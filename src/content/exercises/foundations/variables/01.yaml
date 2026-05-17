@@ -1,0 +1,33 @@
+target: go
+themeId: foundations/variables
+type: mcq
+order: 1
+prompt: |
+  Inside a function, which is the idiomatic Go translation of this
+  TypeScript?
+generator:
+  kind: template
+  vars:
+    name: [count, total, n, score, items]
+    value: ["5", "42", "0", "100", "-1"]
+  ts: |-
+    let ${name} = ${value};
+  canonical: |-
+    ${name} := ${value}
+  distractors:
+    - "var ${name} = ${value};"
+    - "${name} = ${value}"
+    - "const ${name} := ${value}"
+hints:
+  - "TS `let` introduces a new variable. Go has a short form for the same job — and inside a function, it's the one you reach for."
+  - "The operator is two characters. It both declares the variable and assigns the value. No `var`, no `let`, no semicolon."
+  - "`${name} := ${value}`"
+notes: |
+  Distractors:
+    1. `var name = value;` — valid Go, but unidiomatic at function
+       scope; also has a trailing semicolon which Go doesn't use.
+    2. `name = value` — assignment, not declaration. Would fail to
+       compile because `name` isn't declared.
+    3. `const name := value` — syntax error. `const` requires `=`,
+       not `:=`.
+runtime: none

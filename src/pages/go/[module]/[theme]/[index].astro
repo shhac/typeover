@@ -1,0 +1,81 @@
+---
+import { getCollection, getEntry, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Container,
+  Divider,
+  Heading,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+import { Mcq } from "~/components/exercise/Mcq";
+
+type ExerciseEntry = CollectionEntry<"exercises">;
+
+export async function getStaticPaths() {
+  const exercises = await getCollection("exercises");
+  return exercises.map((entry) => {
+    const parts = entry.id.split("/");
+    const [moduleP, themeP, indexP] = parts;
+    return {
+      params: { module: moduleP, theme: themeP, index: indexP },
+      props: { entry },
+    };
+  });
+}
+
+interface Props {
+  entry: ExerciseEntry;
+}
+
+const { entry } = Astro.props;
+const ex = entry.data;
+
+const themeEntry = await getEntry("themes", ex.themeId);
+const moduleEntry = themeEntry
+  ? await getEntry("modules", themeEntry.data.moduleId)
+  : undefined;
+---
+
+<BaseLayout
+  title={`${themeEntry?.data.title ?? "Exercise"} — typeover`}
+  description={`Practice ${themeEntry?.data.title} for TypeScript developers learning Go.`}
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Stack direction="row" gap="sm" align="center" wrap>
+            <Badge variant="amber">{moduleEntry?.data.title}</Badge>
+            <Text tone="muted" size="sm" family="mono">→</Text>
+            <Badge variant="default" outline>{themeEntry?.data.title}</Badge>
+            <Text tone="muted" size="sm" family="mono">·</Text>
+            <Text tone="muted" size="sm" family="mono">
+              exercise {ex.order} · {ex.type}
+            </Text>
+          </Stack>
+          <Heading level={1}>{themeEntry?.data.title}</Heading>
+        </Stack>
+
+        <Panel padding="airy" tone="default">
+          <Mcq
+            client:visible
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            hints={ex.hints}
+          />
+        </Panel>
+
+        <Divider />
+
+        <Stack gap="sm">
+          <Heading level={4}>About this theme</Heading>
+          <Text tone="secondary" size="md">{themeEntry?.data.intro}</Text>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

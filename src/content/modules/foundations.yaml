@@ -1,0 +1,7 @@
+target: go
+title: Foundations
+order: 1
+summary: |
+  The "you already know this, just spelled differently" module.
+  By the end, you trust that typeover's translation pattern works,
+  and writing trivial Go feels familiar.
