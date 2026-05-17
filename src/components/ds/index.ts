@@ -1,10 +1,14 @@
+export { Adaptive } from "./Adaptive";
 export { Badge } from "./Badge";
 export { Button } from "./Button";
 export { CodeBlock } from "./CodeBlock";
 export { Container } from "./Container";
 export { Divider } from "./Divider";
+export { Feedback } from "./Feedback";
 export { Heading } from "./Heading";
+export { HintButton } from "./HintButton";
 export { Kbd } from "./Kbd";
 export { Panel } from "./Panel";
+export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";
 export { Text } from "./Text";

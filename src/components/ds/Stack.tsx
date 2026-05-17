@@ -2,7 +2,7 @@ import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
 
 type Direction = "row" | "col";
-type Gap = "none" | "xs" | "sm" | "md" | "lg" | "xl";
+type Gap = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 type Align = "start" | "center" | "end" | "stretch" | "baseline";
 type Justify = "start" | "center" | "end" | "between" | "around";
 
@@ -14,13 +14,16 @@ interface StackProps extends JSX.HTMLAttributes<HTMLDivElement> {
   wrap?: boolean;
 }
 
+/* Airy gap defaults — md is 24px, not 16px. Bloomberg-tight density is
+ * the opt-in (via "sm" or "xs"). */
 const gapClass: Record<Gap, string> = {
   none: "gap-0",
   xs: "gap-1",
-  sm: "gap-2",
-  md: "gap-4",
-  lg: "gap-6",
-  xl: "gap-10",
+  sm: "gap-3",
+  md: "gap-6",
+  lg: "gap-10",
+  xl: "gap-16",
+  "2xl": "gap-24",
 };
 
 const alignClass: Record<Align, string> = {

@@ -7,6 +7,8 @@ type Size = "sm" | "md" | "lg";
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
+  /** Use uppercase mono label (terminal feel). Default off for airier UI. */
+  terminal?: boolean;
 }
 
 const variantClass: Record<Variant, string> = {
@@ -20,24 +22,31 @@ const variantClass: Record<Variant, string> = {
     "bg-transparent text-error border border-error/60 hover:bg-error/10",
 };
 
+/* Touch targets ≥ 44px on mobile per Apple HIG. The "sm" size uses 36px
+ * which is below that — we only allow it inside dense desktop UI (toolbars,
+ * inline filters). Never use "sm" as a primary touch target. */
 const sizeClass: Record<Size, string> = {
-  sm: "h-7 px-2.5 text-xs",
-  md: "h-9 px-3.5 text-sm",
-  lg: "h-11 px-5 text-base",
+  sm: "h-9 px-3 text-sm",
+  md: "h-11 px-4 text-sm",
+  lg: "h-12 px-6 text-base",
 };
 
 export function Button(props: ParentProps<ButtonProps>) {
   const [local, rest] = splitProps(props, [
     "variant",
     "size",
+    "terminal",
     "class",
     "children",
   ]);
+  const typo = local.terminal
+    ? "font-mono uppercase tracking-wider"
+    : "font-sans font-medium";
   return (
     <button
       type="button"
       {...rest}
-      class={`inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+      class={`inline-flex items-center justify-center gap-2 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${typo} ${
         variantClass[local.variant ?? "secondary"]
       } ${sizeClass[local.size ?? "md"]} ${local.class ?? ""}`}
     >

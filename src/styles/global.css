@@ -2,8 +2,8 @@
 
 @theme {
   /* === Surfaces ===
-   * Near-black base, slightly elevated panels — the Bloomberg-terminal look,
-   * but softer than pure #000 so eyes don't strain on long reading sessions.
+   * Near-black base, slightly elevated panels. Bloomberg's identity (dark
+   * + amber) without Bloomberg-tight density — we go airy.
    */
   --color-bg-base: #0a0a0b;
   --color-bg-panel: #121214;
@@ -15,26 +15,30 @@
   --color-border-accent: #ffa72655;
 
   /* === Text ===
-   * Slightly off-white primary to reduce contrast burn against the dark bg.
+   * Contrast-verified against bg-base for WCAG 2.2 AA:
+   *   fg-primary    16.2:1   ✓
+   *   fg-secondary   8.4:1   ✓
+   *   fg-muted       5.7:1   ✓  (was failing at 3.2; brightened from #6b6b70)
+   *   fg-faint       3.2:1   non-text/decorative use only (UI < 14pt fails)
    */
   --color-fg-primary: #e8e8e8;
   --color-fg-secondary: #a8a8ad;
-  --color-fg-muted: #6b6b70;
-  --color-fg-faint: #4a4a4f;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
 
   /* === Brand accents ===
-   * amber  — Bloomberg-terminal nostalgia, used for focus/active/key info
-   * ts     — TypeScript blue, marks anything TS-side
-   * go     — Go cyan ("Aqua" #00ADD8), marks anything Go-side
+   * amber  — Bloomberg-terminal nostalgia, focus / active / primary CTA
+   * ts     — TypeScript blue, anywhere TS is referenced
+   * go     — Go cyan ("Aqua"), anywhere Go is referenced
    *
-   * The TS/Go pair lets us color-code at a glance: blue = "what you know",
-   * cyan = "what you're learning". Used in Badge, CodeBlock language tags,
-   * and side-by-side diff views.
+   * accent-ts brightened from #3178c6 (failed 4.5:1 AA at small text)
+   * to #4a9eff (passes ~7.2:1).
+   * accent-go #00add8 already passes ~7.5:1.
    */
   --color-accent-amber: #ffa726;
   --color-accent-amber-dim: #b87a1c;
-  --color-accent-ts: #3178c6;
-  --color-accent-ts-dim: #1f4a7a;
+  --color-accent-ts: #4a9eff;
+  --color-accent-ts-dim: #2a6fbf;
   --color-accent-go: #00add8;
   --color-accent-go-dim: #007a99;
 
@@ -43,9 +47,9 @@
   --color-error: #ef4444;
 
   /* === Type ===
-   * Mono is the *primary* feature font — code is the content here. Sans only
-   * for surrounding prose. JetBrains Mono picked for its ligatures and how
-   * cleanly it renders both Go and TS at small sizes.
+   * Mono is the *primary* feature font — code is the content. Sans for
+   * surrounding prose. Base size 16px (Tailwind default) — airy direction;
+   * we never go below 14px for body text (a11y, normal-text contrast rules).
    */
   --font-mono:
     "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
@@ -54,7 +58,8 @@
     sans-serif;
 
   /* === Radii ===
-   * Sharp. The terminal aesthetic doesn't get rounded corners.
+   * Sharp. The terminal aesthetic doesn't get rounded corners — but it
+   * doesn't get knife-edge either. 3-4px max.
    */
   --radius-sm: 2px;
   --radius-md: 3px;
@@ -87,8 +92,23 @@
     font-family: var(--font-mono);
   }
 
+  /* Visible focus on all interactives. We never strip the ring without
+     replacing it. */
   *:focus-visible {
-    outline: 1px solid var(--color-accent-amber);
+    outline: 2px solid var(--color-accent-amber);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Respect reduced-motion. Quiz transitions must check this too. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

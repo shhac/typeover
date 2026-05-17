@@ -1,18 +1,18 @@
 import type { JSX, ParentProps } from "solid-js";
-import { splitProps } from "solid-js";
+import { splitProps, Show } from "solid-js";
 
 type Tone = "default" | "inset" | "elevated";
+type LangAccent = "amber" | "ts" | "go" | "none";
 
-interface PanelProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  tone?: PanelTone;
-  /** Bloomberg-style title strip across the top. */
+interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
+  tone?: Tone;
+  /** Optional title strip across the top — used sparingly. */
   label?: string;
-  /** Optional language flag colour for the label strip. */
-  accent?: "amber" | "ts" | "go" | "none";
-  padded?: boolean;
+  /** Optional language accent for the label strip. */
+  accent?: LangAccent;
+  /** Padding scale. Airy default; "tight" for dense data. */
+  padding?: "tight" | "default" | "airy";
 }
-
-type PanelTone = Tone;
 
 const toneClass: Record<Tone, string> = {
   default: "bg-bg-panel border-border-default",
@@ -20,11 +20,17 @@ const toneClass: Record<Tone, string> = {
   elevated: "bg-bg-elevated border-border-strong",
 };
 
-const accentClass = {
+const accentClass: Record<LangAccent, string> = {
   amber: "border-accent-amber/60 text-accent-amber",
   ts: "border-accent-ts/60 text-accent-ts",
   go: "border-accent-go/60 text-accent-go",
   none: "border-border-default text-fg-secondary",
+};
+
+const paddingClass = {
+  tight: "p-3",
+  default: "p-6",
+  airy: "p-8",
 } as const;
 
 export function Panel(props: ParentProps<PanelProps>) {
@@ -32,28 +38,30 @@ export function Panel(props: ParentProps<PanelProps>) {
     "tone",
     "label",
     "accent",
-    "padded",
+    "padding",
     "class",
     "children",
   ]);
-  const padded = local.padded ?? true;
   return (
-    <div
+    <section
       {...rest}
       class={`border ${toneClass[local.tone ?? "default"]} rounded-sm ${
         local.class ?? ""
       }`}
+      aria-label={local.label}
     >
-      {local.label && (
-        <div
-          class={`px-3 py-1.5 border-b text-[11px] uppercase tracking-widest font-mono ${
+      <Show when={local.label}>
+        <header
+          class={`px-4 py-2 border-b text-[11px] uppercase tracking-widest font-mono ${
             accentClass[local.accent ?? "none"]
           }`}
         >
           {local.label}
-        </div>
-      )}
-      <div class={padded ? "p-4" : ""}>{local.children}</div>
-    </div>
+        </header>
+      </Show>
+      <div class={paddingClass[local.padding ?? "default"]}>
+        {local.children}
+      </div>
+    </section>
   );
 }
