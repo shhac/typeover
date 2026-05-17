@@ -55,8 +55,8 @@ export const GeneratorSchema = z.discriminatedUnion("kind", [
 ]);
 
 export type GeneratorSpec = z.infer<typeof GeneratorSchema>;
-export type TemplateGenerator = z.infer<typeof TemplateSpec>;
-export type VariantGenerator = z.infer<typeof VariantSpec>;
+type TemplateGenerator = z.infer<typeof TemplateSpec>;
+type VariantGenerator = z.infer<typeof VariantSpec>;
 
 /* ---------------- Runtime ---------------- */
 

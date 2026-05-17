@@ -10,7 +10,7 @@ import { cn } from "../ds/_internal";
  *   "selected"       — picked, pre-submission
  *   "neutral"        — everything else
  */
-export type CellState = "showCorrect" | "showIncorrect" | "selected" | "neutral";
+type CellState = "showCorrect" | "showIncorrect" | "selected" | "neutral";
 
 const cellClass: Record<CellState, string> = {
   showCorrect: "border-success/60 bg-success/5",
@@ -19,7 +19,7 @@ const cellClass: Record<CellState, string> = {
   neutral: "border-border-default hover:border-border-strong",
 };
 
-export function optionCellState(args: {
+function optionCellState(args: {
   selected: boolean;
   submitted: boolean;
   revealed: boolean;
