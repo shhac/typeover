@@ -1,0 +1,137 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Button,
+  CodeBlock,
+  Container,
+  Divider,
+  Heading,
+  Kbd,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+---
+
+<BaseLayout
+  title="typeover — learn Go from TypeScript"
+  description="A bilingual learning site that teaches Go to TypeScript developers."
+>
+  <main class="py-16">
+    <Container width="wide">
+      <Stack gap="xl">
+        {/* Hero */}
+        <Stack gap="md">
+          <Stack direction="row" gap="sm" align="center">
+            <Badge variant="amber">v0.0.0 — hello world</Badge>
+            <Badge variant="ts" outline>TS</Badge>
+            <Text tone="muted" size="sm" family="mono">→</Text>
+            <Badge variant="go" outline>GO</Badge>
+          </Stack>
+          <Heading level={1}>
+            <span class="text-accent-ts">type</span><span class="text-accent-amber">over</span>
+          </Heading>
+          <Text tone="secondary" size="lg">
+            Learn Go from your TypeScript knowledge. Side-by-side translation,
+            multiple choice, fill-in-the-tile, and code-runner exercises —
+            scaffolded so you build real intuition, not just syntax recognition.
+          </Text>
+          <Stack direction="row" gap="sm">
+            <Button variant="primary" size="md">Start learning</Button>
+            <Button variant="secondary" size="md">Browse exercises</Button>
+            <Button variant="ghost" size="md">
+              <Kbd>?</Kbd>
+              <span>shortcuts</span>
+            </Button>
+          </Stack>
+        </Stack>
+
+        <Divider />
+
+        {/* Side-by-side example */}
+        <Stack gap="md">
+          <Heading level={4}>Exercise preview</Heading>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CodeBlock lang="ts" filename="users.ts">{`type User = {
+  id: string;
+  name: string;
+};
+
+function greet(u: User) {
+  return \`hi \${u.name}\`;
+}`}</CodeBlock>
+            <CodeBlock lang="go" filename="users.go">{`type User struct {
+    ID   string
+    Name string
+}
+
+func greet(u User) string {
+    return "hi " + u.Name
+}`}</CodeBlock>
+          </div>
+          <Text tone="muted" size="sm">
+            Each lesson presents a TS snippet and its Go counterpart, then asks
+            you to identify, translate, or write the equivalent.
+          </Text>
+        </Stack>
+
+        <Divider />
+
+        {/* Design system inventory */}
+        <Stack gap="md">
+          <Heading level={4}>Design system</Heading>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Panel label="Buttons" accent="amber">
+              <Stack direction="row" gap="sm" wrap>
+                <Button variant="primary">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="danger">Danger</Button>
+              </Stack>
+            </Panel>
+
+            <Panel label="Badges" accent="ts">
+              <Stack direction="row" gap="sm" wrap>
+                <Badge>default</Badge>
+                <Badge variant="ts">typescript</Badge>
+                <Badge variant="go">golang</Badge>
+                <Badge variant="amber">focus</Badge>
+                <Badge variant="success">passed</Badge>
+                <Badge variant="error">failed</Badge>
+              </Stack>
+            </Panel>
+
+            <Panel label="Keys" accent="go">
+              <Stack direction="row" gap="sm" align="center">
+                <Kbd>⌘</Kbd>
+                <Kbd>K</Kbd>
+                <Text tone="muted" size="sm" family="mono">open palette</Text>
+              </Stack>
+            </Panel>
+
+            <Panel label="Tones" accent="none">
+              <Stack gap="xs">
+                <Text tone="primary">Primary — main reading text</Text>
+                <Text tone="secondary">Secondary — supporting prose</Text>
+                <Text tone="muted">Muted — captions and hints</Text>
+                <Text tone="faint">Faint — barely-there metadata</Text>
+              </Stack>
+            </Panel>
+          </div>
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" justify="between" align="center">
+          <Text tone="muted" size="xs" family="mono">
+            typeover · 2026 · built with astro + solid + tailwind
+          </Text>
+          <Text tone="faint" size="xs" family="mono">
+            yaegi runtime pending
+          </Text>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>
