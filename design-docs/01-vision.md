@@ -2,7 +2,15 @@
 
 ## What
 
-**typeover** teaches Go to developers who already know TypeScript.
+**typeover** teaches a *target language* to developers who already know
+TypeScript. The first (and currently only) target is **Go**.
+
+The name and the platform are deliberately language-agnostic. Future
+targets are possible — Rust, Zig, Python, Elixir — once the Go pipeline
+is mature and the model is proven. For v0, "typeover" means "TS to Go"
+and nothing more, but exercise schemas, URL structure, and any
+per-target chrome are named so a second target slots in without a
+rewrite.
 
 Most Go-learning resources assume zero prior programming knowledge or assume a
 C/Java background. There's a large and growing audience that comes from the
@@ -43,15 +51,19 @@ The target learner:
 - Progress tracked locally first; cloud accounts only if there's demand.
 - Open-source content, so the community can extend it.
 
-## Scope
+## Scope (Go target)
 
-typeover aims to be a **full Go intro**, with TS-translation as the
-pedagogical wedge — not just a phrasebook. The bilingual core gets you
-through everything that has a TS analogue (types, structs, generics,
-interfaces, error returns). Once that scaffold is paying off, the course
-continues into the parts of Go that *don't* translate from TS
-(goroutines, channels, defer, embedding, project layout, stdlib idioms)
-as straight Go content, no longer leaning on the translation crutch.
+For the Go target, typeover aims to be a **full Go intro**, with
+TS-translation as the pedagogical wedge — not just a phrasebook. The
+bilingual core gets you through everything that has a TS analogue
+(types, structs, generics, interfaces, error returns). Once that
+scaffold is paying off, the course continues into the parts of Go that
+*don't* translate from TS (goroutines, channels, defer, embedding,
+project layout, stdlib idioms) as straight Go content, no longer leaning
+on the translation crutch.
+
+This same shape — "bilingual core, then native-only content" — is the
+intended template for any future target.
 
 The audience deliberately isn't split into "backend devs" vs "frontend
 devs picking up Go for tooling." The bilingual core serves both; if

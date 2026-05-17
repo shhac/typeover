@@ -35,6 +35,26 @@ Captured here so they don't sit only in conversation history.
 - **Module structure.** Linear path vs branching tracks vs open buffet.
   Still open — depends on how the curriculum tree looks once drafted.
 
+## Architecture (future-proofing for multi-target)
+
+typeover is positioned as a TS→X bridge where X starts as Go but may
+later include Rust, Zig, Python, etc. (Decided 2026-05-18.) Implications
+for v0 that we should bake in cheaply:
+
+- **Exercise schema:** `target: "go"` field on every exercise, not
+  implicit. URL structure `/<target>/<module>/<lesson>` (initially just
+  `/go/...`).
+- **Design tokens:** the `accent-go` colour is fine to stay hardcoded
+  while Go is the only target. When a second target arrives we
+  generalise to `accent-target` with per-target overrides.
+- **Runtime:** Yaegi is Go-specific; that's correct. The worker
+  abstraction (`runtime/<target>/worker.ts`) is where target swap-out
+  will happen if/when a second language joins.
+- **Content collections:** `src/content/lessons/<target>/...` rather
+  than `src/content/lessons/...` flat.
+
+None of this is built yet — just keeping the room for it.
+
 ## Runtime
 
 - **Yaegi POC results.** Until we run the 20-snippet matrix (see
