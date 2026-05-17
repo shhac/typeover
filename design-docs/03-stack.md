@@ -7,7 +7,7 @@
 | Framework | **Astro 6** | Content-heavy site with interactive islands. Ships 0 KB JS for static lessons; only quizzes and the Go runner hydrate. |
 | Islands | **Solid** | Smallest reactive bundle (~7 KB) compared to React (~45 KB). Each interactive component on a lesson page is cheap. |
 | Styling | **Tailwind 4** | CSS-first config (`@theme`), token-driven. Design system has named tokens like `--color-accent-go` referenced by utility classes. |
-| Editor | **CodeMirror 6** (planned) | ~300 KB vs Monaco's ~2.4 MB. Modular, has a Go grammar via `@codemirror/lang-go`. Replit and Sourcegraph both moved to CodeMirror for the same reason. |
+| Editor | **CodeMirror 6** (planned) | ~300 KB vs Monaco's ~2.4 MB. Modular, has a Go grammar via `@codemirror/lang-go`. Decent mobile support (verified during build). Replit and Sourcegraph both moved to CodeMirror for the same reason. |
 | Runtime | **Yaegi compiled to WASM** in a Web Worker | Client-side Go execution. Run user code without a server roundtrip. Falls back to server compile for exercises Yaegi can't handle (see runtime-strategy.md). |
 | Content | **MDX + Astro Content Collections** | Type-safe lesson authoring; Zod-validated frontmatter. |
 | Package manager | **pnpm** | Fast, disk-efficient, strict by default. |

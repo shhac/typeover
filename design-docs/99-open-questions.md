@@ -26,25 +26,63 @@ Captured here so they don't sit only in conversation history.
   break each topic into sub-topics, validate; Pass 3+ = continue until
   exercise-level. (Decided 2026-05-18.)
 
-## Product
+## Resolved (cont.)
 
-- **Accounts.** v0 is anonymous (localStorage). Do we ever add cloud sync,
-  and at what user count does it become worth the maintenance?
-- **Free vs paid.** Default plan is fully free, open-source content. Given
-  the portfolio framing, monetisation is parked indefinitely.
-- **Community contribution model.** Are exercises authored by maintainers
-  only, or do we accept PRs? If PRs — what's the review bar?
+- **Visual direction.** Airy (Stripe/Linear-style), liberal language
+  colour-coding, adaptive split/stack layout, selective chrome.
+  (Decided 2026-05-18.)
+- **Voice.** Warm + dry-witty, peer-level technical, no patronising.
+  (Decided 2026-05-18.)
+- **Failure UX.** Three-button choice on wrong: try-again / try-different
+  / reveal-diff. Layered hints; on-demand canonical reveal.
+  (Decided 2026-05-18.)
+- **Open source.** Public + MIT from day one. Repo quality is part of
+  the portfolio. (Decided 2026-05-18.)
+- **Launch gate.** Module 1 (Foundations, 5 themes) complete and
+  polished. (Decided 2026-05-18.)
+- **Maintenance.** Burst-mode acceptable; quality bar constant.
+  (Decided 2026-05-18.)
+- **Sharing.** Quiet — portfolio link, no marketing. Social share at
+  module completion is the only growth mechanism. (Decided 2026-05-18.)
+- **Mobile support.** Full, including freeform code editing. Adaptive
+  breakpoint at 1024px. (Decided 2026-05-18.)
+- **Accessibility.** WCAG 2.2 AA, enforced at design-system layer.
+  (Decided 2026-05-18.)
+- **Authoring model.** Community-friendly from day one. CONTRIBUTING +
+  lesson template + schema docs. (Decided 2026-05-18.)
+- **Gamification posture.** Minimal stats now; data tracking complete
+  enough to add gamification later. Social share at module completion
+  is the v0 growth lever. (Decided 2026-05-18.)
+- **Accounts.** None in v0. Anonymous local-only. (Decided 2026-05-18.)
+- **Monetisation.** Parked indefinitely. (Decided 2026-05-18.)
 
-## Content
+## Still open
 
 - **Stdlib coverage.** Which stdlib packages do we drill on (`net/http`,
   `encoding/json`, `context`)? Which do we skip (`cgo`, `reflect`)?
-- **Exercise authoring tooling.** MDX with Zod-validated frontmatter is
-  the current bet; do we need a richer authoring UI for non-coders to
-  contribute lessons?
-- **Lesson shape.** Target exercise count per lesson, mix of exercise
-  types per lesson, time budget. Still open.
-- ~~**Module structure.**~~ Resolved: recommended path + free browse.
+- **Pass 2 curriculum.** Themes per module + prerequisite chain.
+- **Pass 3+ curriculum.** Exercise-level breakdowns.
+- **Server-fallback runtime hosting** for hard exercises that Yaegi
+  can't handle (Vercel function vs always-on container).
+- **Module 3 weighting.** Currently bundles 6 themes — may split into
+  "Types & methods" + "Interfaces & generics."
+- **Generics positioning.** Should they jump earlier given TS-dev
+  familiarity?
+- **Logo / wordmark** — currently just the wordmark in mono.
+- **Domain claim timing** — `typeover.dev / .io / .app / .co` all free;
+  grab before public launch.
+
+## Unvalidated assumptions
+
+- CodeMirror 6 on mobile touch keyboards works well enough for freeform
+  code editing.
+- Yaegi handles 80%+ of intended Module 1–4 exercises.
+- TS blue and Go cyan have enough contrast against `bg-base` for WCAG
+  AA at ≥14px.
+- 9-exercise theme template is right for most themes; outliers can
+  deviate.
+- Burst-mode maintenance with constant quality bar is sustainable.
+- Current design system can be retuned toward airy without rewriting.
 
 ## Architecture (future-proofing for multi-target)
 

@@ -2,86 +2,140 @@
 
 ## Aesthetic
 
-Three influences, in priority order:
+Three influences blend into one resolution:
 
-1. **Bloomberg Terminal** — dark surfaces, monospace-first, amber accents,
-   sharp corners, information density. The terminal aesthetic signals
-   "professional tool, not toy."
-2. **TypeScript docs** — clean blue accents, readable typography for prose
-   sections.
-3. **Go docs (`pkg.go.dev`)** — cyan/teal accents (Go brand `#00ADD8`),
-   minimal chrome, content-first layout.
+1. **Bloomberg Terminal** — dark surfaces, amber accent, monospace-first
+   identity. Signals "professional tool."
+2. **TypeScript docs** — blue accent; clean prose blocks.
+3. **Go docs (`pkg.go.dev`)** — cyan accent; content-first chrome.
 
-The combination resolves naturally: **dark Bloomberg-style chrome** as the
-shell, **TS blue and Go cyan** as language-coded accents inside lesson
-content, **amber** for focus / active / "look here" affordances.
+The resolution is **dark Linear, not Bloomberg-tight**. We keep Bloomberg's
+identity (dark base, amber accent, mono-first, sharp corners), but we
+adopt **airy Stripe/Linear-style spacing and density**.
+
+Concretely:
+
+- Generous whitespace, not terminal-tight.
+- Base font 15–16px, not 11–12px.
+- Borders are selective — present on code blocks and exercise containers,
+  absent where spacing + typography already establish hierarchy.
+- **Language colour is liberal**: TS blue and Go cyan appear wherever the
+  language is referenced (headings, badges, code blocks, prose mentions).
+  This is the strongest visual identity moment of the site.
+
+## Layout philosophy
+
+Adaptive by default:
+
+- **≥ 1024px:** side-by-side TS/Go for exercises and comparisons.
+- **< 1024px:** stacked TS over Go. No information loss; readability
+  preserved.
+
+A single `Adaptive` layout primitive in the DS encapsulates the breakpoint
+so pages don't write media queries.
+
+## A11y contract
+
+**Every component in `src/components/ds/` is WCAG 2.2 AA by default.**
+
+See [08-accessibility-and-mobile.md](08-accessibility-and-mobile.md) for
+the full contract. Headline rules:
+
+- Semantic HTML.
+- Visible focus rings.
+- Keyboard operable.
+- Contrast verified at the token level.
+- No colour-only signal.
+- Touch targets ≥ 44px.
+- Honour `prefers-reduced-motion`.
+
+A page composed entirely of design-system primitives is a11y-correct
+without further work. A page is not allowed to compose primitives in a
+way that *breaks* a11y (e.g. nested interactive elements).
 
 ## Tokens
 
-Defined in `src/styles/global.css` under `@theme`:
+Defined in `src/styles/global.css` under `@theme`. Surface tokens
+graduate near-black to slightly-elevated:
 
-- **Surfaces:** `bg-base`, `bg-panel`, `bg-elevated`, `bg-inset` (graduated
-  near-black; `bg-base` is `#0a0a0b`, never pure `#000` to reduce eye
-  strain on long sessions).
-- **Borders:** `border-default`, `border-strong`, `border-accent` (the last
-  reserved for hovered/active emphasis).
-- **Text:** `fg-primary`, `fg-secondary`, `fg-muted`, `fg-faint` — four
-  steps, used consistently so layout hierarchy reads at a glance.
-- **Accents:** `accent-amber`, `accent-ts`, `accent-go`, each with a `-dim`
-  variant for de-emphasised states.
-- **State:** `success`, `warning`, `error`.
-- **Type:** `font-mono` (JetBrains Mono primary), `font-sans` (Inter).
-- **Radius:** 2–4 px, never larger. Sharp corners are part of the look.
+- `bg-base`, `bg-panel`, `bg-elevated`, `bg-inset`
+
+Foreground tokens step from primary to faint:
+
+- `fg-primary`, `fg-secondary`, `fg-muted`, `fg-faint`
+
+Border tokens for two strengths plus an accent variant:
+
+- `border-default`, `border-strong`, `border-accent`
+
+Accent tokens — three colours, each with a dimmed variant for
+de-emphasised states:
+
+- `accent-amber` (Bloomberg identity, focus / active / primary actions)
+- `accent-ts` (`#3178c6` — TypeScript blue)
+- `accent-go` (`#00add8` — Go cyan)
+
+State tokens:
+
+- `success`, `warning`, `error`
+
+Type tokens:
+
+- `font-mono` (JetBrains Mono primary)
+- `font-sans` (Inter)
+
+Radius tokens (2–4px only, never larger; sharp corners stay):
+
+- `radius-sm`, `radius-md`, `radius-lg`
 
 ## Component principles
 
-1. **One component per file.** Each file in `src/components/ds/` owns one
-   concept. The barrel export in `index.ts` is the consumption surface.
-2. **Solid throughout.** Even purely-presentational components are `.tsx`
-   in Solid, so they can be hydrated as islands when needed without
-   refactoring.
+1. **One concept per file.** Barrel-exported from `ds/index.ts`.
+2. **Solid throughout.** Components are `.tsx` so any can hydrate as an
+   island.
 3. **Props closed at compile time.** Variants are string-literal unions
-   keyed into class lookup tables. No `cva` library — the lookup is
-   trivial and the lookup pattern is more readable than another DSL.
-4. **Compose with `splitProps`.** Keep custom props out of the underlying
-   DOM element; everything else passes through via `{...rest}`.
-5. **Tailwind utilities, not custom CSS classes.** The design system is
-   the named-token layer; tailwind is the assembly layer.
-6. **Mono is the default for code, badges, button labels.** Sans for
-   reading prose. This makes language switches visually obvious.
+   keyed into class lookup tables.
+4. **Compose with `splitProps`.** Custom props stay out of the DOM.
+5. **Tailwind utilities, not custom CSS.** The DS is the named-token
+   layer; Tailwind is the assembly layer.
+6. **Mono for code, badges, button labels.** Sans for reading prose.
 
-## Components shipped in v0
+## Components
+
+Shipped in v0 (initial set, will be retuned for airy direction):
 
 | File | Purpose |
 |---|---|
 | `Container.tsx` | Width-constrained centered column. |
 | `Stack.tsx` | Flex layout primitive (row/col + gap). |
+| `Adaptive.tsx` | Split-on-wide, stack-on-narrow layout primitive. |
 | `Heading.tsx` | h1–h4 with optional accent colour. |
 | `Text.tsx` | Body text with tone + size + family. |
-| `Panel.tsx` | Bordered card with optional Bloomberg-style label strip. |
+| `Panel.tsx` | Bordered container with optional label strip. |
 | `Badge.tsx` | Inline label, including TS/Go language flags. |
 | `Button.tsx` | Primary / secondary / ghost / danger × sm/md/lg. |
 | `CodeBlock.tsx` | Display-only code with language strip + filename. |
 | `Kbd.tsx` | Keyboard key indicator. |
 | `Divider.tsx` | Horizontal/vertical rule. |
-| `index.ts` | Barrel export. |
 
-## Components yet to build
+Planned for v0 (still to be added):
 
-These will arrive as the corresponding pages need them:
-
-- `Quiz/MultipleChoice` — radio list with feedback states
-- `Quiz/TileFill` — DnD slot filler
-- `Quiz/ConstrainedWrite` — CodeMirror + submit/feedback
-- `Runner` — CodeMirror + worker-backed run button + output console
-- `Nav`, `Breadcrumb`, `ProgressBar`, `Toast`
+| File | Purpose |
+|---|---|
+| `Feedback.tsx` | Correctness banner with `aria-live`. |
+| `HintButton.tsx` | 3-layer hint reveal with escalation. |
+| `RevealButton.tsx` | "Show canonical" / "Reveal diff" with destructive-action confirmation. |
+| `Choice.tsx` | Radio-style option for MCQ exercises. |
+| `Tile.tsx` | Drag-and-drop tile for fill-in-the-blank exercises. |
+| `MobileKeyBar.tsx` | Symbol bar above the editor on small screens. |
+| `ProgressBar.tsx` | Theme/module progress indicator. |
 
 ## Rules for adding components
 
-- A new component goes in `src/components/ds/` only if it's a reusable
-  primitive. Page-specific composition stays in `src/pages/` or
+- New primitive in `src/components/ds/` only if it's reusable.
+  Page-specific composition stays in `src/pages/` or
   `src/components/<feature>/`.
-- Any new colour or spacing token goes in `@theme` first, not inline.
-- Any new variant goes in the component's class-lookup table; don't
-  branch with conditionals inside JSX.
-- If two components share more than ~30 lines of logic, extract a third.
+- New tokens go in `@theme` first, never inline.
+- New variants go in the lookup table, no conditional logic in JSX.
+- Components must be a11y-correct on first commit; we do not add a11y
+  later as a polish pass.
