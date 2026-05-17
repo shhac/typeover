@@ -43,12 +43,34 @@ The target learner:
 - Progress tracked locally first; cloud accounts only if there's demand.
 - Open-source content, so the community can extend it.
 
+## Scope
+
+typeover aims to be a **full Go intro**, with TS-translation as the
+pedagogical wedge — not just a phrasebook. The bilingual core gets you
+through everything that has a TS analogue (types, structs, generics,
+interfaces, error returns). Once that scaffold is paying off, the course
+continues into the parts of Go that *don't* translate from TS
+(goroutines, channels, defer, embedding, project layout, stdlib idioms)
+as straight Go content, no longer leaning on the translation crutch.
+
+The audience deliberately isn't split into "backend devs" vs "frontend
+devs picking up Go for tooling." The bilingual core serves both; if
+either audience proves to need specialised modules (HTTP servers,
+CLI design), those become add-ons later.
+
+## Ambition
+
+This is a **portfolio / learning project** for the author. The primary
+goal is building it well — optimising for craft, not for launch speed or
+audience growth. If it ends up genuinely useful and attracts learners,
+great; that doesn't change the build priorities.
+
 ## Non-goals
 
-- Not a Go textbook. Concepts that don't have a TS analogue (channels,
-  goroutines, defer semantics) get introduced *after* the bilingual core
-  pays off — they're treated as "new things to learn," not as translations.
 - Not a JS-to-Go tool or transpiler. typeover teaches Go *as Go*; the TS
   scaffold is removed once you don't need it.
 - Not aimed at non-typed-JS developers. If you don't know TS, you'll
-  understand the Go side fine, but you won't get the value of the comparison.
+  understand the Go side fine, but you won't get the value of the
+  comparison.
+- Not optimising for SEO, monetisation, or growth tactics in v0. Those
+  questions can be revisited if the content matures.

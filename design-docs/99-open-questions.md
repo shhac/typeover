@@ -2,25 +2,38 @@
 
 Captured here so they don't sit only in conversation history.
 
+## Resolved
+
+- **Scope.** Full Go intro, TS-translation as the wedge. Beyond the
+  bilingual core, the course continues into Go-only concepts as
+  straight Go content. (Decided 2026-05-18.)
+- **Audience split.** Don't differentiate backend vs frontend TS devs.
+  Add specialised tracks only on demand. (Decided 2026-05-18.)
+- **Ambition.** Portfolio / learning project — craft over launch speed.
+  (Decided 2026-05-18.)
+- **First lesson concept.** Variables, primitives, `:=` vs `let`.
+  (Decided 2026-05-18.)
+
 ## Product
 
 - **Accounts.** v0 is anonymous (localStorage). Do we ever add cloud sync,
   and at what user count does it become worth the maintenance?
-- **Free vs paid.** Default plan is fully free, open-source content. Is
-  there ever a tier (mentorship? advanced tracks? team licenses?)
+- **Free vs paid.** Default plan is fully free, open-source content. Given
+  the portfolio framing, monetisation is parked indefinitely.
 - **Community contribution model.** Are exercises authored by maintainers
   only, or do we accept PRs? If PRs — what's the review bar?
 
 ## Content
 
-- **Curriculum scope.** Hard ceiling: at what point does typeover stop
-  being a translation course and start being "just a Go course"? Goroutines
-  and channels feel like the natural boundary.
 - **Stdlib coverage.** Which stdlib packages do we drill on (`net/http`,
   `encoding/json`, `context`)? Which do we skip (`cgo`, `reflect`)?
 - **Exercise authoring tooling.** MDX with Zod-validated frontmatter is
   the current bet; do we need a richer authoring UI for non-coders to
   contribute lessons?
+- **Lesson shape.** Target exercise count per lesson, mix of exercise
+  types per lesson, time budget. Still open.
+- **Module structure.** Linear path vs branching tracks vs open buffet.
+  Still open — depends on how the curriculum tree looks once drafted.
 
 ## Runtime
 
