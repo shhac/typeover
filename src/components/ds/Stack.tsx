@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Direction = "row" | "col";
 type Gap = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
@@ -52,15 +53,18 @@ export function Stack(props: ParentProps<StackProps>) {
     "class",
     "children",
   ]);
-  const dir = local.direction === "row" ? "flex-row" : "flex-col";
   return (
     <div
       {...rest}
-      class={`flex ${dir} ${gapClass[local.gap ?? "md"]} ${
-        local.align ? alignClass[local.align] : ""
-      } ${local.justify ? justifyClass[local.justify] : ""} ${
-        local.wrap ? "flex-wrap" : ""
-      } ${local.class ?? ""}`}
+      class={cn(
+        "flex",
+        local.direction === "row" ? "flex-row" : "flex-col",
+        gapClass[local.gap ?? "md"],
+        local.align && alignClass[local.align],
+        local.justify && justifyClass[local.justify],
+        local.wrap && "flex-wrap",
+        local.class,
+      )}
     >
       {local.children}
     </div>

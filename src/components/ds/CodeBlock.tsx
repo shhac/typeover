@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps, Show } from "solid-js";
+import { cn } from "./_internal";
 
 type Lang = "ts" | "go" | "shell" | "plain";
 
@@ -44,20 +45,27 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const showLang = local.showLang ?? true;
   return (
     <div
-      class={`border border-border-default rounded-sm overflow-hidden ${
-        local.class ?? ""
-      }`}
+      class={cn(
+        "border border-border-default rounded-sm overflow-hidden",
+        local.class,
+      )}
     >
       <Show when={local.filename || showLang}>
         <div
-          class={`flex items-center justify-between px-3 py-1.5 border-b border-border-default ${langBarBg[lang]}`}
+          class={cn(
+            "flex items-center justify-between px-3 py-1.5 border-b border-border-default",
+            langBarBg[lang],
+          )}
         >
           <span class="font-mono text-[11px] text-fg-muted">
             {local.filename}
           </span>
           <Show when={showLang && langLabel[lang]}>
             <span
-              class={`font-mono text-[10px] uppercase tracking-widest px-1.5 py-0.5 border rounded-sm ${langAccent[lang]}`}
+              class={cn(
+                "font-mono text-[10px] uppercase tracking-widest px-1.5 py-0.5 border rounded-sm",
+                langAccent[lang],
+              )}
             >
               {langLabel[lang]}
             </span>

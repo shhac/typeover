@@ -1,8 +1,10 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps, Show } from "solid-js";
+import { cn } from "./_internal";
 
 type Tone = "default" | "inset" | "elevated";
 type LangAccent = "amber" | "ts" | "go" | "none";
+type Padding = "tight" | "default" | "airy";
 
 interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
   tone?: Tone;
@@ -11,7 +13,7 @@ interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
   /** Optional language accent for the label strip. */
   accent?: LangAccent;
   /** Padding scale. Airy default; "tight" for dense data. */
-  padding?: "tight" | "default" | "airy";
+  padding?: Padding;
 }
 
 const toneClass: Record<Tone, string> = {
@@ -27,11 +29,11 @@ const accentClass: Record<LangAccent, string> = {
   none: "border-border-default text-fg-secondary",
 };
 
-const paddingClass = {
+const paddingClass: Record<Padding, string> = {
   tight: "p-3",
   default: "p-6",
   airy: "p-8",
-} as const;
+};
 
 export function Panel(props: ParentProps<PanelProps>) {
   const [local, rest] = splitProps(props, [
@@ -45,16 +47,19 @@ export function Panel(props: ParentProps<PanelProps>) {
   return (
     <section
       {...rest}
-      class={`border ${toneClass[local.tone ?? "default"]} rounded-sm ${
-        local.class ?? ""
-      }`}
+      class={cn(
+        "border rounded-sm",
+        toneClass[local.tone ?? "default"],
+        local.class,
+      )}
       aria-label={local.label}
     >
       <Show when={local.label}>
         <header
-          class={`px-4 py-2 border-b text-[11px] uppercase tracking-widest font-mono ${
-            accentClass[local.accent ?? "none"]
-          }`}
+          class={cn(
+            "px-4 py-2 border-b text-[11px] uppercase tracking-widest font-mono",
+            accentClass[local.accent ?? "none"],
+          )}
         >
           {local.label}
         </header>

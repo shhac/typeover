@@ -1,6 +1,7 @@
 import type { JSX, ParentProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Level = 1 | 2 | 3 | 4;
 
@@ -37,9 +38,11 @@ export function Heading(props: ParentProps<HeadingProps>) {
     <Dynamic
       component={tag}
       {...rest}
-      class={`${sizeClass[level]} ${
-        local.accent ? accentClass[local.accent] : "text-fg-primary"
-      } ${local.class ?? ""}`}
+      class={cn(
+        sizeClass[level],
+        local.accent ? accentClass[local.accent] : "text-fg-primary",
+        local.class,
+      )}
     >
       {local.children}
     </Dynamic>

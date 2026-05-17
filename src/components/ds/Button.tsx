@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
@@ -39,16 +40,20 @@ export function Button(props: ParentProps<ButtonProps>) {
     "class",
     "children",
   ]);
-  const typo = local.terminal
-    ? "font-mono uppercase tracking-wider"
-    : "font-sans font-medium";
   return (
     <button
       type="button"
       {...rest}
-      class={`inline-flex items-center justify-center gap-2 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${typo} ${
-        variantClass[local.variant ?? "secondary"]
-      } ${sizeClass[local.size ?? "md"]} ${local.class ?? ""}`}
+      class={cn(
+        "inline-flex items-center justify-center gap-2 rounded-sm transition-colors",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        local.terminal
+          ? "font-mono uppercase tracking-wider"
+          : "font-sans font-medium",
+        variantClass[local.variant ?? "secondary"],
+        sizeClass[local.size ?? "md"],
+        local.class,
+      )}
     >
       {local.children}
     </button>

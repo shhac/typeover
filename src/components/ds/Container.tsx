@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Width = "narrow" | "default" | "wide" | "full";
 
@@ -19,7 +20,11 @@ export function Container(props: ParentProps<ContainerProps>) {
   return (
     <div
       {...rest}
-      class={`mx-auto px-6 sm:px-8 w-full ${widthClass[local.width ?? "default"]} ${local.class ?? ""}`}
+      class={cn(
+        "mx-auto px-6 sm:px-8 w-full",
+        widthClass[local.width ?? "default"],
+        local.class,
+      )}
     >
       {local.children}
     </div>

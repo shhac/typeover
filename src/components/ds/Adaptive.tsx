@@ -1,12 +1,15 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
+
+type Breakpoint = "md" | "lg" | "xl";
 
 interface AdaptiveProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /** Breakpoint above which we go side-by-side. Default 1024px. */
-  breakpoint?: "md" | "lg" | "xl";
+  /** Breakpoint above which we go side-by-side. Default `lg` (1024px). */
+  breakpoint?: Breakpoint;
 }
 
-const splitClass: Record<NonNullable<AdaptiveProps["breakpoint"]>, string> = {
+const splitClass: Record<Breakpoint, string> = {
   md: "md:grid-cols-2",
   lg: "lg:grid-cols-2",
   xl: "xl:grid-cols-2",
@@ -26,9 +29,11 @@ export function Adaptive(props: ParentProps<AdaptiveProps>) {
   return (
     <div
       {...rest}
-      class={`grid grid-cols-1 ${splitClass[local.breakpoint ?? "lg"]} gap-6 ${
-        local.class ?? ""
-      }`}
+      class={cn(
+        "grid grid-cols-1 gap-6",
+        splitClass[local.breakpoint ?? "lg"],
+        local.class,
+      )}
     >
       {local.children}
     </div>

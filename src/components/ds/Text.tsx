@@ -1,6 +1,7 @@
 import type { JSX, ParentProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Tone = "primary" | "secondary" | "muted" | "faint";
 type Size = "xs" | "sm" | "md" | "lg";
@@ -40,11 +41,12 @@ export function Text(props: ParentProps<TextProps>) {
     <Dynamic
       component={local.as ?? "p"}
       {...rest}
-      class={`${toneClass[local.tone ?? "primary"]} ${
-        sizeClass[local.size ?? "md"]
-      } ${local.family === "mono" ? "font-mono" : "font-sans"} ${
-        local.class ?? ""
-      }`}
+      class={cn(
+        toneClass[local.tone ?? "primary"],
+        sizeClass[local.size ?? "md"],
+        local.family === "mono" ? "font-mono" : "font-sans",
+        local.class,
+      )}
     >
       {local.children}
     </Dynamic>

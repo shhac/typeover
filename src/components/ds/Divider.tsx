@@ -1,5 +1,6 @@
 import type { JSX } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 interface DividerProps extends JSX.HTMLAttributes<HTMLHRElement> {
   tone?: "default" | "strong";
@@ -13,12 +14,12 @@ export function Divider(props: DividerProps) {
   return local.vertical ? (
     <span
       {...(rest as JSX.HTMLAttributes<HTMLSpanElement>)}
-      class={`inline-block self-stretch border-l ${color} ${local.class ?? ""}`}
+      class={cn("inline-block self-stretch border-l", color, local.class)}
     />
   ) : (
     <hr
       {...rest}
-      class={`border-0 border-t ${color} ${local.class ?? ""}`}
+      class={cn("border-0 border-t", color, local.class)}
     />
   );
 }

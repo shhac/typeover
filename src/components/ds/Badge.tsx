@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Variant = "default" | "ts" | "go" | "amber" | "success" | "error";
 
@@ -37,9 +38,12 @@ export function Badge(props: ParentProps<BadgeProps>) {
   return (
     <span
       {...rest}
-      class={`inline-flex items-center gap-1 px-1.5 py-0.5 border rounded-sm font-mono text-[10px] uppercase tracking-widest ${
-        local.outline ? outlineClass[variant] : filledClass[variant]
-      } ${local.class ?? ""}`}
+      class={cn(
+        "inline-flex items-center gap-1 px-1.5 py-0.5 border rounded-sm",
+        "font-mono text-[10px] uppercase tracking-widest",
+        local.outline ? outlineClass[variant] : filledClass[variant],
+        local.class,
+      )}
     >
       {local.children}
     </span>

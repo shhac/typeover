@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { cn } from "./_internal";
 
 type Status = "idle" | "correct" | "incorrect" | "pending";
 
@@ -32,9 +33,11 @@ export function Feedback(props: ParentProps<FeedbackProps>) {
       {...rest}
       role="status"
       aria-live="polite"
-      class={`border rounded-sm px-4 py-3 font-mono text-sm ${
-        statusClass[local.status]
-      } ${local.class ?? ""}`}
+      class={cn(
+        "border rounded-sm px-4 py-3 font-mono text-sm",
+        statusClass[local.status],
+        local.class,
+      )}
     >
       <span class="font-semibold mr-2 uppercase tracking-wider text-xs">
         {statusLabel[local.status]}
