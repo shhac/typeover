@@ -1,122 +1,166 @@
-# 10 — Curriculum (Go target) — Pass 1
+# 10 — Curriculum (Go target)
 
-This is the **top-level outline** of the Go curriculum, ordered for a TS
-developer. Subsequent passes drill each module into themes, then themes
-into exercises. We validate at each pass before going deeper.
+This is the curriculum tree. Pass 1 established modules, Pass 2 drills
+each module into themes with prerequisite chains, Pass 3+ will break
+themes into exercise-level content (9 slots per theme by default).
 
 ## Ordering principle
 
 1. Start where TS mental models transfer almost unchanged — build trust
    in the translation pattern.
 2. Introduce *one* friction point per module, building up.
-3. Group related friction (structs + methods + pointers + interfaces all
-   live in one module).
+3. Group related friction (structs + methods + pointers + nil all live
+   in one module).
 4. Defer Go-native concepts (goroutines, channels, defer, embedding)
    until the bilingual scaffold has paid off — when they arrive, the
    learner is fluent enough to engage with them as pure Go content.
 
-## Modules (Pass 1)
+## Pass 2 — Modules & themes
+
+The Pass-1 "Module 3 — Types you define" was split into two modules to
+keep weighting even. Module 4 used to be "Errors & packaging" and is now
+slot 5. The launch gate (Module 1 complete and polished) is unchanged.
+
+Theme IDs are stable slugs (`<module>/<theme>`); they appear in URLs and
+in localStorage progress keys, so don't rename them post-launch.
+
+---
 
 ### Module 1 — Foundations *(translates cleanly)*
-The "you already know this, just spelled differently" module. Goal: by
-the end, the learner trusts that typeover's translation pattern works,
-and writing trivial Go feels familiar.
 
-- Variables and types (`:=`, `var`, `const`, type inference)
-- Primitives and arithmetic (`int`/`int32`/`int64`, `float64`, no
-  implicit conversions)
-- Strings, bytes, runes (`fmt.Sprintf` instead of template literals)
-- Conditionals and loops (`if/else`, the one-and-only `for`)
-- Functions and multiple returns (the first idea TS doesn't quite
-  have — tuple-style returns)
+Goal: by the end, the learner trusts that typeover's translation
+pattern works, and writing trivial Go feels familiar.
+
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 1.1 | Variables & declarations | `foundations/variables` | — | `:=` vs `var` vs `const`; type inference; shadowing. The TS `let`/`const` → Go translation pattern is established here, then reused everywhere. |
+| 1.2 | Numeric primitives | `foundations/numeric-primitives` | 1.1 | `int`, `int32`, `int64`, `uint*`, `float64`, `float32`. The big idea: Go has no implicit numeric conversion. |
+| 1.3 | Strings, bytes, runes | `foundations/strings-bytes-runes` | 1.1, 1.2 | String literals, `fmt.Sprintf` instead of template literals, `byte` vs `rune` vs `string`. |
+| 1.4 | Conditionals & switch | `foundations/conditionals` | 1.1 | `if`/`else`, the short-statement form `if err := ...; err != nil`, no ternary, `switch` with no fallthrough by default. |
+| 1.5 | Loops | `foundations/loops` | 1.1 | `for` is the only loop. Three forms: classic, while-style, infinite. No `while`, no `do`. `break`, `continue`, labels. |
+| 1.6 | Functions & multi-return | `foundations/functions-and-multi-return` | 1.1, 1.4 | `func` definition, the big new idea: tuple-style returns. The `(T, error)` shape is introduced here as the canonical Go convention. |
+
+---
 
 ### Module 2 — Collections *(translates with wrinkles)*
-- Arrays vs slices (`[N]T` vs `[]T`, length vs capacity, `append`,
-  `make`)
-- Maps (`map[K]V`, comma-ok lookup, iteration order is undefined)
-- Iteration (`for-range`, blank identifier `_`)
 
-### Module 3 — Types you define *(the structural shift)*
-The biggest mental-model change. TS object literals carry methods; Go
-structs don't. Methods are functions with a receiver. Once this clicks,
-the rest of Go's type system falls into place.
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 2.1 | Arrays vs slices | `collections/arrays-and-slices` | 1.1, 1.2 | `[N]T` (fixed-size array) vs `[]T` (slice, the one you actually use). Slices are views over arrays — capacity, `len`, `cap`, `append`, `make`. |
+| 2.2 | Maps | `collections/maps` | 1.1, 2.1 | `map[K]V`, `make(map[K]V)`, comma-ok lookup, deletion, iteration order is undefined. |
+| 2.3 | Iteration with range | `collections/iteration` | 1.5, 2.1, 2.2 | `for i, v := range`, blank identifier `_`, ranging over slices vs maps vs strings (bytes vs runes). |
 
-- Structs (definition, struct literals, zero values, field access)
-- Methods (value vs pointer receivers, when each)
-- Pointers (`&`, `*`, why and when — the explicit version of "by
-  reference")
-- Nil (zero value for pointers, interfaces, maps, slices, channels)
-- Interfaces (structural like TS, but implicit — no `implements`)
-- Generics (`[T any]`, constraints — familiar from TS)
+---
 
-### Module 4 — Errors and packaging *(Go's distinctive conventions)*
-- The `(T, error)` return pattern
-- `errors.Is`, `errors.As`, error wrapping with `%w`
-- Type assertions and type switches
-- Packages, imports, and the export-by-capitalisation rule
-- Modules and `go.mod`
+### Module 3 — Types & methods *(the structural shift)*
 
-### Module 5 — Concurrency *(native Go territory — no bilingual crutch)*
-- Goroutines
-- Channels (unbuffered, buffered, direction)
-- Select and common patterns
-- Sync primitives (`Mutex`, `WaitGroup`)
+The biggest mental-model change so far. TS object literals carry
+methods; Go structs don't. Methods are functions with a receiver. Once
+this clicks, everything from Module 4 onward falls into place.
 
-### Module 6 — Idioms and ecosystem *(graduating to "real Go")*
-- Defer (cleanup, evaluation order)
-- Embedding (composition over inheritance)
-- Context and cancellation
-- Testing (table-driven, `t.Run` subtests)
-- Standard library tour (`net/http`, `encoding/json`, `os`, `time`,
-  `io`)
-- Project layout (`cmd/`, `internal/`, module conventions)
-- Common gotchas (loop var capture, nil interface, slice aliasing,
-  goroutine leaks)
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 3.1 | Structs | `types/structs` | 1.1 | `type Foo struct { ... }`, struct literals (positional vs named), field access, zero values for each field type. |
+| 3.2 | Methods | `types/methods` | 3.1 | `func (r Receiver) Foo()` — methods are functions with a receiver, not struct members. Value vs pointer receivers and when to use each. |
+| 3.3 | Pointers | `types/pointers` | 3.1 | `&` (address-of) and `*` (dereference). The explicit version of "by reference" — TS hides this behind objects-are-references; Go makes it visible. |
+| 3.4 | Nil & zero values | `types/nil-and-zero-values` | 3.1, 3.3 | The zero value for every type, the special `nil` for pointers, interfaces, maps, slices, channels, functions. `nil != undefined`. |
 
-## Things deliberately *not* in v0
+---
 
-- Reflection (`reflect`). Rarely needed; complicates more than it
-  teaches.
+### Module 4 — Interfaces & generics *(structural typing in Go's shape)*
+
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 4.1 | Interfaces | `interfaces/interfaces` | 3.2 | `interface { Foo() }`, **implicit satisfaction** (no `implements` keyword), interface composition, the empty interface `any`. The key TS→Go shift: Go inherits structural typing but drops the explicit declaration. |
+| 4.2 | Generics | `interfaces/generics` | 3.2, 4.1 | `[T any]`, type constraints, the `comparable` constraint, the `~T` underlying-type form. Familiar from TS; mostly just syntax to learn. |
+
+---
+
+### Module 5 — Errors & packaging *(Go's distinctive conventions)*
+
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 5.1 | The error pattern | `errors/the-error-pattern` | 1.6 | The `(T, error)` return shape made explicit, sentinel errors, `fmt.Errorf` and `%w` for wrapping. |
+| 5.2 | errors.Is / errors.As | `errors/is-and-as` | 5.1, 4.1 | Inspecting errors: `errors.Is` for sentinel match, `errors.As` for type unwrap. Why this is better than `instanceof`. |
+| 5.3 | Type assertions & switches | `errors/type-assertions` | 4.1 | `v.(T)` and `v, ok := v.(T)`, the `switch v := i.(type)` form. Adjacent to error inspection, useful generally. |
+| 5.4 | Packages & imports | `errors/packages-and-imports` | 1.6 | Package vs file scope, the export-by-capitalisation rule, import aliases, blank import. |
+| 5.5 | Modules & go.mod | `errors/modules-and-gomod` | 5.4 | `go.mod`, import paths, module path conventions, `go get` basics. |
+
+---
+
+### Module 6 — Concurrency *(native Go territory — no bilingual crutch)*
+
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 6.1 | Goroutines | `concurrency/goroutines` | 1.6 | `go fn()`. Concurrency as a built-in. Why you (almost) never want a bare unsynchronised goroutine. |
+| 6.2 | Channels | `concurrency/channels` | 6.1 | `chan T`, send/receive, direction (`<-chan` / `chan<-`), buffered vs unbuffered as a synchronisation primitive. |
+| 6.3 | Select | `concurrency/select` | 6.2 | Multi-channel coordination, `default` branch for non-blocking, timeout via `time.After`. |
+| 6.4 | Sync primitives | `concurrency/sync` | 6.2 | `sync.Mutex`, `sync.RWMutex`, `sync.WaitGroup`. When to reach for `sync` vs channels. |
+
+---
+
+### Module 7 — Idioms & ecosystem *(graduating to "real Go")*
+
+| # | Theme | Slug | Prereqs | Pedagogical purpose |
+|---|---|---|---|---|
+| 7.1 | Defer | `idioms/defer` | 1.6 | The cleanup pattern, evaluation order (LIFO + args captured at defer-time), common gotcha: defer in a loop. |
+| 7.2 | Embedding | `idioms/embedding` | 3.2 | Struct embedding for composition; method promotion. Why Go has no inheritance and what you do instead. |
+| 7.3 | Context | `idioms/context` | 6.1, 5.1 | `context.Context`, propagating cancellation, request lifecycle. Why the first arg is conventionally `ctx`. |
+| 7.4 | Testing | `idioms/testing` | 5.1, 1.6 | The `testing` package, table-driven tests, `t.Run` subtests, `t.Helper`. |
+| 7.5 | The small-interface idiom | `idioms/small-interfaces` | 4.1 | `io.Reader`, `io.Writer`, the "accept interfaces, return structs" principle. Why Go interfaces are tiny. |
+| 7.6 | Project layout | `idioms/project-layout` | 5.4, 5.5 | `cmd/`, `internal/`, conventions, when to use what. |
+| 7.7 | Common gotchas | `idioms/gotchas` | several | Loop-variable capture, nil interface vs nil concrete, slice aliasing, goroutine leaks. The "what bit me in code review" survival kit. |
+
+---
+
+## Things explicitly **not** in v0
+
+- Reflection (`reflect`). Rarely needed; complicates more than it teaches.
 - CGo. Different audience.
 - Unsafe pointers. Same.
 - Go assembly. Same.
-- Specific frameworks (gin, echo, etcd, kubernetes). The stdlib tour is
-  enough; framework choice is a per-project decision.
+- Specific frameworks (gin, echo, etcd, kubernetes). Per-project decisions.
+- `net/http` deep dive, `encoding/json` deep dive. Both worth a theme each
+  eventually; deferred from launch because they expand Module 7 past the
+  "graduating" character.
+- Build tags, conditional compilation, embedding files (`//go:embed`). Edge.
 
-## What to validate at this pass
+---
 
-Before drilling Pass 2:
+## What Pass 2 commits
 
-1. **Modules are ordered correctly for a TS dev.** Is "Collections"
-   really easier than "Types you define"? Should "Generics" be earlier
-   because TS devs already know the concept?
-2. **No module is overweight.** Module 3 currently bundles 6 themes —
-   may want to split structs+methods from interfaces+generics.
-3. **No critical concept is missing.** What did I forget?
-4. **The Go-native modules (5, 6) land at the right time.** A learner
-   reaching them should already feel fluent in everything earlier.
+- Module 3 split into "Types & methods" (3.x) and "Interfaces & generics"
+  (4.x). Previous "Module 3" was overweight at 6 themes; now it's 4+2.
+- Generics positioned *after* interfaces (4.2 after 4.1). The structural-
+  typing mental shift is the harder one; once interfaces are in, generics
+  is mostly TS-familiar syntax.
+- Conditionals and loops split into two themes (1.4 + 1.5). The Pass-1
+  bullet "Conditionals & loops" did too much work in one theme.
+- Module 7 (Idioms) slimmed to 7 themes by deferring `net/http` and
+  `encoding/json` deep-dives.
 
-## What Pass 2 looks like
+Total: **7 modules, 31 themes**. At 9 exercises per theme (default
+slot allocation), that's ~280 exercises end-to-end. Launch gate is
+Module 1 only: 6 themes × 9 = 54 exercises.
 
-For each module, break the bullets above into **themes** with rationale,
-estimated theme count, and prerequisite chain. Example for Module 1:
+## What Pass 3 looks like (still pending)
+
+For each theme, break into the 9-slot exercise progression with
+concrete TS↔Go content per slot, hints, and notes. Example for
+`foundations/variables`:
 
 ```
-Theme 1.1: Declaring variables
-  - := vs var vs const
-  - Type inference
-  - Shadowing rules
-  prerequisites: none
-
-Theme 1.2: Primitive types
-  - Integer types (int, int32, int64, uint*)
-  - Floating point (float32, float64)
-  - bool, byte
-  - No implicit conversion
-  prerequisites: 1.1
-
-...
+1. MCQ "let x = 5;" → which Go is idiomatic?         (DONE — already shipped)
+2. MCQ "const PI = 3.14;" → which Go is idiomatic?
+3. MCQ unannotated TS → which Go matches the inferred type?
+4. fill-blank-word: complete "<blank> x = 5" with the right declaration
+5. fill-blank-word: complete with right type annotation
+6. fill-blank-line: write the var declaration that matches a description
+7. fill-blank-line: shadowing exercise
+8. freeform: declare three vars from a TS snippet
+9. freeform: open problem (write code that does X using only var/const/:=)
 ```
 
-Pass 3 then breaks each theme into the 9-slot exercise progression with
-concrete TS↔Go content per slot.
+Pass 3 is per-theme work; doesn't have to land all at once. Each theme's
+Pass 3 lives in `design-docs/lessons/<module>/<theme>.md` (planned —
+not yet a directory).
