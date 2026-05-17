@@ -72,6 +72,50 @@ Captured here so they don't sit only in conversation history.
 - **Domain claim timing** — `typeover.dev / .io / .app / .co` all free;
   grab before public launch.
 
+## Engineering follow-ups
+
+Surfaced by the first code-structure review pass (2026-05-17). Each is
+a should-definitely-do that was parked because the immediate iteration
+was already big enough.
+
+- **Add Vitest + critical-path unit tests.** No test infrastructure
+  exists yet. Cover at minimum:
+  - PRNG determinism in `src/lib/seed.ts` (snapshot a known seed → known
+    sequence; re-seeding produces same sequence).
+  - `generate()` in `src/lib/generator.ts` (snapshot a fixed exercise +
+    seed → known instance; the dedupe-distractor path drops collisions
+    cleanly; substitute() throws on unknown vars).
+  - `progress.ts` `bumpExercise` (idempotency of slot creation, counter
+    mutations, lastSeenAt always advances).
+  - `optionCellState` in `McqOption.tsx` (truth table across all
+    boolean combinations).
+  - Mcq.tsx happy-path + wrong-path + reveal via
+    `@solidjs/testing-library`.
+
+- **Zod-validate the localStorage progress blob.** Today
+  `progress.read()` accepts any JSON that parses and has `version: 1`.
+  A corrupt/partial blob (`null`, `[]`, `{version: 1}` without
+  `exercises`, `{exercises: "wrong type"}`) crashes downstream. Add a
+  `ProgressSchema` and `safeParse`; on mismatch, back up the raw value
+  to `typeover:progress:corrupt-<ts>` before resetting so we don't
+  silently destroy a learner's history.
+
+- **Content-schema `.refine()` cross-field checks.** Today nothing
+  prevents an author from:
+  - Referencing a `${name}` in a template that isn't declared in `vars`.
+  - Shipping an MCQ exercise with empty `distractors`.
+  - Declaring an empty var pool (crashes `pickFrom` at runtime).
+  Add refinements to `content.config.ts` so these fail at build time
+  with a clear authoring error.
+
+- **`progress.write()` should dispatch a same-tab storage event.**
+  Browsers only fire `storage` in *other* tabs, so any future Solid
+  signal subscribed to localStorage won't refresh in the current tab.
+  Fix: `window.dispatchEvent(new StorageEvent("storage", { key: ... }))`
+  inside `write()`. Pair with restoring a `useExerciseProgress` hook
+  with proper `onCleanup` listener removal — both were dropped in the
+  refactor pass because nothing currently consumes them.
+
 ## Unvalidated assumptions
 
 - CodeMirror 6 on mobile touch keyboards works well enough for freeform
