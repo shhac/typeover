@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  /* === Surfaces ===
+   * Near-black base, slightly elevated panels — the Bloomberg-terminal look,
+   * but softer than pure #000 so eyes don't strain on long reading sessions.
+   */
+  --color-bg-base: #0a0a0b;
+  --color-bg-panel: #121214;
+  --color-bg-elevated: #1a1a1d;
+  --color-bg-inset: #08080a;
+
+  --color-border-default: #26262a;
+  --color-border-strong: #3a3a40;
+  --color-border-accent: #ffa72655;
+
+  /* === Text ===
+   * Slightly off-white primary to reduce contrast burn against the dark bg.
+   */
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #6b6b70;
+  --color-fg-faint: #4a4a4f;
+
+  /* === Brand accents ===
+   * amber  — Bloomberg-terminal nostalgia, used for focus/active/key info
+   * ts     — TypeScript blue, marks anything TS-side
+   * go     — Go cyan ("Aqua" #00ADD8), marks anything Go-side
+   *
+   * The TS/Go pair lets us color-code at a glance: blue = "what you know",
+   * cyan = "what you're learning". Used in Badge, CodeBlock language tags,
+   * and side-by-side diff views.
+   */
+  --color-accent-amber: #ffa726;
+  --color-accent-amber-dim: #b87a1c;
+  --color-accent-ts: #3178c6;
+  --color-accent-ts-dim: #1f4a7a;
+  --color-accent-go: #00add8;
+  --color-accent-go-dim: #007a99;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #ef4444;
+
+  /* === Type ===
+   * Mono is the *primary* feature font — code is the content here. Sans only
+   * for surrounding prose. JetBrains Mono picked for its ligatures and how
+   * cleanly it renders both Go and TS at small sizes.
+   */
+  --font-mono:
+    "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    sans-serif;
+
+  /* === Radii ===
+   * Sharp. The terminal aesthetic doesn't get rounded corners.
+   */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-bg-base);
+    color: var(--color-fg-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-amber);
+    color: var(--color-bg-base);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  *:focus-visible {
+    outline: 1px solid var(--color-accent-amber);
+    outline-offset: 2px;
+  }
+}
