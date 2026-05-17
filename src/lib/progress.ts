@@ -3,9 +3,10 @@
  * "you've seen N instances of this exercise" without locking in a
  * schema that prevents future gamification. The full schema is
  * documented in design-docs/11-progress-tracking.md.
+ *
+ * The four `record*` helpers all follow the same read-modify-write
+ * shape, expressed once via `bumpExercise`.
  */
-
-import { createSignal, onMount } from "solid-js";
 
 const STORAGE_KEY = "typeover:progress";
 
@@ -25,10 +26,12 @@ export type Progress = {
   exercises: Record<string, ExerciseProgress>;
 };
 
+const now = () => new Date().toISOString();
+
 const empty = (): Progress => ({
   version: 1,
-  startedAt: new Date().toISOString(),
-  lastSeenAt: new Date().toISOString(),
+  startedAt: now(),
+  lastSeenAt: now(),
   exercises: {},
 });
 
@@ -47,16 +50,16 @@ function read(): Progress {
 
 function write(p: Progress) {
   if (typeof localStorage === "undefined") return;
-  p.lastSeenAt = new Date().toISOString();
+  p.lastSeenAt = now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
 }
 
 function exerciseSlot(p: Progress, id: string): ExerciseProgress {
   if (!p.exercises[id]) {
-    const now = new Date().toISOString();
+    const t = now();
     p.exercises[id] = {
-      firstSeenAt: now,
-      lastSeenAt: now,
+      firstSeenAt: t,
+      lastSeenAt: t,
       instancesSeen: 0,
       instancesPassed: 0,
       instancesFailed: 0,
@@ -66,50 +69,42 @@ function exerciseSlot(p: Progress, id: string): ExerciseProgress {
   return p.exercises[id]!;
 }
 
-export function recordInstanceSeen(id: string) {
-  const p = read();
-  const slot = exerciseSlot(p, id);
-  slot.instancesSeen += 1;
-  slot.lastSeenAt = new Date().toISOString();
-  write(p);
-}
-
-export function recordInstancePassed(id: string) {
-  const p = read();
-  const slot = exerciseSlot(p, id);
-  slot.instancesPassed += 1;
-  slot.lastSeenAt = new Date().toISOString();
-  write(p);
-}
-
-export function recordInstanceFailed(id: string) {
-  const p = read();
-  const slot = exerciseSlot(p, id);
-  slot.instancesFailed += 1;
-  slot.lastSeenAt = new Date().toISOString();
-  write(p);
-}
-
-export function recordHintUsed(id: string) {
-  const p = read();
-  const slot = exerciseSlot(p, id);
-  slot.hintsUsedTotal += 1;
-  write(p);
-}
-
 /**
- * Solid signal for one exercise's progress. Reactive: pages re-render
- * when storage updates. Returns `() => undefined` on the server.
+ * Read progress, locate (or create) the exercise slot, apply `mutate`,
+ * touch `lastSeenAt`, write back. Every public recorder is built on
+ * this — adding a new counter is a one-liner.
  */
-export function useExerciseProgress(id: string) {
-  const [state, setState] = createSignal<ExerciseProgress | undefined>();
-  onMount(() => {
-    setState(exerciseSlot(read(), id));
-    // Refresh after any storage event from this tab too (we dispatch one
-    // after each write for completeness).
-    window.addEventListener("storage", () => {
-      setState({ ...exerciseSlot(read(), id) });
-    });
+function bumpExercise(
+  id: string,
+  mutate: (slot: ExerciseProgress) => void,
+): void {
+  const p = read();
+  const slot = exerciseSlot(p, id);
+  mutate(slot);
+  slot.lastSeenAt = now();
+  write(p);
+}
+
+export const recordInstanceSeen = (id: string) =>
+  bumpExercise(id, (s) => {
+    s.instancesSeen += 1;
   });
-  return state;
+
+export const recordInstancePassed = (id: string) =>
+  bumpExercise(id, (s) => {
+    s.instancesPassed += 1;
+  });
+
+export const recordInstanceFailed = (id: string) =>
+  bumpExercise(id, (s) => {
+    s.instancesFailed += 1;
+  });
+
+export const recordHintUsed = (id: string) =>
+  bumpExercise(id, (s) => {
+    s.hintsUsedTotal += 1;
+  });
+
+export function getExerciseProgress(id: string): ExerciseProgress {
+  return exerciseSlot(read(), id);
 }
