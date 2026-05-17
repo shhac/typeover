@@ -5,7 +5,7 @@ type Theme = CollectionEntry<"themes">;
 type Exercise = CollectionEntry<"exercises">;
 
 /** Stable sort by `data.order`. Tiebreaker is original array order. */
-export const byOrder = <T extends { data: { order: number } }>(a: T, b: T) =>
+const byOrder = <T extends { data: { order: number } }>(a: T, b: T) =>
   a.data.order - b.data.order;
 
 /** Truncate a string to a max length, returning the assembled string with
@@ -17,13 +17,13 @@ export function truncateIntro(s: string, max = 180): string {
   return trimmed.slice(0, max).trimEnd() + "…";
 }
 
-export type ThemeNode = {
+type ThemeNode = {
   theme: Theme;
   firstExercise: Exercise | undefined;
   exerciseCount: number;
 };
 
-export type ModuleNode = {
+type ModuleNode = {
   module: Module;
   themes: ThemeNode[];
 };
