@@ -8,6 +8,7 @@ export { Feedback } from "./Feedback";
 export { Heading } from "./Heading";
 export { HintButton } from "./HintButton";
 export { Kbd } from "./Kbd";
+export { LangCrumbs } from "./LangCrumbs";
 export { Panel } from "./Panel";
 export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";

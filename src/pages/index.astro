@@ -8,6 +8,7 @@ import {
   Divider,
   Heading,
   Kbd,
+  LangCrumbs,
   Panel,
   Stack,
   Text,
@@ -23,12 +24,9 @@ import {
       <Stack gap="xl">
         {/* Hero */}
         <Stack gap="md">
-          <Stack direction="row" gap="sm" align="center">
+          <LangCrumbs>
             <Badge variant="amber">v0.0.0 — hello world</Badge>
-            <Badge variant="ts" outline>TS</Badge>
-            <Text tone="muted" size="sm" family="mono">→</Text>
-            <Badge variant="go" outline>GO</Badge>
-          </Stack>
+          </LangCrumbs>
           <Heading level={1}>
             <span class="text-accent-ts">type</span><span class="text-accent-amber">over</span>
           </Heading>

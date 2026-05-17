@@ -6,10 +6,16 @@ import {
   Container,
   Divider,
   Heading,
+  LangCrumbs,
   Panel,
   Stack,
   Text,
 } from "~/components/ds";
+import {
+  buildCurriculumTree,
+  exerciseHref,
+  truncateIntro,
+} from "~/lib/curriculum";
 
 /**
  * Curriculum overview. Browse-anywhere tree of modules → themes →
@@ -23,30 +29,7 @@ const [modules, themes, exercises] = await Promise.all([
   getCollection("exercises"),
 ]);
 
-const sortedModules = [...modules].sort((a, b) => a.data.order - b.data.order);
-
-function themesForModule(moduleId: string) {
-  return themes
-    .filter((t) => t.data.moduleId === moduleId)
-    .sort((a, b) => a.data.order - b.data.order);
-}
-
-function firstExerciseFor(themeId: string) {
-  const list = exercises
-    .filter((e) => e.data.themeId === themeId)
-    .sort((a, b) => a.data.order - b.data.order);
-  return list[0];
-}
-
-function exerciseCountFor(themeId: string) {
-  return exercises.filter((e) => e.data.themeId === themeId).length;
-}
-
-function exerciseHref(exerciseId: string) {
-  // Exercise ID is "<module>/<theme>/<index>", which maps 1-to-1 to the
-  // /go/[module]/[theme]/[index] dynamic route.
-  return `/go/${exerciseId}`;
-}
+const tree = buildCurriculumTree(modules, themes, exercises);
 ---
 
 <BaseLayout
@@ -57,11 +40,7 @@ function exerciseHref(exerciseId: string) {
     <Container width="wide">
       <Stack gap="xl">
         <Stack gap="sm">
-          <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="ts" outline>TS</Badge>
-            <Text tone="muted" size="sm" family="mono">→</Text>
-            <Badge variant="go" outline>GO</Badge>
-          </Stack>
+          <LangCrumbs />
           <Heading level={1}>Curriculum</Heading>
           <Text tone="secondary" size="lg">
             Seven modules. Start anywhere — the recommended path is in order, but
@@ -73,7 +52,7 @@ function exerciseHref(exerciseId: string) {
         <Divider />
 
         <Stack gap="xl">
-          {sortedModules.map((module) => (
+          {tree.map(({ module, themes }) => (
             <Stack gap="md">
               <Stack direction="row" gap="sm" align="baseline" wrap>
                 <Heading level={2}>
@@ -84,10 +63,8 @@ function exerciseHref(exerciseId: string) {
               <Text tone="secondary" size="md">{module.data.summary}</Text>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {themesForModule(module.id).map((theme) => {
-                  const first = firstExerciseFor(theme.id);
-                  const count = exerciseCountFor(theme.id);
-                  const href = first ? exerciseHref(first.id) : null;
+                {themes.map(({ theme, firstExercise, exerciseCount }) => {
+                  const href = firstExercise ? exerciseHref(firstExercise.id) : null;
                   return (
                     <Panel padding="default" tone="default">
                       <Stack gap="sm">
@@ -100,12 +77,11 @@ function exerciseHref(exerciseId: string) {
                           </Heading>
                         </Stack>
                         <Text tone="muted" size="sm">
-                          {theme.data.intro.slice(0, 180).trim()}
-                          {theme.data.intro.length > 180 ? "…" : ""}
+                          {truncateIntro(theme.data.intro)}
                         </Text>
                         <Stack direction="row" gap="sm" align="center" wrap>
-                          <Badge variant={count > 0 ? "go" : "default"} outline>
-                            {count > 0 ? `${count} ready` : "coming"}
+                          <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
+                            {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
                           </Badge>
                           {href && (
                             <a
@@ -120,7 +96,7 @@ function exerciseHref(exerciseId: string) {
                     </Panel>
                   );
                 })}
-                {themesForModule(module.id).length === 0 && (
+                {themes.length === 0 && (
                   <Text tone="faint" size="sm" family="mono">
                     themes for this module are not yet drafted
                   </Text>
