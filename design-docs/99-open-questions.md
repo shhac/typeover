@@ -13,6 +13,18 @@ Captured here so they don't sit only in conversation history.
   (Decided 2026-05-18.)
 - **First lesson concept.** Variables, primitives, `:=` vs `let`.
   (Decided 2026-05-18.)
+- **Lesson shape.** Short & dense — 3-4 exercises per lesson (~3 min),
+  chainable. A *theme* is the pedagogical unit (~9 exercises across the
+  MCQ → fill-blank-word → fill-blank-line → freeform progression). All
+  exercises are parameterised generators, not static instances —
+  replayability built in. Progress tracked at topic/theme/exercise
+  levels with drop-in/drop-out support. (Decided 2026-05-18.)
+- **Navigation.** Recommended path with progress tracking, plus a
+  free-browse escape hatch. (Decided 2026-05-18.)
+- **Curriculum design process.** Recursive validation:
+  Pass 1 = top-level topics, validate ordering for a TS dev; Pass 2 =
+  break each topic into sub-topics, validate; Pass 3+ = continue until
+  exercise-level. (Decided 2026-05-18.)
 
 ## Product
 
@@ -32,8 +44,7 @@ Captured here so they don't sit only in conversation history.
   contribute lessons?
 - **Lesson shape.** Target exercise count per lesson, mix of exercise
   types per lesson, time budget. Still open.
-- **Module structure.** Linear path vs branching tracks vs open buffet.
-  Still open — depends on how the curriculum tree looks once drafted.
+- ~~**Module structure.**~~ Resolved: recommended path + free browse.
 
 ## Architecture (future-proofing for multi-target)
 
