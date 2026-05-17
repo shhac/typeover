@@ -1,0 +1,7 @@
+target: go
+title: Interfaces & generics
+order: 4
+summary: |
+  Structural typing in Go's shape — implicit satisfaction with no
+  `implements` keyword. Then generics on top: familiar from TS,
+  mostly syntax to learn.

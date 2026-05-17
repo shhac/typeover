@@ -1,0 +1,7 @@
+target: go
+title: Types & methods
+order: 3
+summary: |
+  The biggest mental-model change so far. TS object literals carry
+  methods; Go structs don't. Methods are functions with a receiver.
+  Pointers become explicit. Nil exists for a specific list of types.

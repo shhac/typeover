@@ -1,0 +1,11 @@
+target: go
+moduleId: idioms
+title: Testing
+order: 4
+prerequisites: [errors/the-error-pattern, foundations/functions-and-multi-return]
+intro: |
+  Go has a testing package in the standard library. Tests live next
+  to code in `_test.go` files. The pattern is **table-driven**: a
+  slice of `(name, input, want)` tuples plus `t.Run(name, ...)` for
+  subtests. No assertion library required — `if got != want { t.Errorf(...) }`
+  is the whole vocabulary.

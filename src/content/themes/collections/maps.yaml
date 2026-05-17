@@ -1,0 +1,10 @@
+target: go
+moduleId: collections
+title: Maps
+order: 2
+prerequisites: [foundations/variables, collections/arrays-and-slices]
+intro: |
+  `map[K]V`. Like a TS `Record<K, V>` or `Map<K, V>`. Lookup with
+  comma-ok: `v, ok := m[key]`. Iteration order is **undefined** —
+  every range yields a different ordering. Maps are reference types;
+  passing a map to a function shares it.

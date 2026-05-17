@@ -1,0 +1,7 @@
+target: go
+title: Collections
+order: 2
+summary: |
+  Arrays, slices, maps, and the for-range loop. The translation
+  pattern still works but the wrinkles deepen: slices are views,
+  map iteration is unordered, and range gives you index+value.

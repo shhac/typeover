@@ -1,0 +1,11 @@
+target: go
+moduleId: idioms
+title: Embedding
+order: 2
+prerequisites: [types/methods]
+intro: |
+  Struct embedding gives you composition without inheritance.
+  Embed a type as an unnamed field and its methods get promoted
+  onto the outer struct. This is how Go does "extend a type" — by
+  containing one. The rule: **prefer composition; Go literally
+  doesn't give you inheritance to misuse**.

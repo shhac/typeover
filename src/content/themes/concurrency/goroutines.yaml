@@ -1,0 +1,11 @@
+target: go
+moduleId: concurrency
+title: Goroutines
+order: 1
+prerequisites: [foundations/functions-and-multi-return]
+intro: |
+  `go fn()` runs `fn` concurrently with the caller. That's it. No
+  promises, no `async`/`await`, no event loop — the runtime
+  multiplexes goroutines over OS threads. Cheap to start (kilobytes
+  of stack). And the discipline: **never start a bare goroutine
+  whose lifetime you can't reason about**.

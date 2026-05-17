@@ -1,0 +1,146 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Container,
+  Divider,
+  Heading,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+
+/**
+ * Curriculum overview. Browse-anywhere tree of modules → themes →
+ * first exercise. The recommended-path highlight + progress chips
+ * arrive once the per-theme progress hook lands.
+ */
+
+const [modules, themes, exercises] = await Promise.all([
+  getCollection("modules"),
+  getCollection("themes"),
+  getCollection("exercises"),
+]);
+
+const sortedModules = [...modules].sort((a, b) => a.data.order - b.data.order);
+
+function themesForModule(moduleId: string) {
+  return themes
+    .filter((t) => t.data.moduleId === moduleId)
+    .sort((a, b) => a.data.order - b.data.order);
+}
+
+function firstExerciseFor(themeId: string) {
+  const list = exercises
+    .filter((e) => e.data.themeId === themeId)
+    .sort((a, b) => a.data.order - b.data.order);
+  return list[0];
+}
+
+function exerciseCountFor(themeId: string) {
+  return exercises.filter((e) => e.data.themeId === themeId).length;
+}
+
+function exerciseHref(exerciseId: string) {
+  // Exercise ID is "<module>/<theme>/<index>", which maps 1-to-1 to the
+  // /go/[module]/[theme]/[index] dynamic route.
+  return `/go/${exerciseId}`;
+}
+---
+
+<BaseLayout
+  title="typeover — Go curriculum"
+  description="Browse the full typeover curriculum for Go."
+>
+  <main class="py-12 sm:py-20">
+    <Container width="wide">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Stack direction="row" gap="sm" align="center" wrap>
+            <Badge variant="ts" outline>TS</Badge>
+            <Text tone="muted" size="sm" family="mono">→</Text>
+            <Badge variant="go" outline>GO</Badge>
+          </Stack>
+          <Heading level={1}>Curriculum</Heading>
+          <Text tone="secondary" size="lg">
+            Seven modules. Start anywhere — the recommended path is in order, but
+            every theme is browsable. Themes without exercises yet are visible
+            so you can see what's coming.
+          </Text>
+        </Stack>
+
+        <Divider />
+
+        <Stack gap="xl">
+          {sortedModules.map((module) => (
+            <Stack gap="md">
+              <Stack direction="row" gap="sm" align="baseline" wrap>
+                <Heading level={2}>
+                  <span class="text-fg-faint font-mono mr-3">{module.data.order}.</span>
+                  {module.data.title}
+                </Heading>
+              </Stack>
+              <Text tone="secondary" size="md">{module.data.summary}</Text>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {themesForModule(module.id).map((theme) => {
+                  const first = firstExerciseFor(theme.id);
+                  const count = exerciseCountFor(theme.id);
+                  const href = first ? exerciseHref(first.id) : null;
+                  return (
+                    <Panel padding="default" tone="default">
+                      <Stack gap="sm">
+                        <Stack direction="row" gap="sm" align="baseline" wrap>
+                          <Text tone="faint" size="xs" family="mono">
+                            {module.data.order}.{theme.data.order}
+                          </Text>
+                          <Heading level={3} class="!text-lg">
+                            {theme.data.title}
+                          </Heading>
+                        </Stack>
+                        <Text tone="muted" size="sm">
+                          {theme.data.intro.slice(0, 180).trim()}
+                          {theme.data.intro.length > 180 ? "…" : ""}
+                        </Text>
+                        <Stack direction="row" gap="sm" align="center" wrap>
+                          <Badge variant={count > 0 ? "go" : "default"} outline>
+                            {count > 0 ? `${count} ready` : "coming"}
+                          </Badge>
+                          {href && (
+                            <a
+                              href={href}
+                              class="text-accent-amber hover:underline font-mono text-sm"
+                            >
+                              start →
+                            </a>
+                          )}
+                        </Stack>
+                      </Stack>
+                    </Panel>
+                  );
+                })}
+                {themesForModule(module.id).length === 0 && (
+                  <Text tone="faint" size="sm" family="mono">
+                    themes for this module are not yet drafted
+                  </Text>
+                )}
+              </div>
+            </Stack>
+          ))}
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" justify="between" align="center" wrap>
+          <Text tone="muted" size="xs" family="mono">
+            typeover · curriculum · pass 2
+          </Text>
+          <a href="/" class="text-fg-muted hover:text-fg-primary font-mono text-xs">
+            ← back to home
+          </a>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

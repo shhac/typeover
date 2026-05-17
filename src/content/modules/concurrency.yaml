@@ -1,0 +1,7 @@
+target: go
+title: Concurrency
+order: 6
+summary: |
+  Native Go territory — no bilingual crutch. Goroutines, channels,
+  select, and the sync primitives. Concurrency as a language-level
+  feature, not a library bolt-on.

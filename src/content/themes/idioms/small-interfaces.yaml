@@ -1,0 +1,11 @@
+target: go
+moduleId: idioms
+title: The small-interface idiom
+order: 5
+prerequisites: [interfaces/interfaces]
+intro: |
+  `io.Reader { Read(p []byte) (n int, err error) }`. One method.
+  Go interfaces are typically tiny because implicit satisfaction
+  rewards it — small interfaces are easy to satisfy accidentally,
+  which is good. The community phrase: "accept interfaces, return
+  structs." Funcs take the smallest interface they need.

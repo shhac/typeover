@@ -1,0 +1,10 @@
+target: go
+moduleId: concurrency
+title: Sync primitives
+order: 4
+prerequisites: [concurrency/channels]
+intro: |
+  `sync.Mutex`, `sync.RWMutex`, `sync.WaitGroup`, `sync.Once`. The
+  classical concurrency toolbox. Go's culture prefers channels
+  for orchestration and `sync` for protecting state. Use whichever
+  makes the code clearer; don't pick a side as a religion.

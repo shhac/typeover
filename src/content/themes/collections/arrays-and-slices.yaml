@@ -1,0 +1,11 @@
+target: go
+moduleId: collections
+title: Arrays vs slices
+order: 1
+prerequisites: [foundations/variables, foundations/numeric-primitives]
+intro: |
+  Go has fixed-size **arrays** (`[N]T`) and dynamically-sized
+  **slices** (`[]T`). You almost always want slices. A slice is a
+  view over a backing array — three machine words: pointer, length,
+  capacity. `append` grows it; `make` pre-sizes it. The mental model
+  is closer to Rust's `Vec` than to TS's `Array`.

@@ -1,0 +1,11 @@
+target: go
+moduleId: interfaces
+title: Interfaces
+order: 1
+prerequisites: [types/methods]
+intro: |
+  `interface { Foo() }`. A type implements an interface by having the
+  right methods. **There is no `implements` keyword.** Satisfaction is
+  implicit: if the methods match, the type satisfies the interface,
+  whether the type's author knew about the interface or not. This is
+  the central TS→Go shift, and it changes how you design APIs.

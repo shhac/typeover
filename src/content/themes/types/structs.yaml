@@ -1,0 +1,11 @@
+target: go
+moduleId: types
+title: Structs
+order: 1
+prerequisites: [foundations/variables]
+intro: |
+  `type Foo struct { ... }`. A struct is a typed record — fields and
+  their types, nothing else. No methods on the struct itself (those
+  come next). Field access with `.`. Struct literals can be positional
+  or named; named is the only sane choice for anything with more than
+  two fields.

@@ -1,0 +1,7 @@
+target: go
+title: Idioms & ecosystem
+order: 7
+summary: |
+  Graduating to "real Go" — defer, embedding, context, testing,
+  the small-interface idiom, project layout, and the gotchas every
+  Go programmer learns the hard way.

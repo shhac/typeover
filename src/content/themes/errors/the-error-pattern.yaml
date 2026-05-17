@@ -1,0 +1,11 @@
+target: go
+moduleId: errors
+title: The error pattern
+order: 1
+prerequisites: [foundations/functions-and-multi-return]
+intro: |
+  Go has no exceptions for ordinary control flow. Errors are values
+  returned alongside results — `(T, error)`. The caller checks
+  `err != nil` and decides. This feels noisy at first; it
+  becomes legible once you trust the convention. `fmt.Errorf("...
+  %w", err)` wraps, preserving the inner error.

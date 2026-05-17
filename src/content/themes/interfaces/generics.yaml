@@ -1,0 +1,11 @@
+target: go
+moduleId: interfaces
+title: Generics
+order: 2
+prerequisites: [types/methods, interfaces/interfaces]
+intro: |
+  Mostly familiar from TS. `func Foo[T any](x T) T { ... }`. The
+  constraint syntax is where Go adds something new: an interface
+  used as a constraint can list types or use `~T` for "any type
+  whose underlying type is T". The `comparable` constraint is built-in.
+  Method sets in constraints are powerful and worth slowing down on.

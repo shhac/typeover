@@ -1,0 +1,11 @@
+target: go
+moduleId: types
+title: Pointers
+order: 3
+prerequisites: [types/structs]
+intro: |
+  `&x` takes the address of `x`. `*p` dereferences `p`. Pointers in
+  Go are pointers — they're not garbage-collector-hostile, they don't
+  do arithmetic (no `p++`), and they don't bite. They're the explicit
+  version of "by reference" — TypeScript hides this behind
+  "objects are references," Go makes it visible.

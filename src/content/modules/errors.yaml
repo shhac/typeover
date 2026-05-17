@@ -1,0 +1,7 @@
+target: go
+title: Errors & packaging
+order: 5
+summary: |
+  Go's distinctive error convention — the `(T, error)` return shape,
+  errors.Is and errors.As for inspection, and the rest of how Go
+  programs are organised into packages and modules.
