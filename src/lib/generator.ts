@@ -7,9 +7,13 @@ import { pickFrom, rngFromSeed, shuffle } from "./seed";
  * Schemas live here (single source of truth) and the TS types are
  * z.inferred from them so content.config.ts and runtime never drift.
  *
- * `template` is implemented. `variant` is implemented but unused by
- * v0 content. `procedural` is reserved for the first content that
+ * `template` is implemented. `variant` is implemented and exercised
+ * by 03.yaml. `procedural` is reserved for the first content that
  * needs it.
+ *
+ * The optional `blanks` argument to `generate()` engages the
+ * fill-blank-word path: certain `${var}` placeholders in the
+ * canonical are emitted as input slots rather than text.
  */
 
 /* ---------------- Schemas ---------------- */
@@ -60,6 +64,10 @@ type VariantGenerator = z.infer<typeof VariantSpec>;
 
 /* ---------------- Runtime ---------------- */
 
+export type FillSegment =
+  | { kind: "text"; text: string }
+  | { kind: "blank"; varName: string; expected: string };
+
 export type ExerciseInstance = {
   /** The TS snippet shown in the prompt. */
   ts: string;
@@ -69,6 +77,16 @@ export type ExerciseInstance = {
    *  of the canonical in this list. */
   options?: string[];
   correctIndex?: number;
+  /** For fill-blank-word exercises: the canonical broken into text
+   *  segments and named blank slots. Present only when generate() is
+   *  called with a non-empty `blanks` option (template generator only). */
+  blankSegments?: FillSegment[];
+};
+
+export type GenerateOptions = {
+  /** Var names from the template to render as input slots instead of
+   *  substituted text. Engages the fill-blank-word path. */
+  blanks?: string[];
 };
 
 /** ${name} substitution against a value map. Throws on unknown vars. */
@@ -83,11 +101,49 @@ function substitute(tmpl: string, values: Record<string, string>): string {
 }
 
 /**
+ * Walk the canonical template, emitting segments. Vars listed in
+ * `blanks` become input slots with their expected value; everything
+ * else is substituted into text.
+ *
+ * Adjacent text segments aren't merged — the renderer iterates and
+ * the small overhead is irrelevant.
+ */
+function buildBlankSegments(
+  canonical: string,
+  values: Record<string, string>,
+  blanks: readonly string[],
+): FillSegment[] {
+  const blankSet = new Set(blanks);
+  const segments: FillSegment[] = [];
+  let cursor = 0;
+  const re = /\$\{(\w+)\}/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(canonical)) !== null) {
+    const [full, name] = match;
+    if (match.index > cursor) {
+      segments.push({ kind: "text", text: canonical.slice(cursor, match.index) });
+    }
+    const value = values[name];
+    if (value === undefined) {
+      throw new Error(`Template references unknown var \${${name}}`);
+    }
+    if (blankSet.has(name)) {
+      segments.push({ kind: "blank", varName: name, expected: value });
+    } else {
+      segments.push({ kind: "text", text: value });
+    }
+    cursor = match.index + full.length;
+  }
+  if (cursor < canonical.length) {
+    segments.push({ kind: "text", text: canonical.slice(cursor) });
+  }
+  return segments;
+}
+
+/**
  * Build MCQ options from a canonical answer + distractor list, shuffled
  * deterministically by `rng`. Drops any distractor that renders to the
- * same text as the canonical (silent-correctness bug: clicking a
- * duplicate-text option marked `correct: false` would be told it's
- * wrong while looking identical to the correct one).
+ * same text as the canonical.
  */
 function buildShuffledOptions(
   rng: () => number,
@@ -108,6 +164,7 @@ function buildShuffledOptions(
 function generateTemplate(
   spec: TemplateGenerator,
   seed: string,
+  opts: GenerateOptions,
 ): ExerciseInstance {
   const rng = rngFromSeed(seed);
   const values: Record<string, string> = {};
@@ -117,17 +174,27 @@ function generateTemplate(
   const ts = substitute(spec.ts, values);
   const canonical = substitute(spec.canonical, values);
 
-  if (!spec.distractors || spec.distractors.length === 0) {
-    return { ts, canonical };
+  const instance: ExerciseInstance = { ts, canonical };
+
+  if (opts.blanks && opts.blanks.length > 0) {
+    instance.blankSegments = buildBlankSegments(
+      spec.canonical,
+      values,
+      opts.blanks,
+    );
   }
-  const renderedDistractors = spec.distractors.map((d) =>
-    substitute(d, values),
-  );
-  return {
-    ts,
-    canonical,
-    ...buildShuffledOptions(rng, canonical, renderedDistractors),
-  };
+
+  if (spec.distractors && spec.distractors.length > 0) {
+    const renderedDistractors = spec.distractors.map((d) =>
+      substitute(d, values),
+    );
+    Object.assign(
+      instance,
+      buildShuffledOptions(rng, canonical, renderedDistractors),
+    );
+  }
+
+  return instance;
 }
 
 function generateVariant(
@@ -150,11 +217,14 @@ function generateVariant(
 export function generate(
   spec: GeneratorSpec,
   seed: string,
+  opts: GenerateOptions = {},
 ): ExerciseInstance {
   switch (spec.kind) {
     case "template":
-      return generateTemplate(spec, seed);
+      return generateTemplate(spec, seed, opts);
     case "variant":
+      // Variant fill-blank-word support deferred until needed; today
+      // every shipped variant is MCQ.
       return generateVariant(spec, seed);
     case "procedural":
       throw new Error(

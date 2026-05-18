@@ -1,5 +1,10 @@
 import { createEffect, createMemo, createSignal } from "solid-js";
-import { generate, type ExerciseInstance, type GeneratorSpec } from "./generator";
+import {
+  generate,
+  type ExerciseInstance,
+  type GenerateOptions,
+  type GeneratorSpec,
+} from "./generator";
 import { recordInstanceSeen } from "./progress";
 
 /**
@@ -10,17 +15,24 @@ import { recordInstanceSeen } from "./progress";
  * to the seed — never in the memo — so memos stay pure and seen-counts
  * don't double-fire on hydration or HMR.
  *
- * Reused by every exercise type (MCQ now; FillBlank-Word / Line /
- * Freeform when they land).
+ * The `opts` argument is passed straight through to `generate` per
+ * call. For fill-blank-word exercises, this is how the consumer
+ * declares which template vars become input slots.
+ *
+ * Reused by every exercise type (MCQ, FillBlankWord; FillBlankLine
+ * and Freeform when they land).
  */
 export function useExerciseInstance(
   exerciseId: string,
   generator: GeneratorSpec,
+  opts: GenerateOptions = {},
 ) {
   const [attempt, setAttempt] = createSignal(0);
 
   const seed = () => `${exerciseId}::${attempt()}`;
-  const instance = createMemo<ExerciseInstance>(() => generate(generator, seed()));
+  const instance = createMemo<ExerciseInstance>(() =>
+    generate(generator, seed(), opts),
+  );
 
   createEffect(() => {
     // Re-runs whenever the seed changes (i.e. attempt advances). Records

@@ -44,6 +44,11 @@ const exerciseCollection = defineCollection({
     order: z.number().int().positive(),
     prompt: z.string(),
     generator: GeneratorSchema,
+    /** For fill-word / fill-line: which template vars to render as
+     *  input slots instead of substituted text. Cross-field validation
+     *  (template-only, non-empty for fill-* types) is tracked as
+     *  open-question task #38. */
+    blanks: z.array(z.string()).optional(),
     hints: z.tuple([z.string(), z.string(), z.string()]),
     runtime: z.enum(["yaegi", "server", "none"]).default("none"),
     notes: z.string().optional(),

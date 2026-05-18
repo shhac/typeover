@@ -11,6 +11,7 @@ import {
   Text,
 } from "~/components/ds";
 import { Mcq } from "~/components/exercise/Mcq";
+import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -60,13 +61,35 @@ const moduleEntry = themeEntry
         </Stack>
 
         <Panel padding="airy" tone="default">
-          <Mcq
-            client:visible
-            exerciseId={entry.id}
-            prompt={ex.prompt}
-            generator={ex.generator}
-            hints={ex.hints}
-          />
+          {ex.type === "mcq" && (
+            <Mcq
+              client:visible
+              exerciseId={entry.id}
+              prompt={ex.prompt}
+              generator={ex.generator}
+              hints={ex.hints}
+            />
+          )}
+          {ex.type === "fill-word" && (
+            <FillBlankWord
+              client:visible
+              exerciseId={entry.id}
+              prompt={ex.prompt}
+              generator={ex.generator}
+              blanks={ex.blanks ?? []}
+              hints={ex.hints}
+            />
+          )}
+          {ex.type === "fill-line" && (
+            <Text tone="muted" size="sm" family="mono">
+              fill-line exercise component not built yet
+            </Text>
+          )}
+          {ex.type === "freeform" && (
+            <Text tone="muted" size="sm" family="mono">
+              freeform exercise component not built yet
+            </Text>
+          )}
         </Panel>
 
         <Divider />
