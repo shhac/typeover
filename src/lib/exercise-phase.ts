@@ -9,7 +9,7 @@ import { recordInstanceFailed, recordInstancePassed } from "./progress";
  */
 export type Phase = "picking" | "wrong" | "right";
 
-export interface UseExercisePhaseArgs {
+interface UseExercisePhaseArgs {
   exerciseId: string;
   /** Predicate the hook calls on submit. */
   isCorrect: () => boolean;
