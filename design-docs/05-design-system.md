@@ -130,6 +130,37 @@ Planned for v0 (still to be added):
 | `MobileKeyBar.tsx` | Symbol bar above the editor on small screens. |
 | `ProgressBar.tsx` | Theme/module progress indicator. |
 
+## Deferred: generic `Crumbs` two-badge breadcrumb
+
+`LangCrumbs` is currently a Solid component that bakes in TS/GO badge
+content. The badge → arrow → badge pattern now has three callers (TS/GO
+strip on the home + curriculum pages, module → theme on the theme
+overview, module → theme · exercise N · type on the exercise page). A
+generic `Crumbs` taking `left`/`right` JSX-element props + extras
+children is the natural extraction.
+
+**Blocker:** Astro's template parser doesn't accept nested component
+JSX inside attribute-value braces — `left={<Badge variant="amber">…</Badge>}`
+fails with "Expected '>' but found 'variant'" because Astro's parser
+disallows component tags inside `{...}` expressions in templates. The
+Solid component `Crumbs.tsx` works in pure JSX but not when called
+from .astro pages, which is where every breadcrumb consumer lives.
+
+**Path forward (when revisited):**
+
+1. Convert `Crumbs` and `LangCrumbs` to `.astro` files using named
+   slots (`<slot name="left" />` / `<slot name="right" />`). Astro's
+   slot mechanism is the idiomatic shape for multi-region container
+   components.
+2. Both files would render their Stack + arrow chrome in Astro and
+   take Solid `<Badge>` children naturally via the slot mechanism.
+3. Migrate the two `[module]/[theme]/...` Astro pages to use the new
+   `Crumbs` component (currently inline Stack + Badge + Text).
+
+Pickup criteria: when (a) a fourth call site lands, OR (b) a chrome
+change (arrow glyph swap, separator dot, etc.) would need to be
+applied at all three call sites.
+
 ## Rules for adding components
 
 - New primitive in `src/components/ds/` only if it's reusable.
