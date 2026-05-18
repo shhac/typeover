@@ -108,9 +108,7 @@ export function buildBlankSegments(
   const blankSet = new Set(blanks);
   const segments: FillSegment[] = [];
   let cursor = 0;
-  const re = /\$\{(\w+)\}/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(canonical)) !== null) {
+  for (const match of canonical.matchAll(/\$\{(\w+)\}/g)) {
     const [full, name] = match;
     if (match.index > cursor) {
       segments.push({ kind: "text", text: canonical.slice(cursor, match.index) });
