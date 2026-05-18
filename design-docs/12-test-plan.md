@@ -9,6 +9,12 @@ Compiled from the iteration-2 code-structure review's test-coverage lens
 findings (2026-05-17). Each item is paired with a one-line "what breaks
 if this regresses" so future-us remembers why the test exists.
 
+**Status (2026-05-18):** Vitest is wired (`pnpm test`). 91 tests live
+across 7 files covering: P0 seed determinism, P0 generator parsing +
+`generate()` golden cases, all three cellState truth tables, and P1
+progress-storage invariants (SSR / malformed / single-`now()`). The
+exercise-phase hook tests and route/page smoke tests are still pending.
+
 ## P0 — Determinism chain *(must land first)*
 
 These pin the contract that makes "Try again with the same instance"
