@@ -5,7 +5,7 @@ type Theme = CollectionEntry<"themes">;
 type Exercise = CollectionEntry<"exercises">;
 
 /** Stable sort by `data.order`. Tiebreaker is original array order. */
-const byOrder = <T extends { data: { order: number } }>(a: T, b: T) =>
+export const byOrder = <T extends { data: { order: number } }>(a: T, b: T) =>
   a.data.order - b.data.order;
 
 /** Truncate a string to a max length, returning the assembled string with
