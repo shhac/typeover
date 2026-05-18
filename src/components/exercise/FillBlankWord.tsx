@@ -1,9 +1,10 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { Button } from "../ds/Button";
 import { CodeBlock } from "../ds/CodeBlock";
-import { type GeneratorSpec, type FillSegment } from "~/lib/generator";
+import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
+import { evaluateBlanks, extractBlankPositions } from "~/lib/fill-blank";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
 
@@ -14,8 +15,6 @@ interface FillBlankWordProps {
   blanks: string[];
   hints: readonly [string, string, string];
 }
-
-type BlankSlot = { idx: number; seg: FillSegment & { kind: "blank" } };
 
 export function FillBlankWord(props: FillBlankWordProps) {
   const { instance, another } = useExerciseInstance(
@@ -30,26 +29,14 @@ export function FillBlankWord(props: FillBlankWordProps) {
   const [inputs, setInputs] = createSignal<Record<number, string>>({});
 
   const segments = () => instance().blankSegments ?? [];
-  const blankPositions = createMemo<BlankSlot[]>(() =>
-    segments()
-      .map((seg, idx) => ({ seg, idx }))
-      .filter((b): b is BlankSlot => b.seg.kind === "blank"),
-  );
-
+  const blankPositions = createMemo(() => extractBlankPositions(segments()));
   const valueFor = (idx: number) => inputs()[idx] ?? "";
 
-  // `every` on an empty array returns true vacuously — would auto-pass
-  // any fill-word exercise authored with `blanks: []`. Guard explicitly.
-  const allFilled = () => {
-    const positions = blankPositions();
-    if (positions.length === 0) return false;
-    return positions.every((b) => valueFor(b.idx) !== "");
-  };
-  const allCorrect = () => {
-    const positions = blankPositions();
-    if (positions.length === 0) return false;
-    return positions.every((b) => valueFor(b.idx) === b.seg.expected);
-  };
+  const evaluation = createMemo(() =>
+    evaluateBlanks(blankPositions(), inputs()),
+  );
+  const allFilled = () => evaluation().allFilled;
+  const allCorrect = () => evaluation().allCorrect;
 
   function clearInputs() {
     setInputs({});
