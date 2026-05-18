@@ -72,6 +72,19 @@ Captured here so they don't sit only in conversation history.
 - **Domain claim timing** — `typeover.dev / .io / .app / .co` all free;
   grab before public launch.
 
+## Engineering follow-ups (preventive)
+
+Flagged for "do later when triggered", not now.
+
+- **`src/components/exercise/cells/` subfolder.** When Freeform
+  (task #17) lands, the exercise/ directory will hold 8-10 files
+  mixing three concerns: shared chrome (ExerciseShell), exercise
+  type hosts (Mcq, FillBlankWord, FillBlankLine, Freeform…), and
+  cell-state leaves (McqOption, BlankInput, CandidateTile, …).
+  Move the leaves into `exercise/cells/` once the file count
+  passes ~10. No reorganisation needed before then.
+  (Iter-7 lens-2 finding, deferred.)
+
 ## Engineering follow-ups
 
 Surfaced by the first code-structure review pass (2026-05-17). Each is

@@ -9,6 +9,14 @@ import { cn } from "../ds/_internal";
  *   "correctSubmitted"   — submission-pass, value matches expected
  *   "incorrectSubmitted" — submission-pass, value differs from expected
  *   "neutral"            — pre-submission or reveal
+ *
+ * The shape diverges from optionCellState / tileState (which use a
+ * `selected` boolean): an input has no discrete "selected" — every
+ * slot continuously holds a value. So the resolver axes are
+ * (value === expected) × submitted × revealed, not selection-based.
+ * Class palette also adds text-success / text-error because the
+ * input's own text needs colouring; the option/tile only style the
+ * container.
  */
 type InputState =
   | "correctRevealed"

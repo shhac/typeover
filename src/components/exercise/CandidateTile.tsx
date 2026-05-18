@@ -29,15 +29,19 @@ const tileClass: Record<TileState, string> = {
   neutral: "border-border-default hover:border-border-strong",
 };
 
+/* Branch order mirrors optionCellState in McqOption: reveal-first,
+ * then submission outcomes, then selection, then neutral. The two
+ * resolvers cover non-overlapping cases so either order is correct;
+ * matching them lowers the cognitive cost of comparing side-by-side. */
 function tileState(args: {
   selected: boolean;
   submitted: boolean;
   revealed: boolean;
   isCorrect: boolean;
 }): TileState {
+  if (args.revealed && args.isCorrect) return "correctRevealed";
   if (args.submitted && args.selected && args.isCorrect) return "correctSubmitted";
   if (args.submitted && args.selected && !args.isCorrect) return "incorrectSubmitted";
-  if (args.revealed && args.isCorrect) return "correctRevealed";
   if (args.selected) return "selected";
   return "neutral";
 }
