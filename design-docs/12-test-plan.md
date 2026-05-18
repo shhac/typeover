@@ -291,7 +291,7 @@ Added 2026-05-18. The component's per-blank match + `allCorrect` +
 
 - **Happy path** — render with two blanks, type the expected values
   into both inputs, submit → `recordInstancePassed` called once,
-  phase becomes `right`, inputs lock (per `phase() === "right"`),
+  phase becomes `right`, inputs lock (per `phase.current() === "right"`),
   "Another" button visible.
 - **Partial fill** — only one of two blanks filled → submit button
   disabled (`allFilled()` false).

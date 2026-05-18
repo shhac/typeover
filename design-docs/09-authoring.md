@@ -131,6 +131,25 @@ warm + dry, never patronising.
 - Difficulty ramps cleanly: MCQ → fill-word → fill-line → freeform.
 - Prerequisite themes are declared in `theme.yaml`.
 
+### Fill-line conventions
+- The pool entries listed under `vars.line:` are the candidate
+  tiles. Exactly **5 candidates** per fill-line, four distractors
+  plus the canonical. The schema doesn't enforce this yet (planned
+  task #38 refinement), but every shipped fill-line follows the
+  convention; deviations need a documented reason.
+- Each distractor should fail in a *distinct* way — one TS-leakage,
+  one wrong-keyword-from-other-language, one
+  arg-order-swap, one almost-right-but-violates-Go-idiom. Avoid
+  near-duplicate distractors that fail the same way.
+- **When the blanked line is the focus of the exercise, hardcode
+  the surrounding context in `canonical`.** The wrapping code
+  isn't filler — it reinforces reflexes from earlier themes
+  (e.g. `loops/06.yaml` wraps the blank in `for i := 0; i < n;
+  i++ { ... }`, recycling Theme 1's `:=` and Theme 5's
+  three-clause shape). Don't re-template the surrounding lines;
+  the static-context-around-`${line}` pattern is now the house
+  style for fill-line.
+
 ## CONTRIBUTING.md sketch
 
 The full contributing doc will live at the repo root. Outline:
