@@ -203,7 +203,16 @@ function generateTemplate(
 function generateVariant(
   spec: VariantGenerator,
   seed: string,
+  opts: GenerateOptions,
 ): ExerciseInstance {
+  /* Variant fill-blank-word support deferred until needed; today
+   * every shipped variant is MCQ. Surface mis-pairings loudly rather
+   * than silently dropping the option. */
+  if (opts.blanks && opts.blanks.length > 0) {
+    throw new Error(
+      "variant generators do not support `blanks` yet — author the exercise with a template generator, or extend generateVariant.",
+    );
+  }
   const rng = rngFromSeed(seed);
   const variant = pickFrom(rng, spec.variants);
 
@@ -226,15 +235,7 @@ export function generate(
     case "template":
       return generateTemplate(spec, seed, opts);
     case "variant":
-      // Variant fill-blank-word support deferred until needed; today
-      // every shipped variant is MCQ. Surface mis-pairings loudly
-      // rather than silently dropping the option.
-      if (opts.blanks && opts.blanks.length > 0) {
-        throw new Error(
-          "variant generators do not support `blanks` yet — author the exercise with a template generator, or extend generateVariant.",
-        );
-      }
-      return generateVariant(spec, seed);
+      return generateVariant(spec, seed, opts);
     case "procedural":
       throw new Error(
         "Procedural generators not implemented yet (no exercises use them)",
