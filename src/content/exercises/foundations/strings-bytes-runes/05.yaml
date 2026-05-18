@@ -1,0 +1,36 @@
+target: go
+themeId: foundations/strings-bytes-runes
+type: fill-word
+order: 5
+prompt: |
+  TypeScript's `split` cuts a string into pieces, called as a method
+  with the separator as the argument. Go's equivalent lives in the
+  `strings` package and takes the string as the first argument.
+  Fill in the package and function name.
+generator:
+  kind: template
+  vars:
+    s: [phrase, line, csv, words, tokens]
+    pkg: [strings]
+    fn: [Split]
+    sep: ["\" \"", "\",\"", "\":\""]
+  ts: |-
+    let parts = ${s}.split(${sep});
+  canonical: |-
+    parts := ${pkg}.${fn}(${s}, ${sep})
+blanks: [pkg, fn]
+hints:
+  - "Same package as slot 4, different function. The Go function takes two arguments — the string to split (first) and the separator (second). The TS form has these reversed: the string is the receiver, the separator is the only argument."
+  - "Package is `strings` (same as slot 4). Function name is one word, capital first. Think of what the operation *does* to the string — it splits it."
+  - "Fills: `strings` and `Split`. Canonical: `strings.Split(phrase, \" \")`."
+notes: |
+  Second Theme 3 fill-word. Same package, different function, but
+  also introduces a subtle reflex: arg order. TS `s.split(sep)`
+  becomes Go `strings.Split(s, sep)` — the *thing being operated
+  on* moves from receiver to first argument.
+
+  Variant pool for `sep` covers three realistic separators (space,
+  comma, colon) so the rendered TS feels natural for each variable
+  name. Generator quotes are escaped via `\"` in the YAML so the
+  rendered output keeps the literal quotes.
+runtime: none

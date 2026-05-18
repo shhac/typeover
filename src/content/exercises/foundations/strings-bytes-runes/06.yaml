@@ -1,0 +1,47 @@
+target: go
+themeId: foundations/strings-bytes-runes
+type: fill-line
+order: 6
+prompt: |
+  TypeScript's `startsWith` is a method; Go's equivalent is a
+  function. Same shape as slots 4 and 5 — first arg is the string,
+  second is the prefix. Pick the idiomatic Go line.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'prefix := strings.HasPrefix(name, "Mr")'
+      - 'prefix := name.StartsWith("Mr")'
+      - 'prefix := name.HasPrefix("Mr")'
+      - 'prefix := strings.StartsWith(name, "Mr")'
+      - 'prefix := startsWith(name, "Mr")'
+  ts: |-
+    let prefix = name.startsWith("Mr");
+  canonical: |-
+    ${line}
+blanks: [line]
+hints:
+  - "Three things must be right at once: package qualifier (`strings.X`), Go's name for this operation (it's not `StartsWith`), and the argument order (string first, prefix second)."
+  - "Go names the operation by what it returns — `HasPrefix` returns whether the string has the given prefix. The TS verb `startsWith` becomes the Go predicate `HasPrefix`."
+  - "Pick `prefix := strings.HasPrefix(name, \"Mr\")`."
+notes: |
+  First Theme 3 fill-line. Tests three things at once:
+   1. Package vs method-on-string
+   2. Go's `HasPrefix` naming (not `StartsWith`)
+   3. Argument order (subject first, then operand)
+
+  Distractor failure modes:
+   - `name.StartsWith("Mr")` — wrong on all three counts
+     (TS-style method, wrong name, missing package)
+   - `name.HasPrefix("Mr")` — got the name right but kept TS-style
+     method call — partial credit if Go allowed it (it doesn't)
+   - `strings.StartsWith(name, "Mr")` — got package + arg order
+     right but wrong function name (the TS verb leaked through)
+   - `startsWith(name, "Mr")` — got the function-call shape but
+     dropped the package
+
+  Each distractor maps to a specific learner mistake worth
+  preventing. The fill-line type means the learner sees all five
+  candidate lines and picks one — drilling discrimination rather
+  than production.
+runtime: none

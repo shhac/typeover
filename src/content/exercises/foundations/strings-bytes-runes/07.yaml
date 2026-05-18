@@ -1,0 +1,44 @@
+target: go
+themeId: foundations/strings-bytes-runes
+type: fill-line
+order: 7
+prompt: |
+  TypeScript joins string arrays with `array.join(separator)`. Go's
+  equivalent — same `strings` package, swapped argument shape. Pick
+  the idiomatic Go line.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'path := strings.Join(parts, "/")'
+      - 'path := parts.join("/")'
+      - 'path := parts.Join("/")'
+      - 'path := strings.Join("/", parts)'
+      - 'path := strings.JoinWith(parts, "/")'
+  ts: |-
+    let path = parts.join("/");
+  canonical: |-
+    ${line}
+blanks: [line]
+hints:
+  - "The Go shape is `strings.Join(slice, separator)`. Slice first, separator second — opposite of the TS method form where the slice is the receiver and the separator is the only argument."
+  - "Order matters: `strings.Join(parts, \"/\")` builds the path; `strings.Join(\"/\", parts)` would be asking Go to call Join on the string \"/\" which doesn't typecheck."
+  - "Pick `path := strings.Join(parts, \"/\")`."
+notes: |
+  Second Theme 3 fill-line. The closing exercise of the
+  package-vs-method drill — by now the learner has seen four
+  instances of `strings.X(s, ...)` and should reach for the
+  pattern reflexively.
+
+  Distractors target the specific mistakes a learner makes when
+  the reflex hasn't landed yet:
+   - `parts.join("/")` — straight TS leakage
+   - `parts.Join("/")` — Go casing but TS-method shape
+   - `strings.Join("/", parts)` — right package + name, wrong
+     order (subtle; would type-check the wrong way)
+   - `strings.JoinWith(parts, "/")` — invented function name (a
+     learner who guessed `JoinWith` based on TS habit)
+
+  Theme 3 finishes its launch-gate slots at 7/9. Slots 8-9 are
+  freeform and blocked on the Yaegi runtime (#22).
+runtime: none
