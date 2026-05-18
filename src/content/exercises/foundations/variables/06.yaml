@@ -1,0 +1,45 @@
+target: go
+themeId: foundations/variables
+type: fill-line
+order: 6
+prompt: |
+  The TS block on the right declares two variables. The Go translation
+  has its second line missing — pick the tile below that completes it
+  idiomatically.
+generator:
+  kind: template
+  vars:
+    base: [count, total, score, items]
+    multiplier: ["2", "3", "10"]
+    line:
+      - "doubled := count * 2"
+      - "var doubled = count * 2"
+      - "doubled = count * 2"
+      - "const doubled := count * 2"
+      - "let doubled = count * 2"
+  ts: |-
+    let count = 5;
+    let doubled = count * 2;
+  canonical: |-
+    count := 5
+    ${line}
+blanks: [line]
+hints:
+  - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. None of `var name = value`, `name = value`, or anything with `let` or `const` belongs in a function body for a fresh local variable."
+  - "The operator is `:=`. It both declares the variable and assigns the right-hand side."
+  - "The right tile is `doubled := count * 2`."
+notes: |
+  First fill-blank-line exercise. The candidate pool for the `line`
+  var IS the multiple-choice — the component shuffles them per seed
+  and the learner picks one.
+
+  The other vars (`base`, `multiplier`) aren't used in the canonical
+  yet; they're scaffolding for future variant exercises that share
+  this theme. Removing them is fine but they don't bloat the
+  rendered instance. Authoring-time note for future me.
+
+  The canonical's first line is hard-coded `count := 5` so that the
+  blanked second line stays the focus. Once we have a generic line-
+  composition exercise type (with TWO blanks, both lines), we'll
+  revisit.
+runtime: none

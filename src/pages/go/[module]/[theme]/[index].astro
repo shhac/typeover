@@ -12,6 +12,7 @@ import {
 } from "~/components/ds";
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
+import { FillBlankLine } from "~/components/exercise/FillBlankLine";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -95,9 +96,19 @@ void _exhaustiveExerciseType;
               hints={ex.hints}
             />
           )}
-          {(ex.type === "fill-line" || ex.type === "freeform") && (
+          {ex.type === "fill-line" && (
+            <FillBlankLine
+              client:visible
+              exerciseId={entry.id}
+              prompt={ex.prompt}
+              generator={ex.generator}
+              blanks={ex.blanks ?? []}
+              hints={ex.hints}
+            />
+          )}
+          {ex.type === "freeform" && (
             <Text tone="muted" size="sm" family="mono">
-              {ex.type} exercise component not built yet
+              freeform exercise component not built yet
             </Text>
           )}
         </Panel>
