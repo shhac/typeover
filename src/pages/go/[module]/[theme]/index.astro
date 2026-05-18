@@ -1,0 +1,142 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Container,
+  Divider,
+  Heading,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+import { byOrder, exerciseHref } from "~/lib/curriculum";
+
+type ThemeEntry = CollectionEntry<"themes">;
+type ModuleEntry = CollectionEntry<"modules">;
+type ExerciseEntry = CollectionEntry<"exercises">;
+
+export async function getStaticPaths() {
+  const themes = await getCollection("themes");
+  return themes.map((entry) => {
+    const [moduleP, themeP] = entry.id.split("/");
+    return {
+      params: { module: moduleP, theme: themeP },
+      props: { theme: entry },
+    };
+  });
+}
+
+interface Props {
+  theme: ThemeEntry;
+}
+
+const { theme } = Astro.props;
+
+const [modules, exercises] = await Promise.all([
+  getCollection("modules"),
+  getCollection("exercises"),
+]);
+
+const moduleEntry: ModuleEntry | undefined = modules.find(
+  (m) => m.id === theme.data.moduleId,
+);
+const themeExercises: ExerciseEntry[] = exercises
+  .filter((ex) => ex.data.themeId === theme.id)
+  .sort(byOrder);
+
+/* Type labels match the cells the learner sees in the exercise — short
+ * and unambiguous. Drives the per-exercise type badge below. */
+const typeLabel = {
+  mcq: "multiple choice",
+  "fill-word": "fill word",
+  "fill-line": "fill line",
+  freeform: "freeform",
+} as const satisfies Record<ExerciseEntry["data"]["type"], string>;
+---
+
+<BaseLayout
+  title={`${theme.data.title} — typeover`}
+  description={`Exercises for ${theme.data.title} — TypeScript to Go.`}
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Stack direction="row" gap="sm" align="center" wrap>
+            <Badge variant="amber">{moduleEntry?.data.title}</Badge>
+            <Text tone="muted" size="sm" family="mono">→</Text>
+            <Badge variant="default" outline>{theme.data.title}</Badge>
+          </Stack>
+          <Heading level={1}>{theme.data.title}</Heading>
+        </Stack>
+
+        <Panel padding="airy" tone="default">
+          <Text tone="secondary" size="md" class="whitespace-pre-line">
+            {theme.data.intro}
+          </Text>
+        </Panel>
+
+        <Stack gap="md">
+          <Stack direction="row" gap="sm" align="baseline" wrap>
+            <Heading level={2} class="!text-xl">Exercises</Heading>
+            <Text tone="faint" size="sm" family="mono">
+              {themeExercises.length} ready
+            </Text>
+          </Stack>
+
+          {themeExercises.length === 0 ? (
+            <Text tone="muted" size="sm" family="mono">
+              No exercises for this theme yet — coming soon.
+            </Text>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {themeExercises.map((ex) => (
+                <a
+                  href={exerciseHref(ex.id)}
+                  class="block group focus-visible:outline-2 focus-visible:outline-accent-amber rounded-md"
+                >
+                  <Panel
+                    padding="default"
+                    tone="default"
+                    class="h-full transition-colors group-hover:border-accent-amber"
+                  >
+                    <Stack gap="sm">
+                      <Stack direction="row" gap="sm" align="baseline" wrap>
+                        <Text tone="faint" size="xs" family="mono">
+                          {ex.data.order.toString().padStart(2, "0")}
+                        </Text>
+                        <Badge variant="default" outline>
+                          {typeLabel[ex.data.type]}
+                        </Badge>
+                      </Stack>
+                      <Text tone="primary" size="sm">
+                        {ex.data.prompt.split("\n")[0]}
+                      </Text>
+                    </Stack>
+                  </Panel>
+                </a>
+              ))}
+            </div>
+          )}
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" justify="between" align="center" wrap>
+          <a href="/go" class="text-fg-muted hover:text-fg-primary font-mono text-sm">
+            ← back to curriculum
+          </a>
+          {themeExercises[0] && (
+            <a
+              href={exerciseHref(themeExercises[0].id)}
+              class="text-accent-amber hover:underline font-mono text-sm"
+            >
+              start with exercise 01 →
+            </a>
+          )}
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

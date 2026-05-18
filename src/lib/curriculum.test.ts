@@ -3,6 +3,7 @@ import {
   buildCurriculumTree,
   byOrder,
   exerciseHref,
+  themeHref,
   truncateIntro,
 } from "./curriculum";
 
@@ -155,5 +156,11 @@ describe("exerciseHref", () => {
     expect(exerciseHref("foundations/variables/01")).toBe(
       "/go/foundations/variables/01",
     );
+  });
+});
+
+describe("themeHref", () => {
+  it("returns /go/<themeId>", () => {
+    expect(themeHref("foundations/variables")).toBe("/go/foundations/variables");
   });
 });

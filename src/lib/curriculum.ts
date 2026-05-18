@@ -76,3 +76,7 @@ export function buildCurriculumTree(
 /** Exercise IDs are `<module>/<theme>/<index>`, which maps 1-to-1 to
  *  the /go/[module]/[theme]/[index] dynamic route. */
 export const exerciseHref = (exerciseId: string) => `/go/${exerciseId}`;
+
+/** Theme IDs are `<module>/<theme>`, which maps 1-to-1 to the
+ *  /go/[module]/[theme] overview route. */
+export const themeHref = (themeId: string) => `/go/${themeId}`;
