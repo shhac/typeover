@@ -262,6 +262,11 @@ tile-selection semantics instead of input-field semantics.
     auto-revealed on wrong submit)
   - `!submitted && !revealed && selected` → `selected`
   - All `submitted && !selected` rows → `neutral`
+  - `selected && submitted && revealed && isCorrect` →
+    **`correctRevealed`** (post-iter-7 reorder; was previously
+    `correctSubmitted`; both produce identical visual class and the
+    row is currently unreachable through the lifecycle, but the
+    truth-table test should pin the post-reorder value).
   - **Re-export `tileState`** as a Phase-1 micro-extraction so the
     truth-table test can target it directly.
 
