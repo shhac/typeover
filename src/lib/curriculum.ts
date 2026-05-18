@@ -4,6 +4,21 @@ type Module = CollectionEntry<"modules">;
 type Theme = CollectionEntry<"themes">;
 type Exercise = CollectionEntry<"exercises">;
 
+export type ExerciseType = Exercise["data"]["type"];
+
+/**
+ * Display labels for each exercise type. Typed as a complete record so
+ * adding a fifth type to the schema fails the build here, not on the
+ * page. Replaces the per-page `satisfies Record<...>` exhaustiveness
+ * workarounds.
+ */
+export const EXERCISE_TYPE_LABELS: Record<ExerciseType, string> = {
+  mcq: "multiple choice",
+  "fill-word": "fill word",
+  "fill-line": "fill line",
+  freeform: "freeform",
+};
+
 /** Stable sort by `data.order`. Tiebreaker is original array order. */
 export const byOrder = <T extends { data: { order: number } }>(a: T, b: T) =>
   a.data.order - b.data.order;
@@ -80,3 +95,68 @@ export const exerciseHref = (exerciseId: string) => `/go/${exerciseId}`;
 /** Theme IDs are `<module>/<theme>`, which maps 1-to-1 to the
  *  /go/[module]/[theme] overview route. */
 export const themeHref = (themeId: string) => `/go/${themeId}`;
+
+/**
+ * Parse an exercise collection id (`<module>/<theme>/<index>`) into
+ * the route params Astro's `getStaticPaths` returns. Returns `null` if
+ * the id has the wrong shape — content with a malformed path would
+ * silently render `/go/foundations/02.yaml/undefined`-style routes
+ * otherwise.
+ */
+export function paramsForExercise(
+  id: string,
+): { module: string; theme: string; index: string } | null {
+  const parts = id.split("/");
+  if (parts.length !== 3) return null;
+  const [module, theme, index] = parts;
+  if (!module || !theme || !index) return null;
+  return { module, theme, index };
+}
+
+export type ThemeContext = {
+  module: Module;
+  exercises: Exercise[];
+};
+
+/**
+ * Resolve the parent module and child exercise list for a theme,
+ * already sorted by `data.order`. Centralises the join that all three
+ * theme/exercise-aware pages were doing inline. The exercises list
+ * is sliced from any shared cache before sorting so it never mutates
+ * the caller's array.
+ */
+export function loadThemeContext(
+  theme: Theme,
+  collections: { modules: readonly Module[]; exercises: readonly Exercise[] },
+): ThemeContext | null {
+  const module = collections.modules.find(
+    (m) => m.id === theme.data.moduleId,
+  );
+  if (!module) return null;
+  const exercises = collections.exercises
+    .filter((ex) => ex.data.themeId === theme.id)
+    .sort(byOrder);
+  return { module, exercises };
+}
+
+export type ExerciseContext = {
+  module: Module;
+  theme: Theme;
+};
+
+/**
+ * Resolve the parent theme and module for an exercise. Returns null
+ * if either parent is missing — surfaces broken content references
+ * loudly at build time rather than letting the route render with
+ * undefined breadcrumbs.
+ */
+export function loadExerciseContext(
+  exercise: Exercise,
+  collections: { modules: readonly Module[]; themes: readonly Theme[] },
+): ExerciseContext | null {
+  const theme = collections.themes.find((t) => t.id === exercise.data.themeId);
+  if (!theme) return null;
+  const module = collections.modules.find((m) => m.id === theme.data.moduleId);
+  if (!module) return null;
+  return { module, theme };
+}

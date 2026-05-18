@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  EXERCISE_TYPE_LABELS,
   buildCurriculumTree,
   byOrder,
   exerciseHref,
+  loadExerciseContext,
+  loadThemeContext,
+  paramsForExercise,
   themeHref,
   truncateIntro,
 } from "./curriculum";
@@ -162,5 +166,111 @@ describe("exerciseHref", () => {
 describe("themeHref", () => {
   it("returns /go/<themeId>", () => {
     expect(themeHref("foundations/variables")).toBe("/go/foundations/variables");
+  });
+});
+
+describe("paramsForExercise", () => {
+  it("splits a well-formed id into module/theme/index", () => {
+    expect(paramsForExercise("foundations/variables/01")).toEqual({
+      module: "foundations",
+      theme: "variables",
+      index: "01",
+    });
+  });
+
+  it("returns null when the id has fewer than 3 parts", () => {
+    expect(paramsForExercise("foundations/variables")).toBeNull();
+    expect(paramsForExercise("foundations")).toBeNull();
+    expect(paramsForExercise("")).toBeNull();
+  });
+
+  it("returns null when the id has more than 3 parts", () => {
+    expect(paramsForExercise("a/b/c/d")).toBeNull();
+  });
+
+  it("returns null when any part is empty", () => {
+    expect(paramsForExercise("foundations//01")).toBeNull();
+    expect(paramsForExercise("/variables/01")).toBeNull();
+    expect(paramsForExercise("foundations/variables/")).toBeNull();
+  });
+});
+
+describe("EXERCISE_TYPE_LABELS", () => {
+  it("has a label for every exercise type in the schema", () => {
+    expect(Object.keys(EXERCISE_TYPE_LABELS).sort()).toEqual([
+      "fill-line",
+      "fill-word",
+      "freeform",
+      "mcq",
+    ]);
+  });
+});
+
+describe("loadThemeContext", () => {
+  const modA = mod("modA", 1);
+  const modB = mod("modB", 2);
+  const themeA1 = theme("modA/themeA1", "modA", 1);
+  const exA1a = exercise("modA/themeA1/01", "modA/themeA1", 1);
+  const exA1b = exercise("modA/themeA1/02", "modA/themeA1", 2);
+  const exB1a = exercise("modB/themeB1/01", "modB/themeB1", 1);
+
+  it("returns the parent module and sorted exercises for a known theme", () => {
+    const ctx = loadThemeContext(themeA1, {
+      modules: [modA, modB],
+      exercises: [exA1b, exA1a, exB1a],
+    });
+    expect(ctx?.module.id).toBe("modA");
+    expect(ctx?.exercises.map((e) => e.id)).toEqual([
+      "modA/themeA1/01",
+      "modA/themeA1/02",
+    ]);
+  });
+
+  it("returns null when the parent module is missing", () => {
+    expect(
+      loadThemeContext(themeA1, { modules: [modB], exercises: [exA1a] }),
+    ).toBeNull();
+  });
+
+  it("returns empty exercises when the theme has none yet", () => {
+    const ctx = loadThemeContext(themeA1, {
+      modules: [modA],
+      exercises: [exB1a],
+    });
+    expect(ctx?.exercises).toEqual([]);
+  });
+
+  it("does not mutate the input collections", () => {
+    const exercises = [exA1b, exA1a];
+    const snapshot = exercises.map((e) => e.id);
+    loadThemeContext(themeA1, { modules: [modA], exercises });
+    expect(exercises.map((e) => e.id)).toEqual(snapshot);
+  });
+});
+
+describe("loadExerciseContext", () => {
+  const modA = mod("modA", 1);
+  const themeA1 = theme("modA/themeA1", "modA", 1);
+  const exA1 = exercise("modA/themeA1/01", "modA/themeA1", 1);
+
+  it("returns the parent theme and module for a known exercise", () => {
+    const ctx = loadExerciseContext(exA1, {
+      modules: [modA],
+      themes: [themeA1],
+    });
+    expect(ctx?.theme.id).toBe("modA/themeA1");
+    expect(ctx?.module.id).toBe("modA");
+  });
+
+  it("returns null when the parent theme is missing", () => {
+    expect(
+      loadExerciseContext(exA1, { modules: [modA], themes: [] }),
+    ).toBeNull();
+  });
+
+  it("returns null when the parent module is missing", () => {
+    expect(
+      loadExerciseContext(exA1, { modules: [], themes: [themeA1] }),
+    ).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry, type CollectionEntry } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Badge,
@@ -13,18 +13,16 @@ import {
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 import { FillBlankLine } from "~/components/exercise/FillBlankLine";
+import { loadExerciseContext, paramsForExercise } from "~/lib/curriculum";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
 export async function getStaticPaths() {
   const exercises = await getCollection("exercises");
-  return exercises.map((entry) => {
-    const parts = entry.id.split("/");
-    const [moduleP, themeP, indexP] = parts;
-    return {
-      params: { module: moduleP, theme: themeP, index: indexP },
-      props: { entry },
-    };
+  return exercises.flatMap((entry) => {
+    const params = paramsForExercise(entry.id);
+    if (!params) return [];
+    return [{ params, props: { entry } }];
   });
 }
 
@@ -35,45 +33,37 @@ interface Props {
 const { entry } = Astro.props;
 const ex = entry.data;
 
-const themeEntry = await getEntry("themes", ex.themeId);
-const moduleEntry = themeEntry
-  ? await getEntry("modules", themeEntry.data.moduleId)
-  : undefined;
-
-/*
- * Exhaustiveness check for the exercise-type cascade below. If the
- * z.enum in content.config.ts gains a fifth value (e.g. "match-pairs")
- * without a corresponding render branch being added here, TS will fail
- * the build at this site rather than the route silently rendering
- * empty.
- */
-const _exhaustiveExerciseType: Record<typeof ex.type, true> = {
-  mcq: true,
-  "fill-word": true,
-  "fill-line": true,
-  freeform: true,
-};
-void _exhaustiveExerciseType;
+const [modules, themes] = await Promise.all([
+  getCollection("modules"),
+  getCollection("themes"),
+]);
+const ctx = loadExerciseContext(entry, { modules, themes });
+if (!ctx) {
+  throw new Error(
+    `Exercise "${entry.id}" has a dangling parent reference (themeId="${ex.themeId}")`,
+  );
+}
+const { module: moduleEntry, theme: themeEntry } = ctx;
 ---
 
 <BaseLayout
-  title={`${themeEntry?.data.title ?? "Exercise"} — typeover`}
-  description={`Practice ${themeEntry?.data.title} for TypeScript developers learning Go.`}
+  title={`${themeEntry.data.title} — typeover`}
+  description={`Practice ${themeEntry.data.title} for TypeScript developers learning Go.`}
 >
   <main class="py-12 sm:py-20">
     <Container width="default">
       <Stack gap="xl">
         <Stack gap="sm">
           <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="amber">{moduleEntry?.data.title}</Badge>
+            <Badge variant="amber">{moduleEntry.data.title}</Badge>
             <Text tone="muted" size="sm" family="mono">→</Text>
-            <Badge variant="default" outline>{themeEntry?.data.title}</Badge>
+            <Badge variant="default" outline>{themeEntry.data.title}</Badge>
             <Text tone="muted" size="sm" family="mono">·</Text>
             <Text tone="muted" size="sm" family="mono">
               exercise {ex.order} · {ex.type}
             </Text>
           </Stack>
-          <Heading level={1}>{themeEntry?.data.title}</Heading>
+          <Heading level={1}>{themeEntry.data.title}</Heading>
         </Stack>
 
         <Panel padding="airy" tone="default">

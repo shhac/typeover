@@ -10,11 +10,13 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
-import { byOrder, exerciseHref } from "~/lib/curriculum";
+import {
+  EXERCISE_TYPE_LABELS,
+  exerciseHref,
+  loadThemeContext,
+} from "~/lib/curriculum";
 
 type ThemeEntry = CollectionEntry<"themes">;
-type ModuleEntry = CollectionEntry<"modules">;
-type ExerciseEntry = CollectionEntry<"exercises">;
 
 export async function getStaticPaths() {
   const themes = await getCollection("themes");
@@ -38,21 +40,13 @@ const [modules, exercises] = await Promise.all([
   getCollection("exercises"),
 ]);
 
-const moduleEntry: ModuleEntry | undefined = modules.find(
-  (m) => m.id === theme.data.moduleId,
-);
-const themeExercises: ExerciseEntry[] = exercises
-  .filter((ex) => ex.data.themeId === theme.id)
-  .sort(byOrder);
-
-/* Type labels match the cells the learner sees in the exercise — short
- * and unambiguous. Drives the per-exercise type badge below. */
-const typeLabel = {
-  mcq: "multiple choice",
-  "fill-word": "fill word",
-  "fill-line": "fill line",
-  freeform: "freeform",
-} as const satisfies Record<ExerciseEntry["data"]["type"], string>;
+const ctx = loadThemeContext(theme, { modules, exercises });
+if (!ctx) {
+  throw new Error(
+    `Theme "${theme.id}" references a module that doesn't exist (data.moduleId="${theme.data.moduleId}")`,
+  );
+}
+const { module: moduleEntry, exercises: themeExercises } = ctx;
 ---
 
 <BaseLayout
@@ -64,7 +58,7 @@ const typeLabel = {
       <Stack gap="xl">
         <Stack gap="sm">
           <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="amber">{moduleEntry?.data.title}</Badge>
+            <Badge variant="amber">{moduleEntry.data.title}</Badge>
             <Text tone="muted" size="sm" family="mono">→</Text>
             <Badge variant="default" outline>{theme.data.title}</Badge>
           </Stack>
@@ -107,7 +101,7 @@ const typeLabel = {
                           {ex.data.order.toString().padStart(2, "0")}
                         </Text>
                         <Badge variant="default" outline>
-                          {typeLabel[ex.data.type]}
+                          {EXERCISE_TYPE_LABELS[ex.data.type]}
                         </Badge>
                       </Stack>
                       <Text tone="primary" size="sm">
