@@ -7,9 +7,11 @@ import { pickFrom, rngFromSeed, shuffle } from "./seed";
  * Schemas live here (single source of truth) and the TS types are
  * z.inferred from them so content.config.ts and runtime never drift.
  *
- * `template` is implemented. `variant` is implemented and exercised
- * by 03.yaml. `procedural` is reserved for the first content that
- * needs it.
+ * `template` is implemented. `variant` is implemented and
+ * exercised by `foundations/variables/03.yaml` (the `const PI`
+ * exercise) — among others; many themes ship a `03.yaml` so the
+ * file path needs to be explicit. `procedural` is reserved for
+ * the first content that needs it.
  *
  * The optional `blanks` argument to `generate()` engages the
  * fill-blank-word path: certain `${var}` placeholders in the
