@@ -67,6 +67,13 @@ and "deterministic exercise URL" work at all.
   `canonical` but different `ts`** — the seed still picks one
   stably. Covers the easy authoring mistake of near-duplicate
   variants.
+- **`generate(variantSpec, seed, { blanks: ["x"] })`** — throws
+  with `"variant"` in the message. Pinned safety guard from
+  iter-5 commit `f3072a7`.
+- **`generate(variantSpec, seed, { blanks: [] })`** — does *not*
+  throw. The guard checks `length > 0`, not just truthy. Pinned
+  so the route's `blanks: ex.blanks ?? []` default keeps working
+  for MCQ variants.
 - **`generate({kind:"procedural"}, ...)`** — throws the
   "not implemented" message.
 - **Template with `distractors: []`** — returns no `options`/
@@ -171,6 +178,10 @@ The component that decides whether a learner passed.
     wrong option is NOT styled wrong on reveal — only the canonical is)
   - `submitted && !selected && !isCorrect` → `neutral` (sibling options
     after wrong submit are not highlighted)
+  - `submitted && !selected && isCorrect` → **`neutral`** (the canonical
+    is NOT auto-revealed on wrong submit — learner-controls-reveal per
+    design-docs/06-voice-and-feedback.md. Fixed iter-6; the old
+    behaviour returned `showCorrect` here and spoiled the answer.)
   - `submitted && selected && isCorrect` → `showCorrect`
   - `submitted && selected && !isCorrect` → `showIncorrect`
   - **Re-export `optionCellState`** as a Phase-1 micro-extraction so the
@@ -199,6 +210,60 @@ wrong submit is *not* counted as `failed` (only `Reveal correct` does
 that). This is by design today — Lens 5 flagged it as worth a test +
 design conversation. Pin behaviour OR change it, but don't leave it
 silent.
+
+## P1 — FillBlankLine correctness
+
+Added 2026-05-18 (iter-5/6). Mirrors the FillBlankWord plan with
+tile-selection semantics instead of input-field semantics.
+
+### `src/components/exercise/FillBlankLine.tsx`
+
+- **Happy path** — render with N candidate tiles, click the canonical
+  → submit → `recordInstancePassed` called once → phase `right` →
+  all tiles `locked` (disabled) → "Another" advances seed AND
+  reshuffles tile order (via `${seed()}::tiles` RNG namespace).
+- **canSubmit gate** — submit disabled until a tile is selected
+  (`selected() !== null`).
+- **Wrong path** — pick non-canonical tile → submit → phase `wrong`,
+  three buttons (Try again / Different exercise / Reveal correct).
+  The canonical tile **does NOT** auto-light green — learner must
+  click Reveal. (Matches `optionCellState` behaviour post iter-6.)
+- **Try-again resets selection** without recording.
+- **Reveal flow** — wrong submit → "Reveal correct" →
+  `recordInstanceFailed` once → canonical tile lights via
+  `correctRevealed`, picked-wrong stays in its `incorrectSubmitted`
+  state (visible side-by-side).
+- **Vacuous-truth guard (`blanks: []` or no blank in segments)** —
+  `blankSlot()` returns undefined → `canSubmit()` returns false →
+  submit button stays disabled. Parallel to FillBlankWord's iter-4
+  fix. (Iter-6 guard.)
+- **Candidate-pool determinism (`${seed()}::tiles` namespace)** —
+  same `(exerciseId, attempt)` → same tile order across re-renders.
+  Calling `another()` produces a different order with high
+  probability for any pool of length ≥ 3. The `::tiles` namespace
+  keeps tile-shuffle RNG independent of any future variant-pick
+  RNG that may consume from the same seed.
+- **Generator-kind guard** — `props.generator.kind !== "template"`
+  short-circuits to `candidates: []`. The component renders the
+  fallback "no candidates — authoring issue" text. Pin so the
+  rendering of the fallback survives any future `Show`/`Match`
+  refactor.
+
+### `src/components/exercise/CandidateTile.tsx` — `tileState`
+
+- **Truth table** — 16 rows over `{selected, submitted, revealed,
+  isCorrect}`. Critical rows:
+  - `submitted && selected && isCorrect` → `correctSubmitted`
+  - `submitted && selected && !isCorrect` → `incorrectSubmitted`
+  - `revealed && !selected && isCorrect` → `correctRevealed` (the
+    unpicked canonical tile lights up only on explicit reveal)
+  - `submitted && !selected && isCorrect` → `neutral` (matches the
+    iter-6 fix in `optionCellState`; the canonical is NOT
+    auto-revealed on wrong submit)
+  - `!submitted && !revealed && selected` → `selected`
+  - All `submitted && !selected` rows → `neutral`
+  - **Re-export `tileState`** as a Phase-1 micro-extraction so the
+    truth-table test can target it directly.
 
 ## P1 — FillBlankWord correctness
 
@@ -253,11 +318,16 @@ Added 2026-05-18.
 - **MCQ branch** mounts `<Mcq>` with the right props.
 - **fill-word branch** mounts `<FillBlankWord>` with `blanks` defaulted
   via `?? []` when the YAML omits it.
-- **fill-line / freeform branches** render the "not built yet"
-  placeholder until #16 / #17 land.
-- **Future:** when refactored to an exhaustive `switch` (or a
-  `Record<ExerciseType, ComponentFn>` lookup), TS narrowing should
-  fail compilation if a new enum value is added without a branch.
+- **fill-line branch** (iter-5) mounts `<FillBlankLine>` with the same
+  `blanks` defaulting.
+- **freeform branch** renders the "not built yet" placeholder until
+  #17 lands.
+- **Exhaustiveness guard (iter-5)** — the frontmatter declares
+  `_exhaustiveExerciseType: Record<typeof ex.type, true>`. Adding
+  a fifth value to `content.config.ts`'s `z.enum(["mcq", "fill-word",
+  "fill-line", "freeform"])` without a key here fails `astro check`
+  / `tsc --noEmit`. Pin via a type-only "expect-error" test once
+  Vitest lands.
 
 ## P1 — `useExerciseInstance` hook
 
