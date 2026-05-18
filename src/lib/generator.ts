@@ -175,27 +175,26 @@ function generateTemplate(
   const ts = substitute(spec.ts, values);
   const canonical = substitute(spec.canonical, values);
 
-  const instance: ExerciseInstance = { ts, canonical };
+  const blankSegments =
+    opts.blanks && opts.blanks.length > 0
+      ? buildBlankSegments(spec.canonical, values, opts.blanks)
+      : undefined;
 
-  if (opts.blanks && opts.blanks.length > 0) {
-    instance.blankSegments = buildBlankSegments(
-      spec.canonical,
-      values,
-      opts.blanks,
-    );
-  }
+  const mcq =
+    spec.distractors && spec.distractors.length > 0
+      ? buildShuffledOptions(
+          rng,
+          canonical,
+          spec.distractors.map((d) => substitute(d, values)),
+        )
+      : undefined;
 
-  if (spec.distractors && spec.distractors.length > 0) {
-    const renderedDistractors = spec.distractors.map((d) =>
-      substitute(d, values),
-    );
-    Object.assign(
-      instance,
-      buildShuffledOptions(rng, canonical, renderedDistractors),
-    );
-  }
-
-  return instance;
+  return {
+    ts,
+    canonical,
+    ...(blankSegments ? { blankSegments } : {}),
+    ...(mcq ?? {}),
+  };
 }
 
 function generateVariant(
