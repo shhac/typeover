@@ -3,8 +3,10 @@ import { Button } from "./Button";
 
 interface HintButtonProps {
   hints: readonly [string, string, string];
-  /** Called each time a hint is revealed (1, 2, or 3). For tracking. */
-  onReveal?: (layer: 1 | 2 | 3) => void;
+  /** Called each time a hint is revealed. For tracking; the layer
+   *  index is captured internally via `revealed()` if a future consumer
+   *  needs per-layer stats — today's consumer only counts totals. */
+  onReveal?: () => void;
 }
 
 /**
@@ -20,9 +22,8 @@ export function HintButton(props: HintButtonProps) {
   const next = () => {
     const r = revealed();
     if (r >= 3) return;
-    const layer = (r + 1) as 1 | 2 | 3;
-    setRevealed(layer);
-    props.onReveal?.(layer);
+    setRevealed((r + 1) as 1 | 2 | 3);
+    props.onReveal?.();
   };
 
   const label = () => {
