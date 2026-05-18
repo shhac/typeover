@@ -1,0 +1,45 @@
+target: go
+themeId: foundations/conditionals
+type: fill-word
+order: 5
+prompt: |
+  Each branch of a Go switch is introduced by the same keyword.
+  Fill in both occurrences to complete the dispatch.
+generator:
+  kind: template
+  vars:
+    case_kw: [case]
+  ts: |-
+    switch (kind) {
+      case "add": handleAdd(); break;
+      case "rm": handleRemove(); break;
+      default: unknown();
+    }
+  canonical: |-
+    switch kind {
+    ${case_kw} "add":
+        handleAdd()
+    ${case_kw} "rm":
+        handleRemove()
+    default:
+        unknown()
+    }
+blanks: [case_kw]
+hints:
+  - "One keyword, repeated for each match. It's not `when`, not `match`, not `=>`, and not anything TS-specific. Go borrows it directly from C."
+  - "The keyword is `case`. Both blanks fill to the same thing."
+  - "Fills: `case` (twice). The third dispatch arm uses `default`, which is already in place."
+notes: |
+  Second Theme 4 fill-word. Drills the switch-case shape from
+  slot 3's MCQ via production. Uses the same-var-twice pattern
+  (`${case_kw}` appears twice in the canonical, producing two
+  independent input slots both expecting `case`).
+
+  The TS source keeps the `break` statements to highlight the
+  contrast — the Go canonical drops them entirely, illustrated
+  by structure (two blank `case` lines, no `break` in sight).
+
+  `default` is hard-coded in the canonical to keep the learner
+  focused on the `case` keyword. Could be lifted to a third blank
+  in a future advanced exercise.
+runtime: none

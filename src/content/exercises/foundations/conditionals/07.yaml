@@ -1,0 +1,50 @@
+target: go
+themeId: foundations/conditionals
+type: fill-line
+order: 7
+prompt: |
+  TypeScript handles "match multiple values with the same code" by
+  declaring an empty case and falling through to the next.
+  Go reversed the fallthrough default, so that pattern wouldn't
+  work — but Go has its own one-line form for multi-value match.
+  Pick the Go form.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'switch n { case 1, 2: handle() }'
+      - 'switch n { case 1: case 2: handle() }'
+      - 'switch n { case 1 | 2: handle() }'
+      - 'switch n { case [1, 2]: handle() }'
+      - 'switch n { match 1, 2: handle() }'
+  ts: |-
+    switch (n) {
+      case 1:
+      case 2:
+        handle();
+        break;
+    }
+  canonical: |-
+    ${line}
+blanks: [line]
+hints:
+  - "Go's `case` clause accepts a comma-separated list of values; matching any of them runs the body. Other languages use `|`, arrays, or pattern syntaxes; Go just uses commas."
+  - "The shape is `case 1, 2:`. Each value listed; one body."
+  - "Pick `switch n { case 1, 2: handle() }`."
+notes: |
+  Second Theme 4 fill-line. Teaches a fully-Go-native idiom (the
+  comma-list case) that has no direct TS analogue — the closest
+  TS pattern is empty-case fall-through, which only works because
+  TS has the opposite default to Go.
+
+  Distractors map to other languages' multi-value-match syntaxes:
+   - `case 1: case 2:` — TS/C-style fall-through that DOES NOT
+     work in Go (no-fallthrough default means only `case 2` runs)
+   - `case 1 | 2:` — Rust / functional language pattern
+   - `case [1, 2]:` — TS-ish array match
+   - `match 1, 2:` — invented keyword (a learner who guessed
+     based on pattern-matching exposure from elsewhere)
+
+  Closes Theme 4's launch-gate slot 7. Slots 8-9 await freeform
+  component (#17/#22/#23).
+runtime: none
