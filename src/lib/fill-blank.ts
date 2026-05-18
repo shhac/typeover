@@ -1,3 +1,10 @@
+/**
+ * Pure helpers extracted out of the FillBlank exercise components so
+ * their critical contracts (vacuous-truth guards, ::tiles seed
+ * namespacing) can be unit-tested directly rather than only through
+ * Solid-rendering tests.
+ */
+
 import type { FillSegment, GeneratorSpec } from "./generator";
 import { rngFromSeed, shuffle } from "./seed";
 
@@ -44,13 +51,6 @@ export function evaluateBlanks(
     allCorrect: positions.every((b) => valueFor(b.idx) === b.seg.expected),
   };
 }
-
-/**
- * Pure helpers extracted out of the FillBlank exercise components so
- * their critical contracts (vacuous-truth guards, ::tiles seed
- * namespacing) can be unit-tested directly rather than only through
- * Solid-rendering tests.
- */
 
 /**
  * Build the candidate-tile pool for a fill-line exercise. The pool is

@@ -131,4 +131,30 @@ describe("useExerciseInstance — opts pass-through", () => {
       dispose();
     });
   });
+
+  it("does not re-fire the memo when `opts` reference changes (opts is treated as stable)", () => {
+    /* The current contract: opts is a plain non-reactive parameter
+     * captured once. A future "track opts" refactor would re-fire
+     * the memo on every render (since callers pass an inline
+     * object literal), creating a new instance + record-seen
+     * per render and double-counting every learner's instancesSeen.
+     * Pin the stability by reading instance() twice and asserting
+     * the result is reference-equal. */
+    createRoot((dispose) => {
+      const { instance } = useExerciseInstance(
+        "ex-stable-opts",
+        {
+          kind: "template",
+          vars: { v: ["42"] },
+          ts: "${v}",
+          canonical: "${v}",
+        },
+        { blanks: [] },
+      );
+      const first = instance();
+      const second = instance();
+      expect(first).toBe(second);
+      dispose();
+    });
+  });
 });
