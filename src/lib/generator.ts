@@ -225,7 +225,13 @@ export function generate(
       return generateTemplate(spec, seed, opts);
     case "variant":
       // Variant fill-blank-word support deferred until needed; today
-      // every shipped variant is MCQ.
+      // every shipped variant is MCQ. Surface mis-pairings loudly
+      // rather than silently dropping the option.
+      if (opts.blanks && opts.blanks.length > 0) {
+        throw new Error(
+          "variant generators do not support `blanks` yet — author the exercise with a template generator, or extend generateVariant.",
+        );
+      }
       return generateVariant(spec, seed);
     case "procedural":
       throw new Error(
