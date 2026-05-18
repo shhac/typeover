@@ -109,6 +109,17 @@ exercises" from corruption.
   doesn't reappear).
 - **Sequential counter accumulation** — `seen` + `pass` + `seen` again
   results in `instancesSeen: 2, instancesPassed: 1`.
+- **Single `now()` per bump (iter-18)** — after any `record*` call,
+  `progress.exercises[id].lastSeenAt === progress.lastSeenAt`
+  (byte-equal string compare). Pins commit `73bdbdc`'s contract that
+  `bumpExercise` is the single timestamp authority and the two
+  fields stay in sync; catches a future "convenient" extra
+  `now()` call in `write()` or a recorder.
+- **`write()` is a pure serializer** — construct a `Progress` with a
+  fixed `lastSeenAt`, call `write()` (via a test-only re-export),
+  re-read from storage, confirm `lastSeenAt` equals the input.
+  Pins the iter-18 doc-contract at `progress.ts:51` so a future
+  refactor can't quietly turn `write()` back into a hidden mutator.
 
 ## P0 — Fill-blank segment building
 

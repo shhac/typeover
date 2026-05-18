@@ -119,37 +119,31 @@ Per theme:
 ## Voice
 
 typeover speaks to its learner as a competent engineer learning a new
-language, not as a novice learning to code. The voice is warm + dry,
-peer-level, technical. No mascots, no "Great job! ⭐", no
-condescension on failure.
+language, not as a novice learning to code. Warm + dry, peer-level,
+technical. No mascots, no "Great job! ⭐", no condescension on
+failure.
 
-Concrete copy patterns are documented in
-[`design-docs/06-voice-and-feedback.md`](design-docs/06-voice-and-feedback.md);
-the cliff-notes:
-
-| Do | Don't |
-|---|---|
-| "Correct — and idiomatic." | "Awesome job! ⭐" |
-| "Not quite. Pick a different option, ask for a hint, or reveal the answer." | "Oops! Let's try again. 😅" |
-| "Compiles, but you'd get heckled in code review." | "Perfect!" |
+Concrete Do/Don't copy patterns are at
+[`design-docs/06-voice-and-feedback.md`](design-docs/06-voice-and-feedback.md).
+Read it before writing user-facing copy.
 
 ## Accessibility
 
-The design system is **WCAG 2.2 AA by default**. Don't fight that —
-use the existing primitives (`Button`, `CodeBlock`, `Stack`, `Panel`,
-`Feedback`, `HintButton`, `RevealButton`) and you inherit focus
-rings, keyboard nav, ARIA, and contrast for free. If you find
-yourself reaching for raw `<button>` or hard-coding colours, stop and
-ask whether the design system needs a new primitive — usually it
-already has one.
+The design system is **WCAG 2.2 AA by default**. Use the existing
+primitives in `src/components/ds/` and you inherit focus rings,
+keyboard nav, ARIA, and contrast for free. If you reach for raw
+`<button>` or hard-code colours, stop and ask whether the design
+system needs a new primitive.
 
-Test before pushing:
+The detailed contract — per-component a11y rules, mobile breakpoints,
+test commitments — lives at
+[`design-docs/08-accessibility-and-mobile.md`](design-docs/08-accessibility-and-mobile.md).
 
-- Keyboard-only navigation works (tab through all interactive
-  elements, no traps)
-- Screen reader announces phase transitions (`role="status"`
-  regions update)
-- Mobile layout works on a real phone (not just emulated)
+Before pushing, verify the PR's effect on:
+
+- Keyboard navigation (tab through interactive elements, no traps)
+- Live regions (any `aria-live` or `role="status"` updates announce)
+- Mobile layout on a real phone (not just emulated)
 
 ## Pull request
 
@@ -170,8 +164,9 @@ coupled.
 
 ## Conduct
 
-Be kind. Disagree with positions, not with people. If a discussion
-needs heat, take it offline.
+We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). The
+maxim: be kind, disagree with positions not people, take heat
+offline.
 
 ## Licence
 
