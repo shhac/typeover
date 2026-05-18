@@ -1,5 +1,6 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { Button } from "../ds/Button";
+import { CodeBlock } from "../ds/CodeBlock";
 import { type GeneratorSpec, type FillSegment } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -98,40 +99,28 @@ export function FillBlankWord(props: FillBlankWordProps) {
         </span>
       }
     >
-      <div class="border border-border-default rounded-sm overflow-hidden">
-        <div class="flex items-center justify-between px-3 py-1.5 border-b border-border-default bg-accent-go/5">
-          <span class="font-mono text-[11px] text-fg-muted">
-            your turn — fill the blanks
-          </span>
-          <span class="font-mono text-[10px] uppercase tracking-widest px-1.5 py-0.5 border rounded-sm text-accent-go border-accent-go/40">
-            GO
-          </span>
-        </div>
-        <pre class="px-4 py-3 overflow-x-auto bg-bg-inset text-fg-primary font-mono text-[13px] leading-relaxed">
-          <code>
-            <For each={segments()}>
-              {(seg, idx) => {
-                if (seg.kind === "text") return <span>{seg.text}</span>;
-                const slotIdx = idx();
-                return (
-                  <BlankInput
-                    slotIdx={slotIdx}
-                    varName={seg.varName}
-                    expected={seg.expected}
-                    value={valueFor(slotIdx)}
-                    submitted={phase.submitted()}
-                    revealed={phase.revealed()}
-                    locked={phase.phase() === "right"}
-                    onInput={(value) =>
-                      setInputs((prev) => ({ ...prev, [slotIdx]: value }))
-                    }
-                  />
-                );
-              }}
-            </For>
-          </code>
-        </pre>
-      </div>
+      <CodeBlock lang="go" filename="your turn — fill the blanks">
+        <For each={segments()}>
+          {(seg, idx) => {
+            if (seg.kind === "text") return <span>{seg.text}</span>;
+            const slotIdx = idx();
+            return (
+              <BlankInput
+                slotIdx={slotIdx}
+                varName={seg.varName}
+                expected={seg.expected}
+                value={valueFor(slotIdx)}
+                submitted={phase.submitted()}
+                revealed={phase.revealed()}
+                locked={phase.phase() === "right"}
+                onInput={(value) =>
+                  setInputs((prev) => ({ ...prev, [slotIdx]: value }))
+                }
+              />
+            );
+          }}
+        </For>
+      </CodeBlock>
     </ExerciseShell>
   );
 }
