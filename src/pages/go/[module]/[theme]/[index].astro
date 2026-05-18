@@ -38,6 +38,21 @@ const themeEntry = await getEntry("themes", ex.themeId);
 const moduleEntry = themeEntry
   ? await getEntry("modules", themeEntry.data.moduleId)
   : undefined;
+
+/*
+ * Exhaustiveness check for the exercise-type cascade below. If the
+ * z.enum in content.config.ts gains a fifth value (e.g. "match-pairs")
+ * without a corresponding render branch being added here, TS will fail
+ * the build at this site rather than the route silently rendering
+ * empty.
+ */
+const _exhaustiveExerciseType: Record<typeof ex.type, true> = {
+  mcq: true,
+  "fill-word": true,
+  "fill-line": true,
+  freeform: true,
+};
+void _exhaustiveExerciseType;
 ---
 
 <BaseLayout
@@ -80,14 +95,9 @@ const moduleEntry = themeEntry
               hints={ex.hints}
             />
           )}
-          {ex.type === "fill-line" && (
+          {(ex.type === "fill-line" || ex.type === "freeform") && (
             <Text tone="muted" size="sm" family="mono">
-              fill-line exercise component not built yet
-            </Text>
-          )}
-          {ex.type === "freeform" && (
-            <Text tone="muted" size="sm" family="mono">
-              freeform exercise component not built yet
+              {ex.type} exercise component not built yet
             </Text>
           )}
         </Panel>
