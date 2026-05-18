@@ -1,0 +1,59 @@
+target: go
+themeId: foundations/loops
+type: mcq
+order: 2
+prompt: |
+  Go has no `while` keyword. The same job is done by `for` with just
+  the condition clause — no init, no post. Pick the idiomatic Go
+  translation.
+generator:
+  kind: variant
+  variants:
+    - id: positive
+      ts: 'while (x > 0) { x--; }'
+      canonical: 'for x > 0 { x-- }'
+      distractors:
+        - 'while x > 0 { x-- }'
+        - 'for (x > 0) { x-- }'
+        - 'for ; x > 0 ; { x-- }'
+    - id: nonempty-buffer
+      ts: 'while (buf.length > 0) { drain(buf); }'
+      canonical: 'for len(buf) > 0 { drain(buf) }'
+      distractors:
+        - 'while len(buf) > 0 { drain(buf) }'
+        - 'for buf.length > 0 { drain(buf) }'
+        - 'for ; len(buf) > 0 ; { drain(buf) }'
+    - id: still-running
+      ts: 'while (running) { tick(); }'
+      canonical: 'for running { tick() }'
+      distractors:
+        - 'while running { tick() }'
+        - 'for (running) { tick() }'
+        - 'for running == true { tick() }'
+hints:
+  - "Go reuses the `for` keyword for what TS spells `while`. The shape is `for CONDITION { body }` — just the condition, no semicolons, no init, no post."
+  - "If you find yourself writing semicolons around the condition (like `for ; cond ; { ... }`), that's the *classic* three-clause form with empty init and post. Legal but verbose noise — Go programmers write the condition-only form when the loop is just a while."
+  - "For `while (running)`, the canonical is `for running { ... }`. No `while`, no parens, no semicolons."
+notes: |
+  Second Theme 5 exercise. Teaches Go's "for-as-while" shape — the
+  most common Go loop after the range form. The pedagogical goal
+  is muscle-memory: a TS dev's reflex `while (cond)` should become
+  Go's reflex `for cond`.
+
+  Variants cover three realistic shapes:
+   - Decrementing toward zero (positive)
+   - Draining a collection (`len(buf) > 0`)
+   - Boolean flag loop (the `running` pattern common in goroutines)
+
+  Distractors:
+   - `while` keyword — doesn't exist in Go; common reflex
+   - Optional parens around the condition (legal but unidiomatic)
+   - Semicolon-wrapped condition (`for ; cond ; { ... }`) — works
+     but is the verbose form of the same loop
+   - `cond == true` redundancy (the running variant) — also
+     unidiomatic; Go programmers compare against `true` only when
+     they specifically mean "this is the boolean true and not just
+     truthy."
+
+  Variant kind to keep each example self-contained.
+runtime: none
