@@ -35,17 +35,30 @@ const empty = (): Progress => ({
   exercises: {},
 });
 
-function read(): Progress {
-  if (typeof localStorage === "undefined") return empty();
+/** Parse + validate a raw storage payload into a Progress. Pure —
+ *  no localStorage access. Any reject path returns empty(); the
+ *  caller can't tell why and doesn't need to. Task #37 will swap
+ *  this for a Zod parser without touching the SSR path or callers. */
+export function safeParseProgress(raw: string | null): Progress {
+  if (raw === null) return empty();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return empty();
-    const parsed = JSON.parse(raw) as Progress;
+    const parsed = JSON.parse(raw) as Partial<Progress>;
     if (parsed.version !== 1) return empty();
-    return parsed;
+    /* Harden against a partial write (browser killed mid-quota-error)
+     * that leaves the blob without `exercises`. Downstream callers
+     * read `p.exercises[id]` and would crash. */
+    if (!parsed.exercises || typeof parsed.exercises !== "object") {
+      return empty();
+    }
+    return parsed as Progress;
   } catch {
     return empty();
   }
+}
+
+function read(): Progress {
+  if (typeof localStorage === "undefined") return empty();
+  return safeParseProgress(localStorage.getItem(STORAGE_KEY));
 }
 
 /** Pure serializer. Caller is responsible for updating `p.lastSeenAt`
