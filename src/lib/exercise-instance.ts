@@ -19,8 +19,8 @@ import { recordInstanceSeen } from "./progress";
  * call. For fill-blank-word exercises, this is how the consumer
  * declares which template vars become input slots.
  *
- * Reused by every exercise type (MCQ, FillBlankWord; FillBlankLine
- * and Freeform when they land).
+ * Reused by every exercise type (MCQ, FillBlankWord, FillBlankLine;
+ * Freeform when it lands).
  */
 export function useExerciseInstance(
   exerciseId: string,
