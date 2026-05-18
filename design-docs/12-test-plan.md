@@ -51,12 +51,14 @@ and "deterministic exercise URL" work at all.
   spec + seed → known `{ts, canonical, options, correctIndex}`. Pin
   the full output, not just shapes.
 - **`generate({kind:"variant"}, seed)`** — golden fixture for the
-  shipped `03.yaml` "PI" variant with a known seed → known
-  `{ts, canonical, options, correctIndex}`. Pin the full output. The
-  variant path has its own RNG-consumption pattern (`pickFrom` over
-  variants, then another shuffle inside `buildShuffledOptions`); a
-  regression here would silently reshuffle which variant a learner
-  sees on a given seed.
+  shipped `foundations/numeric-primitives/03.yaml` ("PI" variant)
+  with a known seed → known `{ts, canonical, options, correctIndex}`.
+  Pin the full output. (Five themes now ship a `03.yaml`; the test
+  must reference the explicit path so it doesn't drift as new
+  exercises land.) The variant path has its own RNG-consumption
+  pattern (`pickFrom` over variants, then another shuffle inside
+  `buildShuffledOptions`); a regression here would silently
+  reshuffle which variant a learner sees on a given seed.
 - **Same `(variant-spec, seed)` → same chosen variant** across calls.
   Determinism guard against a future "use a different RNG for variant
   pick" regression.
