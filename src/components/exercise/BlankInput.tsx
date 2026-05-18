@@ -33,7 +33,7 @@ const inputClass: Record<InputState, string> = {
   neutral: "border-border-strong focus-within:border-accent-amber",
 };
 
-function inputCellState(args: {
+export function inputCellState(args: {
   value: string;
   expected: string;
   submitted: boolean;

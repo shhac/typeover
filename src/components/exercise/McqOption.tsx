@@ -27,7 +27,7 @@ const cellClass: Record<CellState, string> = {
   neutral: "border-border-default hover:border-border-strong",
 };
 
-function optionCellState(args: {
+export function optionCellState(args: {
   selected: boolean;
   submitted: boolean;
   revealed: boolean;

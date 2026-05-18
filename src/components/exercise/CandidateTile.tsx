@@ -33,7 +33,7 @@ const tileClass: Record<TileState, string> = {
  * then submission outcomes, then selection, then neutral. The two
  * resolvers cover non-overlapping cases so either order is correct;
  * matching them lowers the cognitive cost of comparing side-by-side. */
-function tileState(args: {
+export function tileState(args: {
   selected: boolean;
   submitted: boolean;
   revealed: boolean;
