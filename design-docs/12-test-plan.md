@@ -100,6 +100,64 @@ exercises" from corruption.
 - **Sequential counter accumulation** — `seen` + `pass` + `seen` again
   results in `instancesSeen: 2, instancesPassed: 1`.
 
+## P0 — Fill-blank segment building
+
+Added 2026-05-18. The `buildBlankSegments` walker is now the single
+source of truth for `${var}` parsing (substitute is implemented in
+terms of it). Tests pin the placeholder grammar in one place.
+
+### `src/lib/generator.ts` — `buildBlankSegments`
+
+- **Basic case** — `buildBlankSegments("name = ${value}", { value: "42" }, ["value"])`
+  → `[{kind:"text", text:"name = "}, {kind:"blank", varName:"value", expected:"42"}]`.
+- **Vars not in `blanks`** substitute as text: `("${a} = ${b}", {a:"x", b:"1"}, ["b"])`
+  → `[text:"x", text:" = ", blank:"b" expected:"1"]`.
+- **Same blank var twice** — `("${x} + ${x}", {x:"v"}, ["x"])` produces
+  **two** independent blank segments with the same `varName`/`expected`.
+  Pins the contract that FillBlankWord's per-occurrence input slots rely on.
+- **Adjacent placeholders, no text between** — `"${a}${b}"` doesn't
+  emit a zero-length text segment (cursor guard).
+- **Leading placeholder** — `"${a}"` produces one segment, no
+  zero-length text before.
+- **Trailing placeholder** — `"${a}y"` produces blank + " y" text.
+- **Unknown var** — `buildBlankSegments("${gone}", {}, [])` throws
+  with `gone` in the message.
+- **Empty `blanks` array but template has vars** — every `${...}`
+  substitutes to a text segment; output has no blank segments. (This
+  is the path `substitute` takes; if it regresses, every template
+  exercise breaks.)
+- **Empty canonical** — returns `[]`.
+
+## P1 — Exercise lifecycle (shared)
+
+Added 2026-05-18. The `useExercisePhase` hook is now the lifecycle
+authority for MCQ, FillBlankWord, and (when they land) FillBlankLine
+and Freeform. One set of tests covers the contract for all of them.
+
+### `src/lib/exercise-phase.ts` — `useExercisePhase`
+
+- **Initial state** — `submitted` false, `revealed` false,
+  `phase()` returns `"picking"`.
+- **`submit()` with `canSubmit` false** — no-op; state unchanged.
+- **`submit()` with `isCorrect` true** — `submitted` becomes true,
+  `phase()` returns `"right"`, `recordInstancePassed(exerciseId)`
+  called once.
+- **`submit()` with `isCorrect` false** — `submitted` becomes true,
+  `phase()` returns `"wrong"`, **`recordInstanceFailed` NOT called**
+  (failure is only recorded via `revealCorrect`).
+- **`submit()` after already submitted** — no-op; no second progress
+  call.
+- **`tryAgain()`** — resets `submitted` + `revealed`, calls
+  `onTryAgain` if provided. No progress recording.
+- **`nextInstance()`** — resets `submitted` + `revealed`, calls
+  `onAnother` exactly once. No progress recording.
+- **`revealCorrect()`** — sets `revealed` true,
+  `recordInstanceFailed(exerciseId)` called once.
+- **Recorded-pass asymmetry** — pin the behaviour: a learner who
+  submits wrong, clicks "Try again", then submits correct is counted
+  as `passed` (not `failed`). Wrong submits are only counted as
+  failed when the learner reveals.
+
 ## P1 — MCQ correctness
 
 The component that decides whether a learner passed.
@@ -141,6 +199,65 @@ wrong submit is *not* counted as `failed` (only `Reveal correct` does
 that). This is by design today — Lens 5 flagged it as worth a test +
 design conversation. Pin behaviour OR change it, but don't leave it
 silent.
+
+## P1 — FillBlankWord correctness
+
+Added 2026-05-18. The component's per-blank match + `allCorrect` +
+`allFilled` predicates decide pass/fail and gate the submit button.
+
+### `src/components/exercise/FillBlankWord.tsx`
+
+- **Happy path** — render with two blanks, type the expected values
+  into both inputs, submit → `recordInstancePassed` called once,
+  phase becomes `right`, inputs lock (per `phase() === "right"`),
+  "Another" button visible.
+- **Partial fill** — only one of two blanks filled → submit button
+  disabled (`allFilled()` false).
+- **Wrong submit** — one blank wrong → phase `wrong`, three buttons
+  visible (Try again / Clear / Different exercise / Reveal correct).
+- **"Same var twice" determinism** — canonical `"${x} == ${x}"` with
+  `blanks: ["x"]`: typing the correct value into only one of the
+  two inputs leaves submit disabled; filling both makes the inputs
+  pass independently.
+- **Vacuous-truth guard (`blanks: []`)** — an exercise authored
+  with `blanks: []` cannot be submitted. `allFilled()` returns
+  false explicitly when there are no blank positions; the submit
+  button stays disabled. (Iter-4 fix; was a real auto-pass bug.)
+- **Reveal flow** — submit wrong → click "Reveal correct" →
+  `recordInstanceFailed` called once, inputs gain correct/error
+  styling via `inputCellState` `revealed` states, "Reveal correct"
+  button disappears.
+- **Clear** — clicking "Clear" empties all inputs and resets
+  `submitted`/`revealed`. Available in both picking and wrong phases.
+
+### `src/components/exercise/BlankInput.tsx` — `inputCellState`
+
+- **Truth table** — for every combination of `{value === expected,
+  submitted, revealed}`, the returned state matches the documented
+  contract:
+  - `!submitted && !revealed` → `neutral` (regardless of value match).
+  - `submitted && !revealed && match` → `correctSubmitted`.
+  - `submitted && !revealed && !match` → `incorrectSubmitted`.
+  - `revealed && match` → `correctRevealed`.
+  - `revealed && !match` → `incorrectRevealed`.
+- **Export `inputCellState`** as a Phase-1 micro-extraction (same
+  as `optionCellState` for MCQ) so the truth-table test can target it
+  directly without rendering Solid components.
+
+## P2 — Route dispatch
+
+Added 2026-05-18.
+
+### `src/pages/go/[module]/[theme]/[index].astro`
+
+- **MCQ branch** mounts `<Mcq>` with the right props.
+- **fill-word branch** mounts `<FillBlankWord>` with `blanks` defaulted
+  via `?? []` when the YAML omits it.
+- **fill-line / freeform branches** render the "not built yet"
+  placeholder until #16 / #17 land.
+- **Future:** when refactored to an exhaustive `switch` (or a
+  `Record<ExerciseType, ComponentFn>` lookup), TS narrowing should
+  fail compilation if a new enum value is added without a branch.
 
 ## P1 — `useExerciseInstance` hook
 
