@@ -1,0 +1,39 @@
+target: go
+themeId: foundations/loops
+type: fill-word
+order: 5
+prompt: |
+  Slot 2 covered Go's "for-as-while" shape by recognition. Now
+  produce it: fill in the one keyword.
+generator:
+  kind: template
+  vars:
+    for_kw: [for]
+  ts: |-
+    let result = 0;
+    while (n > 0) {
+      result += n;
+      n--;
+    }
+  canonical: |-
+    result := 0
+    ${for_kw} n > 0 {
+        result += n
+        n--
+    }
+blanks: [for_kw]
+hints:
+  - "Go has no `while` keyword. The same job is done by a single keyword that you already know — Go reuses it for all three loop shapes (classic, while-style, infinite). Three letters."
+  - "The keyword is `for`. Followed by just the condition — no semicolons (those mark a classic-form loop, which has init + cond + post)."
+  - "Fill: `for`. Canonical: `for n > 0 { result += n; n-- }`."
+runtime: none
+notes: |
+  Slot 5 deliberately leaves the body intact (it's just a couple
+  Go-idiomatic statements) and blanks only the keyword. The
+  payoff isn't typing characters — it's the muscle-memory shift
+  from `while (cond)` to `for cond`. Single-pool literal blank
+  same as previous themes' kw idiom.
+
+  The body shows `result := 0` and `result += n` and `n--` to
+  reinforce Theme 1's `:=` + Theme 4's compound-assignment
+  syntax without belabouring them.

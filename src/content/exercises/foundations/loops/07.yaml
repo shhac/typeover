@@ -1,0 +1,48 @@
+target: go
+themeId: foundations/loops
+type: fill-line
+order: 7
+prompt: |
+  TypeScript skips an iteration with `continue`. Go's keyword and
+  shape are similar but the if-syntax around it follows Go's
+  rules. Pick the Go line that skips nil entries.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if items[i] == nil { continue }"
+      - "if (items[i] == nil) continue"
+      - "if items[i] === nil { continue }"
+      - "if items[i] == null { continue }"
+      - "continue if items[i] == nil"
+  ts: |-
+    for (let i = 0; i < items.length; i++) {
+      if (items[i] === null) continue;
+      process(items[i]);
+    }
+  canonical: |-
+    for i := 0; i < len(items); i++ {
+        ${line}
+        process(items[i])
+    }
+blanks: [line]
+hints:
+  - "Four things have to be right: no parens around the condition, braces around the continue body, `==` (not `===`) for equality, and Go's keyword for absence — which is *not* `null`."
+  - "Go's empty-marker is `nil` (Theme 3 covered this for pointer types). The shape is `if items[i] == nil { continue }`."
+  - "Pick `if items[i] == nil { continue }`."
+notes: |
+  Second Theme 5 fill-line. Distractors layer multiple wrong
+  reflexes simultaneously to force the learner to apply all four
+  TS-to-Go shifts at once:
+   - Parens around condition + no braces (the most common
+     half-converted form)
+   - `===` strict equality (TS leak)
+   - `null` instead of `nil` (Theme 3 reminder)
+   - Postfix conditional (Ruby/Perl)
+
+  The wrapping for-loop also reinforces slot 4's `len(items)`
+  reflex (not `items.length`).
+
+  Theme 5 finishes its launch-gate slot 7. Slots 8-9 are
+  freeform and await Yaegi (#22) + CodeMirror (#23).
+runtime: none
