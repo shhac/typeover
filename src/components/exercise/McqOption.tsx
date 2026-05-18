@@ -5,10 +5,18 @@ import { cn } from "../ds/_internal";
  * from the booleans (`selected`, `submitted`, `revealed`, `isCorrect`)
  * — see {@link optionCellState}.
  *
- *   "showCorrect"    — submitted or revealed AND this is the answer
- *   "showIncorrect"  — submitted, picked, but not the answer
+ *   "showCorrect"    — picked-and-correct on submit, OR the answer on reveal
+ *   "showIncorrect"  — picked but not the answer on submit
  *   "selected"       — picked, pre-submission
  *   "neutral"        — everything else
+ *
+ * The learner-controls-reveal principle (design-docs/06-voice-and-feedback.md)
+ * means we do NOT auto-light the canonical option after a wrong submit —
+ * the learner has to click "Reveal correct" to see it. This used to fire
+ * `showCorrect` for any `(submitted || revealed) && isCorrect`, which
+ * spoiled the answer on wrong submits and diverged from FillBlankLine's
+ * tile behaviour. Fixed to require either a correct submission OR an
+ * explicit reveal.
  */
 type CellState = "showCorrect" | "showIncorrect" | "selected" | "neutral";
 
@@ -25,7 +33,8 @@ function optionCellState(args: {
   revealed: boolean;
   isCorrect: boolean;
 }): CellState {
-  if ((args.submitted || args.revealed) && args.isCorrect) return "showCorrect";
+  if (args.revealed && args.isCorrect) return "showCorrect";
+  if (args.submitted && args.selected && args.isCorrect) return "showCorrect";
   if (args.submitted && args.selected && !args.isCorrect) return "showIncorrect";
   if (args.selected) return "selected";
   return "neutral";
