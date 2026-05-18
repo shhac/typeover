@@ -5,7 +5,7 @@ import { Text } from "../ds/Text";
 import { type GeneratorSpec, type FillSegment } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
-import { rngFromSeed, shuffle } from "~/lib/seed";
+import { buildCandidatePool } from "~/lib/fill-blank";
 import { ExerciseShell } from "./ExerciseShell";
 import { CandidateTile } from "./CandidateTile";
 
@@ -42,15 +42,9 @@ export function FillBlankLine(props: FillBlankLineProps) {
 
   const expected = () => blankSlot()?.expected ?? "";
 
-  // Candidate pool: the var's pool from the template generator,
-  // shuffled deterministically per seed. The "::tiles" namespace keeps
-  // the tile-shuffle RNG independent of any future variant-pick RNG.
-  const candidates = createMemo(() => {
-    if (props.generator.kind !== "template") return [];
-    if (props.blanks.length === 0) return [];
-    const pool = props.generator.vars[props.blanks[0]!] ?? [];
-    return shuffle(rngFromSeed(`${seed()}::tiles`), [...pool]);
-  });
+  const candidates = createMemo(() =>
+    buildCandidatePool(props.generator, props.blanks, seed()),
+  );
 
   // canSubmit requires both: (a) a tile has been picked, (b) the
   // exercise actually has a blank to fill (vacuous-truth guard).
