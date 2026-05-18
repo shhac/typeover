@@ -22,15 +22,10 @@ interface ExerciseShellProps {
   hints: readonly [string, string, string];
 
   /** The full lifecycle handle produced by useExercisePhase. The shell
-   *  reads the current phase and dispatches every action through this
-   *  one object; consumers pass `phase={phase}` once instead of
-   *  plumbing six accessors individually. */
+   *  reads the current phase, the canSubmit gate, and dispatches every
+   *  action through this one object; consumers pass `phase={phase}`
+   *  once. */
   phase: ExercisePhaseHandle;
-  /** Predicate gating the Submit button. Supplied by the consumer
-   *  (each exercise type has its own readiness rule) rather than
-   *  living on the phase handle, since the hook doesn't know about
-   *  the answer state. */
-  canSubmit: () => boolean;
 
   /** Inserted between Submit and the rest of the picking-phase row.
    *  e.g. FillBlankWord's "Clear" button. */
@@ -53,11 +48,15 @@ interface ExerciseShellProps {
  * Feedback panel, the action toolbar, and the Hint+Reveal footer.
  * Exercise-type-specific UI (the answer region) lives in `children`.
  *
- * State is supplied via the phase handle from useExercisePhase plus a
- * `canSubmit` predicate. The shell never reads or mutates exercise
- * state directly — it just dispatches through the handle.
+ * State is supplied via the phase handle from useExercisePhase. The
+ * shell never reads or mutates exercise state directly — it just
+ * dispatches through the handle.
  */
 export function ExerciseShell(props: ExerciseShellProps) {
+  // Local accessor — `props.phase.current()` reads heavy at 6 call
+  // sites. Solid's reactivity is preserved as long as we keep it as
+  // a function (don't destructure props.phase here).
+  const phase = () => props.phase.current();
   return (
     <Stack gap="lg">
       <Stack gap="sm">
@@ -71,10 +70,10 @@ export function ExerciseShell(props: ExerciseShellProps) {
 
       {props.children}
 
-      <Show when={props.phase.current() !== "picking"}>
-        <Feedback status={props.phase.current() === "right" ? "correct" : "incorrect"}>
+      <Show when={phase() !== "picking"}>
+        <Feedback status={phase() === "right" ? "correct" : "incorrect"}>
           <Show
-            when={props.phase.current() === "right"}
+            when={phase() === "right"}
             fallback={
               props.wrongMessage ?? (
                 <span>
@@ -91,17 +90,17 @@ export function ExerciseShell(props: ExerciseShellProps) {
 
       <Stack direction="row" gap="sm" wrap>
         <Switch>
-          <Match when={props.phase.current() === "picking"}>
+          <Match when={phase() === "picking"}>
             <Button
               variant="primary"
               onClick={() => props.phase.submit()}
-              disabled={!props.canSubmit()}
+              disabled={!props.phase.canSubmit()}
             >
               Submit
             </Button>
             {props.extraPickingActions}
           </Match>
-          <Match when={props.phase.current() === "wrong"}>
+          <Match when={phase() === "wrong"}>
             <Button variant="secondary" onClick={() => props.phase.tryAgain()}>
               Try again
             </Button>
@@ -115,7 +114,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
               </Button>
             </Show>
           </Match>
-          <Match when={props.phase.current() === "right"}>
+          <Match when={phase() === "right"}>
             <Button variant="primary" onClick={() => props.phase.nextInstance()}>
               Another
             </Button>

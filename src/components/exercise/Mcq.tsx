@@ -44,7 +44,6 @@ export function Mcq(props: McqProps) {
       canonical={instance().canonical}
       hints={props.hints}
       phase={phase}
-      canSubmit={canSubmit}
     >
       <fieldset class="flex flex-col gap-2 m-0 p-0 border-0">
         <legend class="sr-only">Pick the idiomatic Go translation</legend>

@@ -50,6 +50,12 @@ export interface ExercisePhaseHandle {
    *  pass the whole handle through as `phase={handle}` without the
    *  awkward `handle.phase.phase()` reading at the call site. */
   current: () => Phase;
+  /** Re-exposed from the hook's input args. ExerciseShell reads this
+   *  for the Submit button's disabled state; the hook also reads it
+   *  inside submit() for the guard. Both reading from the same handle
+   *  means a consumer can't pass diverging accessors to the two
+   *  call sites — one source of truth. */
+  canSubmit: () => boolean;
   submit: () => void;
   tryAgain: () => void;
   nextInstance: () => void;
@@ -92,6 +98,7 @@ export function useExercisePhase(args: UseExercisePhaseArgs): ExercisePhaseHandl
     submitted,
     revealed,
     current,
+    canSubmit: args.canSubmit,
     submit,
     tryAgain,
     nextInstance,

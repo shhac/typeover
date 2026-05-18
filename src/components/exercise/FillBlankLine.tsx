@@ -76,7 +76,6 @@ export function FillBlankLine(props: FillBlankLineProps) {
       canonical={instance().canonical}
       hints={props.hints}
       phase={phase}
-      canSubmit={canSubmit}
       correctMessage={<span>Correct — that's the line.</span>}
       wrongMessage={
         <span>

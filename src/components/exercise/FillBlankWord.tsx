@@ -83,7 +83,6 @@ export function FillBlankWord(props: FillBlankWordProps) {
       canonical={instance().canonical}
       hints={props.hints}
       phase={phase}
-      canSubmit={allFilled}
       extraPickingActions={clearButton}
       extraWrongActions={clearButton}
       correctMessage={<span>Correct — every blank matches.</span>}
