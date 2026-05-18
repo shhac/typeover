@@ -148,7 +148,7 @@ export function substitute(tmpl: string, values: Record<string, string>): string
  * deterministically by `rng`. Drops any distractor that renders to the
  * same text as the canonical.
  */
-function buildShuffledOptions(
+export function buildShuffledOptions(
   rng: () => number,
   canonical: string,
   distractors: readonly string[],
