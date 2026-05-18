@@ -141,19 +141,28 @@ terms of it). Tests pin the placeholder grammar in one place.
 ## P1 — Exercise lifecycle (shared)
 
 Added 2026-05-18. The `useExercisePhase` hook is now the lifecycle
-authority for MCQ, FillBlankWord, and (when they land) FillBlankLine
-and Freeform. One set of tests covers the contract for all of them.
+authority for MCQ, FillBlankWord, FillBlankLine, and (when it lands)
+Freeform. One set of tests covers the contract for all of them.
 
 ### `src/lib/exercise-phase.ts` — `useExercisePhase`
 
+- **Handle surface** — `Object.keys(useExercisePhase(args))` returns
+  exactly `["submitted", "revealed", "current", "canSubmit",
+  "submit", "tryAgain", "nextInstance", "revealCorrect"]` (in some
+  order). A snapshot pins the public API of `ExercisePhaseHandle`
+  so a silent field rename (e.g. someone restoring `phase` over
+  `current`) or accidental new field surfaces in the diff. The
+  `canSubmit` field is the same accessor passed in as `args.canSubmit`
+  — re-exposed by the handle so the shell's disable-state and the
+  hook's submit-guard read one source of truth.
 - **Initial state** — `submitted` false, `revealed` false,
-  `phase()` returns `"picking"`.
+  `current()` returns `"picking"`.
 - **`submit()` with `canSubmit` false** — no-op; state unchanged.
 - **`submit()` with `isCorrect` true** — `submitted` becomes true,
-  `phase()` returns `"right"`, `recordInstancePassed(exerciseId)`
+  `current()` returns `"right"`, `recordInstancePassed(exerciseId)`
   called once.
 - **`submit()` with `isCorrect` false** — `submitted` becomes true,
-  `phase()` returns `"wrong"`, **`recordInstanceFailed` NOT called**
+  `current()` returns `"wrong"`, **`recordInstanceFailed` NOT called**
   (failure is only recorded via `revealCorrect`).
 - **`submit()` after already submitted** — no-op; no second progress
   call.
