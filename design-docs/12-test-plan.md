@@ -50,6 +50,23 @@ and "deterministic exercise URL" work at all.
 - **`generate(template, seed)`** — golden fixture for a hand-written
   spec + seed → known `{ts, canonical, options, correctIndex}`. Pin
   the full output, not just shapes.
+- **`generate({kind:"variant"}, seed)`** — golden fixture for the
+  shipped `03.yaml` "PI" variant with a known seed → known
+  `{ts, canonical, options, correctIndex}`. Pin the full output. The
+  variant path has its own RNG-consumption pattern (`pickFrom` over
+  variants, then another shuffle inside `buildShuffledOptions`); a
+  regression here would silently reshuffle which variant a learner
+  sees on a given seed.
+- **Same `(variant-spec, seed)` → same chosen variant** across calls.
+  Determinism guard against a future "use a different RNG for variant
+  pick" regression.
+- **`generateVariant` with `distractors: undefined` or `[]`** —
+  returns no `options`/`correctIndex` (mirrors the template-with-no-
+  distractors case).
+- **`generateVariant` with two variants sharing the same
+  `canonical` but different `ts`** — the seed still picks one
+  stably. Covers the easy authoring mistake of near-duplicate
+  variants.
 - **`generate({kind:"procedural"}, ...)`** — throws the
   "not implemented" message.
 - **Template with `distractors: []`** — returns no `options`/
