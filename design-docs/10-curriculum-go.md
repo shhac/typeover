@@ -150,16 +150,21 @@ concrete TS↔Go content per slot, hints, and notes. Example for
 `foundations/variables`:
 
 ```
-1. MCQ "let x = 5;" → which Go is idiomatic?         (DONE — already shipped)
-2. MCQ "const PI = 3.14;" → which Go is idiomatic?
-3. MCQ unannotated TS → which Go matches the inferred type?
-4. fill-blank-word: complete "<blank> x = 5" with the right declaration
-5. fill-blank-word: complete with right type annotation
-6. fill-blank-line: write the var declaration that matches a description
-7. fill-blank-line: shadowing exercise
-8. freeform: declare three vars from a TS snippet
-9. freeform: open problem (write code that does X using only var/const/:=)
+1. MCQ "let x = 5;" → which Go is idiomatic?              (shipped)
+2. MCQ typed decl "let x: number = 5;" → which Go form?   (shipped)
+3. MCQ "const PI = 3.14;" → which Go preserves const-ness? (shipped, variant kind)
+4. fill-blank-word: produce `name := value` (blanks at op) (shipped)
+5. fill-blank-word: produce `var name int = value`        (shipped, blanks at kw + type)
+6. fill-blank-line: pick the right line for a Go translation (shipped)
+7. fill-blank-line: multi-variable short decl `a, b := 1, 2` (shipped)
+8. freeform: declare three vars from a TS snippet         (blocked on freeform component)
+9. freeform: open problem with type+const+:= constraints  (blocked on freeform component)
 ```
+
+(Slots 1-7 above reflect the actual shipped progression in
+`src/content/exercises/foundations/variables/`. The earlier draft of
+this illustration drifted from the implementation as exercises
+landed; the shipped order is canonical.)
 
 Pass 3 is per-theme work; doesn't have to land all at once. Each theme's
 Pass 3 lives in `design-docs/lessons/<module>/<theme>.md` (planned —
