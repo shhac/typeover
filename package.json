@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "typecheck": "astro check"
+    "typecheck": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -18,8 +20,16 @@
     "astro": "^6.3.3",
     "solid-js": "^1.9.13",
     "tailwindcss": "^4.3.0",
-    "zod": "^4.4.3",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "zod": "^4.4.3"
   },
-  "packageManager": "pnpm@9.5.0"
+  "packageManager": "pnpm@9.5.0",
+  "devDependencies": {
+    "@solidjs/testing-library": "^0.8.10",
+    "@types/node": "^25.9.0",
+    "@vitest/ui": "^4.1.6",
+    "jsdom": "^29.1.1",
+    "vite-plugin-solid": "^2.11.12",
+    "vitest": "^4.1.6"
+  }
 }

@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rngFromSeed (golden) > produces a stable first-5 sequence for a known string seed 1`] = `
+[
+  0.7546650841832161,
+  0.9727962524630129,
+  0.22084611607715487,
+  0.25161236664280295,
+  0.8671417443547398,
+]
+`;

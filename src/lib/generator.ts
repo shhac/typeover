@@ -100,7 +100,7 @@ export type GenerateOptions = {
  * defined in terms of this so the placeholder grammar and the
  * unknown-var error live in one place.
  */
-function buildBlankSegments(
+export function buildBlankSegments(
   canonical: string,
   values: Record<string, string>,
   blanks: readonly string[],
@@ -135,7 +135,7 @@ function buildBlankSegments(
 /** ${name} substitution against a value map. Throws on unknown vars.
  *  Implemented via buildBlankSegments with `blanks = []` so the
  *  placeholder grammar lives in one place. */
-function substitute(tmpl: string, values: Record<string, string>): string {
+export function substitute(tmpl: string, values: Record<string, string>): string {
   let out = "";
   for (const seg of buildBlankSegments(tmpl, values, [])) {
     if (seg.kind === "text") out += seg.text;

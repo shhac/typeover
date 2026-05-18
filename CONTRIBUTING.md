@@ -21,9 +21,10 @@ Verify before pushing:
 ```bash
 pnpm build        # static build, must succeed
 pnpm typecheck    # astro check, must report 0 errors
+pnpm test         # vitest run, must report 0 failures
 ```
 
-Both run in <5s on a typical machine.
+All three run in <5s on a typical machine.
 
 ## What to work on
 
@@ -35,7 +36,7 @@ now:
 | **Module 1 freeform exercises** | Blocked on the Yaegi-in-WASM runtime (task #22). Help on that runtime is welcome. |
 | **Modules 2–7 content** | Themes are scaffolded with intros; exercise YAMLs are not yet written. |
 | **Distractor sweeps** | A pass over shipped exercises to make sure each distractor fails in a *distinct* way. |
-| **Test infrastructure** | Vitest is planned (`task #36`); the test plan is fully written at [`design-docs/12-test-plan.md`](design-docs/12-test-plan.md). |
+| **Test coverage gaps** | Vitest is wired (`pnpm test`); seed / generator / `optionCellState` are covered. The full P0/P1 plan at [`design-docs/12-test-plan.md`](design-docs/12-test-plan.md) lists what's still pending — progress storage, exercise lifecycle, route smoke. |
 
 ## Authoring an exercise
 
