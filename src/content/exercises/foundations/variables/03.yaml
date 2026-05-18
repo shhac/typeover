@@ -1,0 +1,60 @@
+target: go
+themeId: foundations/variables
+type: mcq
+order: 3
+prompt: |
+  TS `const` means "this binding can't be reassigned." Go `const` means
+  something stricter — "compile-time constant." For a value that's
+  genuinely fixed at compile time, which Go matches this TS?
+generator:
+  kind: variant
+  variants:
+    - id: pi
+      ts: 'const PI = 3.14;'
+      canonical: 'const PI = 3.14'
+      distractors:
+        - 'PI := 3.14'
+        - 'var PI = 3.14'
+        - 'const PI := 3.14'
+    - id: max-retries
+      ts: 'const MAX_RETRIES = 5;'
+      canonical: 'const MaxRetries = 5'
+      distractors:
+        - 'MaxRetries := 5'
+        - 'var MaxRetries = 5'
+        - 'const MaxRetries := 5'
+    - id: version
+      ts: 'const VERSION = "1.0.0";'
+      canonical: 'const Version = "1.0.0"'
+      distractors:
+        - 'Version := "1.0.0"'
+        - 'var Version = "1.0.0"'
+        - 'const Version := "1.0.0"'
+    - id: days
+      ts: 'const DAYS_IN_WEEK = 7;'
+      canonical: 'const DaysInWeek = 7'
+      distractors:
+        - 'DaysInWeek := 7'
+        - 'var DaysInWeek = 7'
+        - 'const DaysInWeek := 7'
+hints:
+  - "Go has `const`, but it doesn't pair with `:=`. `const` always uses plain `=`."
+  - "Notice the casing in the canonical: Go uses MixedCaps, not SCREAMING_SNAKE_CASE, even for constants. Capital first letter exports the constant from the package."
+  - "`const Name = value` — plain `=`, no `var`, no `:=`."
+notes: |
+  Two lessons in one exercise:
+
+  1. **`const` vs `:=` in Go** — `const` requires `=`, not `:=`. The
+     `const Name := value` distractor is a syntax error.
+  2. **Go naming convention** — SCREAMING_SNAKE_CASE is not idiomatic
+     Go. Constants follow the same MixedCaps rule as everything else;
+     capitalisation of the first letter controls package export.
+
+  Distractors all use the original SCREAMING name from the TS source
+  intentionally — those would compile but be unidiomatic; the lesson
+  is that the canonical changes BOTH the keyword and the casing.
+
+  Using the `variant` generator kind here (rather than `template`)
+  because the name/value pairs need to be semantically meaningful — a
+  random name+value combination ("PI = 7") would be confusing.
+runtime: none
