@@ -82,13 +82,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
-      phase={phase.phase}
-      revealed={phase.revealed}
+      phase={phase}
       canSubmit={allFilled}
-      submit={phase.submit}
-      tryAgain={phase.tryAgain}
-      nextInstance={phase.nextInstance}
-      revealCorrect={phase.revealCorrect}
       extraPickingActions={clearButton}
       extraWrongActions={clearButton}
       correctMessage={<span>Correct — every blank matches.</span>}
@@ -112,7 +107,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
                 value={valueFor(slotIdx)}
                 submitted={phase.submitted()}
                 revealed={phase.revealed()}
-                locked={phase.phase() === "right"}
+                locked={phase.current() === "right"}
                 onInput={(value) =>
                   setInputs((prev) => ({ ...prev, [slotIdx]: value }))
                 }

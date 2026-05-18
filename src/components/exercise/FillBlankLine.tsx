@@ -75,13 +75,8 @@ export function FillBlankLine(props: FillBlankLineProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
-      phase={phase.phase}
-      revealed={phase.revealed}
+      phase={phase}
       canSubmit={canSubmit}
-      submit={phase.submit}
-      tryAgain={phase.tryAgain}
-      nextInstance={phase.nextInstance}
-      revealCorrect={phase.revealCorrect}
       correctMessage={<span>Correct — that's the line.</span>}
       wrongMessage={
         <span>
@@ -135,7 +130,7 @@ export function FillBlankLine(props: FillBlankLineProps) {
                 submitted={phase.submitted()}
                 revealed={phase.revealed()}
                 isCorrect={candidate === expected()}
-                locked={phase.phase() === "right"}
+                locked={phase.current() === "right"}
                 onSelect={() => setSelected(candidate)}
               />
             )}

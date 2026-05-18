@@ -43,11 +43,24 @@ interface UseExercisePhaseArgs {
  * wrong submit followed by reveal is recorded as a fail. Pinned
  * behaviour, not a bug.
  */
-export function useExercisePhase(args: UseExercisePhaseArgs) {
+export interface ExercisePhaseHandle {
+  submitted: () => boolean;
+  revealed: () => boolean;
+  /** Current discrete phase. Renamed from `.phase` so consumers can
+   *  pass the whole handle through as `phase={handle}` without the
+   *  awkward `handle.phase.phase()` reading at the call site. */
+  current: () => Phase;
+  submit: () => void;
+  tryAgain: () => void;
+  nextInstance: () => void;
+  revealCorrect: () => void;
+}
+
+export function useExercisePhase(args: UseExercisePhaseArgs): ExercisePhaseHandle {
   const [submitted, setSubmitted] = createSignal(false);
   const [revealed, setRevealed] = createSignal(false);
 
-  const phase = (): Phase => {
+  const current = (): Phase => {
     if (!submitted()) return "picking";
     return args.isCorrect() ? "right" : "wrong";
   };
@@ -78,7 +91,7 @@ export function useExercisePhase(args: UseExercisePhaseArgs) {
   return {
     submitted,
     revealed,
-    phase,
+    current,
     submit,
     tryAgain,
     nextInstance,

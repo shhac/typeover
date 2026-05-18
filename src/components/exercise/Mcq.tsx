@@ -43,13 +43,8 @@ export function Mcq(props: McqProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
-      phase={phase.phase}
-      revealed={phase.revealed}
+      phase={phase}
       canSubmit={canSubmit}
-      submit={phase.submit}
-      tryAgain={phase.tryAgain}
-      nextInstance={phase.nextInstance}
-      revealCorrect={phase.revealCorrect}
     >
       <fieldset class="flex flex-col gap-2 m-0 p-0 border-0">
         <legend class="sr-only">Pick the idiomatic Go translation</legend>

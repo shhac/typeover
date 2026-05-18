@@ -7,7 +7,7 @@ import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
 import { recordHintUsed } from "~/lib/progress";
-import type { Phase } from "~/lib/exercise-phase";
+import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
 
 interface ExerciseShellProps {
   /** For progress recording from the Hint button. */
@@ -21,14 +21,16 @@ interface ExerciseShellProps {
   /** Three-layer hint stack. */
   hints: readonly [string, string, string];
 
-  /** Reactive phase + lifecycle actions, produced by useExercisePhase. */
-  phase: () => Phase;
-  revealed: () => boolean;
+  /** The full lifecycle handle produced by useExercisePhase. The shell
+   *  reads the current phase and dispatches every action through this
+   *  one object; consumers pass `phase={phase}` once instead of
+   *  plumbing six accessors individually. */
+  phase: ExercisePhaseHandle;
+  /** Predicate gating the Submit button. Supplied by the consumer
+   *  (each exercise type has its own readiness rule) rather than
+   *  living on the phase handle, since the hook doesn't know about
+   *  the answer state. */
   canSubmit: () => boolean;
-  submit: () => void;
-  tryAgain: () => void;
-  nextInstance: () => void;
-  revealCorrect: () => void;
 
   /** Inserted between Submit and the rest of the picking-phase row.
    *  e.g. FillBlankWord's "Clear" button. */
@@ -51,9 +53,9 @@ interface ExerciseShellProps {
  * Feedback panel, the action toolbar, and the Hint+Reveal footer.
  * Exercise-type-specific UI (the answer region) lives in `children`.
  *
- * State is supplied as accessor functions from useExercisePhase. The
- * shell never reads or mutates exercise state directly — it just
- * dispatches.
+ * State is supplied via the phase handle from useExercisePhase plus a
+ * `canSubmit` predicate. The shell never reads or mutates exercise
+ * state directly — it just dispatches through the handle.
  */
 export function ExerciseShell(props: ExerciseShellProps) {
   return (
@@ -69,10 +71,10 @@ export function ExerciseShell(props: ExerciseShellProps) {
 
       {props.children}
 
-      <Show when={props.phase() !== "picking"}>
-        <Feedback status={props.phase() === "right" ? "correct" : "incorrect"}>
+      <Show when={props.phase.current() !== "picking"}>
+        <Feedback status={props.phase.current() === "right" ? "correct" : "incorrect"}>
           <Show
-            when={props.phase() === "right"}
+            when={props.phase.current() === "right"}
             fallback={
               props.wrongMessage ?? (
                 <span>
@@ -89,32 +91,32 @@ export function ExerciseShell(props: ExerciseShellProps) {
 
       <Stack direction="row" gap="sm" wrap>
         <Switch>
-          <Match when={props.phase() === "picking"}>
+          <Match when={props.phase.current() === "picking"}>
             <Button
               variant="primary"
-              onClick={() => props.submit()}
+              onClick={() => props.phase.submit()}
               disabled={!props.canSubmit()}
             >
               Submit
             </Button>
             {props.extraPickingActions}
           </Match>
-          <Match when={props.phase() === "wrong"}>
-            <Button variant="secondary" onClick={() => props.tryAgain()}>
+          <Match when={props.phase.current() === "wrong"}>
+            <Button variant="secondary" onClick={() => props.phase.tryAgain()}>
               Try again
             </Button>
             {props.extraWrongActions}
-            <Button variant="ghost" onClick={() => props.nextInstance()}>
+            <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
               Different exercise
             </Button>
-            <Show when={!props.revealed()}>
-              <Button variant="ghost" onClick={() => props.revealCorrect()}>
+            <Show when={!props.phase.revealed()}>
+              <Button variant="ghost" onClick={() => props.phase.revealCorrect()}>
                 Reveal correct
               </Button>
             </Show>
           </Match>
-          <Match when={props.phase() === "right"}>
-            <Button variant="primary" onClick={() => props.nextInstance()}>
+          <Match when={props.phase.current() === "right"}>
+            <Button variant="primary" onClick={() => props.phase.nextInstance()}>
               Another
             </Button>
           </Match>
