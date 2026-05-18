@@ -1,0 +1,57 @@
+target: go
+themeId: foundations/strings-bytes-runes
+type: mcq
+order: 2
+prompt: |
+  TypeScript template literals interpolate values directly into a
+  string. Go has no template literal — but there's a stdlib function
+  that's the canonical translation. Pick the Go form.
+generator:
+  kind: variant
+  variants:
+    - id: hello-name
+      ts: 'let greeting = `Hello, ${name}!`;'
+      canonical: 'greeting := fmt.Sprintf("Hello, %s!", name)'
+      distractors:
+        - 'greeting := "Hello, " + name + "!"'
+        - 'greeting := `Hello, ${name}!`'
+        - 'greeting := "Hello, %s!".format(name)'
+    - id: count-message
+      ts: 'let msg = `Found ${count} items`;'
+      canonical: 'msg := fmt.Sprintf("Found %d items", count)'
+      distractors:
+        - 'msg := "Found " + count + " items"'
+        - 'msg := `Found ${count} items`'
+        - 'msg := "Found %d items".format(count)'
+    - id: file-line
+      ts: 'let loc = `${file}:${line}`;'
+      canonical: 'loc := fmt.Sprintf("%s:%d", file, line)'
+      distractors:
+        - 'loc := file + ":" + line'
+        - 'loc := `${file}:${line}`'
+        - 'loc := "%s:%d".format(file, line)'
+hints:
+  - "Go has no template literals — backticks in Go create *raw* strings (no escape processing), but they don't interpolate values. You need a function."
+  - "The function lives in the `fmt` package and takes a format string with `%`-verbs (`%s` for string, `%d` for integer, `%v` for anything). It's the workhorse of Go formatting."
+  - "Use `fmt.Sprintf(\"...\", value1, value2)`. The format string uses verbs like `%s`/`%d`."
+notes: |
+  Second Theme 3 exercise. Translates one of TS's most-used features
+  (template literals) into Go's canonical idiom (`fmt.Sprintf`).
+  Important to teach early — every TS dev reaches for `\`${x}\``
+  on day one, and the Go translation isn't obvious without it.
+
+  Three variants cover three common shapes:
+   - one substitution with `%s` (string)
+   - one substitution with `%d` (integer)
+   - two substitutions of different types
+
+  Distractor "+" concatenation works for strings only — adding
+  numbers requires conversion, which the distractor silently skips
+  (real Go programmers will spot it). Backtick distractor literally
+  copies the TS source — illustrates that Go's backticks aren't
+  "TypeScript template literals." The `.format(...)` distractor is
+  Python-style method dispatch, doesn't exist on Go strings.
+
+  Variant kind because each example needs its own format string and
+  verb set.
+runtime: none
