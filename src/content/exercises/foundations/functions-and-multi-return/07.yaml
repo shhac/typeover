@@ -1,0 +1,48 @@
+target: go
+themeId: foundations/functions-and-multi-return
+type: fill-line
+order: 7
+prompt: |
+  The other half of the `(T, error)` convention is the caller's
+  error-check. TypeScript truthy-tests an error reference; Go is
+  explicit. Pick the idiomatic Go check.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'if err != nil { handleError(err); return }'
+      - 'if (err) { handleError(err); return }'
+      - 'if err { handleError(err); return }'
+      - 'if err === null { handleError(err); return }'
+      - 'if err == null { handleError(err); return }'
+  ts: |-
+    const result = parse(s);
+    if (result.err) { handleError(result.err); return; }
+    process(result.value);
+  canonical: |-
+    n, err := parse(s)
+    ${line}
+    process(n)
+blanks: [line]
+hints:
+  - "Four reflexes at once: no parens around the condition (Theme 4), `nil` not `null` (Theme 3), explicit `!= nil` comparison (Go has no truthy-tests on errors), and braces required around the body (Theme 4)."
+  - "Go's idiom: `if err != nil { ... }`. Plain `if err { ... }` doesn't compile because `error` isn't a bool. The empty-marker is `nil`. The comparison is `!=`."
+  - "Pick `if err != nil { handleError(err); return }`."
+runtime: none
+notes: |
+  Second Theme 6 fill-line. The companion to slot 6's return-side
+  drill — slot 7 drills the receive-side, the `if err != nil`
+  check that dominates Go codebases.
+
+  Distractor failure modes layer multiple wrong reflexes:
+   - `if (err)` — TS-style truthy parens (compiles? no, Go
+     doesn't allow paren-only conditions to evaluate non-bool
+     values truthily — wait, the parens ARE legal in Go; the
+     issue is `err` isn't a bool. Both problems compound.)
+   - `if err` — same problem, no parens
+   - `if err === null` — strict-eq + null instead of nil
+   - `if err == null` — fixes the strict-eq but keeps null
+
+  Closes Theme 6's launch-gate slot 7. Module 1 now has every
+  theme at 7/9. Slots 8-9 universally await Yaegi (#22) +
+  CodeMirror (#23) + Freeform component (#17).
