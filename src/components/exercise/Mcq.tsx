@@ -23,11 +23,12 @@ export function Mcq(props: McqProps) {
   const options = () => instance().options ?? [];
   const correctIndex = () => instance().correctIndex ?? -1;
   const isCorrect = () => selected() === correctIndex();
+  const canSubmit = () => selected() !== null;
 
   const phase = useExercisePhase({
     exerciseId: props.exerciseId,
     isCorrect,
-    canSubmit: () => selected() !== null,
+    canSubmit,
     onAnother: () => {
       another();
       setSelected(null);
@@ -44,7 +45,7 @@ export function Mcq(props: McqProps) {
       hints={props.hints}
       phase={phase.phase}
       revealed={phase.revealed}
-      canSubmit={() => selected() !== null}
+      canSubmit={canSubmit}
       submit={phase.submit}
       tryAgain={phase.tryAgain}
       nextInstance={phase.nextInstance}
