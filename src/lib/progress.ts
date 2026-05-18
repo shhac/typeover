@@ -48,9 +48,10 @@ function read(): Progress {
   }
 }
 
+/** Pure serializer. Caller is responsible for updating `p.lastSeenAt`
+ *  before calling; write() doesn't touch timestamps. */
 function write(p: Progress) {
   if (typeof localStorage === "undefined") return;
-  p.lastSeenAt = now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
 }
 
@@ -81,7 +82,9 @@ function bumpExercise(
   const p = read();
   const slot = exerciseSlot(p, id);
   mutate(slot);
-  slot.lastSeenAt = now();
+  const t = now();
+  slot.lastSeenAt = t;
+  p.lastSeenAt = t;
   write(p);
 }
 
