@@ -50,11 +50,13 @@ applying the same substitutions to the Go template.
 
 ```yaml
 kind: template
-ts: "let ${name} = ${value};"
-go: "${name} := ${value}"
 vars:
-  - name: { values: [x, count, total, n] }
-  - value: { values: ["5", "42", "0"] }
+  name: [x, count, total, n]
+  value: ["5", "42", "0"]
+ts: "let ${name} = ${value};"
+canonical: "${name} := ${value}"
+distractors:           # optional, MCQ only
+  - "var ${name} = ${value};"
 ```
 
 ### `variant`
@@ -66,10 +68,12 @@ kind: variant
 variants:
   - id: int-int
     ts: "function add(a: number, b: number): number { return a + b; }"
-    go:  "func add(a, b int) int { return a + b }"
+    canonical: "func add(a, b int) int { return a + b }"
+    distractors:       # optional, MCQ only
+      - "function add(a int, b int) int { return a + b }"
   - id: string-string
     ts: "function greet(s: string): string { return 'hi ' + s; }"
-    go:  "func greet(s string) string { return \"hi \" + s }"
+    canonical: "func greet(s string) string { return \"hi \" + s }"
 ```
 
 ### `procedural`
@@ -82,86 +86,39 @@ kind: procedural
 module: "./gen.ts"
 ```
 
-## Exercise schema (Zod)
+## Exercise schema
 
-Sketched here; canonical is `src/content/schema.ts`.
+The Zod schema is the **single source of truth**. Read it directly at
+[`src/content.config.ts`](../src/content.config.ts) — don't mirror it
+in prose, as duplication drifts. The generator-spec discriminated
+union lives alongside the runtime at
+[`src/lib/generator.ts`](../src/lib/generator.ts), `z.infer`'d so the
+schema and the runtime types never drift either.
 
-```ts
-const Exercise = z.object({
-  id: z.string(),                      // stable, used in URL + storage
-  type: z.enum([
-    "mcq", "fill-word", "fill-line", "freeform",
-  ]),
-  prompt: z.string(),                  // shown to learner
-  generator: GeneratorSpec,            // see above
+Shape at a glance (read the actual files for the live definition):
 
-  hints: z.tuple([
-    z.string(),  // conceptual
-    z.string(),  // structural
-    z.string(),  // near-answer
-  ]),
+- An exercise has `target`, `themeId`, `type`, `order`, `prompt`,
+  `generator`, `hints` (3-tuple), and optional `blanks`, `runtime`,
+  `notes`.
+- `generator.kind` is `"template" | "variant" | "procedural"` with
+  shapes shown in the section above.
+- A theme has `target`, `moduleId`, `title`, `intro`, `order`,
+  optional `prerequisites`.
+- A module has `target`, `title`, `summary`, `order`.
 
-  canonical: z.string(),               // idiomatic Go (for diff and reveal)
-  testCases: z.array(z.object({        // freeform only
-    in: z.unknown(),
-    out: z.unknown(),
-  })).optional(),
+## Style guide
 
-  runtime: z.enum(["yaegi", "server", "none"]).default("none"),
-  notes: z.string().optional(),        // author-facing rationale
-});
-```
+Voice (peer-level, warm + dry, never patronising) lives at
+[06-voice-and-feedback.md](06-voice-and-feedback.md).
 
-## Style guide for authors
-
-### Voice
-See [06-voice-and-feedback.md](06-voice-and-feedback.md). Peer-level,
-warm + dry, never patronising.
-
-### Quality bar (per exercise)
-- One concept per exercise. If an exercise teaches two things, it
-  splits.
-- Canonical answer is idiomatic Go. `gofmt`-clean.
-- All three hints written. Conceptual is a *nudge*, not the answer.
-- Generator produces at least 3 meaningfully different instances.
-- Author runs every instance manually before opening the PR.
-
-### Quality bar (per theme)
-- Theme has all 9 slots filled (or a documented reason for fewer).
-- Difficulty ramps cleanly: MCQ → fill-word → fill-line → freeform.
-- Prerequisite themes are declared in `theme.yaml`.
-
-### Fill-line conventions
-- The pool entries listed under `vars.line:` are the candidate
-  tiles. Exactly **5 candidates** per fill-line, four distractors
-  plus the canonical. The schema doesn't enforce this yet (planned
-  task #38 refinement), but every shipped fill-line follows the
-  convention; deviations need a documented reason.
-- Each distractor should fail in a *distinct* way — one TS-leakage,
-  one wrong-keyword-from-other-language, one
-  arg-order-swap, one almost-right-but-violates-Go-idiom. Avoid
-  near-duplicate distractors that fail the same way.
-- **When the blanked line is the focus of the exercise, hardcode
-  the surrounding context in `canonical`.** The wrapping code
-  isn't filler — it reinforces reflexes from earlier themes
-  (e.g. `loops/06.yaml` wraps the blank in `for i := 0; i < n;
-  i++ { ... }`, recycling Theme 1's `:=` and Theme 5's
-  three-clause shape). Don't re-template the surrounding lines;
-  the static-context-around-`${line}` pattern is now the house
-  style for fill-line.
-
-## CONTRIBUTING.md sketch
-
-The full contributing doc will live at the repo root. Outline:
-
-1. **Setup** — `pnpm install`, `pnpm dev`, the dev URL.
-2. **Authoring a theme** — copy `_template/`, fill in metadata, add
-   exercises following the schema.
-3. **Generator authoring** — for each generator type, a worked example.
-4. **Validating** — `pnpm typecheck` + `pnpm exercise:check <id>` runs
-   every generator instance and verifies canonical answers compile.
-5. **Submitting** — PR template asks for the why, the source idea, and
-   confirmation that you ran every instance.
+**Per-exercise quality bar, per-theme quality bar, fill-line
+conventions, distractor rules, and the PR shape are the canonical
+contributor surface at the repo root:** see
+[`CONTRIBUTING.md`](../CONTRIBUTING.md). This file used to duplicate
+them; the duplication drifted, so the rules now live in
+CONTRIBUTING and this doc focuses on the *design rationale* (why the
+schema looks like it does, why the generator kinds are shaped this
+way) rather than the rules an author follows day-to-day.
 
 ## Tooling we'll need
 
