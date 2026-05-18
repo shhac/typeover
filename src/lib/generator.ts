@@ -89,24 +89,14 @@ export type GenerateOptions = {
   blanks?: string[];
 };
 
-/** ${name} substitution against a value map. Throws on unknown vars. */
-function substitute(tmpl: string, values: Record<string, string>): string {
-  return tmpl.replace(/\$\{(\w+)\}/g, (_, name) => {
-    const v = values[name];
-    if (v === undefined) {
-      throw new Error(`Template references unknown var \${${name}}`);
-    }
-    return v;
-  });
-}
-
 /**
  * Walk the canonical template, emitting segments. Vars listed in
  * `blanks` become input slots with their expected value; everything
  * else is substituted into text.
  *
- * Adjacent text segments aren't merged — the renderer iterates and
- * the small overhead is irrelevant.
+ * The single source of truth for `${var}` parsing — `substitute` is
+ * defined in terms of this so the placeholder grammar and the
+ * unknown-var error live in one place.
  */
 function buildBlankSegments(
   canonical: string,
@@ -138,6 +128,17 @@ function buildBlankSegments(
     segments.push({ kind: "text", text: canonical.slice(cursor) });
   }
   return segments;
+}
+
+/** ${name} substitution against a value map. Throws on unknown vars.
+ *  Implemented via buildBlankSegments with `blanks = []` so the
+ *  placeholder grammar lives in one place. */
+function substitute(tmpl: string, values: Record<string, string>): string {
+  let out = "";
+  for (const seg of buildBlankSegments(tmpl, values, [])) {
+    if (seg.kind === "text") out += seg.text;
+  }
+  return out;
 }
 
 /**
