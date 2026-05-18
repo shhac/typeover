@@ -35,6 +35,19 @@ const empty = (): Progress => ({
   exercises: {},
 });
 
+function isValidExerciseProgress(v: unknown): v is ExerciseProgress {
+  if (!v || typeof v !== "object") return false;
+  const s = v as Record<string, unknown>;
+  return (
+    typeof s.firstSeenAt === "string" &&
+    typeof s.lastSeenAt === "string" &&
+    Number.isFinite(s.instancesSeen) &&
+    Number.isFinite(s.instancesPassed) &&
+    Number.isFinite(s.instancesFailed) &&
+    Number.isFinite(s.hintsUsedTotal)
+  );
+}
+
 /** Parse + validate a raw storage payload into a Progress. Pure —
  *  no localStorage access. Any reject path returns empty(); the
  *  caller can't tell why and doesn't need to. Task #37 will swap
@@ -49,6 +62,15 @@ export function safeParseProgress(raw: string | null): Progress {
      * read `p.exercises[id]` and would crash. */
     if (!parsed.exercises || typeof parsed.exercises !== "object") {
       return empty();
+    }
+    /* Per-slot validation: a corrupt slot (null, string counters,
+     * missing timestamps) would either crash bumpExercise or write
+     * `NaN + 1 === NaN` back to storage and silently brick the
+     * learner's counters forever. Drop the whole blob to empty()
+     * if any slot is malformed — safer to lose progress than to
+     * persist NaN. */
+    for (const slot of Object.values(parsed.exercises)) {
+      if (!isValidExerciseProgress(slot)) return empty();
     }
     return parsed as Progress;
   } catch {

@@ -51,6 +51,100 @@ describe("safeParseProgress", () => {
     expect(safeParseProgress(nullExercises).exercises).toEqual({});
   });
 
+  it("returns empty when any slot is null", () => {
+    /* A future Zod migration will surface this with a typed error;
+     * until then, dropping to empty() prevents the downstream
+     * `null.instancesSeen` crash in bumpExercise. */
+    const corrupt = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: { "ex-1": null },
+    });
+    expect(safeParseProgress(corrupt).exercises).toEqual({});
+  });
+
+  it("returns empty when a slot has a string counter (NaN risk)", () => {
+    /* Without the guard, `"five" + 1 === "five1"` → NaN once it
+     * touches a downstream calculation, and that NaN persists. */
+    const corrupt = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: {
+        "ex-1": {
+          firstSeenAt: "2026-01-01T00:00:00.000Z",
+          lastSeenAt: "2026-01-01T00:00:00.000Z",
+          instancesSeen: "five",
+          instancesPassed: 1,
+          instancesFailed: 0,
+          hintsUsedTotal: 0,
+        },
+      },
+    });
+    expect(safeParseProgress(corrupt).exercises).toEqual({});
+  });
+
+  it("returns empty when a slot is missing firstSeenAt", () => {
+    const corrupt = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: {
+        "ex-1": {
+          /* firstSeenAt deliberately absent */
+          lastSeenAt: "2026-01-01T00:00:00.000Z",
+          instancesSeen: 0,
+          instancesPassed: 0,
+          instancesFailed: 0,
+          hintsUsedTotal: 0,
+        },
+      },
+    });
+    expect(safeParseProgress(corrupt).exercises).toEqual({});
+  });
+
+  it("returns empty when a slot's counter is NaN", () => {
+    const corrupt = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: {
+        "ex-1": {
+          firstSeenAt: "2026-01-01T00:00:00.000Z",
+          lastSeenAt: "2026-01-01T00:00:00.000Z",
+          instancesSeen: Number.NaN,
+          instancesPassed: 0,
+          instancesFailed: 0,
+          hintsUsedTotal: 0,
+        },
+      },
+    });
+    /* JSON.stringify writes NaN as null; that re-parses as null
+     * which is neither finite nor a number — the guard fires. */
+    expect(safeParseProgress(corrupt).exercises).toEqual({});
+  });
+
+  it("drops the whole blob if any one slot is corrupt (even if others are valid)", () => {
+    const corrupt = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: {
+        "ex-1": {
+          firstSeenAt: "2026-01-01T00:00:00.000Z",
+          lastSeenAt: "2026-01-01T00:00:00.000Z",
+          instancesSeen: 5,
+          instancesPassed: 2,
+          instancesFailed: 1,
+          hintsUsedTotal: 3,
+        },
+        "ex-2": null,
+      },
+    });
+    expect(safeParseProgress(corrupt).exercises).toEqual({});
+  });
+
   it("round-trips a well-formed v1 payload unchanged", () => {
     const ok = {
       version: 1 as const,
