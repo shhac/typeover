@@ -205,6 +205,133 @@ rewrite per pickup.
 **Replaced**: the wiki feel on the home page directly. New
 authoring guidance below.
 
+### 9. Persistent "back to home" — global brand anchor
+
+*Surfaced 2026-05-20 from user feedback: "no way to get back to
+the homepage from Curriculum / Settings / etc."*
+
+**Today**: the only return-home path on most pages is the footer
+`typeover` link. The page's *header* region has no
+always-present link to `/`; learners on `/go` need to know to
+scroll to the footer or use browser back. Same problem on
+`/settings`, `/privacy`, the completion screen, and exercise
+routes.
+
+**Pattern (Stripe, Linear, Astro Docs)**: the **brand wordmark
+in the top-left is always linked to home**. Doesn't compete with
+a breadcrumb because the wordmark is *identity*, not navigation.
+Page-specific breadcrumbs live underneath it.
+
+**DS primitive**: extend `BaseLayout.astro` with a tiny
+sticky-or-static header strip containing a single `<a href="/"
+class="font-mono">typeover</a>` left, and (optionally) a
+quiet right-edge link to `/go`. No avatar, no menu — just the
+identity anchor. The footer wordmark stays as redundancy.
+
+**Replaces**: silent dead-ends. Cross-references the "pick two"
+anti-pattern below: brand-anchor + breadcrumbs + rail is still
+two-anchor types (identity + crumbs), not three different
+navigation languages.
+
+### 10. Curriculum index — TOC sidebar OR accordion
+
+*Surfaced 2026-05-20: "Curriculum should either have a contents
+section, or should be an accordion, or both (currently it is a
+wall)."*
+
+**Today**: `/go` renders every module as a long flat section,
+with all themes shown inline as a grid of cards. With 7 modules
+× ~4-6 themes each, the page is ~10 screens tall and hard to
+navigate.
+
+**Pattern (Stripe Docs, Astro Docs, MDN)**: a sticky left-rail
+TOC listing modules; clicking jumps to the anchor; the rail
+highlights the in-view section via the same IntersectionObserver
+pattern as Pattern 6. *Plus or instead*: each module's theme
+grid collapses to an accordion that defaults open for Module 1
+(launch-gate) and collapsed for Modules 2-7 (scaffolded /
+empty).
+
+**DS primitives**: `<Accordion>` (new) with `defaultOpen` prop;
+reuse `<PageRail>` from Pattern 6 for the TOC. Both can ship
+independently — left-rail first (mechanically smaller), then
+accordion (changes the read flow).
+
+**Replaces**: the "wall of curriculum" UX. A returning learner
+who completed Module 1 can collapse it; a fresh learner sees
+Foundations expanded.
+
+### 11. Homepage as track-overview; DS moves to `/design-system`
+
+*Surfaced 2026-05-20: "The design system should be shown on
+`/design-system`, not on the homepage. The homepage can have a
+bit more content dedicated to offering the Go course, a pattern
+where a future language would slot in alongside/below the Go
+one."*
+
+**Today**: the home page (`/`) shows the hero, one TS↔Go
+example, the DS inventory grid (Buttons / Badges / Keys /
+Tones), and a footer. The DS grid is dev-facing and crowds out
+what the site IS to a new visitor.
+
+**Pattern (Stripe, Vercel)**: home is a **track overview**.
+Today that means a single track ("Go for TypeScript devs") laid
+out as: hero → wedge example → Module-1 overview card with a
+"start here" CTA → a "more languages" slot below ("Rust for TS
+devs — proposed; not authored"). The DS inventory moves to a
+dedicated `/design-system` route that the DS contributor opens
+intentionally; learners never see it.
+
+The future-language slot is the structural commitment: the
+homepage layout treats Go as the first of many, even when it's
+the only one. A second language only requires *content* — no
+homepage restructure.
+
+**DS primitive**: a new `<TrackCard>` for the per-language
+"course offering" block (title + dek + module list + CTA).
+First caller: Go. Second caller (whenever): Rust/Zig/Python/etc.
+
+**Replaces**: the DS-inventory-on-homepage anti-pattern. Adds a
+multi-language-ready layout without committing to multi-language
+content.
+
+### 12. Less pills — alternatives to box-pill identity
+
+*Surfaced 2026-05-20: "I don't like how many visual components
+we have are pills/box-pills, is there a different style we can
+use?"*
+
+**Today**: Badge, Button, ProgressChip, Eyebrow's container all
+use the same `border + rounded-sm + padding` pill shape, with
+colour the only differentiator. The result is repetitive at any
+density: a row of three "pills in slightly different colours"
+even when they're meant to be visually distinct concepts.
+
+**Alternatives**: rather than every-tag-is-a-pill, layer the
+visual language across at least three shapes:
+
+- **Underline-as-accent.** A language identifier renders as
+  `TS` with a 2px bottom border in the language colour, no fill,
+  no border-box. Mono. Smaller footprint, clearer hierarchy.
+  Lands as a `<Tag>` primitive (vs the existing `<Badge>` pill).
+- **Bracket-glyphs.** Text wrapped in mono brackets — `‹TS›`,
+  `[focus]`, `«passed»`. Type-only emphasis; no border at all.
+  Carries the terminal-text identity without the chrome.
+- **Inline-marker.** A leading single-character glyph (▸, ◆, ▪)
+  in the language colour, then text. Works inside flowing prose
+  in a way pills can't.
+
+Pillhood stays appropriate for *actionable* things (Button), but
+for *informational* things (Badge today), bracket-glyphs or
+underline-accents read lighter. Pickup criterion: when adding the
+next informational label that "wants to be a Badge", build the
+alternative shape instead and re-evaluate Badge's role.
+
+This pattern is also a natural test surface for the **Style
+axis** in [14-stylistic-themes.md](14-stylistic-themes.md) — a
+Terminal-style learner gets brackets, a Glass-style learner
+might get filled translucent badges, etc.
+
 ## Anti-patterns we explicitly skip
 
 These came up in the research and we're naming them so they
@@ -274,6 +401,19 @@ Per pattern, the trigger for actually doing it:
 - **Pattern 8** (hairline dividers) — *landed 2026-05-19* on the
   home page. Audit not run on other pages because they didn't
   exhibit the panel-as-group anti-pattern.
+- **Pattern 9** (persistent back-to-home) — *next pickup,
+  surfaced 2026-05-20.* Cheap (one header strip in
+  BaseLayout); blocks no other work; immediately fixes the
+  dead-end UX on /go, /settings, /privacy.
+- **Pattern 10** (curriculum TOC / accordion) — pickup
+  alongside Module 2+ content, since the wall-of-curriculum
+  problem gets worse with more content.
+- **Pattern 11** (track-overview homepage + `/design-system`
+  route) — pickup before launch; the DS-inventory-on-home is
+  the worst remaining "this looks like a dev's repo" cue.
+- **Pattern 12** (less pills) — explore alongside the **Style**
+  axis from design-docs/14 so the new shapes have a thematic
+  home rather than landing as one-off primitives.
 
 ## Cross-references
 

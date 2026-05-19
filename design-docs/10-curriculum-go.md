@@ -166,6 +166,18 @@ concrete TS↔Go content per slot, hints, and notes. Example for
 this illustration drifted from the implementation as exercises
 landed; the shipped order is canonical.)
 
+**Known pedagogy gap, flagged 2026-05-20:** slot 7 introduces the
+multi-declaration shape `a, b := 1, 2` as a fill-line, but this
+shape doesn't appear in any prior MCQ. A learner reaching slot 7
+has to invent the syntax. Per
+[02-pedagogy.md](02-pedagogy.md#introducing-a-new-pattern-rule),
+the fix options are: add a multi-decl MCQ slot, move the
+multi-decl fill-line later (after a freeform demonstrates it),
+or preview the shape in an earlier MCQ. A full per-theme audit
+for "new shape introduced inside fill-line/freeform without
+prior MCQ" is part of Module 1's pre-launch QA pass and
+re-applied to every Module 2+ theme as it lands.
+
 Pass 3 is per-theme work; doesn't have to land all at once. Each theme's
 Pass 3 lives in `design-docs/lessons/<module>/<theme>.md` (planned —
 not yet a directory).

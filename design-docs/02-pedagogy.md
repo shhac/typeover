@@ -89,6 +89,43 @@ Total: 9 exercise slots per theme. The mix is tunable per-theme — some
 concepts justify more recognition (anything counter-intuitive); some
 benefit from extra freeform (anything mechanical).
 
+### Introducing-a-new-pattern rule
+
+*Surfaced 2026-05-20 from user feedback: "Some of our examples
+throw us in the deep end, e.g. multi assignment happens as
+fill-line before we even get a multiple choice on it."*
+
+The progression above is the *shape* of a theme, not a strict
+order. The rule that takes precedence:
+
+> **Any pattern a learner hasn't seen yet must appear in an MCQ
+> before it appears in a fill-line or freeform exercise.**
+
+Concrete example: `foundations/variables` shipped slot 7 as a
+fill-line for the multi-declaration shape `a, b := 1, 2` — but
+this shape never appears in the prior slots' MCQs (which cover
+single-var declarations only). A learner reaching slot 7 has to
+*invent* the syntax. The fix is either:
+
+1. Add an MCQ slot (8th in the theme — or repurpose an
+   existing one) that introduces the multi-declaration shape as
+   a recognition exercise, OR
+2. Move the fill-line further along after the freeform slots
+   have demonstrated the shape via the canonical-as-example,
+   OR
+3. Add the shape to an earlier MCQ's prompt or distractor as a
+   "you'll see this later" preview.
+
+The 9-slot target is a *guideline*, not a contract — a theme
+introducing N novel patterns can grow to 10-11 slots if 1-3
+above forces it. Better a slightly longer theme than a learner
+who has to guess.
+
+Per-theme audit: every theme's pre-launch QA includes walking
+through the slot order with "what's new in this slot vs what
+existed before?" and flagging any slot where a new shape lands
+inside a fill-line or freeform without prior MCQ exposure.
+
 ## Parameterised exercises (replayability)
 
 **No exercise is 100% static.** Every exercise is a *generator* that

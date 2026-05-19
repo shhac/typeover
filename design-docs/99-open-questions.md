@@ -76,6 +76,64 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
+- **Auto-indent on code-box Enter** *(surfaced 2026-05-20.)*
+  In Freeform's `<textarea>` (and the future CodeMirror surface),
+  pressing Enter on a line beginning `^(\s+)` should prepend the
+  same whitespace prefix to the new line — standard editor
+  behaviour. Today Enter drops to column 0; the learner has to
+  re-indent every nested block by hand. Implementation: an
+  `onKeyDown` on the textarea that intercepts Enter, reads the
+  current line's leading whitespace via `value.slice(0,
+  selectionStart).split("\n").pop()`, and inserts `"\n" +
+  prefix` via `insertAtSelection`. Belongs in
+  `src/lib/textarea-insert.ts` as a sibling helper to the
+  existing functions; one-line wire-up in Freeform. CodeMirror
+  handles this for free when #23 lands.
+
+- **Homepage Shortcuts button — decide and act** *(surfaced
+  2026-05-20.)* The `?` Shortcuts button on `/` is a first-class
+  CTA that does nothing. Two options: (a) **build the overlay**
+  — a `<KeyboardShortcuts>` Solid island that opens on
+  `?`-keydown OR button click, lists the keybinds (`?` to open,
+  `Esc` to close, exercise-page shortcuts when added later); or
+  (b) **remove the button** entirely until shortcuts exist.
+  Recommendation: (b) — option (a) commits us to authoring and
+  maintaining a shortcuts list the rest of the site doesn't yet
+  earn. Re-add when there are ≥3 site-wide shortcuts worth
+  documenting. Tiny change; ship in the homepage redesign
+  (design-docs/15 pattern 11) commit.
+
+- **Module 2+ content authoring velocity** *(surfaced
+  2026-05-20: "lets also build out more of the exercises".)*
+  Module 1 ships 54 exercises across 6 themes; Modules 2-7 are
+  scaffolded with empty themes. Authoring an exercise takes
+  roughly 30-60 minutes (prompt + canonical + 3 hints + 4
+  distractors + runtime:verify). At 9 exercises × ~25 themes
+  remaining = ~225 exercises, that's ~100-200 hours of focused
+  authoring before the curriculum is content-complete. Realistic
+  options:
+  1. **Burst-author Module 2 (Collections)** as the immediate
+     next big push — 3 themes × 9 = 27 exercises. Smallest
+     module after Foundations; covers the highest-value Go-vs-
+     TS divergence (arrays vs slices, no Array-prototype
+     methods, range iteration). Estimated ~15-30 hours of
+     focused work.
+  2. **Apply the introducing-new-patterns rule** (see
+     02-pedagogy.md) during authoring rather than as a
+     back-port — each new shape gets an MCQ slot before any
+     fill-line/freeform.
+  3. **Use `content:new theme <id>`** (parked in this doc;
+     pickup criterion is reached now that Module 2 is the next
+     authoring push) to stamp out the 27 exercise stubs in one
+     command, then fill them iteratively rather than
+     copy-pasting from `foundations/`.
+
+  Decision point not made: which module after Collections?
+  Modules 3-5 (Types & methods, Interfaces & generics, Errors
+  & packaging) translate well with bilingual scaffolding;
+  Modules 6-7 (Concurrency, Idioms) need the server-fallback
+  runtime for some exercises. Order TBD when Module 2 ships.
+
 - **Targeted wrong-pattern feedback on fill-line** *(mechanism
   landed 2026-05-19; content upgrade is incremental.)* The
   fill-line redesign retained `generator.distractors` as an

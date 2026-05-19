@@ -1,17 +1,21 @@
-# 14 — Stylistic themes (density + shape)
+# 14 — Stylistic themes (density + shape + style)
 
-Three theme **axes**, each independently set by the learner:
+Four theme **axes**, each independently set by the learner:
 
 1. **Colour** — `dark` / `light` (today) + `hc-*`, `sepia`, etc. (parked).
    See [13-themes.md](13-themes.md).
 2. **Density** — `compact` / `normal` / `airy`. How much whitespace
    the site uses. *This doc.*
-3. **Shape** — `sharp` / `normal` / `rounded`. How rounded the
-   corners are. *This doc.*
+3. **Shape** — `sharp` / `normal` / `rounded` / `pill`. How rounded
+   the corners are. *This doc.*
+4. **Style** — `terminal` (default) / `cardboard` / `textbook` /
+   `glass` / `islands`. The aesthetic "feel" of surfaces and
+   chrome, composed on top of the other three axes. *This doc;
+   proposed 2026-05-20, not yet implemented.*
 
-The three axes compose: a learner can run `dark` + `compact` +
-`rounded` if that's what reads best to them. The DS holds the
-contract that any combination just works.
+The four axes compose: a learner can run `dark` + `compact` +
+`rounded` + `glass` if that's what reads best to them. The DS holds
+the contract that any combination just works.
 
 ## Why two new axes
 
@@ -118,10 +122,111 @@ The shape theme rebinds the three at once:
   --radius-md: 8px;
   --radius-lg: 12px;
 }
+:root[data-radius="pill"] {
+  /* Even rounder than "rounded" — proposed 2026-05-20. Small
+   * UI lands as pills; large surfaces approach half-height
+   * curvature, but the tokens stay finite (no 9999px) so
+   * touch-target visuals don't explode unexpectedly. */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+}
 ```
 
 The component layer doesn't change — every `rounded-sm` /
 `rounded-md` / `rounded-lg` already reads through these.
+
+### Style — surface aesthetic, composed on top
+
+*Proposed 2026-05-20, not yet implemented.*
+
+The previous axes change measurements (spacing, radii); the
+**Style** axis changes the *aesthetic vocabulary* of surfaces and
+chrome — borders, shadows, textures, accent shapes — without
+changing what anything means. A "Glass" learner and a "Cardboard"
+learner read the same content under different visual feels.
+
+Catalogue (in launch order):
+
+#### `terminal` (default, today)
+
+The current Bloomberg-meets-airy-Linear aesthetic. Hairline
+borders only; flat surfaces; no shadows except focus rings; mono
+accents (filename strips, eyebrow labels). This is what every
+shipped page is right now. It becomes the default of the Style
+axis, named explicitly so other styles know what they're
+diverging from.
+
+#### `cardboard`
+
+Warm off-white-on-brown surfaces with very subtle paper-grain
+cues (low-noise `background-image` pattern). Borders soften
+into recessed `inset` shadows that read as folded-paper edges.
+Tokens (proposed):
+
+```css
+:root[data-style="cardboard"] {
+  --surface-pattern: url("/textures/paper-grain.svg");
+  --shadow-panel: inset 0 0 0 1px var(--color-bg-inset),
+                  0 1px 0 var(--color-bg-elevated);
+  /* warm-tilt overrides for the colour tokens go here, but the
+   * dark/light axis still provides the floor — cardboard's
+   * "warm tilt" is in addition to whichever colour is active */
+}
+```
+
+#### `textbook`
+
+Cleaner, almost-academic feel. Single hairline left-rule on
+section blocks (margin-only emphasis); restored serif on prose
+headings (`--font-serif: "Source Serif Pro"`); code blocks
+inherit a subtle yellow-tape gutter to read like an annotated
+textbook page.
+
+#### `glass`
+
+Translucent panels (`background: color-mix(in oklab,
+var(--color-bg-panel) 80%, transparent)`); subtle
+`backdrop-filter: blur(8px)`; soft drop shadows. The brand
+mono-amber stays but panels feel layered above the page rather
+than welded to it. Hard requirement: `backdrop-filter` is
+optional polish — non-supporting browsers fall back to opaque
+panels via `@supports` guard.
+
+#### `islands`
+
+Distinct floating cards with stronger drop shadows
+(`--shadow-island: 0 8px 24px -8px var(--color-shadow-key)`).
+Panels physically separate from the page background, breathing
+on all sides. Reads modern-app rather than terminal.
+
+### Style contract
+
+**Each style adds at most three token overrides + one optional
+texture URL.** No JS, no component-level conditionals, no
+per-style component code. If a style needs the DS to know what
+style is active (e.g. to swap a Tailwind class), the DS has
+leaked — styles are a token-layer concern only.
+
+The component layer reads `--shadow-panel`, `--shadow-island`,
+`--surface-pattern`, `--border-style` etc. as it already reads
+`--color-bg-panel`. New tokens introduced by the style axis go
+in `@theme` first with the `terminal` default values; each
+`:root[data-style="…"]` block re-binds them.
+
+### What Style does *not* do
+
+- **Doesn't introduce new component variants** beyond what the
+  token set provides. A "card" looks different under glass and
+  cardboard because the *shadow token* changed, not because the
+  Card component branches on style.
+- **Doesn't fight the colour axis.** Cardboard isn't an
+  alternative to "light" — it's "light + warm-paper" or
+  "dark + warm-paper" depending on the colour axis. The same
+  amber stays amber; the same Go cyan stays Go cyan.
+- **Doesn't replace the visual identity.** Mono-amber-on-near-
+  black is typeover's identity floor; styles are surface-level
+  variations, not rebrands.
 
 ### What density / shape do *not* touch
 
@@ -151,22 +256,22 @@ for opt-in.
 
 ## Persistence
 
-Two new localStorage keys:
+Three new localStorage keys:
 
 - `typeover:density` — `"compact"` / `"normal"` / `"airy"`
-- `typeover:radius` — `"sharp"` / `"normal"` / `"rounded"`
+- `typeover:radius` — `"sharp"` / `"normal"` / `"rounded"` / `"pill"`
+- `typeover:style` — `"terminal"` / `"cardboard"` / `"textbook"` /
+  `"glass"` / `"islands"` *(reserved; not yet read)*
 
 Same shape as `typeover:theme`. The existing bootstrap script in
-`BaseLayout.astro` extends to read all three keys synchronously
-before paint — adding two `getItem` reads is cheap and keeps
-the no-FOUC contract.
+`BaseLayout.astro` extends to read each key synchronously before
+paint — adding `getItem` reads is cheap and keeps the no-FOUC
+contract.
 
 ## Selector UX
 
-Settings page grows from one radio group to three. The colour
-group stays at the top (most impactful); density and shape are
-below. Stacked, not tabbed — they're related concerns and the
-page is short.
+Settings page hosts four radio groups, stacked, ordered by
+impact (colour most impactful, style last):
 
 ```
 Theme
@@ -183,12 +288,21 @@ Corners
   ○ Sharp
   ● Normal
   ○ Rounded
+  ○ Pill
+
+Style
+  ● Terminal
+  ○ Cardboard
+  ○ Textbook
+  ○ Glass
+  ○ Islands
 ```
 
-A live preview region under each group helps the learner see what
-the choice does. The DS gives this for free: render a Panel +
+A live preview region above the radios reflects the chosen
+combination. The DS gives this for free: render a Panel +
 Button + Badge + CodeBlock inside the `<html>`-attribute-aware
-cascade and they reflect the picker instantly.
+cascade and they reflect the picker instantly. *Live preview
+landed 2026-05-19.*
 
 ## DS leaks to prevent (new)
 
