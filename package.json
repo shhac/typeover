@@ -27,6 +27,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.3",
     "comlink": "^4.4.2",
+    "diff": "^9.0.0",
     "solid-js": "^1.9.13",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.7.0",

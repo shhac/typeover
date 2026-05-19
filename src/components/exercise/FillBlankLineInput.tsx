@@ -7,6 +7,7 @@ import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { CodeBlock } from "../ds/CodeBlock";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
+import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
 import { RunResultPanel } from "./RunResultPanel";
 
@@ -83,6 +84,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       hints={props.hints}
       hintValues={instance().values}
       phase={phase}
+      ownsReveal
       extraPickingActions={toolbar}
       extraWrongActions={toolbar}
       correctMessage={<span>Correct — your line produces the expected output.</span>}
@@ -123,6 +125,16 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
           }}
         </For>
       </CodeBlock>
+      <InlineCanonicalReveal
+        submission={input}
+        /* The canonical for the LINE the learner is typing — not the
+         * full scaffolded program. Falls back to "" if no blank
+         * segment is present (variant generators, which the schema
+         * already rejects for fill-line). */
+        canonical={(instance().blankSegments ?? []).find((s) => s.kind === "blank")?.expected ?? ""}
+        mode="word"
+        forceOpen={() => phase.revealed()}
+      />
       <Show when={yaegi.runResult()}>
         {(r) => <RunResultPanel result={r()} expectStdout={props.expectStdout} />}
       </Show>

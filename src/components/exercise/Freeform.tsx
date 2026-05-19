@@ -4,6 +4,7 @@ import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { ExerciseShell } from "./ExerciseShell";
+import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
 import { RunResultPanel } from "./RunResultPanel";
 
@@ -21,6 +22,25 @@ interface FreeformProps {
   themeHref?: string;
 }
 
+/* Default scaffold the textarea starts with. Per the user's
+ * 2026-05-19 ask, freeform must NOT prefill the canonical — the
+ * exercise is about the learner producing the code, and a prefilled
+ * answer collapses that to a delete-and-Run cycle. The scaffold is
+ * deliberately barren: package + import + an empty main with a
+ * comment marker. When per-exercise scaffolds become useful (e.g.
+ * an exercise that wants the learner to FILL a specific function),
+ * add a `scaffold` field to the schema and fall back here when
+ * unset. */
+const DEFAULT_SCAFFOLD = `package main
+
+import "fmt"
+
+func main() {
+\t// implement here
+\t_ = fmt.Println
+}
+`;
+
 /*
  * v0 freeform exercise — textarea editor, Run button, stdout-match
  * grading. The run lifecycle (running / runResult / run / reset)
@@ -35,7 +55,7 @@ interface FreeformProps {
 export function Freeform(props: FreeformProps) {
   const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
 
-  const [code, setCode] = createSignal(instance().canonical);
+  const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
 
   const yaegi = useYaegiRun({ buildProgram: () => code() });
 
@@ -51,7 +71,7 @@ export function Freeform(props: FreeformProps) {
     canSubmit,
     onAnother: () => {
       another();
-      setCode(instance().canonical);
+      setCode(DEFAULT_SCAFFOLD);
       yaegi.clear();
     },
     onTryAgain: () => yaegi.clear(),
@@ -75,6 +95,7 @@ export function Freeform(props: FreeformProps) {
       hints={props.hints}
       hintValues={instance().values}
       phase={phase}
+      ownsReveal
       extraPickingActions={toolbar}
       extraWrongActions={toolbar}
       correctMessage={<span>Correct — your program prints the expected output.</span>}
@@ -96,6 +117,12 @@ export function Freeform(props: FreeformProps) {
         value={code()}
         onInput={(e) => setCode(e.currentTarget.value)}
         disabled={phase.current() === "right"}
+      />
+      <InlineCanonicalReveal
+        submission={code}
+        canonical={instance().canonical}
+        mode="line"
+        forceOpen={() => phase.revealed()}
       />
       <Show when={yaegi.runResult()}>
         {(r) => <RunResultPanel result={r()} expectStdout={props.expectStdout} />}

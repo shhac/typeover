@@ -76,18 +76,24 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
-- **Reveal-diff UX** *(surfaced 2026-05-19 design-goal pass, not yet
-  built).* design-docs/06 commits to "Reveal diff — show submission
-  vs canonical, highlight the divergence." The current
-  `<RevealButton>` only shows the canonical, no diff. Applies
-  primarily to fill-word + fill-line + freeform (MCQ has the option
-  list as its visible diff surface). When picked up: pick a small
-  diff lib (e.g. `diff` v5+ on npm — well-established, license-clean)
-  for line/word diff, render a 2-column or inline-highlight view
-  driven off the existing `revealed` phase signal. Pairs with the
-  "distractors as known-wrong-pattern bank" follow-up — a learner
-  whose submission matches a distractor verbatim could see a richer
-  per-distractor explanation instead of a generic diff.
+- **Reveal-diff UX** *(landed 2026-05-19.)* Inline "Show canonical"
+  toggle next to the input area on fill-line + freeform —
+  `<InlineCanonicalReveal>` renders `<DiffView>` against the
+  learner's current input. Word-level diff for fill-line (one line)
+  and line-level for freeform (multi-line program). Submission-only
+  tokens render with red strikethrough; canonical-only tokens with
+  green underline. The shell-footer `<RevealButton>` is hidden for
+  these types via `ownsReveal` (still mounted for MCQ where the
+  options ARE the visible canonical). The wrong-phase "Reveal
+  correct" button auto-opens the inline panel via a `forceOpen`
+  accessor. Library: `diff@9.x` (well-established, MIT, ~17KB).
+  Future enhancements: per-distractor explanations (pair with the
+  known-wrong-pattern bank surfaced by the fill-line redesign).
+
+  Also (same iteration): freeform no longer prefills the
+  textarea with the canonical — starts with a generic `package main`
+  scaffold. Per-exercise scaffolds remain a future schema field
+  (`scaffold: |- ...`) once authors want exercise-specific starts.
 
 - **Server-fallback runtime hosting** *(surfaced 2026-05-19 design-
   goal pass, not yet built; original entry below merged here for

@@ -65,6 +65,11 @@ interface ExerciseShellProps {
    *  absent. */
   themeHref?: string;
 
+  /** When true, the shell's footer RevealButton is hidden — the
+   *  consumer is rendering its own reveal surface inline near the
+   *  input area. fill-line + freeform set this; MCQ does not. */
+  ownsReveal?: boolean;
+
   /** The answer region — radio fieldset, blank inputs, code editor. */
   children: JSX.Element;
 }
@@ -167,7 +172,9 @@ export function ExerciseShell(props: ExerciseShellProps) {
           values={props.hintValues}
           onReveal={() => recordHintUsed(props.exerciseId)}
         />
-        <RevealButton canonical={props.canonical} lang="go" />
+        <Show when={!props.ownsReveal}>
+          <RevealButton canonical={props.canonical} lang="go" />
+        </Show>
       </Stack>
     </Stack>
   );
