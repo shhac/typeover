@@ -115,11 +115,16 @@ describe("<Freeform> — submit gate", () => {
 describe("<Freeform> — happy path", () => {
   it("edit → Run → stdout match → Submit records pass + locks textarea", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
-    const { container, getByText } = renderFF();
+    const { container, getAllByText, getByText } = renderFF();
     expect(slot()?.instancesSeen).toBe(1);
     const ta = textarea(container);
     setVal(ta, 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello") }');
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom: the toolbar Run from
+     * RunResetToolbar (always visible) and the MobileKeyBar Run
+     * shortcut (lg:hidden in real browsers — jsdom doesn't fire
+     * media queries so it's in the tree too). Both fire the same
+     * yaegi.run; click the first one. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
@@ -133,9 +138,14 @@ describe("<Freeform> — happy path", () => {
 describe("<Freeform> — wrong path", () => {
   it("stdout mismatch → wrong-phase actions surface, no pass or fail recorded", async () => {
     evalMock.mockResolvedValueOnce({ stdout: "wrong\n", stderr: "", error: "" });
-    const { container, getByText } = renderFF();
+    const { container, getAllByText, getByText } = renderFF();
     setVal(textarea(container), "package main\nfunc main(){}");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom: the toolbar Run from
+     * RunResetToolbar (always visible) and the MobileKeyBar Run
+     * shortcut (lg:hidden in real browsers — jsdom doesn't fire
+     * media queries so it's in the tree too). Both fire the same
+     * yaegi.run; click the first one. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
@@ -151,9 +161,14 @@ describe("<Freeform> — wrong path", () => {
 describe("<Freeform> — reveal flow", () => {
   it("Reveal correct records exactly one failure and hides the Reveal button", async () => {
     evalMock.mockResolvedValueOnce({ stdout: "wrong\n", stderr: "", error: "" });
-    const { container, getByText, queryByText } = renderFF();
+    const { container, getAllByText, getByText, queryByText } = renderFF();
     setVal(textarea(container), "package main\nfunc main(){}");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom: the toolbar Run from
+     * RunResetToolbar (always visible) and the MobileKeyBar Run
+     * shortcut (lg:hidden in real browsers — jsdom doesn't fire
+     * media queries so it's in the tree too). Both fire the same
+     * yaegi.run; click the first one. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
@@ -168,10 +183,15 @@ describe("<Freeform> — reveal flow", () => {
 describe("<Freeform> — Another resets scaffold + runResult", () => {
   it("Another after pass returns the textarea to the scaffold and clears runResult", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
-    const { container, getByText } = renderFF();
+    const { container, getAllByText, getByText } = renderFF();
     const ta = textarea(container);
     setVal(ta, 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello") }');
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom: the toolbar Run from
+     * RunResetToolbar (always visible) and the MobileKeyBar Run
+     * shortcut (lg:hidden in real browsers — jsdom doesn't fire
+     * media queries so it's in the tree too). Both fire the same
+     * yaegi.run; click the first one. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });

@@ -133,6 +133,7 @@ Shipped in v0 (initial set, will be retuned for airy direction):
 | `HintButton.tsx` | 3-layer hint reveal with escalation. |
 | `RevealButton.tsx` | "Show canonical" / "Reveal diff" with destructive-action confirmation. |
 | `LangCrumbs.tsx` | TS → arrow → Go breadcrumb strip; takes extras via `children`. |
+| `MobileKeyBar.tsx` | Sticky Go-symbol bar docked above the mobile keyboard. `role="toolbar"`, `lg:hidden` on desktop. Pairs with `src/lib/textarea-insert.ts`. design-docs/08 + 99. |
 | `ProgressChip.tsx` | Pure mono "passed/total" chip (theme variant) or "seen N · passed M" (exercise variant). No localStorage — see `src/components/progress/` for the hydrated wrappers. design-docs/11. |
 
 Planned for v0 (still to be added):
@@ -141,7 +142,6 @@ Planned for v0 (still to be added):
 |---|---|
 | `Choice.tsx` | Radio-style option for MCQ exercises. *(MCQ today renders via `McqOption.tsx` in `src/components/exercise/`; the DS-layer extraction is deferred until another caller appears.)* |
 | `Tile.tsx` | Drag-and-drop tile for fill-in-the-blank exercises. *(Retired — fill-line redesign moved off the tile UX; see design-docs/99 fill-line entry.)* |
-| `MobileKeyBar.tsx` | Symbol bar above the editor on small screens. *(Surfaced as a concrete proposal 2026-05-19 — see design-docs/99 for the proposed shape; pickup gated on real-device mobile QA.)* |
 | `ProgressBar.tsx` | Theme/module progress indicator. *(Parked — see design-docs/11; `<ProgressChip>` covers the v0 surface and a bar would invite the gamification creep the project's posture rejects.)* |
 
 ## Deferred: generic `Crumbs` two-badge breadcrumb

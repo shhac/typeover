@@ -96,27 +96,42 @@ Flagged for "do later when triggered", not now.
   12-YAML upgrade; content-lint warning + tests).
 
 - **MobileKeyBar — sticky Go-symbol bar above the mobile
-  keyboard** *(surfaced 2026-05-19 design-goal pass, not built;
-  named in design-docs/05's planned-components table since v0.)*
-  The current Freeform / FillBlankLineInput on a mobile viewport
-  is a plain `<textarea>` — every Go symbol (`{`, `}`, `:=`, `&`,
-  `*`, `\t`) is 2–3 taps deep on stock iOS/Android keyboards,
-  which silently invalidates the design-docs/08 commitment to
-  *full* mobile freeform editing. Proposal: new
-  `src/components/ds/MobileKeyBar.tsx` with a `role="toolbar"`
-  pinned `position: fixed; bottom: 0` on `<1024px`, hidden via
-  `lg:hidden` on desktop. Default key set: `{ } ( ) [ ] < > := =
-  * & " ; Tab ⏎`. Two callers (Freeform, FillBlankLineInput) +
-  a shared `insertAtSelection` helper in
-  `src/lib/textarea-insert.ts`. Pickup criterion: real-device
-  mobile QA from the launch checklist surfaces the freeform
-  unusability (it will), OR before exposing freeform on a
-  share-target link that lands a mobile-first audience. Risks:
-  iOS Safari `visualViewport` overlay (need real-device, not
-  simulator); Chrome Android `VirtualKeyboard API` is cleaner
-  but Chromium-only; caret restoration after Solid re-renders.
-  Cost: ~1 DS primitive + 1 helper + 2 caller wires + tests
-  (1–3 commits).
+  keyboard** *(landed 2026-05-19 — first cut on Freeform.)*
+  `src/components/ds/MobileKeyBar.tsx` ships with
+  `role="toolbar" aria-label="Code symbols"`, pinned
+  `position: fixed; bottom: 0` on `<1024px`, hidden via
+  `lg:hidden` on desktop. Default key set (`GO_KEYS`):
+  `Tab { } ( ) [ ] < > := = * & " ; ⏎` plus an optional `Run`
+  shortcut on the right. Each key uses `onPointerDown` +
+  `preventDefault()` to keep the textarea focused on iOS
+  Safari (without this the soft keyboard collapses on tap).
+  Touch targets are 44×44 via `min-w-11 min-h-11`. The
+  `src/lib/textarea-insert.ts` helper drops text at the
+  caret via `setRangeText`, preserves native undo, fires a
+  bubbling `input` event so Solid signals re-sync.
+  Browser-verified at 390×844 (Chromium mobile emulation):
+  clicking the `{` key inserts `{` at the caret; at 1280px
+  the bar is `display: none` per `lg:hidden`.
+
+  Open follow-ups:
+  - **FillBlankLineInput wiring.** Today the bar is only on
+    Freeform. Adding it to fill-line means forwarding a ref
+    through BlankInput so the bar's `onInsert` can target
+    the active blank — straightforward but not done yet.
+  - **iOS Safari `visualViewport` overlay.** The soft
+    keyboard overlays the layout viewport, so a `bottom: 0`
+    element lands BEHIND the keyboard. Fix: subscribe to
+    `visualViewport.resize` and translate the bar by
+    `(window.innerHeight - visualViewport.height)`. Needs
+    real-device verification, not simulator — open until
+    the mobile QA from the launch checklist runs.
+  - **Chrome Android `VirtualKeyboard API`** + the
+    `env(keyboard-inset-height)` CSS env var is the cleaner
+    fix for Chromium; can ship alongside the iOS branch.
+  - **Auto-Run shortcut on fill-line:** the proposal
+    included a Run shortcut on the bar. Today it fires
+    `yaegi.run()` on Freeform only; once fill-line is
+    wired it'll grow the same shortcut.
 
 - **`content:new theme <id>` — schema-aware scaffolder**
   *(surfaced 2026-05-19 design-goal pass; previously noted as

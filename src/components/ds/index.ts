@@ -11,6 +11,7 @@ export { Heading } from "./Heading";
 export { HintButton } from "./HintButton";
 export { Kbd } from "./Kbd";
 export { LangCrumbs } from "./LangCrumbs";
+export { GO_KEYS, MobileKeyBar, type KeySpec } from "./MobileKeyBar";
 export { Panel } from "./Panel";
 export { ProgressChip } from "./ProgressChip";
 export { RevealButton } from "./RevealButton";
