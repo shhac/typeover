@@ -112,20 +112,28 @@ Flagged for "do later when triggered", not now.
   implementations based on the exercise's runtime tag. Module 1
   doesn't need this; Modules 6-7 likely will.
 
-- **Authoring CLI — `content:lint`** *(surfaced 2026-05-19 design-
-  goal pass, not yet built).* design-docs/09 calls out three tools:
-  `pnpm exercise:check`, `pnpm content:lint`, `pnpm content:new
-  theme`. The first is partially done as `pnpm runtime:verify`
-  (freeform + fill-line canonicals against Yaegi). The other two
-  are open. `content:lint` is the highest-value next tool — it
-  catches authoring errors that today only surface at `pnpm build`
-  with a long Astro stack trace: hint-tuple length != 3, missing
-  prerequisite themes, prerequisites that point at unknown theme
-  IDs, missing or off-by-one slot ordering, theme without a parent
-  module. When picked up: walk every YAML, build a name-graph,
-  apply checks, print a markdown report with file:line refs.
-  Reuses the existing `yaml` package and `~/lib/content-schema`
-  Zod schemas. ~200 LOC for v0.
+- **Authoring CLI — `content:lint`** *(landed 2026-05-19.)*
+  `scripts/content-lint.mjs`, invoked via `pnpm content:lint`.
+  Fills the graph layer (cross-file integrity) that the Zod schema
+  in `~/lib/content-schema` (per-file) and `pnpm runtime:verify`
+  (per-canonical) can't see. Checks today:
+    - module orders unique
+    - theme.moduleId → existing module
+    - theme.prerequisites → existing themes
+    - theme orders unique within their module
+    - exercise.themeId matches path-derived parent + → existing theme
+    - exercise orders unique + contiguous 1..N within a theme
+    - half-authored theme warning (1 ≤ exercises < 9)
+    - empty-theme summary line (pre-launch stubs)
+  Output is markdown with file:line refs; exits 1 on errors, 0 on
+  warnings-only. Today the repo passes 0 errors / 0 half-authored
+  warnings (25 empty stubs for M2+ themes are summarised in one
+  line).
+
+  The third design-docs/09 tool — `content:new theme <id>` —
+  remains unbuilt and lower priority; authors today copy an
+  existing theme directory. Pickup criterion: when the first
+  community contributor lands and bounces off the manual scaffold.
 
 - **fill-line UX redesign: input + Yaegi grading.** *(Surfaced 2026-05-19
   via user feedback.)* fill-line currently renders as MCQ-with-tile-UX
