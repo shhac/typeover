@@ -102,7 +102,7 @@ export function setDensity(next: DensityId): void {
 
 /* =============================== Shape ============================== */
 
-export const RADII = ["sharp", "normal", "rounded"] as const;
+export const RADII = ["sharp", "normal", "rounded", "pill"] as const;
 export type RadiusId = (typeof RADII)[number];
 
 export const RADIUS_STORAGE_KEY = "typeover:radius";

@@ -147,6 +147,11 @@ const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
     label: "Rounded",
     description: "Friendlier 4–12px corners.",
   },
+  {
+    value: "pill",
+    label: "Pill",
+    description: "Generously curved — 8–24px. Small elements pill out.",
+  },
 ];
 
 /* Focused mini-canvas showing the visual elements every axis

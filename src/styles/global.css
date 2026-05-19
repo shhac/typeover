@@ -114,6 +114,15 @@
   --radius-md: 8px;
   --radius-lg: 12px;
 }
+:root[data-radius="pill"] {
+  /* Even rounder than "rounded" — see design-docs/14. Small
+   * UI elements approach pills; large surfaces feel
+   * generously curved without exploding into 9999px
+   * half-height shapes. */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+}
 
 :root[data-theme="light"] {
   /* Surfaces — off-white base, subtle elevated tints toward warm grey. */

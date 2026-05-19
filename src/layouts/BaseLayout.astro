@@ -56,7 +56,8 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
           document.documentElement.dataset.radius =
             pinnedRadius === "sharp" ||
             pinnedRadius === "normal" ||
-            pinnedRadius === "rounded"
+            pinnedRadius === "rounded" ||
+            pinnedRadius === "pill"
               ? pinnedRadius
               : "normal";
         } catch (_) {
@@ -88,6 +89,35 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
     <title>{title}</title>
   </head>
   <body class="flex flex-col min-h-screen">
+    {/*
+      * Site-wide brand anchor — always-present link to home.
+      * design-docs/15 pattern 9. Suppressed on the homepage itself
+      * (the hero IS the brand anchor there), so the wordmark
+      * doesn't repeat itself two lines apart.
+      */}
+    {Astro.url.pathname !== "/" && (
+      <header
+        class="border-b border-border-default text-xs font-mono"
+      >
+        <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center">
+          <a
+            href="/"
+            class="text-fg-secondary hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+            aria-label="typeover — back to home"
+          >
+            <span class="text-accent-ts">type</span><span class="text-accent-amber">over</span>
+          </a>
+          {Astro.url.pathname !== "/go" && (
+            <a
+              href="/go"
+              class="text-fg-muted hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+            >
+              curriculum →
+            </a>
+          )}
+        </div>
+      </header>
+    )}
     <div class="flex-1">
       <slot />
     </div>
