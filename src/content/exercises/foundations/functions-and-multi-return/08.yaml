@@ -1,0 +1,47 @@
+target: go
+themeId: foundations/functions-and-multi-return
+type: freeform
+order: 8
+prompt: |
+  Write a Go function `divmod(a, b int) (int, int)` that returns the
+  integer quotient and remainder of `a / b`. Call it with `divmod(17, 5)`
+  from `main` and print the two results on one line via
+  `fmt.Println(q, r)`. The expected output is `3 2`.
+
+  Multiple-return functions are the headline-new shape of Theme 6 —
+  every TypeScript dev's first instinct is to return a tuple or an
+  object. Go just lets you return both values directly.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function divmod(a: number, b: number): [number, number] {
+      return [Math.trunc(a / b), a % b];
+    }
+    const [q, r] = divmod(17, 5);
+    console.log(q, r);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func divmod(a, b int) (int, int) {
+    	return a / b, a % b
+    }
+
+    func main() {
+    	q, r := divmod(17, 5)
+    	fmt.Println(q, r)
+    }
+expectStdout: |
+  3 2
+runtime: yaegi
+hints:
+  - "Two-arg same-type signature: `func divmod(a, b int) (int, int)`. Repeating the type once is enough — Go infers the same `int` for both parameters."
+  - "Return is `return a / b, a % b` — two expressions separated by a comma, matching the two return types."
+  - "Destructure at the call site with `q, r := divmod(17, 5)`. This is the same shape that `(result, error)` returns will use everywhere from Module 5 on."
+notes: |
+  First freeform of Theme 6. Drills the (T1, T2) multi-return shape
+  that becomes (result, error) in Module 5. The Go `int / int`
+  truncation (no fractional result) is also visible here — same
+  no-implicit-conversion family as Theme 2.
