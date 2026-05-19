@@ -100,9 +100,10 @@ This is the hardest mobile UX:
 - **Provide a "common symbols" bar** above the keyboard for `{`, `}`,
   `(`, `)`, `[`, `]`, `:=`, `=`, `*`, `&`. This is the single most
   productive mobile-editor affordance — phones bury symbols two
-  taps deep. *(Shipped 2026-05-19 on Freeform — `MobileKeyBar` in
-  `src/components/ds/`. Wiring on fill-line + iOS Safari
-  visualViewport polish are open follow-ups; see design-docs/99.)*
+  taps deep. *(Shipped 2026-05-19 on both Freeform and
+  FillBlankLineInput — `MobileKeyBar` in `src/components/ds/`.
+  iOS Safari visualViewport polish is the open follow-up; see
+  design-docs/99.)*
 - **Tabs** insert two spaces (no real tabs).
 - **No** vim mode / advanced editor modes on mobile.
 

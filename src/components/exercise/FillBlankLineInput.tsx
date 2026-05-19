@@ -3,8 +3,10 @@ import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
+import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { CodeBlock } from "../ds/CodeBlock";
+import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -125,6 +127,19 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
           }}
         </For>
       </CodeBlock>
+      {/* Mobile-only Go-symbol bar — same primitive as Freeform.
+       * Targets `document.activeElement` (the focused BlankInput)
+       * via insertAtFocused; ref forwarding through BlankInput +
+       * the segments loop isn't needed because only one input is
+       * present per fill-line exercise. */}
+      <MobileKeyBar
+        onInsert={(text) => {
+          if (phase.current() !== "right") insertAtFocused(text);
+        }}
+        onRun={() => {
+          if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
+        }}
+      />
       <InlineCanonicalReveal
         submission={input}
         /* The canonical for the LINE the learner is typing — not the

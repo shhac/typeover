@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { insertAtSelection } from "./textarea-insert";
+import { insertAtFocused, insertAtSelection } from "./textarea-insert";
 
 /*
  * insertAtSelection — caret-aware text injection used by
@@ -90,5 +90,35 @@ describe("insertAtSelection — text input element (not just textarea)", () => {
     insertAtSelection(inp, "BAR");
     expect(inp.value).toBe("fooBAR");
     expect(inp.selectionStart).toBe(6);
+  });
+});
+
+describe("insertAtFocused", () => {
+  it("inserts into a focused textarea", () => {
+    const ta = makeTextarea("abc", 1);
+    ta.focus();
+    insertAtFocused("Z");
+    expect(ta.value).toBe("aZbc");
+  });
+
+  it("inserts into a focused input", () => {
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.value = "xy";
+    document.body.appendChild(inp);
+    inp.focus();
+    inp.setSelectionRange(2, 2);
+    insertAtFocused("Q");
+    expect(inp.value).toBe("xyQ");
+  });
+
+  it("is a no-op when no input/textarea is focused", () => {
+    const ta = makeTextarea("untouched", 0);
+    /* Move focus to something that isn't an input/textarea. */
+    const btn = document.createElement("button");
+    document.body.appendChild(btn);
+    btn.focus();
+    insertAtFocused("X");
+    expect(ta.value).toBe("untouched");
   });
 });

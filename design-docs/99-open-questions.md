@@ -114,10 +114,18 @@ Flagged for "do later when triggered", not now.
   the bar is `display: none` per `lg:hidden`.
 
   Open follow-ups:
-  - **FillBlankLineInput wiring.** Today the bar is only on
-    Freeform. Adding it to fill-line means forwarding a ref
-    through BlankInput so the bar's `onInsert` can target
-    the active blank — straightforward but not done yet.
+  - **FillBlankLineInput wiring** *(landed 2026-05-19.)*
+    Ships on fill-line via `insertAtFocused` reading
+    `document.activeElement` rather than forwarding a ref
+    through BlankInput — same primitive, smaller surface
+    change. Browser-verified at 390×844: tapping the `:=`
+    key inserts `:=` into the focused blank, focus stays on
+    the input (the `onPointerDown` + `preventDefault()`
+    keeps the soft keyboard from collapsing). Freeform also
+    refactored to use `insertAtFocused` for consistency.
+    The Run shortcut on the bar now grows a fill-line code
+    path: gated on non-empty input + not-running, same
+    contract as the toolbar Run.
   - **iOS Safari `visualViewport` overlay.** The soft
     keyboard overlays the layout viewport, so a `bottom: 0`
     element lands BEHIND the keyboard. Fix: subscribe to

@@ -109,8 +109,16 @@ describe("<FillBlankLineInput> — submit gate", () => {
   });
 
   it("Run button is disabled until input is non-empty", () => {
-    const { container, getByText } = renderFBL();
-    const runBtn = getByText("Run") as HTMLButtonElement;
+    const { container } = renderFBL();
+    /* The toolbar Run carries the disabled-state contract; the
+     * MobileKeyBar Run shortcut is unconditional (it fires when
+     * tapped if input is non-empty, but no disabled attribute).
+     * Target the toolbar one by excluding anything inside the
+     * mobile bar's toolbar role. */
+    const runBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Run" && !b.closest('[role="toolbar"]'),
+    ) as HTMLButtonElement;
+    expect(runBtn).toBeTruthy();
     expect(runBtn.disabled).toBe(true);
     setVal(lineInput(container), "x");
     expect(runBtn.disabled).toBe(false);
@@ -120,12 +128,16 @@ describe("<FillBlankLineInput> — submit gate", () => {
 describe("<FillBlankLineInput> — happy path", () => {
   it("type → Run → stdout match → Submit records pass once + locks input", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
-    const { container, getByText } = renderFBL();
+    const { container, getAllByText, getByText } = renderFBL();
     expect(slot()?.instancesSeen).toBe(1);
 
     const input = lineInput(container);
     setVal(input, "doubled := count * 2");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom — RunResetToolbar's plus the
+     * MobileKeyBar shortcut (lg:hidden in real browsers; jsdom
+     * doesn't fire media queries so both live in the tree). Both
+     * fire yaegi.run; the toolbar's is first. */
+    fireEvent.click(getAllByText("Run")[0]!);
     /* Wait for the awaited run to settle. */
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
@@ -140,9 +152,13 @@ describe("<FillBlankLineInput> — happy path", () => {
 describe("<FillBlankLineInput> — wrong path", () => {
   it("stdout mismatch → wrong-phase actions surface, no pass or fail recorded", async () => {
     evalMock.mockResolvedValueOnce({ stdout: "wrong-output\n", stderr: "", error: "" });
-    const { container, getByText } = renderFBL();
+    const { container, getAllByText, getByText } = renderFBL();
     setVal(lineInput(container), "broken := count");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom — RunResetToolbar's plus the
+     * MobileKeyBar shortcut (lg:hidden in real browsers; jsdom
+     * doesn't fire media queries so both live in the tree). Both
+     * fire yaegi.run; the toolbar's is first. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
@@ -158,9 +174,13 @@ describe("<FillBlankLineInput> — wrong path", () => {
 describe("<FillBlankLineInput> — reveal flow", () => {
   it("Reveal correct records exactly one failure and hides the Reveal button", async () => {
     evalMock.mockResolvedValueOnce({ stdout: "wrong\n", stderr: "", error: "" });
-    const { container, getByText, queryByText } = renderFBL();
+    const { container, getAllByText, getByText, queryByText } = renderFBL();
     setVal(lineInput(container), "broken := count");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom — RunResetToolbar's plus the
+     * MobileKeyBar shortcut (lg:hidden in real browsers; jsdom
+     * doesn't fire media queries so both live in the tree). Both
+     * fire yaegi.run; the toolbar's is first. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
@@ -198,9 +218,13 @@ describe("<FillBlankLineInput> — Enter-to-Run", () => {
 describe("<FillBlankLineInput> — Another resets state", () => {
   it("Another clears input AND runResult", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
-    const { container, getByText, queryByText } = renderFBL();
+    const { container, getAllByText, getByText, queryByText } = renderFBL();
     setVal(lineInput(container), "doubled := count * 2");
-    fireEvent.click(getByText("Run"));
+    /* Two "Run" buttons in jsdom — RunResetToolbar's plus the
+     * MobileKeyBar shortcut (lg:hidden in real browsers; jsdom
+     * doesn't fire media queries so both live in the tree). Both
+     * fire yaegi.run; the toolbar's is first. */
+    fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });

@@ -38,3 +38,24 @@ export function insertAtSelection(el: Insertable, text: string): void {
 
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
+
+/**
+ * Insert into whatever input/textarea is currently focused. No-op
+ * if nothing focusable holds the caret.
+ *
+ * Used by MobileKeyBar callers that render multiple potential
+ * targets and don't want to forward a ref through nested components
+ * — FillBlankLineInput renders its `<input>` inside a `<For>` over
+ * blank segments inside CodeBlock; threading a ref out is more
+ * invasive than just reading `document.activeElement` here.
+ *
+ * Safe because MobileKeyBar's `onPointerDown` calls
+ * `preventDefault()`, which keeps the previously-focused field
+ * active when the button is tapped.
+ */
+export function insertAtFocused(text: string): void {
+  const active = document.activeElement;
+  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
+    insertAtSelection(active, text);
+  }
+}

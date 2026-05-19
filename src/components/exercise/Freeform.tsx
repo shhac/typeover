@@ -3,7 +3,7 @@ import { MobileKeyBar } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
-import { insertAtSelection } from "~/lib/textarea-insert";
+import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -59,12 +59,6 @@ export function Freeform(props: FreeformProps) {
 
   const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
 
-  /* Ref to the textarea — the MobileKeyBar drops Go symbols at the
-   * caret via insertAtSelection. We don't lift the textarea into a
-   * controlled-by-ref pattern; the signal-driven value() still wins
-   * for everything except the bar's caret-aware injection. */
-  let textareaEl: HTMLTextAreaElement | undefined;
-
   const yaegi = useYaegiRun({ buildProgram: () => code() });
 
   const isCorrect = () => {
@@ -117,9 +111,6 @@ export function Freeform(props: FreeformProps) {
       themeHref={props.themeHref}
     >
       <textarea
-        ref={(el) => {
-          textareaEl = el;
-        }}
         class="font-mono text-sm bg-bg-inset text-fg-primary p-3 rounded-sm border border-border-default min-h-[200px] outline-none focus:border-accent-amber"
         spellcheck={false}
         autocomplete="off"
@@ -130,14 +121,13 @@ export function Freeform(props: FreeformProps) {
         disabled={phase.current() === "right"}
       />
       {/* Mobile-only Go-symbol bar docked above the soft keyboard.
-       * Inserts at the textarea caret; the embedded Run shortcut
-       * fires the same Yaegi run as the toolbar button so a mobile
+       * Inserts at the textarea caret via insertAtFocused (reads
+       * document.activeElement); the embedded Run shortcut fires
+       * the same Yaegi run as the toolbar button so a mobile
        * learner doesn't have to dismiss the keyboard to submit. */}
       <MobileKeyBar
         onInsert={(text) => {
-          if (textareaEl && phase.current() !== "right") {
-            insertAtSelection(textareaEl, text);
-          }
+          if (phase.current() !== "right") insertAtFocused(text);
         }}
         onRun={() => void yaegi.run()}
       />
