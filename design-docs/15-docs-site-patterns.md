@@ -37,25 +37,29 @@ That's the lens for every pattern below.
 
 ## Patterns to consider
 
-### 1. Numbered eyebrows instead of section headers
+### 1. Numbered eyebrows instead of section headers — landed 2026-05-19 (no numbers yet)
 
-**Today**: each home-page section announces itself with an `<h4>`
-that the reader doesn't need ("Exercise preview", "Design system"
-on `/`). Theme overview and exercise pages do similar.
+**Today**: home page uses the `<Eyebrow>` DS primitive in place of
+`<h4>` block labels. Each section reads as a small mono uppercase
+caption (`EXAMPLE`, `DESIGN SYSTEM`) plus content. Per-group
+sub-eyebrows inside the DS inventory pick up the language accent
+(amber/ts/go/muted) so the showcase still signals identity without
+panel chrome.
 
-**Pattern (Tailwind, Stripe)**: a big low-contrast mono `01` /
-`02` / `03` to the left of the section's first heading. The number
-*is* the structural cue; the heading text becomes content, not
-chrome. When the number is enough, the heading can be deleted
-entirely.
+The proposal also included **numbered** anchors (`01`, `02`) — those
+are deferred until a longer-form page needs the structural cue.
+The Eyebrow primitive is shape-only today; a future `<Eyebrow
+number="01">` is one optional prop away.
 
-**DS primitive**: `<Eyebrow number="01">` or — cleaner — a CSS
-counter on a parent container so authors don't have to number by
-hand. Adds one token: `--type-step-num` (mono, ~2× body,
-`color-mix(in oklab, var(--color-fg-primary), transparent 60%)`).
+**DS primitive**: `<Eyebrow tone>` shipping in `src/components/ds/`.
+Five tones (default / muted / amber / ts / go), one render shape
+(`<span>` with `font-mono text-xs uppercase tracking-widest`).
+Component tests pin the structural classes so a refactor that drops
+uppercase or mono is caught.
 
-**Replaces**: the `<h4>` block-label rhythm on home + curriculum
-+ theme overview pages.
+**Replaced**: every `<Heading level={4}>` block label on the home
+page (`Exercise preview`, `Design system`) plus the four
+`<Panel label="…">` group containers inside the DS inventory.
 
 ### 2. Filename caption above code, not language pill
 
@@ -95,27 +99,30 @@ component owns the wrapper; authors don't repeat themselves.
 **Replaces**: undifferentiated grey inline code. Reinforces the
 language identity the colour theme already commits to.
 
-### 4. `<Compare>` for TS↔Go side-by-side
+### 4. `<Compare>` for TS↔Go side-by-side — landed 2026-05-19
 
-**Today**: home page hand-rolls a 2-column grid of two
-`<CodeBlock>` elements. Exercise pages do similar via
-`<Adaptive>`. Both stack at narrow widths; both work; neither has
-a shared caption or a hairline between.
+**Today**: `<Compare caption?>` wraps the existing `<Adaptive>` in
+a `<figure>` + `<figcaption>`. The home-page TS↔Go example is the
+first caller; pickup criterion now is "next time a page wants the
+same shape" — the primitive is ready.
 
-**Pattern (novel, closest analog: Stripe's multi-language tabs —
-but we want both visible)**: a primitive that takes two
-`<CodeBlock>` children, lays them side-by-side with a thin
-divider between, and renders one shared caption beneath. Collapses
-to stacked at <1024px.
+The pattern-3 "language wrapper" hadn't landed yet when Compare
+shipped, so the language identity comes from the CodeBlock's `lang`
+prop (its filename strip + syntax-highlight colour) rather than a
+surrounding `[data-lang]` parent. When pattern 3 lands it slots in
+underneath Compare cleanly because Compare doesn't own the
+per-column colour decision.
 
-**DS primitive**: `<Compare>{ts}{go}{caption?}</Compare>` —
-extension of the existing `<Adaptive>` with a caption slot and
-the language wrapper from pattern 3 already applied.
+**DS primitive**: `<Compare>` in `src/components/ds/`, semantic
+`<figure>` + `<figcaption>` with a 12px gap. Component tests pin
+the figure/figcaption structure so the magazine semantics can't
+silently regress to "two divs next to each other."
 
-**Replaces**: the duplicated grid + caption pattern on home,
-theme intros, and the exercise hero region. This is the killer
-move for a TS→Go learning site and the one that most signals
-"this is a translation tool, not a generic course."
+**Replaced so far**: the hand-rolled `<div class="grid grid-cols-1
+md:grid-cols-2 gap-4">` + separate `<Text size="sm">` caption on
+the home page. Exercise pages still use `<Adaptive>` directly
+since they don't have a shared caption — that's the right call;
+not every two-column layout is a comparison.
 
 ### 5. Marginalia callouts, not alert boxes
 
@@ -178,25 +185,25 @@ remembering which fields are mono.
 home + curriculum + completion screen. Reinforces the
 terminal half of the identity without crowding the reading half.
 
-### 8. Hairline-only dividers
+### 8. Hairline-only dividers — landed 2026-05-19 (home page)
 
-**Today**: `<Divider />` is a 1px line in `border-default`. Good.
-Adjacent problem: too many regions are *also* getting boxed by
-panels (`<Panel label="Buttons">` on home page is the textbook
-example). The DS already supports hairlines; we just need to lean
-on them harder and demote `<Panel label="…">` to where it earns
-its keep (actual code-block frames, callouts).
+**Today**: home page no longer wraps DS-inventory groups in
+`<Panel label="…">` chrome. Each group is a `<Stack>` + small
+mono `<Eyebrow>`. The four hairline `<Divider />` instances still
+mark major rhythm changes between hero, example, DS inventory,
+footer — that's where they earn their keep.
 
-**Pattern (Linear, Stripe Press)**: one hairline, one weight,
-between page sections. No bordered cards for "groups of related
-controls" — let the type + whitespace do the work.
+The audit pass to do this everywhere else hasn't run; other pages
+(curriculum, theme overview, exercise) didn't have the
+panel-as-group anti-pattern so they didn't need touching.
+Marginalia panels (pattern 5) still use `<Panel>` properly —
+that's framing, not grouping.
 
-**DS primitive**: no new primitive. Audit pass on existing pages:
-replace `<Panel>` with `<Stack>` + `<Divider>` where the panel
-exists purely to group, not to frame. The four panels on the
-home-page DS inventory are the canonical example.
+**DS primitive**: no new primitive. Component-level audit + page
+rewrite per pickup.
 
-**Replaces**: the wiki feel on the home page directly.
+**Replaced**: the wiki feel on the home page directly. New
+authoring guidance below.
 
 ## Anti-patterns we explicitly skip
 
@@ -242,18 +249,18 @@ don't sneak in:
 
 Per pattern, the trigger for actually doing it:
 
-- **Pattern 1** (numbered eyebrows) — when a third page lands with
-  more than two `<h4>` block labels.
+- **Pattern 1** (eyebrows, no numbers yet) — *landed 2026-05-19*
+  on the home page. Numbered variant (`01`, `02`) deferred until
+  a longer-form page wants the structural cue.
 - **Pattern 2** (filename caption) — same sweep as #23 (CodeMirror
   integration). The two changes share `<CodeBlock>` surgery and
   should go together.
 - **Pattern 3** (inline `code` by language) — first time a learner
   reports confusion about which language an inline mention refers
   to. Until then it's a polish lever.
-- **Pattern 4** (`<Compare>`) — next time a page wants TS↔Go side
-  by side with a shared caption. Hot candidate: the curriculum
-  index intro, where we should be showing the wedge in a clear
-  before/after.
+- **Pattern 4** (`<Compare>`) — *landed 2026-05-19* on the home
+  page. Primitive is ready; next caller is the curriculum index
+  intro when the wedge case study lands.
 - **Pattern 5** (marginalia) — first time a lesson wants a tip
   that doesn't fit the hint system. Build the primitive then; not
   before.
@@ -263,9 +270,9 @@ Per pattern, the trigger for actually doing it:
 - **Pattern 7** (mono for data) — sweep alongside the
   module-completion screen polish, because that page is half data
   by area and is the natural place to set the precedent.
-- **Pattern 8** (hairline dividers) — the cheapest. Do this in the
-  same commit as patterns 1 or 7; the home-page DS inventory is
-  the worst offender and is one file.
+- **Pattern 8** (hairline dividers) — *landed 2026-05-19* on the
+  home page. Audit not run on other pages because they didn't
+  exhibit the panel-as-group anti-pattern.
 
 ## Cross-references
 

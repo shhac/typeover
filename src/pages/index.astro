@@ -4,15 +4,27 @@ import {
   Badge,
   Button,
   CodeBlock,
+  Compare,
   Container,
   Divider,
+  Eyebrow,
   Heading,
   Kbd,
   LangCrumbs,
-  Panel,
   Stack,
   Text,
 } from "~/components/ds";
+
+/*
+ * Landing page. Three rhythms separated by hairlines per
+ * design-docs/15 patterns 1 + 4 + 8:
+ *   - hero (title + dek + actions)
+ *   - example (shared-caption side-by-side TS/Go via <Compare>)
+ *   - DS index (small mono eyebrow per group; no panel chrome)
+ *
+ * Replaces the prior "h4 block label + grid of labelled panels"
+ * Confluence rhythm.
+ */
 ---
 
 <BaseLayout
@@ -52,9 +64,11 @@ import {
         <Divider />
 
         {/* Side-by-side example */}
-        <Stack gap="md">
-          <Heading level={4}>Exercise preview</Heading>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Stack gap="sm">
+          <Eyebrow>example</Eyebrow>
+          <Compare
+            caption="Each lesson presents a TS snippet and its Go counterpart, then asks you to identify, translate, or write the equivalent."
+          >
             <CodeBlock lang="ts" filename="users.ts">{`type User = {
   id: string;
   name: string;
@@ -71,29 +85,28 @@ function greet(u: User) {
 func greet(u User) string {
     return "hi " + u.Name
 }`}</CodeBlock>
-          </div>
-          <Text tone="muted" size="sm">
-            Each lesson presents a TS snippet and its Go counterpart, then asks
-            you to identify, translate, or write the equivalent.
-          </Text>
+          </Compare>
         </Stack>
 
         <Divider />
 
-        {/* Design system inventory */}
+        {/* Design system inventory — small mono eyebrows per group,
+            no panel-label chrome. */}
         <Stack gap="md">
-          <Heading level={4}>Design system</Heading>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Panel label="Buttons" accent="amber">
+          <Eyebrow>design system</Eyebrow>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <Stack gap="xs">
+              <Eyebrow tone="amber">buttons</Eyebrow>
               <Stack direction="row" gap="sm" wrap>
                 <Button variant="primary">Primary</Button>
                 <Button variant="secondary">Secondary</Button>
                 <Button variant="ghost">Ghost</Button>
                 <Button variant="danger">Danger</Button>
               </Stack>
-            </Panel>
+            </Stack>
 
-            <Panel label="Badges" accent="ts">
+            <Stack gap="xs">
+              <Eyebrow tone="ts">badges</Eyebrow>
               <Stack direction="row" gap="sm" wrap>
                 <Badge>default</Badge>
                 <Badge variant="ts">typescript</Badge>
@@ -102,24 +115,26 @@ func greet(u User) string {
                 <Badge variant="success">passed</Badge>
                 <Badge variant="error">failed</Badge>
               </Stack>
-            </Panel>
+            </Stack>
 
-            <Panel label="Keys" accent="go">
+            <Stack gap="xs">
+              <Eyebrow tone="go">keys</Eyebrow>
               <Stack direction="row" gap="sm" align="center">
                 <Kbd>⌘</Kbd>
                 <Kbd>K</Kbd>
                 <Text tone="muted" size="sm" family="mono">open palette</Text>
               </Stack>
-            </Panel>
+            </Stack>
 
-            <Panel label="Tones" accent="none">
+            <Stack gap="xs">
+              <Eyebrow tone="muted">tones</Eyebrow>
               <Stack gap="xs">
                 <Text tone="primary">Primary — main reading text</Text>
                 <Text tone="secondary">Secondary — supporting prose</Text>
                 <Text tone="muted">Muted — captions and hints</Text>
                 <Text tone="faint">Faint — barely-there metadata</Text>
               </Stack>
-            </Panel>
+            </Stack>
           </div>
         </Stack>
 
@@ -130,7 +145,7 @@ func greet(u User) string {
             typeover · 2026 · built with astro + solid + tailwind
           </Text>
           <Text tone="faint" size="xs" family="mono">
-            yaegi runtime pending
+            yaegi runtime · in browser
           </Text>
         </Stack>
       </Stack>

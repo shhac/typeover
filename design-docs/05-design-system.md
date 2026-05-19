@@ -119,9 +119,11 @@ Shipped in v0 (initial set, will be retuned for airy direction):
 | `Container.tsx` | Width-constrained centered column. |
 | `Stack.tsx` | Flex layout primitive (row/col + gap). |
 | `Adaptive.tsx` | Split-on-wide, stack-on-narrow layout primitive. |
+| `Compare.tsx` | `<figure>` + `<figcaption>` wrapper for TS↔Go side-by-side (design-docs/15 pattern 4). |
 | `Heading.tsx` | h1–h4 with optional accent colour. |
 | `Text.tsx` | Body text with tone + size + family. |
-| `Panel.tsx` | Bordered container with optional label strip. |
+| `Eyebrow.tsx` | Small mono uppercase section label (design-docs/15 pattern 1). |
+| `Panel.tsx` | Bordered container with optional label strip. Reserve `label`-strip use for framing, not grouping. |
 | `Badge.tsx` | Inline label, including TS/Go language flags. |
 | `Button.tsx` | Primary / secondary / ghost / danger × sm/md/lg. |
 | `CodeBlock.tsx` | Display-only code with language strip + filename. |
