@@ -59,3 +59,45 @@ export function insertAtFocused(text: string): void {
     insertAtSelection(active, text);
   }
 }
+
+/**
+ * Leading-whitespace prefix of the line the caret is currently in.
+ * For `"  foo\n    bar|"` (caret at `|`), returns `"    "`. Used by
+ * the auto-indent Enter handler so the new line opens with the same
+ * indent as the previous one.
+ */
+export function currentLineIndent(el: HTMLTextAreaElement | HTMLInputElement): string {
+  const start = el.selectionStart ?? el.value.length;
+  const before = el.value.slice(0, start);
+  const lineStart = before.lastIndexOf("\n") + 1;
+  const lineSoFar = before.slice(lineStart);
+  const match = lineSoFar.match(/^[ \t]*/);
+  return match ? match[0] : "";
+}
+
+/**
+ * Auto-indent Enter handler — call from a textarea's `onKeyDown`.
+ * Returns `true` when it handled the key (caller must NOT also let
+ * the default Enter fire), `false` otherwise.
+ *
+ * Behaviour: when Enter is pressed and the current line begins with
+ * whitespace, inserts `\n` + that whitespace prefix at the caret.
+ * Lines with no leading whitespace fall through to the browser's
+ * default Enter (bare newline).
+ *
+ * Modifier keys (Shift, Ctrl, Meta, Alt) fall through unchanged —
+ * Shift+Enter is the conventional "no auto-indent" escape hatch
+ * for users who want a bare newline mid-block.
+ */
+export function handleAutoIndentEnter(
+  el: HTMLTextAreaElement | HTMLInputElement,
+  event: KeyboardEvent,
+): boolean {
+  if (event.key !== "Enter") return false;
+  if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return false;
+  const indent = currentLineIndent(el);
+  if (indent === "") return false;
+  event.preventDefault();
+  insertAtSelection(el, "\n" + indent);
+  return true;
+}

@@ -3,7 +3,7 @@ import { MobileKeyBar } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
-import { insertAtFocused } from "~/lib/textarea-insert";
+import { handleAutoIndentEnter, insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -118,6 +118,17 @@ export function Freeform(props: FreeformProps) {
         autocorrect="off"
         value={code()}
         onInput={(e) => setCode(e.currentTarget.value)}
+        onKeyDown={(e) => {
+          /* Auto-indent: Enter on an indented line opens the next
+           * line at the same indent. Shift+Enter (and other modified
+           * Enters) fall through to a bare newline. */
+          if (handleAutoIndentEnter(e.currentTarget, e)) {
+            /* insertAtSelection has already fired an `input` event,
+             * but Solid's onInput won't run from a synthetic dispatch
+             * here — sync the signal directly. */
+            setCode(e.currentTarget.value);
+          }
+        }}
         disabled={phase.current() === "right"}
       />
       {/* Mobile-only Go-symbol bar docked above the soft keyboard.

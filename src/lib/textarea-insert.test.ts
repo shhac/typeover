@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { insertAtFocused, insertAtSelection } from "./textarea-insert";
+import {
+  currentLineIndent,
+  handleAutoIndentEnter,
+  insertAtFocused,
+  insertAtSelection,
+} from "./textarea-insert";
 
 /*
  * insertAtSelection — caret-aware text injection used by
@@ -90,6 +95,99 @@ describe("insertAtSelection — text input element (not just textarea)", () => {
     insertAtSelection(inp, "BAR");
     expect(inp.value).toBe("fooBAR");
     expect(inp.selectionStart).toBe(6);
+  });
+});
+
+describe("currentLineIndent", () => {
+  it("returns empty for an empty value", () => {
+    const ta = makeTextarea("", 0);
+    expect(currentLineIndent(ta)).toBe("");
+  });
+
+  it("returns the leading spaces of the caret's line", () => {
+    const ta = makeTextarea("  foo\n    bar", 13);
+    expect(currentLineIndent(ta)).toBe("    ");
+  });
+
+  it("returns the leading tabs of the caret's line", () => {
+    const ta = makeTextarea("\t\tfoo", 5);
+    expect(currentLineIndent(ta)).toBe("\t\t");
+  });
+
+  it("returns mixed leading whitespace verbatim", () => {
+    const ta = makeTextarea("  \tfoo", 6);
+    expect(currentLineIndent(ta)).toBe("  \t");
+  });
+
+  it("is empty when the caret's line has no leading whitespace", () => {
+    const ta = makeTextarea("foo\nbar", 7);
+    expect(currentLineIndent(ta)).toBe("");
+  });
+
+  it("reads the FIRST line when caret is in the first line", () => {
+    const ta = makeTextarea("  foo\n    bar", 3);
+    expect(currentLineIndent(ta)).toBe("  ");
+  });
+});
+
+describe("handleAutoIndentEnter", () => {
+  const enterEvent = (init?: Partial<KeyboardEventInit>): KeyboardEvent =>
+    new KeyboardEvent("keydown", { key: "Enter", cancelable: true, ...init });
+
+  it("returns false (and doesn't preventDefault) for non-Enter keys", () => {
+    const ta = makeTextarea("  foo", 5);
+    const ev = new KeyboardEvent("keydown", { key: "a", cancelable: true });
+    expect(handleAutoIndentEnter(ta, ev)).toBe(false);
+    expect(ev.defaultPrevented).toBe(false);
+  });
+
+  it("returns false when the current line has no leading whitespace", () => {
+    const ta = makeTextarea("foo", 3);
+    const ev = enterEvent();
+    expect(handleAutoIndentEnter(ta, ev)).toBe(false);
+    expect(ev.defaultPrevented).toBe(false);
+    /* Value is untouched — the browser's default Enter handler runs. */
+    expect(ta.value).toBe("foo");
+  });
+
+  it("inserts \\n + indent and preventDefaults when the line is indented", () => {
+    const ta = makeTextarea("  foo", 5);
+    const ev = enterEvent();
+    expect(handleAutoIndentEnter(ta, ev)).toBe(true);
+    expect(ev.defaultPrevented).toBe(true);
+    expect(ta.value).toBe("  foo\n  ");
+    expect(ta.selectionStart).toBe(8);
+  });
+
+  it("preserves tab indents", () => {
+    const ta = makeTextarea("\tfoo", 4);
+    const ev = enterEvent();
+    handleAutoIndentEnter(ta, ev);
+    expect(ta.value).toBe("\tfoo\n\t");
+  });
+
+  it("falls through (returns false) on Shift+Enter — escape hatch", () => {
+    const ta = makeTextarea("  foo", 5);
+    const ev = enterEvent({ shiftKey: true });
+    expect(handleAutoIndentEnter(ta, ev)).toBe(false);
+    expect(ev.defaultPrevented).toBe(false);
+  });
+
+  it("falls through on Ctrl+Enter / Meta+Enter / Alt+Enter", () => {
+    for (const mod of ["ctrlKey", "metaKey", "altKey"] as const) {
+      const ta = makeTextarea("  foo", 5);
+      const ev = enterEvent({ [mod]: true });
+      expect(handleAutoIndentEnter(ta, ev)).toBe(false);
+    }
+  });
+
+  it("handles Enter at mid-line — indent comes from the line, caret splits the line", () => {
+    /* Caret between "foo" and "bar" on an indented line. The new
+     * line starts with the same indent, then "bar" follows after
+     * the auto-inserted whitespace. */
+    const ta = makeTextarea("  foobar", 5);
+    handleAutoIndentEnter(ta, enterEvent());
+    expect(ta.value).toBe("  foo\n  bar");
   });
 });
 
