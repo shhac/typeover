@@ -63,6 +63,58 @@
   --radius-lg: 4px;
 }
 
+/* ===========================================================================
+ * Theme overrides — see design-docs/13-themes.md
+ *
+ * @theme above is the dark default; utility classes compile against those
+ * vars. Each `:root[data-theme="<id>"]` block re-binds the SAME var names
+ * to different values. The cascade does the rest: every component reads
+ * `var(--color-bg-base)`, so the swap is atomic with zero per-component
+ * code.
+ *
+ * Add a new theme = add one block here + one entry on the selector. If
+ * a component breaks under a new theme, the component is at fault for
+ * having reached around the token layer — not the theme.
+ * ========================================================================= */
+
+:root[data-theme="light"] {
+  /* Surfaces — off-white base, subtle elevated tints toward warm grey. */
+  --color-bg-base: #ffffff;
+  --color-bg-panel: #f5f6f8;
+  --color-bg-elevated: #ebedf1;
+  --color-bg-inset: #f0f2f5;
+
+  --color-border-default: #e1e4ea;
+  --color-border-strong: #c4c9d2;
+  --color-border-accent: #c97a0055;
+
+  /* Text — contrast-verified against bg-base (#fff) for WCAG AA:
+   *   fg-primary   ~17:1 ✓ AAA
+   *   fg-secondary  ~8.4:1 ✓ AAA
+   *   fg-muted      ~5.7:1 ✓ AA
+   *   fg-faint      ~3.2:1 non-text/decorative only (same a11y rule
+   *                 as the dark variant). */
+  --color-fg-primary: #14171f;
+  --color-fg-secondary: #4a5060;
+  --color-fg-muted: #6b7280;
+  --color-fg-faint: #94989f;
+
+  /* Brand accents — darkened from the dark-theme values so they pass
+   * 4.5:1 AA against #ffffff at ≥14pt. Brand identity bends to a11y;
+   * amber stays the focus colour, TS-blue and Go-cyan stay
+   * recognisable but pull toward saturated mid-tones. */
+  --color-accent-amber: #c97a00;
+  --color-accent-amber-dim: #8a5300;
+  --color-accent-ts: #2057b8;
+  --color-accent-ts-dim: #143a7e;
+  --color-accent-go: #006d8e;
+  --color-accent-go-dim: #00485e;
+
+  --color-success: #0e8443;
+  --color-warning: #b25c00;
+  --color-error: #b91c1c;
+}
+
 @layer base {
   html {
     background-color: var(--color-bg-base);

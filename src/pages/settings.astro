@@ -1,0 +1,41 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { Container, Heading, Stack, Text } from "~/components/ds";
+import { ThemePicker } from "~/components/settings/ThemePicker";
+
+/*
+ * Learner settings. Single concern today (theme picker); will grow
+ * to hold any other learner-controlled preference that doesn't fit
+ * inside an exercise — keybindings, reduced-motion override, etc.
+ *
+ * Per design-docs/13-themes.md the picker is the only theme UX
+ * surface in v0; no header toggle until feedback says the footer
+ * link is too buried.
+ */
+---
+
+<BaseLayout title="Settings — typeover" description="Configure your typeover preferences.">
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Heading level={1}>Settings</Heading>
+          <Text tone="muted" size="sm">
+            Preferences are stored locally in your browser. Nothing leaves
+            your device.
+          </Text>
+        </Stack>
+
+        <Stack gap="md">
+          <Stack gap="xs">
+            <Heading level={2} class="!text-xl">Theme</Heading>
+            <Text tone="muted" size="sm">
+              Pick a theme, or follow your operating system.
+            </Text>
+          </Stack>
+          <ThemePicker client:only="solid-js" />
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

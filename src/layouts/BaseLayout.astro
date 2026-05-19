@@ -16,6 +16,31 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
+    {/*
+     * Theme bootstrap — runs synchronously before paint to set
+     * data-theme on <html> from the learner's pin (localStorage) or
+     * the OS preference. Prevents flash-of-wrong-theme on first
+     * frame. Keep this inline and small; any growth lives in
+     * src/lib/theme.ts (which the settings page uses). See
+     * design-docs/13-themes.md.
+     */}
+    <script is:inline>
+      (() => {
+        try {
+          var pinned = localStorage.getItem("typeover:theme");
+          var theme =
+            pinned === "dark" || pinned === "light"
+              ? pinned
+              : window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+          document.documentElement.dataset.theme = theme;
+        } catch (_) {
+          /* localStorage unavailable (incognito quota / SSR / etc.) —
+           * fall through to the CSS @theme defaults (dark). */
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

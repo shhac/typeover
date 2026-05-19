@@ -216,22 +216,40 @@ new shadow goes through a token. If the catalogue grows to need
 explicit shadow recipes, we add `--shadow-key`, `--shadow-panel`,
 etc. as tokens of their own.
 
-## Implementation plan (not yet started)
+## Implementation plan
 
-When picked up:
+Steps 1-5 landed 2026-05-19. The DS-does-the-heavy-lifting bet held:
+every component picked up the swap with zero code changes. End-to-end
+verified in Chromium across the settings page, an MCQ exercise page,
+and the curriculum index.
 
-1. Promote `@theme` values to default + add `:root[data-theme="dark"]`
-   override block (no-op semantics, explicitness).
-2. Add `:root[data-theme="light"]` with the provisional values above
-   and verify each accent against the surface at ≥14pt.
-3. Add the bootstrap script to `BaseLayout.astro`.
-4. Add `src/lib/theme.ts` with `setTheme(id)` / `clearTheme()` /
-   `currentTheme()` helpers (localStorage write + DOM update).
-5. Add `src/pages/settings.astro` with the radio group.
-6. Add unit tests for the theme helpers + an integration test that
-   verifies the bootstrap script doesn't introduce a flash (Playwright
-   reads computed-style before and after `data-theme` change).
-7. Add the high-contrast pair under the same flow.
+1. ~~Promote `@theme` values to default + add `:root[data-theme="dark"]`
+   override block.~~ Skipped — `@theme` IS the dark default, and an
+   explicit `[data-theme="dark"]` block would be redundant. The
+   bootstrap script still writes `data-theme="dark"` to the DOM for
+   selector-state reading, but it doesn't need a matching CSS block.
+2. ~~Add `:root[data-theme="light"]` with the provisional values
+   above.~~ `src/styles/global.css`.
+3. ~~Add the bootstrap script to `BaseLayout.astro`.~~ Inline,
+   pre-paint, FOUC-free.
+4. ~~Add `src/lib/theme.ts`.~~ `currentTheme()` / `currentChoice()` /
+   `setTheme("system" | "dark" | "light")`. 10 unit tests pin the
+   contract.
+5. ~~Add `src/pages/settings.astro` with the radio group.~~
+   `src/components/settings/ThemePicker.tsx` is the Solid island;
+   the route mounts it via `client:only`.
 
-Each step is small and isolated. The DS already does the heavy
-lifting.
+Open:
+
+6. **Integration test** that the bootstrap script doesn't introduce a
+   flash. Playwright check: navigate, read `getComputedStyle(html).backgroundColor`,
+   confirm it's already the right colour on the very first frame
+   (no transition through the default). Pending until #32 axe +
+   Lighthouse CI lands; same Playwright harness.
+7. **High-contrast pair** (`hc-dark`, `hc-light`) — same shape as
+   step 2, plus a token review for opacity-mixed colours (every
+   `border-success/40` in the codebase becomes a full-saturation
+   variant in the HC themes). Add when an a11y reviewer asks or when
+   `prefers-contrast: more` adoption is high enough to justify.
+8. **Future themes** parked above (`sepia`, `bloomberg`, solarized
+   pair) — same one-block recipe.
