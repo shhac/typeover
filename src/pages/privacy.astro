@@ -31,31 +31,55 @@ import { Container, Heading, Stack, Text } from "~/components/ds";
         <Stack gap="md">
           <Heading level={2} class="!text-xl">What we store</Heading>
           <Text>
-            typeover keeps two things in your browser's
+            typeover keeps a handful of pins in your browser's
             <code class="font-mono text-fg-primary">localStorage</code>:
           </Text>
-          <Text as="div" class="ds-prose">
-            - <code class="font-mono text-fg-primary">typeover:progress</code>
-            — which exercises you've passed, how many hints you used, when you
-            last opened an exercise. Per-device only.
-            - <code class="font-mono text-fg-primary">typeover:theme</code>
-            — your chosen colour theme, if you pinned one. Otherwise we
-            follow your OS preference.
-          </Text>
+          <ul class="ds-prose pl-6 list-disc text-fg-primary text-base">
+            <li>
+              <code class="font-mono">typeover:progress</code>
+              — which exercises you've passed, how many hints you used,
+              when you last opened an exercise. Per-device only.
+            </li>
+            <li>
+              <code class="font-mono">typeover:theme</code>
+              — your chosen colour theme. If you haven't pinned one we
+              follow your OS preference.
+            </li>
+            <li>
+              <code class="font-mono">typeover:density</code> +
+              <code class="font-mono">typeover:radius</code>
+              — your appearance preferences (compact / normal / airy
+              spacing and sharp / normal / rounded corners).
+            </li>
+            <li>
+              If a progress payload ever fails validation, the original
+              is copied to
+              <code class="font-mono">typeover:progress:corrupt-&lt;timestamp&gt;</code>
+              before we reset — so a future forensic pass can recover
+              what was there. No data is silently lost.
+            </li>
+          </ul>
         </Stack>
 
         <Stack gap="md">
           <Heading level={2} class="!text-xl">What leaves your device</Heading>
-          <Text as="div" class="ds-prose">
-            - Nothing about you or your progress. There are no analytics, no
-            cookies, no third-party trackers, no server-side accounts.
-            - Page assets and Google Fonts load from CDNs the way any
-            static site's do.
-            - If you tap **Share** on a module-completion screen, that uses
-            your operating system's share sheet (or your clipboard) — the
-            text and link go wherever you send them. typeover doesn't see
-            it.
-          </Text>
+          <ul class="ds-prose pl-6 list-disc text-fg-primary text-base">
+            <li>
+              Nothing about you or your progress. There are no
+              analytics, no cookies, no third-party trackers, no
+              server-side accounts.
+            </li>
+            <li>
+              Page assets and Google Fonts load from CDNs the way any
+              static site's do.
+            </li>
+            <li>
+              If you tap <strong>Share</strong> on a module-completion
+              screen, that uses your operating system's share sheet
+              (or your clipboard) — the text and link go wherever you
+              send them. typeover doesn't see it.
+            </li>
+          </ul>
         </Stack>
 
         <Stack gap="md">

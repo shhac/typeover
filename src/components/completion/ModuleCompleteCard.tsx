@@ -150,19 +150,19 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
               </div>
               <For each={props.themes}>
                 {(theme) => {
-                  const themePassed = theme.exerciseIds.filter(
-                    (id) => getExerciseProgress(id).instancesPassed > 0,
-                  ).length;
-                  const isThemeComplete = themePassed === theme.exerciseIds.length;
+                  /* Delegate to summarizeTheme so the empty-theme rule
+                   * matches everywhere — `0 === 0` would mark a stub
+                   * theme complete otherwise. */
+                  const summary = summarizeTheme(theme.exerciseIds);
                   return (
                     <div class="flex flex-row gap-3 items-baseline">
                       <span
                         class={
                           "font-mono text-xs " +
-                          (isThemeComplete ? "text-success" : "text-fg-faint")
+                          (summary.themeComplete ? "text-success" : "text-fg-faint")
                         }
                       >
-                        {isThemeComplete ? "✓" : "·"} {themePassed}/{theme.exerciseIds.length}
+                        {summary.themeComplete ? "✓" : "·"} {summary.passed}/{summary.total}
                       </span>
                       <a
                         href={`/go/${theme.id}`}

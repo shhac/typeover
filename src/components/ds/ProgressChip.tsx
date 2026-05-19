@@ -1,5 +1,3 @@
-import type { JSX } from "solid-js";
-import { splitProps } from "solid-js";
 import { cn } from "./_internal";
 
 /*
@@ -25,7 +23,9 @@ import { cn } from "./_internal";
  * the `6/9` shorthand isn't read as "six slash nine".
  */
 
-interface BaseProps extends JSX.HTMLAttributes<HTMLSpanElement> {
+interface BaseProps {
+  /** Optional extra class — most callers use the default. */
+  class?: string;
   /** Pin the chip's resolved width when the caller wants to
    *  reserve space pre-mount and avoid layout shift. Number is
    *  in ch units. */
@@ -46,34 +46,36 @@ interface ExerciseChipProps extends BaseProps {
 
 type ProgressChipProps = ThemeChipProps | ExerciseChipProps;
 
+/**
+ * Pure presentational chip — accepts ONLY the props it needs.
+ * Earlier shape extended `JSX.HTMLAttributes<HTMLSpanElement>` and
+ * spread `rest` onto the underlying `<span>`; that leaked data
+ * fields like `passed`, `total`, `seen` as DOM attributes because
+ * Solid forwards unknown props verbatim. No real caller passes
+ * arbitrary HTML attrs through here, so the surface stays narrow.
+ */
 export function ProgressChip(props: ProgressChipProps) {
-  const [local, rest] = splitProps(props, ["kind", "class", "minCh"]);
+  const styleAttr = () => (props.minCh ? { "min-width": `${props.minCh}ch` } : undefined);
 
-  const styleAttr = () => (local.minCh ? { "min-width": `${local.minCh}ch` } : undefined);
-
-  if (local.kind === "theme") {
-    const themeProps = props as ThemeChipProps;
+  if (props.kind === "theme") {
     return (
       <span
-        {...rest}
-        class={cn("font-mono text-xs text-fg-muted", local.class)}
-        aria-label={`${themeProps.passed} of ${themeProps.total} exercises passed`}
+        class={cn("font-mono text-xs text-fg-muted", props.class)}
+        aria-label={`${props.passed} of ${props.total} exercises passed`}
         style={styleAttr()}
       >
-        {themeProps.passed}/{themeProps.total} passed
+        {props.passed}/{props.total} passed
       </span>
     );
   }
 
-  const exerciseProps = props as ExerciseChipProps;
   return (
     <span
-      {...rest}
-      class={cn("font-mono text-xs text-fg-faint", local.class)}
-      aria-label={`Seen ${exerciseProps.seen} instances, passed ${exerciseProps.passed}`}
+      class={cn("font-mono text-xs text-fg-faint", props.class)}
+      aria-label={`Seen ${props.seen} instances, passed ${props.passed}`}
       style={styleAttr()}
     >
-      seen {exerciseProps.seen} · passed {exerciseProps.passed}
+      seen {props.seen} · passed {props.passed}
     </span>
   );
 }

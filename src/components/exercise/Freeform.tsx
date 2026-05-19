@@ -129,7 +129,12 @@ export function Freeform(props: FreeformProps) {
         onInsert={(text) => {
           if (phase.current() !== "right") insertAtFocused(text);
         }}
-        onRun={() => void yaegi.run()}
+        /* Mirror the toolbar's runtime gate. Today the schema permits
+         * `runtime: "yaegi" | "server"` for freeform; only "yaegi"
+         * runs in the worker. Without this, a future server-runtime
+         * exercise would silently invoke yaegi.run via the mobile
+         * bar even though the toolbar Run is disabled. */
+        onRun={props.runtime === "yaegi" ? () => void yaegi.run() : undefined}
       />
       <InlineCanonicalReveal
         submission={code}
