@@ -126,3 +126,30 @@ export function setRadius(next: RadiusId): void {
   if (typeof localStorage !== "undefined") localStorage.setItem(RADIUS_STORAGE_KEY, next);
   document.documentElement.dataset.radius = next;
 }
+
+/* =============================== Style ============================== */
+
+export const STYLES = ["terminal", "cardboard", "textbook", "glass", "islands"] as const;
+export type StyleId = (typeof STYLES)[number];
+
+export const STYLE_STORAGE_KEY = "typeover:style";
+const STYLE_DEFAULT: StyleId = "terminal";
+
+const isStyle = (s: string | null): s is StyleId =>
+  s !== null && (STYLES as readonly string[]).includes(s);
+
+/** The current visual style. DOM attribute is authoritative; missing /
+ *  unknown values fall back to `terminal`. */
+export function currentStyle(): StyleId {
+  if (typeof document !== "undefined") {
+    const attr = document.documentElement.dataset.style;
+    if (isStyle(attr ?? null)) return attr as StyleId;
+  }
+  return STYLE_DEFAULT;
+}
+
+export function setStyle(next: StyleId): void {
+  if (typeof document === "undefined") return;
+  if (typeof localStorage !== "undefined") localStorage.setItem(STYLE_STORAGE_KEY, next);
+  document.documentElement.dataset.style = next;
+}

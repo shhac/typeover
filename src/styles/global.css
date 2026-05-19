@@ -71,6 +71,18 @@
    * Default is `0.25rem` = 4px per unit, matching Tailwind's stock.
    */
   --spacing: 0.25rem;
+
+  /* === Style axis (terminal default) ===
+   * design-docs/14. Tokens that styles re-bind; components consume
+   * them via .ds-panel / .ds-heading-font in @layer base below.
+   * "Terminal" is the @theme default — flat, hairline-only, mono.
+   */
+  --surface-pattern: none;
+  --shadow-panel: none;
+  --shadow-island: none;
+  --panel-backdrop-filter: none;
+  --font-serif: "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-sans);
 }
 
 /* ===========================================================================
@@ -122,6 +134,47 @@
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
+}
+
+/* ---- Style axis (terminal / cardboard / textbook / glass / islands)
+ * design-docs/14. Each block re-binds at most a handful of style
+ * tokens; components don't branch on the active style.
+ */
+:root[data-style="cardboard"] {
+  /* Warm-paper grain via a tiny radial-gradient stipple. Subtle
+   * inset shadow reads as folded-paper edge depth. */
+  --surface-pattern: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--color-fg-faint) 18%, transparent) 1px,
+    transparent 1.5px
+  );
+  --shadow-panel: inset 0 0 0 1px color-mix(in oklab, var(--color-bg-elevated) 80%, transparent);
+}
+
+:root[data-style="textbook"] {
+  /* Serif headings + a left-rule on Panel reads as annotated
+   * textbook margins. */
+  --font-heading: var(--font-serif);
+  --shadow-panel: inset 3px 0 0 0 color-mix(in oklab, var(--color-accent-amber) 70%, transparent);
+}
+
+:root[data-style="glass"] {
+  /* Translucent panels with backdrop blur where supported. The
+   * @supports guard in @layer base below keeps the opaque
+   * fallback honest. */
+  --panel-backdrop-filter: blur(10px) saturate(140%);
+  --shadow-panel:
+    0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 4%, transparent),
+    0 6px 24px -10px color-mix(in oklab, #000 35%, transparent);
+}
+
+:root[data-style="islands"] {
+  /* Strong drop shadow so panels physically separate from the
+   * page. Reads modern-app rather than terminal. */
+  --shadow-panel:
+    0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
+    0 2px 4px -1px color-mix(in oklab, #000 30%, transparent);
+  --shadow-island: 0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
 }
 
 :root[data-theme="light"] {
@@ -241,6 +294,24 @@
     outline: 2px solid var(--color-accent-amber);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+  }
+
+  /* ---- Style-axis consumers (design-docs/14) ----
+   * Components add these classes and read the style tokens
+   * automatically. Terminal defaults are no-ops; non-terminal
+   * styles light up the cascade.
+   */
+  .ds-panel {
+    box-shadow: var(--shadow-panel);
+    background-image: var(--surface-pattern);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .ds-panel {
+      backdrop-filter: var(--panel-backdrop-filter);
+    }
+  }
+  .ds-heading-font {
+    font-family: var(--font-heading);
   }
 
   /* Respect reduced-motion. Quiz transitions must check this too. */

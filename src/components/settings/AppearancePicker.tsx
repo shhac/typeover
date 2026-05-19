@@ -14,11 +14,14 @@ import {
   currentChoice,
   currentDensity,
   currentRadius,
+  currentStyle,
   type DensityId,
   type RadiusId,
   setDensity,
   setRadius,
+  setStyle,
   setTheme,
+  type StyleId,
   type ThemeChoice,
 } from "~/lib/theme";
 
@@ -131,6 +134,34 @@ const DENSITY_OPTIONS: RadioOption<DensityId>[] = [
   },
 ];
 
+const STYLE_OPTIONS: RadioOption<StyleId>[] = [
+  {
+    value: "terminal",
+    label: "Terminal",
+    description: "Bloomberg-meets-airy-Linear. Flat, hairline-only, mono. Default.",
+  },
+  {
+    value: "cardboard",
+    label: "Cardboard",
+    description: "Warm paper grain on panels. Reads like a notebook.",
+  },
+  {
+    value: "textbook",
+    label: "Textbook",
+    description: "Serif headings + amber left-rule. Annotated-page feel.",
+  },
+  {
+    value: "glass",
+    label: "Glass",
+    description: "Translucent panels with subtle backdrop blur where supported.",
+  },
+  {
+    value: "islands",
+    label: "Islands",
+    description: "Distinct floating cards with stronger drop shadows.",
+  },
+];
+
 const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
   {
     value: "sharp",
@@ -238,6 +269,17 @@ export function AppearancePicker() {
           initial="normal"
           read={currentRadius}
           write={setRadius}
+        />
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">Style</div>
+        <RadioGroup<StyleId>
+          legend="Style"
+          name="style"
+          options={STYLE_OPTIONS}
+          initial="terminal"
+          read={currentStyle}
+          write={setStyle}
         />
       </div>
     </div>

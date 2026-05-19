@@ -3,13 +3,16 @@ import {
   currentChoice,
   currentDensity,
   currentRadius,
+  currentStyle,
   currentTheme,
   DENSITY_STORAGE_KEY,
   RADIUS_STORAGE_KEY,
   setDensity,
   setRadius,
+  setStyle,
   setTheme,
   STORAGE_KEY,
+  STYLE_STORAGE_KEY,
 } from "./theme";
 
 /*
@@ -41,6 +44,7 @@ beforeEach(() => {
   delete document.documentElement.dataset.theme;
   delete document.documentElement.dataset.density;
   delete document.documentElement.dataset.radius;
+  delete document.documentElement.dataset.style;
   vi.stubGlobal("matchMedia", matchMediaStub(false));
   /* matchMedia lives on window, not just globalThis */
   Object.defineProperty(window, "matchMedia", {
@@ -163,6 +167,36 @@ describe("radius axis", () => {
   });
 });
 
+describe("style axis", () => {
+  it("currentStyle defaults to 'terminal' when no DOM attribute", () => {
+    expect(currentStyle()).toBe("terminal");
+  });
+
+  it("currentStyle reads the DOM attribute when set", () => {
+    document.documentElement.dataset.style = "glass";
+    expect(currentStyle()).toBe("glass");
+  });
+
+  it("currentStyle falls back to 'terminal' on an unknown attribute", () => {
+    document.documentElement.dataset.style = "neon";
+    expect(currentStyle()).toBe("terminal");
+  });
+
+  it("setStyle writes the pin and updates the DOM", () => {
+    setStyle("cardboard");
+    expect(localStorage.getItem(STYLE_STORAGE_KEY)).toBe("cardboard");
+    expect(document.documentElement.dataset.style).toBe("cardboard");
+    expect(currentStyle()).toBe("cardboard");
+  });
+
+  it("accepts all five documented styles", () => {
+    for (const s of ["terminal", "cardboard", "textbook", "glass", "islands"] as const) {
+      setStyle(s);
+      expect(currentStyle()).toBe(s);
+    }
+  });
+});
+
 describe("axes are independent", () => {
   it("setting density doesn't touch the colour theme attribute", () => {
     document.documentElement.dataset.theme = "dark";
@@ -170,12 +204,24 @@ describe("axes are independent", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
-  it("setting theme doesn't touch density or radius attributes", () => {
+  it("setting theme doesn't touch density / radius / style attributes", () => {
     setDensity("airy");
     setRadius("rounded");
+    setStyle("glass");
     setTheme("light");
     expect(document.documentElement.dataset.density).toBe("airy");
     expect(document.documentElement.dataset.radius).toBe("rounded");
+    expect(document.documentElement.dataset.style).toBe("glass");
+  });
+
+  it("setting style doesn't touch any other axis", () => {
+    setTheme("light");
+    setDensity("compact");
+    setRadius("pill");
+    setStyle("islands");
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement.dataset.density).toBe("compact");
+    expect(document.documentElement.dataset.radius).toBe("pill");
   });
 });
 
@@ -209,5 +255,10 @@ describe("theme — SSR path (no localStorage)", () => {
   it("setRadius updates the DOM without throwing when localStorage is undefined", () => {
     expect(() => setRadius("rounded")).not.toThrow();
     expect(document.documentElement.dataset.radius).toBe("rounded");
+  });
+
+  it("setStyle updates the DOM without throwing when localStorage is undefined", () => {
+    expect(() => setStyle("glass")).not.toThrow();
+    expect(document.documentElement.dataset.style).toBe("glass");
   });
 });

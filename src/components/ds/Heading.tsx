@@ -33,6 +33,7 @@ export function Heading(props: ParentProps<HeadingProps>) {
       component={tag}
       {...rest}
       class={cn(
+        "ds-heading-font",
         sizeClass[level],
         local.accent ? accentClass[local.accent] : "text-fg-primary",
         local.class,

@@ -60,6 +60,16 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
             pinnedRadius === "pill"
               ? pinnedRadius
               : "normal";
+
+          var pinnedStyle = localStorage.getItem("typeover:style");
+          document.documentElement.dataset.style =
+            pinnedStyle === "terminal" ||
+            pinnedStyle === "cardboard" ||
+            pinnedStyle === "textbook" ||
+            pinnedStyle === "glass" ||
+            pinnedStyle === "islands"
+              ? pinnedStyle
+              : "terminal";
         } catch (_) {
           /* localStorage unavailable (incognito quota / SSR / etc.) —
            * fall through to the CSS @theme defaults. */

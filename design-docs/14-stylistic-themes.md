@@ -10,8 +10,8 @@ Four theme **axes**, each independently set by the learner:
    the corners are. *This doc.*
 4. **Style** — `terminal` (default) / `cardboard` / `textbook` /
    `glass` / `islands`. The aesthetic "feel" of surfaces and
-   chrome, composed on top of the other three axes. *This doc;
-   proposed 2026-05-20, not yet implemented.*
+   chrome, composed on top of the other three axes. *Landed
+   2026-05-20.*
 
 The four axes compose: a learner can run `dark` + `compact` +
 `rounded` + `glass` if that's what reads best to them. The DS holds
@@ -138,7 +138,7 @@ The component layer doesn't change — every `rounded-sm` /
 
 ### Style — surface aesthetic, composed on top
 
-*Proposed 2026-05-20, not yet implemented.*
+*Landed 2026-05-20.*
 
 The previous axes change measurements (spacing, radii); the
 **Style** axis changes the *aesthetic vocabulary* of surfaces and
@@ -261,7 +261,8 @@ Three new localStorage keys:
 - `typeover:density` — `"compact"` / `"normal"` / `"airy"`
 - `typeover:radius` — `"sharp"` / `"normal"` / `"rounded"` / `"pill"`
 - `typeover:style` — `"terminal"` / `"cardboard"` / `"textbook"` /
-  `"glass"` / `"islands"` *(reserved; not yet read)*
+  `"glass"` / `"islands"` *(active; read by the BaseLayout
+  bootstrap script alongside the other three pins)*
 
 Same shape as `typeover:theme`. The existing bootstrap script in
 `BaseLayout.astro` extends to read each key synchronously before
