@@ -20,33 +20,100 @@ import { pickFrom, rngFromSeed, shuffle } from "./seed";
 
 /* ---------------- Schemas ---------------- */
 
-const TemplateSpec = z.object({
-  kind: z.literal("template"),
-  /** Map of variable name to value pool. Generator picks one from each. */
-  vars: z.record(z.string(), z.array(z.string())),
-  /** TS snippet shown in the prompt, with ${name} placeholders. */
-  ts: z.string(),
-  /** Idiomatic Go answer template, with the same placeholders. */
-  canonical: z.string(),
-  /**
-   * MCQ-specific: distractor templates. Each uses the same vars as the
-   * canonical so the *only* meaningful difference is the syntax under
-   * test.
-   */
-  distractors: z.array(z.string()).optional(),
-});
+const PLACEHOLDER_RE = /\$\{(\w+)\}/g;
 
-const VariantSpec = z.object({
-  kind: z.literal("variant"),
-  variants: z.array(
-    z.object({
-      id: z.string(),
-      ts: z.string(),
-      canonical: z.string(),
-      distractors: z.array(z.string()).optional(),
-    }),
-  ),
-});
+/** Extract `${name}` references from a template string. Shared between
+ *  the runtime substitution path and the build-time schema refinements
+ *  so the placeholder grammar lives in one place. */
+export function extractTemplateVars(tmpl: string): string[] {
+  return Array.from(tmpl.matchAll(PLACEHOLDER_RE), (m) => m[1]!);
+}
+
+const TemplateSpec = z
+  .object({
+    kind: z.literal("template"),
+    /** Map of variable name to value pool. Generator picks one from each. */
+    vars: z.record(z.string(), z.array(z.string())),
+    /** TS snippet shown in the prompt, with ${name} placeholders. */
+    ts: z.string(),
+    /** Idiomatic Go answer template, with the same placeholders. */
+    canonical: z.string(),
+    /**
+     * MCQ-specific: distractor templates. Each uses the same vars as the
+     * canonical so the *only* meaningful difference is the syntax under
+     * test.
+     */
+    distractors: z.array(z.string()).optional(),
+  })
+  .superRefine((spec, ctx) => {
+    /* Every declared pool must be non-empty — pickFrom crashes on []. */
+    for (const [name, pool] of Object.entries(spec.vars)) {
+      if (pool.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Template var pool "${name}" is empty; pickFrom needs ≥1 value.`,
+          path: ["vars", name],
+        });
+      }
+    }
+    /* Every ${ref} in ts / canonical / distractors must be declared
+     * in `vars`. Catches the most common authoring footgun before it
+     * hits the runtime (where substitute() throws). */
+    const declared = new Set(Object.keys(spec.vars));
+    const checkRefs = (template: string, path: (string | number)[]) => {
+      for (const ref of extractTemplateVars(template)) {
+        if (!declared.has(ref)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Template references undeclared var "\${${ref}}".`,
+            path,
+          });
+        }
+      }
+    };
+    checkRefs(spec.ts, ["ts"]);
+    checkRefs(spec.canonical, ["canonical"]);
+    (spec.distractors ?? []).forEach((d, i) =>
+      checkRefs(d, ["distractors", i]),
+    );
+  });
+
+const VariantSpec = z
+  .object({
+    kind: z.literal("variant"),
+    variants: z.array(
+      z.object({
+        id: z.string(),
+        ts: z.string(),
+        canonical: z.string(),
+        distractors: z.array(z.string()).optional(),
+      }),
+    ),
+  })
+  .superRefine((spec, ctx) => {
+    if (spec.variants.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Variant generator must declare at least one variant.",
+        path: ["variants"],
+      });
+    }
+    /* IDs are how learners would (eventually) be told which variant
+     * they're on; clashing IDs make that pointer useless. */
+    const seen = new Map<string, number>();
+    spec.variants.forEach((v, i) => {
+      const prior = seen.get(v.id);
+      if (prior !== undefined) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate variant id "${v.id}" (also at index ${prior}).`,
+          path: ["variants", i, "id"],
+        });
+      } else {
+        seen.set(v.id, i);
+      }
+    });
+  });
 
 const ProceduralSpec = z.object({
   kind: z.literal("procedural"),

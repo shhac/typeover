@@ -113,13 +113,21 @@ was already big enough.
   no-backup-on-SSR and no-backup-when-empty. `ExerciseProgress` and
   `Progress` are now `z.infer`'d from the schema.
 
-- **Content-schema `.refine()` cross-field checks.** Today nothing
-  prevents an author from:
-  - Referencing a `${name}` in a template that isn't declared in `vars`.
-  - Shipping an MCQ exercise with empty `distractors`.
-  - Declaring an empty var pool (crashes `pickFrom` at runtime).
-  Add refinements to `content.config.ts` so these fail at build time
-  with a clear authoring error.
+- **Content-schema `.refine()` cross-field checks.** *(Landed — task #38.)*
+  Schemas extracted from `content.config.ts` into `~/lib/content-schema`
+  (plain Zod, testable from vitest without an `astro:content` shim).
+  Refinements now reject:
+  - `vars` pool of length 0 (would crash `pickFrom`).
+  - `${name}` reference in `ts` / `canonical` / `distractors[i]` that
+    isn't declared in `vars`.
+  - Empty `variants: []` and duplicate variant IDs.
+  - `fill-word` / `fill-line` without (or with empty) `blanks`.
+  - `fill-word` / `fill-line` with a non-template generator.
+  - `blanks` entries that don't name a declared template var.
+  - MCQ with empty `distractors` (template kind) or any MCQ-variant
+    without distractors (variant kind).
+  - Stray `blanks` set on non-fill exercise types.
+  Each issue carries a path pointing at the offending field.
 
 - **`progress.write()` should dispatch a same-tab storage event.**
   Browsers only fire `storage` in *other* tabs, so any future Solid

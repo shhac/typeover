@@ -391,18 +391,51 @@ The seed → instance → record bridge that all exercise types depend on.
 
 Cheap to write, catches authoring drift before it hits a PR.
 
-### `src/content.config.ts`
+### `src/lib/content-schema.ts`
+
+Schemas moved out of `content.config.ts` so they're testable under
+vitest (Astro's `astro:content` import isn't available outside the
+Astro runtime).
+
+Field-shape rejections (built into the base `z.object`):
 
 - **MCQ exercise with `hints: ["one", "two"]`** — rejected (hints is a
   tuple of 3).
 - **Exercise with `order: 0`** — rejected (positive int constraint).
 - **Exercise with unknown `type`** — rejected.
-- **Template generator with no `vars`** — accepted today; once task #38
-  lands, rejected.
-- **Template referencing `${undeclared}`** — accepted today; once task
-  #38 lands, rejected with `${undeclared}` in the error path.
-- **Variant generator with empty `variants: []`** — accepted today;
-  document whether this should be rejected.
+
+Cross-field rejections (task #38 — landed; `content-schema.test.ts`):
+
+- **Empty value pool** `vars: { x: [] }` → rejected; issue path
+  `vars.x`. Pinned per `Template generator empty pool` test.
+- **Undeclared placeholder** `ts: "${y}"` with `vars: { x: [...] }` →
+  rejected; issue path `ts` (or `canonical` / `distractors.N`); error
+  message contains `${y}`.
+- **Variant generator with `variants: []`** → rejected.
+- **Duplicate variant IDs** → rejected; issue path
+  `variants.<dup-index>.id` and the error message names the prior
+  index.
+- **`fill-word` / `fill-line` without `blanks`** → rejected; issue
+  path `blanks`. Prevents the iter-4/6 vacuous-truth auto-pass bug.
+- **`fill-word` / `fill-line` with a variant generator** → rejected
+  with `generator.kind` path (variant kind doesn't produce
+  `blankSegments`).
+- **Blank name not declared in `generator.vars`** → rejected with
+  `blanks.<i>` path.
+- **MCQ template with `distractors: []`** → rejected with
+  `generator.distractors` path. Without this an MCQ renders as a
+  single-option "quiz".
+- **MCQ variant with any variant missing `distractors`** → rejected
+  with `generator.variants.<i>.distractors` path.
+- **`blanks` on non-fill type (mcq / freeform)** → rejected (likely
+  copy-paste from a fill exercise).
+
+Happy paths:
+
+- Well-formed fill-word, mcq (template & variant), and freeform
+  exercises all parse without issues.
+- A template with `vars: {}` and no `${refs}` in `ts`/`canonical`
+  is accepted (legal-but-boring static exercise).
 
 ## P2 — Curriculum tree
 
