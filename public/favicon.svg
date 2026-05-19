@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  typeover favicon. Mono `t` on near-black surface in amber — the
+  three identity beats from design-docs/05 (mono-first, dark Linear,
+  amber accent). 32×32 vector so it scales across favicon sizes
+  without antialiasing fuzz on the small ones.
+
+  Stays the same character across themes — favicons don't respond
+  to data-theme, and the dark mark works fine on both light and
+  dark browser chrome backgrounds.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="3" fill="#0a0a0b"/>
+  <text
+    x="16"
+    y="24"
+    text-anchor="middle"
+    font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+    font-size="24"
+    font-weight="700"
+    fill="#ffa726"
+  >t</text>
+</svg>

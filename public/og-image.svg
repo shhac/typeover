@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Open Graph share image — 1200×630, the canonical social-card
+  dimensions Twitter/X, LinkedIn, Slack, Discord, and others render.
+  Vector for crispness on every platform that supports SVG.
+
+  Aesthetic mirrors the home page on the dark theme (the marketing
+  side of the audience funnel arrives on the open web before they pick
+  light); design-docs/05 + /07 carry the rationale.
+
+  Composition:
+    - background       bg-base
+    - wordmark         "typeover" big mono in fg-primary
+    - tagline          fg-secondary
+    - identity row     [TS] → [GO] chips in their respective accents
+    - footer           "typeover.dev" mono in fg-muted
+
+  No external font fetches — relies on ui-monospace / system mono
+  for portability across social-platform render farms (some refuse
+  external requests during card generation).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="amberLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffa726" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ffa726" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#ffa726" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0a0a0b"/>
+
+  <!-- subtle amber underline, mid-image, evokes a terminal cursor blink -->
+  <rect x="120" y="395" width="960" height="1" fill="url(#amberLine)"/>
+
+  <!-- wordmark -->
+  <text
+    x="120"
+    y="280"
+    font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+    font-size="120"
+    font-weight="700"
+    fill="#e8e8e8"
+    letter-spacing="-4"
+  >typeover</text>
+
+  <!-- tagline -->
+  <text
+    x="120"
+    y="350"
+    font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+    font-size="30"
+    font-weight="500"
+    fill="#a8a8ad"
+  >Learn Go from TypeScript.</text>
+
+  <!-- TS → GO identity row -->
+  <g font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+     font-size="20" font-weight="600" letter-spacing="3">
+    <rect x="120" y="445" width="74" height="34" rx="2"
+          fill="#4a9eff15" stroke="#4a9eff66" stroke-width="1"/>
+    <text x="157" y="468" text-anchor="middle" fill="#4a9eff">TS</text>
+
+    <text x="220" y="468" fill="#a8a8ad" font-size="22">→</text>
+
+    <rect x="252" y="445" width="74" height="34" rx="2"
+          fill="#00add815" stroke="#00add866" stroke-width="1"/>
+    <text x="289" y="468" text-anchor="middle" fill="#00add8">GO</text>
+  </g>
+
+  <!-- footer -->
+  <text
+    x="120"
+    y="565"
+    font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+    font-size="22"
+    font-weight="400"
+    fill="#8a8a8f"
+  >typeover.dev</text>
+</svg>

@@ -7,6 +7,14 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+
+/* Canonical URL for the deploy. Used for og:url + the absolute
+ * og:image URL — some social platforms (notably LinkedIn and
+ * old-school crawlers) refuse relative image paths. Falls back to
+ * a sensible literal so dev / preview builds don't break. */
+const SITE_ORIGIN = import.meta.env.SITE ?? "https://typeover.paulie.app";
+const ogImage = new URL("/og-image.svg", SITE_ORIGIN).toString();
+const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
 ---
 
 <!doctype html>
@@ -41,12 +49,26 @@ const { title, description } = Astro.props;
         }
       })();
     </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
+
+    {/* Open Graph + Twitter share card. Absolute URLs because some
+      * platforms (LinkedIn especially) refuse relative paths. */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImage} />
+
     <title>{title}</title>
   </head>
   <body>
