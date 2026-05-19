@@ -259,8 +259,9 @@ Per pattern, the trigger for actually doing it:
   reports confusion about which language an inline mention refers
   to. Until then it's a polish lever.
 - **Pattern 4** (`<Compare>`) — *landed 2026-05-19* on the home
-  page. Primitive is ready; next caller is the curriculum index
-  intro when the wedge case study lands.
+  page **and** the curriculum index intro (the "hot candidate"
+  case study). Next caller will be a theme intro when one wants
+  the side-by-side shape.
 - **Pattern 5** (marginalia) — first time a lesson wants a tip
   that doesn't fit the hint system. Build the primitive then; not
   before.

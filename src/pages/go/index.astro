@@ -3,8 +3,11 @@ import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Badge,
+  CodeBlock,
+  Compare,
   Container,
   Divider,
+  Eyebrow,
   Heading,
   LangCrumbs,
   Panel,
@@ -49,6 +52,26 @@ const tree = buildCurriculumTree(modules, themes, exercises);
             every theme is browsable. Themes without exercises yet are visible
             so you can see what's coming.
           </Text>
+        </Stack>
+
+        <Stack gap="sm">
+          <Eyebrow>the wedge</Eyebrow>
+          <Compare
+            caption="Same intent, two syntaxes. typeover's whole shape is teaching the second one by leaning on what you already know about the first."
+          >
+            <CodeBlock lang="ts" filename="variables.ts">{`let count: number = 5;
+const PI = 3.14;
+
+function double(n: number): number {
+  return n * 2;
+}`}</CodeBlock>
+            <CodeBlock lang="go" filename="variables.go">{`count := 5
+const PI = 3.14
+
+func double(n int) int {
+    return n * 2
+}`}</CodeBlock>
+          </Compare>
         </Stack>
 
         <Divider />
