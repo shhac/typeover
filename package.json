@@ -17,7 +17,8 @@
     "format:check": "oxfmt --check",
     "runtime:build": "bash runtime/yaegi-wasm/build.sh",
     "runtime:smoke": "node runtime/yaegi-wasm/smoke.mjs",
-    "runtime:matrix": "node runtime/yaegi-wasm/matrix.mjs"
+    "runtime:matrix": "node runtime/yaegi-wasm/matrix.mjs",
+    "runtime:verify-freeform": "node runtime/yaegi-wasm/verify-freeform.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -38,7 +39,8 @@
     "oxfmt": "^0.50.0",
     "oxlint": "^1.65.0",
     "vite-plugin-solid": "^2.11.12",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "yaml": "^2.9.0"
   },
   "packageManager": "pnpm@10.33.4"
 }

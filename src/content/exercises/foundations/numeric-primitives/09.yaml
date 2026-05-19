@@ -1,0 +1,40 @@
+target: go
+themeId: foundations/numeric-primitives
+type: freeform
+order: 9
+prompt: |
+  Write a Go program that prints the maximum value of an `int8` and
+  the minimum value of an `int16`. Use `math.MaxInt8` and
+  `math.MinInt16` from the standard library. The expected output is
+  two lines: the max-int8 first, then the min-int16.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log(2 ** 7 - 1);    // ~max-int8
+    console.log(-(2 ** 15));    // ~min-int16
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"math"
+    )
+
+    func main() {
+    	fmt.Println(math.MaxInt8)
+    	fmt.Println(math.MinInt16)
+    }
+expectStdout: |
+  127
+  -32768
+runtime: yaegi
+hints:
+  - "The `math` package has untyped constants for every integer range. `math.MaxInt8`, `math.MinInt8`, `math.MaxInt16`, `math.MinInt16`, and so on through Int32 and Int64."
+  - "The constants are *untyped* — you can print them directly without a cast. Just `fmt.Println(math.MaxInt8)` works."
+  - "`package main; import (\"fmt\"; \"math\"); func main() { fmt.Println(math.MaxInt8); fmt.Println(math.MinInt16) }`"
+notes: |
+  Second freeform of Theme 2. The lever here is the `math` package's
+  untyped numeric constants — a feature TS doesn't have an analogue
+  for. Reaches for stdlib to reinforce that Go's narrow integer types
+  carry explicit, named ranges (a contrast to TS's single `number`).

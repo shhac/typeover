@@ -85,6 +85,20 @@ Flagged for "do later when triggered", not now.
   passes ~10. No reorganisation needed before then.
   (Iter-7 lens-2 finding, deferred.)
 
+- **Template-placeholder grammar collides with TS template literals.**
+  Generators use `${name}` for substitution placeholders. The `#38`
+  refinement rejects undeclared `${ref}` in `ts` / `canonical` /
+  `distractors`. But TypeScript template literals also use
+  `${...}` — so a freeform exercise that wants to show TS like
+  `` `hello ${name}` `` in its `ts` field gets rejected. Today's
+  workaround is to rewrite the TS without template literals
+  (concatenation works). The cleaner fix is to switch placeholder
+  grammar to something with no Go/TS collision — `{{name}}` (Mustache)
+  is the natural choice. Migration touches every existing exercise's
+  template — ~30 files. Pickup criterion: when an author hits this
+  for a *second* time, or when an exercise genuinely needs to show
+  TS template-literal syntax.
+
 - **Block-level markdown in content strings.** `formatInline()` covers
   `` `code` `` and `**bold**` but theme intros (e.g.
   `themes/foundations/variables.yaml`) author bulleted lists with
