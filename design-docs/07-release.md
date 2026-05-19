@@ -78,7 +78,8 @@ Word-of-mouth from learners is the only growth channel we build.
 - [ ] README rewrite (public-facing).
 - [ ] OG image (dark, mono, wordmark).
 - [ ] Favicon.
-- [ ] Privacy note (we use localStorage, no servers, no tracking).
+- [x] Privacy note (we use localStorage, no servers, no tracking). Lives
+      at `/privacy`, linked from the site footer.
 - [ ] Module 1 content complete.
 - [ ] Mobile sanity pass on real iPhone + Android.
 - [ ] axe a11y clean.

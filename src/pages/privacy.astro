@@ -1,0 +1,93 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { Container, Heading, Stack, Text } from "~/components/ds";
+
+/*
+ * Privacy note. Launch-checklist item from design-docs/07: "we use
+ * localStorage, no servers, no tracking." The honest version of that
+ * statement lives here, linked from the footer, so a learner can
+ * confirm what the site does with their data without reading source.
+ *
+ * Keep it terse — there isn't much to say. If anything on this list
+ * stops being true (analytics added, server-runtime endpoint, etc.),
+ * update this page in the same commit.
+ */
+---
+
+<BaseLayout
+  title="Privacy — typeover"
+  description="What typeover stores, where it lives, what leaves your device."
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Heading level={1}>Privacy</Heading>
+          <Text tone="muted" size="sm">
+            The short version: typeover runs entirely in your browser.
+          </Text>
+        </Stack>
+
+        <Stack gap="md">
+          <Heading level={2} class="!text-xl">What we store</Heading>
+          <Text>
+            typeover keeps two things in your browser's
+            <code class="font-mono text-fg-primary">localStorage</code>:
+          </Text>
+          <Text as="div" class="ds-prose">
+            - <code class="font-mono text-fg-primary">typeover:progress</code>
+            — which exercises you've passed, how many hints you used, when you
+            last opened an exercise. Per-device only.
+            - <code class="font-mono text-fg-primary">typeover:theme</code>
+            — your chosen colour theme, if you pinned one. Otherwise we
+            follow your OS preference.
+          </Text>
+        </Stack>
+
+        <Stack gap="md">
+          <Heading level={2} class="!text-xl">What leaves your device</Heading>
+          <Text as="div" class="ds-prose">
+            - Nothing about you or your progress. There are no analytics, no
+            cookies, no third-party trackers, no server-side accounts.
+            - Page assets and Google Fonts load from CDNs the way any
+            static site's do.
+            - If you tap **Share** on a module-completion screen, that uses
+            your operating system's share sheet (or your clipboard) — the
+            text and link go wherever you send them. typeover doesn't see
+            it.
+          </Text>
+        </Stack>
+
+        <Stack gap="md">
+          <Heading level={2} class="!text-xl">Code execution</Heading>
+          <Text>
+            Go code you type into freeform and fill-line exercises runs in a
+            WebAssembly Go interpreter (Yaegi) inside a Web Worker — on
+            your device, not on any server. Your code never leaves the
+            browser tab.
+          </Text>
+        </Stack>
+
+        <Stack gap="md">
+          <Heading level={2} class="!text-xl">Clearing your data</Heading>
+          <Text>
+            Clearing site data in your browser (or using an incognito
+            window) wipes everything typeover knows about you. There's no
+            "delete my account" form because there's no account.
+          </Text>
+        </Stack>
+
+        <Stack gap="sm">
+          <Text tone="muted" size="sm">
+            Questions? Open an issue on
+            <a
+              href="https://github.com/paulsomers/typeover"
+              class="text-accent-amber hover:underline"
+              rel="noopener noreferrer">GitHub</a
+            >.
+          </Text>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>
