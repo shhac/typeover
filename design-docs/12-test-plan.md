@@ -259,10 +259,14 @@ the /improve-code-structure dead-code sweep.
 The new surface is `src/components/exercise/FillBlankLineInput.tsx`.
 It composes `useYaegiRun` (the shared hook covered by
 `src/lib/use-yaegi-run.test.ts`) with `substituteAtBlank` (covered
-by `src/lib/fill-blank.test.ts`). Component-level integration tests
-for FillBlankLineInput are still a gap — same shape as the missing
-Freeform.tsx tests; both should mount the component with `~/runtime`
-mocked. Coverage follow-ups:
+by `src/lib/fill-blank.test.ts`). **Component-level integration
+tests landed 2026-05-19** — `FillBlankLineInput.test.tsx` mocks
+`~/runtime` (same pattern as `use-yaegi-run.test.ts`) and pins the
+contract end-to-end through the real progress chain. Sister suite
+`Freeform.test.tsx` lands the same coverage for freeform (scaffold
+seed, happy / wrong / reveal / Another-resets-scaffold).
+
+Pinned scenarios:
 
 - Happy path: type the canonical line → Run → stdout match → Submit
   records pass once → input locks in the right phase.
