@@ -84,11 +84,15 @@ export function BlankInput(props: BlankInputProps) {
       onInput={(e) => props.onInput(e.currentTarget.value)}
       class={cn(
         "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-[13px]",
-        "border rounded-sm outline-none align-baseline min-w-[3ch]",
+        "border rounded-sm outline-none align-baseline min-w-[5ch]",
         inputClass[state()],
       )}
       style={{
-        width: `${Math.max(props.expected.length + 1, 3)}ch`,
+        /* border-box + ~14px of padding+border means width-in-ch
+         * underreads the content area by ~2ch. Buffer of 4 keeps the
+         * text from clipping even for the longest expected value in
+         * the pool. min-w-[5ch] guards tiny one-char expecteds. */
+        width: `${Math.max(props.expected.length + 4, 5)}ch`,
       }}
     />
   );

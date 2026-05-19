@@ -76,6 +76,50 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
+- **fill-line UX redesign: input + Yaegi grading.** *(Surfaced 2026-05-19
+  via user feedback.)* fill-line currently renders as MCQ-with-tile-UX
+  (pick the right line from 5 shuffled candidates). The intent is
+  "**type** the code for this one line" — single-line text input, no
+  candidate pool, graded by running the surrounding scaffold under
+  Yaegi.
+  Shape:
+  1. The exercise's `canonical` becomes a runnable program with a
+     `${line}` blank inside a scaffold function (typically
+     `func main()` or a tested-function-with-return).
+  2. The component renders a single `<input>` for the line.
+  3. On Submit, substitute the user's input into the canonical at
+     `${line}`, run via `getRunner().eval(...)`, compare stdout to
+     a per-exercise `expectStdout` (same field freeform uses).
+  4. Schema migration: `runtime: "yaegi"` becomes required;
+     `expectStdout` becomes required (mirror freeform). The
+     existing `generator.distractors` field is **kept** but
+     repurposed — no longer the visible candidate pool. The
+     distractors become an authoring-driven "known wrong-pattern"
+     bank that can power targeted feedback: if the learner's
+     submitted line matches a distractor (verbatim or AST-equivalent),
+     surface a per-distractor hint instead of the generic "didn't
+     match expected output" message. This re-uses the per-distractor
+     thinking the author did when writing them; no work is thrown
+     away from the recent migration.
+  5. Content migration: all 12 fill-line YAMLs need a re-author —
+     scaffold prose around `${line}` so the program runs, set
+     `expectStdout`. vars.line[0] stays as the reference solution.
+     Distractors stay too, now as the wrong-pattern bank.
+  The current MCQ-as-tile implementation stays as the stopgap until
+  this lands — the recent distractor-pool fix (commit cf75494)
+  prevents the grading-by-luck bug while the redesign is pending.
+  Pickup criterion: this is launch-blocking — the current UX
+  misleads learners. Schedule alongside #23 (CodeMirror) since the
+  textarea will eventually become a CodeMirror surface too.
+  Same redesign argument applies to **fill-word**: currently a
+  text input with string-match grading; the Yaegi-run grading model
+  would let exercises grade by behaviour (e.g. typed expression
+  yields the right value at runtime) rather than by literal string
+  match. That's a smaller change — same Yaegi scaffold,
+  per-blank-context expected output — but worth considering as
+  part of the same rewrite.
+
+
 - **`src/components/exercise/cells/` subfolder.** When Freeform
   (task #17) lands, the exercise/ directory will hold 8-10 files
   mixing three concerns: shared chrome (ExerciseShell), exercise
