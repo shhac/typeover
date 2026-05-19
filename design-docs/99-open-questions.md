@@ -126,16 +126,26 @@ Flagged for "do later when triggered", not now.
     The Run shortcut on the bar now grows a fill-line code
     path: gated on non-empty input + not-running, same
     contract as the toolbar Run.
-  - **iOS Safari `visualViewport` overlay.** The soft
-    keyboard overlays the layout viewport, so a `bottom: 0`
-    element lands BEHIND the keyboard. Fix: subscribe to
-    `visualViewport.resize` and translate the bar by
-    `(window.innerHeight - visualViewport.height)`. Needs
-    real-device verification, not simulator — open until
-    the mobile QA from the launch checklist runs.
-  - **Chrome Android `VirtualKeyboard API`** + the
-    `env(keyboard-inset-height)` CSS env var is the cleaner
-    fix for Chromium; can ship alongside the iOS branch.
+  - **iOS Safari `visualViewport` overlay** *(structural fix
+    landed 2026-05-19; real-device validation still pending.)*
+    `useKeyboardInset()` subscribes to `visualViewport.resize`
+    and `scroll` and computes
+    `Math.max(0, window.innerHeight - (vv.offsetTop + vv.height))`
+    — the bottom gap between the layout and visual viewports.
+    The bar's `bottom` is set from that signal. Browser-verified
+    in Chromium that the listener fires and the inline `bottom`
+    style updates from `0px` → `300px` on a synthesized 300px
+    keyboard pop. Real iOS Safari verification still requires
+    the launch-checklist mobile QA pass.
+  - **Chrome Android default** doesn't need extra work — the
+    layout viewport shrinks naturally when the keyboard opens,
+    so `bottom: 0` already lands above the keyboard. With
+    `navigator.virtualKeyboard.overlaysContent = true` opted in
+    elsewhere, the visualViewport hook above kicks in and
+    handles the overlay case too. We don't opt in proactively
+    because flipping that flag is a site-wide layout-viewport
+    change; better to let the default behaviour serve until a
+    learner reports an issue.
   - **Auto-Run shortcut on fill-line:** the proposal
     included a Run shortcut on the bar. Today it fires
     `yaegi.run()` on Freeform only; once fill-line is

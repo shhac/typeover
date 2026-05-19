@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js";
-import { For, Show, splitProps } from "solid-js";
+import { createSignal, For, onCleanup, onMount, Show, splitProps } from "solid-js";
 import { cn } from "./_internal";
 
 /*
@@ -22,14 +22,51 @@ import { cn } from "./_internal";
  *      a mobile-only surface. Desktop users with hardware
  *      keyboards have all symbols one tap away already.
  *
- * Open follow-up: iOS Safari's visual viewport overlays the
- * layout viewport when the soft keyboard is up, so a
- * `bottom: 0` element actually lands BEHIND the keyboard. The
- * fix is to subscribe to `visualViewport.resize` and translate
- * the bar by `(window.innerHeight - visualViewport.height)`.
- * Not built here; requires real-device verification rather than
- * simulator-based testing. Marked in design-docs/99.
+ * Keyboard-overlap handling: on iOS Safari the soft keyboard
+ * overlays the layout viewport, so a `bottom: 0` element lands
+ * BEHIND the keyboard. `useKeyboardInset()` subscribes to
+ * `visualViewport.resize` / `scroll` and tracks the bottom gap
+ * between the layout viewport and the visual viewport — that gap
+ * is exactly the keyboard height plus any toolbars below it.
+ *
+ * Chrome Android (default behaviour) shrinks the layout viewport
+ * when the keyboard opens, so the bar already lands above the
+ * keyboard with `bottom: 0`; the visualViewport gap is 0 in that
+ * case, so the JS hook is a no-op. With
+ * `navigator.virtualKeyboard.overlaysContent = true` opted in
+ * elsewhere, Chrome Android matches iOS and the hook kicks in.
+ *
+ * Other browsers / no visualViewport API → graceful fallback to
+ * the original `bottom: 0` behaviour.
+ *
+ * Real-device validation across iOS Safari + Chrome Android is
+ * still pending the launch-checklist mobile QA pass; the structural
+ * logic + jsdom-safe no-op fallback are verified.
  */
+
+/** Reactive bottom-gap between layout viewport and visual
+ *  viewport. 0 when there's no visual-viewport API (SSR, jsdom,
+ *  older Safari) or when no keyboard is up. */
+function useKeyboardInset(): () => number {
+  const [inset, setInset] = createSignal(0);
+  onMount(() => {
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const gap = window.innerHeight - (vv.offsetTop + vv.height);
+      setInset(Math.max(0, Math.round(gap)));
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    onCleanup(() => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    });
+  });
+  return inset;
+}
 
 export interface KeySpec {
   /** Visible label on the button. */
@@ -76,6 +113,7 @@ interface MobileKeyBarProps extends JSX.HTMLAttributes<HTMLDivElement> {
 export function MobileKeyBar(props: MobileKeyBarProps) {
   const [local, rest] = splitProps(props, ["keys", "onInsert", "onRun", "class"]);
   const keys = () => local.keys ?? GO_KEYS;
+  const inset = useKeyboardInset();
 
   return (
     <div
@@ -83,10 +121,11 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
       role="toolbar"
       aria-label="Code symbols"
       class={cn(
-        "fixed bottom-0 left-0 right-0 z-50 lg:hidden",
+        "fixed left-0 right-0 z-50 lg:hidden",
         "bg-bg-elevated border-t border-border-strong overflow-x-auto",
         local.class,
       )}
+      style={{ bottom: `${inset()}px` }}
       data-mobile-key-bar
     >
       <div class="flex flex-row min-h-11">

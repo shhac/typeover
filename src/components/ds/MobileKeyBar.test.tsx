@@ -80,6 +80,17 @@ describe("<MobileKeyBar> — onInsert wiring", () => {
   });
 });
 
+describe("<MobileKeyBar> — keyboard-overlap fallback", () => {
+  it("starts at bottom: 0 when visualViewport is absent (jsdom path)", () => {
+    /* jsdom doesn't implement visualViewport, so useKeyboardInset
+     * returns 0 throughout. Pin that: the bar's inline `bottom`
+     * style stays "0px" rather than NaN, undefined, or missing. */
+    const { container } = render(() => <MobileKeyBar onInsert={() => {}} />);
+    const bar = container.querySelector('[role="toolbar"]') as HTMLElement;
+    expect(bar.style.bottom).toBe("0px");
+  });
+});
+
 describe("<MobileKeyBar> — Run shortcut", () => {
   it("omits the Run button when onRun is absent", () => {
     const { container } = render(() => <MobileKeyBar onInsert={() => {}} />);
