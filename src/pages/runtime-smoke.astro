@@ -1,0 +1,37 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { Container, Heading, Stack, Text } from "~/components/ds";
+import { YaegiSmoke } from "~/components/runtime/YaegiSmoke";
+
+/*
+ * Dev-only smoke page for the Yaegi WASM runtime. Hydrates the
+ * YaegiSmoke island which spawns the worker + Comlink-wraps it and
+ * runs whatever Go you type. Not linked from any user-facing nav.
+ *
+ * Loaded at /runtime-smoke — visit during development to verify the
+ * runtime end-to-end. Will be deleted once the Freeform exercise
+ * component (#17) lands and exercises this same chain in production.
+ */
+---
+
+<BaseLayout
+  title="runtime smoke — typeover"
+  description="Yaegi WASM runtime smoke test (dev-only)"
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="lg">
+        <Stack gap="sm">
+          <Heading level={1}>Runtime smoke</Heading>
+          <Text tone="muted" size="sm">
+            Dev-only — verifies the Yaegi WASM worker chain end-to-end.
+            Type Go, hit Run. First click loads the WASM (~11 MB raw /
+            ~1.9 MB brotli on the wire); subsequent runs reuse the
+            same worker.
+          </Text>
+        </Stack>
+        <YaegiSmoke client:only="solid-js" />
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>
