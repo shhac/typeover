@@ -13,6 +13,7 @@ from these files alone.
 | 02 | [pedagogy.md](02-pedagogy.md) | How does typeover actually teach? Theme vs lesson; exercise progression. |
 | 03 | [stack.md](03-stack.md) | Why Astro + Solid + Tailwind + Vercel + pnpm? |
 | 04 | [runtime-strategy.md](04-runtime-strategy.md) | How do we run Go in the browser? Yaegi tradeoff and fallback. |
+| 04a | [runtime-matrix.md](04a-runtime-matrix.md) | POC outcome: 18/20 snippets pass, runtime-tier matrix for authoring. |
 | 05 | [design-system.md](05-design-system.md) | What does typeover look like, and what's the design-system contract? |
 | 06 | [voice-and-feedback.md](06-voice-and-feedback.md) | How does typeover speak to learners? Failure UX, hints, reveals. |
 | 07 | [release.md](07-release.md) | When does typeover go public? Maintenance shape, sharing posture. |
