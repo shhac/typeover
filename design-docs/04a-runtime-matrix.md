@@ -122,9 +122,14 @@ The `runtime` field on `exerciseSchema` is already in place
 - **Server fallback hosting** — Vercel Function vs Cloudflare Worker
   vs a small VPS, sandboxing strategy (firejail / nsjail), timeouts.
   Open in 99-open-questions.md.
-- **Watchdog for runaway loops** — `terminateRunner()` is in place
-  but nothing fires it yet. A Stop button on the freeform component
-  (#17) is the natural surface.
+- **Watchdog for runaway loops** — *shipped.* The Reset button in
+  `RunResetToolbar` (mounted on Freeform and FillBlankLineInput)
+  calls `useYaegiRun.reset()` → `terminateRunner()` → terminates
+  and re-spawns the worker, and writes a sentinel `runResult` so
+  the UI explains what happened. Auto-watchdog (kill after N
+  seconds, no learner click required) is still open and would help
+  learners who don't realise their loop is infinite — small
+  follow-up, not blocking launch.
 - **Multi-package programs** — every snippet here is a single
   `package main`. Yaegi supports multi-file but we haven't tested
   whether exercises that import their own helpers work.

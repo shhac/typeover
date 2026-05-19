@@ -157,11 +157,11 @@ concrete TS↔Go content per slot, hints, and notes. Example for
 5. fill-blank-word: produce `var name int = value`        (shipped, blanks at kw + type)
 6. fill-blank-line: pick the right line for a Go translation (shipped)
 7. fill-blank-line: multi-variable short decl `a, b := 1, 2` (shipped)
-8. freeform: declare three vars from a TS snippet         (blocked on freeform component)
-9. freeform: open problem with type+const+:= constraints  (blocked on freeform component)
+8. freeform: declare three vars from a TS snippet         (shipped)
+9. freeform: open problem with type+const+:= constraints  (shipped)
 ```
 
-(Slots 1-7 above reflect the actual shipped progression in
+(All nine slots above reflect the actual shipped progression in
 `src/content/exercises/foundations/variables/`. The earlier draft of
 this illustration drifted from the implementation as exercises
 landed; the shipped order is canonical.)

@@ -19,24 +19,27 @@ This serves three goals:
 
 ```
 src/content/
-├── modules/<module-id>.yaml    # module metadata + theme list
-└── themes/<module-id>/<theme-id>/
-    ├── theme.yaml              # theme metadata
-    ├── concept.md              # learner-facing intro prose
-    └── exercises/
-        ├── 01-mcq.yaml
-        ├── 02-mcq.yaml
-        ├── 03-mcq.yaml
-        ├── 04-fill-word.yaml
-        ├── 05-fill-word.yaml
-        ├── 06-fill-line.yaml
-        ├── 07-fill-line.yaml
-        ├── 08-freeform.yaml
-        └── 09-freeform.yaml
+├── modules/<module-id>.yaml             # module metadata + summary
+├── themes/<module-id>/<theme-id>.yaml   # theme metadata + intro prose
+└── exercises/<module-id>/<theme-id>/
+    ├── 01.yaml
+    ├── 02.yaml
+    ├── …
+    └── 09.yaml
 ```
 
-Schemas live in `src/content/schema.ts` as Zod definitions. Astro
-Content Collections validate everything at build time.
+Themes are flat YAML files (intro prose lives inside as the `intro`
+string, not in a separate `.md` file). Exercises are named by their
+slot number `NN.yaml`; the `type` field inside (`mcq` / `fill-word` /
+`fill-line` / `freeform`) determines which component renders them,
+not the filename. The canonical 9-slot progression is documented in
+[02-pedagogy.md](02-pedagogy.md) and enforced by `content:lint`.
+
+Schemas live in [`src/content.config.ts`](../src/content.config.ts)
+(the Astro-side entry point) and
+[`src/lib/content-schema.ts`](../src/lib/content-schema.ts) (the
+vitest-testable extract). Astro Content Collections validate
+everything at build time.
 
 ## Generator types
 
@@ -120,14 +123,27 @@ CONTRIBUTING and this doc focuses on the *design rationale* (why the
 schema looks like it does, why the generator kinds are shaped this
 way) rather than the rules an author follows day-to-day.
 
-## Tooling we'll need
+## Authoring tooling
 
-- `pnpm exercise:check <id>` — runs the generator N times, checks
-  canonical answers compile + match expected outputs (for freeform).
-- `pnpm content:lint` — verifies schema, checks for missing hints,
-  checks that prerequisite themes exist.
-- `pnpm content:new theme <id>` — scaffolds a theme directory from the
-  template.
+Three planned tools, two shipped:
 
-None of this is built yet. It's the second-priority tooling chunk
-after the first vertical slice (one rendered exercise) is in place.
+- **`pnpm runtime:verify`** — *shipped.* Runs every freeform +
+  fill-line canonical through Yaegi and confirms `expectStdout`
+  matches. Closest analogue to the original `exercise:check <id>`
+  proposal; runs across the whole tree, not per-id, because that
+  matches how content gets reviewed in practice (PRs touch
+  multiple files).
+- **`pnpm content:lint`** — *shipped 2026-05-19.*
+  `scripts/content-lint.mjs`. Cross-file graph integrity: theme
+  → module references, exercise → theme references, unique
+  orders, contiguous 1..N slot numbering within a theme,
+  half-authored theme warnings. The per-file Zod schema and
+  `runtime:verify` cover the other two layers (per-file and
+  per-canonical); this covers the graph.
+- **`pnpm content:new theme <id>`** — *not built.* Stamper for a
+  theme.yaml + 9 prefilled exercise YAMLs across the canonical
+  3 × MCQ / 2 × fill-word / 2 × fill-line / 2 × freeform
+  progression. Proposed shape in
+  [99-open-questions.md](99-open-questions.md). Pickup gated on
+  either the maintainer authoring Module 2 reaching for it OR
+  the first community PR bouncing off the manual scaffold.

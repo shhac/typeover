@@ -9,11 +9,18 @@ Compiled from the iteration-2 code-structure review's test-coverage lens
 findings (2026-05-17). Each item is paired with a one-line "what breaks
 if this regresses" so future-us remembers why the test exists.
 
-**Status (2026-05-18):** Vitest is wired (`pnpm test`). 91 tests live
-across 7 files covering: P0 seed determinism, P0 generator parsing +
-`generate()` golden cases, all three cellState truth tables, and P1
-progress-storage invariants (SSR / malformed / single-`now()`). The
-exercise-phase hook tests and route/page smoke tests are still pending.
+**Status (2026-05-19):** Vitest is wired (`pnpm test`). **345 tests
+live across 29 files** covering: P0 seed determinism, P0 generator
+parsing + `generate()` golden cases, all three cellState truth
+tables, P1 progress-storage invariants (SSR / malformed /
+single-`now()` / corrupt-blob backup), the `useExercisePhase` hook
+contract, MCQ / FillBlankWord / FillBlankLineInput / Freeform
+component integration tests via `@solidjs/testing-library`,
+`useYaegiRun` lifecycle, theme/density/radius helpers,
+`summarizeTheme`, and the DS-layer primitives `<Eyebrow>` /
+`<Compare>` / `<ProgressChip>` / `<HintButton>` / `<RevealButton>`.
+Route/page smoke tests are still pending; axe-core a11y runs at the
+DS layer via `src/a11y.test.tsx`.
 
 ## P0 — Determinism chain *(must land first)*
 
@@ -91,7 +98,11 @@ and "deterministic exercise URL" work at all.
 ## P1 — Progress storage
 
 The progress blob is the only thing protecting "you've passed 47 of 54
-exercises" from corruption.
+exercises" from corruption. The `summarizeTheme` aggregator
+(`progress.summarize.test.ts`, *landed 2026-05-19*) pins the shared
+"theme complete" predicate that both `ModuleCompleteCard` and
+`<ProgressChip>` consume, so the two surfaces can't disagree on
+whether a theme reads as done.
 
 ### `src/lib/progress.ts`
 

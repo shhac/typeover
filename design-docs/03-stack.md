@@ -39,34 +39,61 @@ Cloudflare R2 or jsDelivr and Vercel keeps serving the rest.
 
 ```
 typeover/
-├── design-docs/        ← this directory
-├── public/             ← static assets (favicon, og images)
+├── design-docs/            ← this directory (16 docs + this one)
+├── public/                 ← static assets
+│   ├── favicon.svg
+│   ├── og-image.svg
+│   └── yaegi/              ← wasm_exec.js + yaegi.wasm (gitignored
+│                              build output; vendored for deploy)
+├── runtime/
+│   └── yaegi-wasm/         ← Go program building the WASM bundle;
+│                              symbols/{fmt,strings,strconv,errors,
+│                              math,sort,slices,maps} vendored stdlib
+├── scripts/
+│   └── content-lint.mjs    ← graph-level content integrity check
 ├── src/
+│   ├── content/
+│   │   ├── modules/        ← module YAML files
+│   │   ├── themes/         ← theme YAML files (flat per module)
+│   │   └── exercises/      ← exercise YAML files (NN.yaml per slot)
+│   ├── content.config.ts   ← Astro Content Collection schemas
 │   ├── components/
-│   │   └── ds/         ← design system (one component per file)
+│   │   ├── ds/             ← design-system primitives (Eyebrow,
+│   │   │                     Compare, ProgressChip, Panel, …)
+│   │   ├── exercise/       ← Mcq, FillBlankWord, FillBlankLineInput,
+│   │   │                     Freeform, ExerciseShell, DiffView, …
+│   │   ├── completion/     ← ModuleCompleteCard
+│   │   ├── progress/       ← Theme/ExerciseProgressChip islands
+│   │   └── settings/       ← AppearancePicker (theme/density/radius)
 │   ├── layouts/
 │   │   └── BaseLayout.astro
 │   ├── pages/
-│   │   └── index.astro
+│   │   ├── index.astro            ← landing
+│   │   ├── settings.astro
+│   │   ├── privacy.astro
+│   │   └── go/                    ← curriculum routes
+│   │       ├── index.astro
+│   │       └── [module]/
+│   │           ├── complete.astro
+│   │           └── [theme]/
+│   │               ├── index.astro
+│   │               └── [index].astro   ← exercise dispatcher
+│   ├── lib/                ← seed, generator, progress, theme,
+│   │                         exercise-phase/instance, use-yaegi-run,
+│   │                         content-schema, curriculum, format-…
 │   └── styles/
-│       └── global.css  ← Tailwind import + @theme tokens
+│       └── global.css      ← Tailwind 4 import + @theme tokens
 ├── astro.config.mjs
 ├── package.json
 ├── tsconfig.json
-└── README.md
+├── vitest.config.ts
+├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md
 ```
 
-Future additions (planned, not yet present):
+Notes:
 
-```
-src/
-├── content/            ← MDX lesson collections
-│   ├── lessons/
-│   └── config.ts       ← Zod schemas for frontmatter
-├── runtime/            ← Yaegi-in-WASM + worker plumbing
-│   ├── worker.ts
-│   └── yaegi.wasm
-└── components/
-    ├── quiz/           ← MCQ, TileFill, ConstrainedWrite components
-    └── runner/         ← CodeMirror + worker-backed run button
-```
+- Freeform exercises currently use a plain `<textarea>` driving
+  `useYaegiRun`. The CodeMirror integration originally implied above
+  is still planned (task #23), not blocking launch.
+- Module 1 (Foundations) ships 54 exercises across 6 themes; Modules
+  2-7 are scaffolded with no exercise content yet.

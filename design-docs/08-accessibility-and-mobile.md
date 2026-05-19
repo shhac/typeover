@@ -86,18 +86,23 @@ Every component in `src/components/ds/` ships with:
 
 This is the hardest mobile UX:
 
-- CodeMirror 6 has decent mobile support out of the box. Verify on
-  iOS Safari and Chrome Android during build.
+- **Current editor surface:** Freeform exercises ship today with a
+  plain `<textarea>` driving `useYaegiRun`. CodeMirror 6 integration
+  is task #23 — planned but not blocking launch. The mobile
+  affordances below apply to the textarea surface today and will
+  apply to CodeMirror when it lands.
 - **Software keyboard quirks:** iOS Safari shrinks the viewport when
   the keyboard appears. The editor must reflow correctly.
 - **Code-friendly virtual keyboard.** We don't fully solve this (no
   one has), but we suppress autocorrect, autocapitalise, and spell-
   check on the editor. (`autocapitalize="off"`, `autocorrect="off"`,
-  `spellcheck="false"`.)
+  `spellcheck="false"`.) *(Shipped on `<textarea>` already.)*
 - **Provide a "common symbols" bar** above the keyboard for `{`, `}`,
   `(`, `)`, `[`, `]`, `:=`, `=`, `*`, `&`. This is the single most
   productive mobile-editor affordance — phones bury symbols two
-  taps deep.
+  taps deep. *(Not yet shipped — proposal in design-docs/99 as
+  `MobileKeyBar`, gated on real-device mobile QA from the launch
+  checklist.)*
 - **Tabs** insert two spaces (no real tabs).
 - **No** vim mode / advanced editor modes on mobile.
 

@@ -1,5 +1,13 @@
 # 04 — Runtime strategy
 
+**Status:** shipped. The Yaegi-WASM-in-Worker primary path is live —
+vendored stdlib subset, ~11 MB raw / 1.9 MB brotli, drives every
+freeform + fill-line exercise in Module 1. The POC matrix outcome
+lives in [04a-runtime-matrix.md](04a-runtime-matrix.md). The
+server-compile fallback is still parked (Modules 6-7 only); see
+[99-open-questions.md](99-open-questions.md) for the proposed
+deployable shape.
+
 ## The question
 
 Four exercise types (recognition, tile fill-in, constrained write, open
@@ -96,15 +104,20 @@ becomes hot enough to justify offloading to the client.
 
 ## Validation plan
 
-Before locking the architecture in, build a half-day POC:
+*Completed 2026-05-19.* The half-day POC ran, results live in
+[04a-runtime-matrix.md](04a-runtime-matrix.md):
 
-1. Compile Yaegi to WASM.
-2. Run 20 candidate snippets covering: basic types, slices, maps, structs,
-   methods, interfaces, goroutines + channels, defer, generics (Sort),
-   generics (custom constraint), modern stdlib (`slices`, `maps`, `cmp`).
-3. Record pass/fail per snippet; this becomes the runtime-tier matrix for
-   exercise authoring.
-
-The POC outcome dictates how many exercises can stay on Yaegi vs need
-the server fallback. If <80% pass, we may need to invest in a Yaegi fork
-or jump straight to full-gc-WASM.
+- Yaegi compiles to WASM cleanly via the standard Go toolchain;
+  vendoring a minimal stdlib subset (`fmt`, `strings`, `strconv`,
+  `errors`, `math`, `sort`, `slices`, `maps`) brings the bundle
+  from ~40 MB raw to ~11 MB raw / ~1.9 MB brotli.
+- The 20-snippet candidate matrix is in 04a; pass rate cleared the
+  ≥80% bar for Module 1's exercise set. Generic stdlib funcs
+  (`slices.Sort` / `Min` / `Max`) and `defer` arg-capture semantics
+  are the documented Yaegi gaps — those exercises route via the
+  not-yet-built server-fallback path (Modules 6-7 only; not
+  blocking launch).
+- Architecture locked in: `runtime/yaegi-wasm/` compiles the
+  bundle, `src/runtime/index.ts` runs it in a Web Worker via
+  Comlink, `useYaegiRun` is the per-component lifecycle hook
+  consumed by Freeform and FillBlankLineInput.

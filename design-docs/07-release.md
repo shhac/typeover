@@ -25,13 +25,18 @@ quality bar. The product is genuinely useful; the marketing is not.
 typeover goes on the open web at `typeover.dev` when **Module 1
 (Foundations) is complete and polished**:
 
-- All 5 themes have full 9-exercise progressions.
+- All **6** themes have full 9-exercise progressions. *(Shipped:
+  variables, numeric-primitives, strings-bytes-runes, conditionals,
+  loops, functions-and-multi-return — 54 exercises total.)*
 - Every exercise has a working parameterised generator with at least 3
-  validated instances.
-- All exercises have canonical answers + 3-layer hints.
+  validated instances. *(Shipped.)*
+- All exercises have canonical answers + 3-layer hints. *(Shipped.)*
 - Yaegi runtime is wired up for the freeform exercises (Module 1's
   variables/primitives/strings/conditionals/functions don't stress
   Yaegi's generics limits — server fallback can be deferred).
+  *(Shipped: WASM build in `runtime/yaegi-wasm/`, Web Worker via
+  Comlink, ~11 MB raw / 1.9 MB brotli with vendored stdlib subset
+  — see design-docs/04a.)*
 - Progress tracking works end-to-end (drop-in / drop-out / replay).
 - Mobile layout works on a real phone, not just emulated.
 - WCAG AA verified with axe + manual VoiceOver pass.
@@ -76,11 +81,15 @@ Word-of-mouth from learners is the only growth channel we build.
 - [ ] CONTRIBUTING.md.
 - [ ] CODE_OF_CONDUCT.md.
 - [ ] README rewrite (public-facing).
-- [ ] OG image (dark, mono, wordmark).
-- [ ] Favicon.
+- [x] OG image (dark, mono, wordmark). `public/og-image.svg`.
+- [x] Favicon. `public/favicon.svg`.
 - [x] Privacy note (we use localStorage, no servers, no tracking). Lives
       at `/privacy`, linked from the site footer.
-- [ ] Module 1 content complete.
+- [x] Module 1 content complete. 6 themes × 9 exercises = 54
+      exercises shipped (18 MCQ + 12 fill-word + 12 fill-line + 12
+      freeform); `pnpm runtime:verify` confirms every freeform +
+      fill-line canonical runs under Yaegi.
 - [ ] Mobile sanity pass on real iPhone + Android.
-- [ ] axe a11y clean.
+- [x] axe a11y clean. `src/a11y.test.tsx` runs axe-core at the DS
+      layer; passes in CI.
 - [ ] Lighthouse Performance ≥ 95 on a real phone.
