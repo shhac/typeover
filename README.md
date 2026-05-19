@@ -15,11 +15,14 @@ idiomatic shifts that put their TS reflexes in the right Go shape.
 ## Where you are
 
 This is a working build, not a launched product. Module 1
-(**Foundations**) has all six themes at 7/9 exercises — every
-recognition, fill-blank-word, and fill-blank-line slot is shipped. The
-final two freeform slots per theme are blocked on a Yaegi-in-WASM
-runtime, currently planned. Until that lands, the launch gate stays
-on the inside of `pnpm dev`.
+(**Foundations**) is complete — all six themes ship the full 9/9
+progression (recognition → fill-word → fill-line → freeform), Yaegi
+runs in a Web Worker for the freeform and fill-line slots, and a
+module-completion screen with a one-tap share lives at the end. The
+remaining gate to a public launch is the items on
+[`design-docs/07-release.md`](design-docs/07-release.md)'s
+pre-launch checklist — domain, OG copy review, real-device mobile
+pass, Lighthouse score.
 
 ## Try it
 
@@ -43,7 +46,7 @@ is tracked in `localStorage`; nothing leaves your device.
 
 | # | Module | Themes | Status |
 |---|---|---|---|
-| 1 | **Foundations** | variables, numeric primitives, strings/bytes/runes, conditionals, loops, functions & multi-return | 7/9 each (freeform pending) |
+| 1 | **Foundations** | variables, numeric primitives, strings/bytes/runes, conditionals, loops, functions & multi-return | 9/9 each — complete |
 | 2 | Collections | arrays vs slices, maps, iteration | scaffolded |
 | 3 | Types & methods | structs, methods, pointers, nil & zero values | scaffolded |
 | 4 | Interfaces & generics | interfaces, generics | scaffolded |
@@ -58,7 +61,7 @@ Full curriculum at [`design-docs/10-curriculum-go.md`](design-docs/10-curriculum
 - **[Astro 6](https://astro.build)** — content-heavy, islands-based, ships zero JS on static lessons
 - **[Solid](https://www.solidjs.com)** — small reactive bundles for the interactive exercise components
 - **[Tailwind 4](https://tailwindcss.com)** — CSS-first design tokens (`@theme` directives)
-- **[Yaegi](https://github.com/traefik/yaegi)** in WASM (planned) — Go interpreter for the freeform exercises
+- **[Yaegi](https://github.com/traefik/yaegi)** compiled to WASM and run in a Web Worker — Go interpreter for freeform and fill-line grading
 - **[CodeMirror 6](https://codemirror.net)** (planned) — editor for freeform code
 - **pnpm**, **Vercel** for hosting
 
