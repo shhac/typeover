@@ -71,7 +71,48 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
 
     <title>{title}</title>
   </head>
-  <body>
-    <slot />
+  <body class="flex flex-col min-h-screen">
+    <div class="flex-1">
+      <slot />
+    </div>
+    {/*
+      * Site-wide footer — minimal chrome carrying the discoverable
+      * routes that don't fit in the curriculum tree:
+      *   - Settings (theme picker, per design-docs/13).
+      *   - GitHub repo (build-in-public posture per design-docs/07).
+      * Anything richer (newsletter, social, contact) waits until
+      * the launch checklist demands it.
+      */}
+    <footer
+      class="mt-12 py-6 border-t border-border-default text-fg-muted text-xs font-mono"
+    >
+      <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl flex flex-row gap-6 flex-wrap">
+        <a
+          href="/"
+          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+        >
+          typeover
+        </a>
+        <a
+          href="/go"
+          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+        >
+          curriculum
+        </a>
+        <a
+          href="/settings"
+          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+        >
+          settings
+        </a>
+        <a
+          href="https://github.com/paulsomers/typeover"
+          rel="noopener noreferrer"
+          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+        >
+          github
+        </a>
+      </div>
+    </footer>
   </body>
 </html>
