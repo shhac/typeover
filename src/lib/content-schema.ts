@@ -96,39 +96,31 @@ function validateFillBlanks(ex: Exercise, ctx: Ctx): void {
   });
 }
 
-/** fill-line has TWO UX modes, distinguished by whether
- *  `expectStdout` is set:
+/** fill-line is graded by running the substituted canonical through
+ *  Yaegi and comparing stdout. Same shape as freeform but with one
+ *  blank line of user input embedded in the scaffold.
  *
- *    MODE A (tile picker — legacy): no expectStdout. The component
- *      renders the picked vars[blank] value + generator.distractors
- *      as candidate tiles. distractors must be non-empty.
- *
- *    MODE B (input + Yaegi grading — the redesign): expectStdout
- *      present. The component renders a single line input; on Submit
- *      we substitute the user's text into the canonical, run via
- *      Yaegi, and check stdout matches expectStdout. runtime must
- *      be "yaegi" (server fallback isn't wired yet). distractors
- *      stay valid but optional — repurposable as a known-wrong-
- *      pattern bank for targeted feedback later. */
+ *  Requires `expectStdout` (the oracle) and `runtime: "yaegi"`
+ *  (server fallback isn't wired yet). The legacy MCQ-as-tiles UX
+ *  was retired once all 12 fill-line exercises migrated to the
+ *  input+Yaegi UX; the distractors field is kept on the generator
+ *  schema as a known-wrong-pattern bank for targeted feedback in
+ *  a later iteration. */
 function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
   if (ex.type !== "fill-line" || ex.generator.kind !== "template") return;
-  if (ex.expectStdout !== undefined) {
-    if (ex.runtime !== "yaegi") {
-      ctx.addIssue({
-        code: "custom",
-        message: 'fill-line with `expectStdout` (input+Yaegi grading) requires `runtime: "yaegi"`.',
-        path: ["runtime"],
-      });
-    }
-    return;
-  }
-  /* MODE A — legacy tile picker. */
-  if (!ex.generator.distractors || ex.generator.distractors.length === 0) {
+  if (ex.expectStdout === undefined) {
     ctx.addIssue({
       code: "custom",
-      message:
-        "fill-line requires either `expectStdout` (input+Yaegi grading) or `generator.distractors` (legacy tile picker). Add one or the other.",
-      path: ["generator", "distractors"],
+      message: "fill-line exercises require `expectStdout` (the stdout to match against).",
+      path: ["expectStdout"],
+    });
+    return;
+  }
+  if (ex.runtime !== "yaegi") {
+    ctx.addIssue({
+      code: "custom",
+      message: 'fill-line exercises require `runtime: "yaegi"`.',
+      path: ["runtime"],
     });
   }
 }

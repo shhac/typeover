@@ -12,7 +12,6 @@ import {
 } from "~/components/ds";
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
-import { FillBlankLine } from "~/components/exercise/FillBlankLine";
 import { FillBlankLineInput } from "~/components/exercise/FillBlankLineInput";
 import { Freeform } from "~/components/exercise/Freeform";
 import {
@@ -127,18 +126,6 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               expectStdout={ex.expectStdout}
               runtime={ex.runtime}
-              nextExerciseHref={nextExerciseHref}
-              themeHref={parentThemeHref}
-            />
-          )}
-          {ex.type === "fill-line" && ex.expectStdout === undefined && (
-            <FillBlankLine
-              client:visible
-              exerciseId={entry.id}
-              prompt={ex.prompt}
-              generator={ex.generator}
-              blanks={ex.blanks ?? []}
-              hints={ex.hints}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />

@@ -166,7 +166,7 @@ terms of it). Tests pin the placeholder grammar in one place.
 ## P1 — Exercise lifecycle (shared)
 
 Added 2026-05-18. The `useExercisePhase` hook is now the lifecycle
-authority for MCQ, FillBlankWord, FillBlankLine, and (when it lands)
+authority for MCQ, FillBlankWord, FillBlankLineInput, and (when it lands)
 Freeform. One set of tests covers the contract for all of them.
 
 ### `src/lib/exercise-phase.ts` — `useExercisePhase`
@@ -248,64 +248,32 @@ that). This is by design today — Lens 5 flagged it as worth a test +
 design conversation. Pin behaviour OR change it, but don't leave it
 silent.
 
-## P1 — FillBlankLine correctness
+## P1 — FillBlankLine correctness (input + Yaegi grading)
 
-Added 2026-05-18 (iter-5/6). Mirrors the FillBlankWord plan with
-tile-selection semantics instead of input-field semantics.
+*Retired 2026-05-19.* The MCQ-as-tile UX with its `tileState` truth
+table is gone — all 12 fill-line exercises migrated to the
+input+Yaegi grading model and the legacy `FillBlankLine.tsx` +
+`CandidateTile.tsx` (and their truth-table tests) were removed in
+the /improve-code-structure dead-code sweep.
 
-### `src/components/exercise/FillBlankLine.tsx`
+The new surface is `src/components/exercise/FillBlankLineInput.tsx`.
+It composes `useYaegiRun` (the shared hook covered by
+`src/lib/use-yaegi-run.test.ts`) with `substituteAtBlank` (covered
+by `src/lib/fill-blank.test.ts`). Component-level integration tests
+for FillBlankLineInput are still a gap — same shape as the missing
+Freeform.tsx tests; both should mount the component with `~/runtime`
+mocked. Coverage follow-ups:
 
-- **Happy path** — render with N candidate tiles, click the canonical
-  → submit → `recordInstancePassed` called once → phase `right` →
-  all tiles `locked` (disabled) → "Another" advances seed AND
-  reshuffles tile order (via `${seed()}::tiles` RNG namespace).
-- **canSubmit gate** — submit disabled until a tile is selected
-  (`selected() !== null`).
-- **Wrong path** — pick non-canonical tile → submit → phase `wrong`,
-  three buttons (Try again / Different exercise / Reveal correct).
-  The canonical tile **does NOT** auto-light green — learner must
-  click Reveal. (Matches `optionCellState` behaviour post iter-6.)
-- **Try-again resets selection** without recording.
-- **Reveal flow** — wrong submit → "Reveal correct" →
-  `recordInstanceFailed` once → canonical tile lights via
-  `correctRevealed`, picked-wrong stays in its `incorrectSubmitted`
-  state (visible side-by-side).
-- **Vacuous-truth guard (`blanks: []` or no blank in segments)** —
-  `blankSlot()` returns undefined → `canSubmit()` returns false →
-  submit button stays disabled. Parallel to FillBlankWord's iter-4
-  fix. (Iter-6 guard.)
-- **Candidate-pool determinism (`${seed()}::tiles` namespace)** —
-  same `(exerciseId, attempt)` → same tile order across re-renders.
-  Calling `another()` produces a different order with high
-  probability for any pool of length ≥ 3. The `::tiles` namespace
-  keeps tile-shuffle RNG independent of any future variant-pick
-  RNG that may consume from the same seed.
-- **Generator-kind guard** — `props.generator.kind !== "template"`
-  short-circuits to `candidates: []`. The component renders the
-  fallback "no candidates — authoring issue" text. Pin so the
-  rendering of the fallback survives any future `Show`/`Match`
-  refactor.
-
-### `src/components/exercise/CandidateTile.tsx` — `tileState`
-
-- **Truth table** — 16 rows over `{selected, submitted, revealed,
-  isCorrect}`. Critical rows:
-  - `submitted && selected && isCorrect` → `correctSubmitted`
-  - `submitted && selected && !isCorrect` → `incorrectSubmitted`
-  - `revealed && !selected && isCorrect` → `correctRevealed` (the
-    unpicked canonical tile lights up only on explicit reveal)
-  - `submitted && !selected && isCorrect` → `neutral` (matches the
-    iter-6 fix in `optionCellState`; the canonical is NOT
-    auto-revealed on wrong submit)
-  - `!submitted && !revealed && selected` → `selected`
-  - All `submitted && !selected` rows → `neutral`
-  - `selected && submitted && revealed && isCorrect` →
-    **`correctRevealed`** (post-iter-7 reorder; was previously
-    `correctSubmitted`; both produce identical visual class and the
-    row is currently unreachable through the lifecycle, but the
-    truth-table test should pin the post-reorder value).
-  - **Re-export `tileState`** as a Phase-1 micro-extraction so the
-    truth-table test can target it directly.
+- Happy path: type the canonical line → Run → stdout match → Submit
+  records pass once → input locks in the right phase.
+- Wrong path: stdout mismatch → three wrong-phase buttons surface,
+  no pass and no fail recorded (asymmetry pinned by useExercisePhase).
+- Reveal: explicit reveal records failure exactly once.
+- canSubmit gate: empty input + running flag both keep Submit
+  disabled.
+- Enter-to-Run: triggers `run()` only when input is non-empty and
+  not currently running.
+- `another()`: clears input AND runResult.
 
 ## P1 — FillBlankWord correctness
 
@@ -360,10 +328,13 @@ Added 2026-05-18.
 - **MCQ branch** mounts `<Mcq>` with the right props.
 - **fill-word branch** mounts `<FillBlankWord>` with `blanks` defaulted
   via `?? []` when the YAML omits it.
-- **fill-line branch** (iter-5) mounts `<FillBlankLine>` with the same
-  `blanks` defaulting.
-- **freeform branch** renders the "not built yet" placeholder until
-  #17 lands.
+- **fill-line branch** mounts `<FillBlankLineInput>` (input + Yaegi
+  grading) when `expectStdout` is set and `runtime === "yaegi"`,
+  with `blanks` defaulted via `?? []`. The pre-redesign tile-picker
+  branch was retired in the /improve-code-structure pass after all
+  12 fill-line exercises migrated.
+- **freeform branch** mounts `<Freeform>` when `expectStdout` is set
+  and `runtime !== "none"`.
 - **Exhaustiveness guard (iter-5)** — the frontmatter declares
   `_exhaustiveExerciseType: Record<typeof ex.type, true>`. Adding
   a fifth value to `content.config.ts`'s `z.enum(["mcq", "fill-word",
