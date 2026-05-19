@@ -1,8 +1,14 @@
-# 13 — Themes
+# 13 — Themes (colour)
 
-How typeover handles visual themes (dark / light / future variants),
-why the DS gives this almost for free, and what the *contract* is for
-adding new themes without per-component code.
+How typeover handles **colour** themes (dark / light / future
+variants), why the DS gives this almost for free, and what the
+*contract* is for adding new themes without per-component code.
+
+This doc covers one of three independent theme axes. The other two
+— **density** (compact / normal / airy) and **shape** (sharp /
+normal / rounded) — are proposed in
+[14-stylistic-themes.md](14-stylistic-themes.md) and use the same
+data-attribute + CSS-cascade mechanism.
 
 ## The contract (one sentence)
 

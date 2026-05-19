@@ -88,9 +88,15 @@ Type tokens:
 - `font-mono` (JetBrains Mono primary)
 - `font-sans` (Inter)
 
-Radius tokens (2–4px only, never larger; sharp corners stay):
+Radius tokens (2–4px in the default `normal` shape preset; rebound
+by the shape axis in [14-stylistic-themes.md](14-stylistic-themes.md)):
 
 - `radius-sm`, `radius-md`, `radius-lg`
+
+Spacing scale: Tailwind 4's `--spacing` knob (default `0.25rem`).
+Rebound by the density axis in
+[14-stylistic-themes.md](14-stylistic-themes.md); component code
+never writes pixel-literal padding/margin.
 
 ## Component principles
 
