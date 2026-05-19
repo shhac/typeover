@@ -29,6 +29,39 @@ export function extractTemplateVars(tmpl: string): string[] {
   return Array.from(tmpl.matchAll(PLACEHOLDER_RE), (m) => m[1]!);
 }
 
+/**
+ * One entry in a `distractors` list. The bare-string form is the
+ * original v0 shape — kept for back-compat with shipped MCQ +
+ * fill-line YAMLs. The `{match, explain}` form is the targeted-
+ * feedback shape (design-docs/99) — fill-line surfaces the explain
+ * string when a learner's submission matches the `match` (mod
+ * whitespace).
+ *
+ * MCQ uses `match` (or the bare string) as the option text. The
+ * `explain` field is unused on MCQ — there's no need to explain
+ * a distractor that the learner *picked* because the canonical is
+ * adjacent and the learner can compare directly.
+ */
+export const DistractorEntrySpec = z.union([
+  z.string(),
+  z.object({
+    match: z.string(),
+    explain: z.string(),
+  }),
+]);
+export type DistractorEntry = z.infer<typeof DistractorEntrySpec>;
+
+/** Pull the matchable text out of a distractor entry. */
+export function distractorMatchText(entry: DistractorEntry): string {
+  return typeof entry === "string" ? entry : entry.match;
+}
+
+/** Pull the explanation out of an entry, or null if the entry
+ *  is a bare string (no explanation authored). */
+export function distractorExplain(entry: DistractorEntry): string | null {
+  return typeof entry === "string" ? null : entry.explain;
+}
+
 const TemplateSpec = z
   .object({
     kind: z.literal("template"),
@@ -39,11 +72,12 @@ const TemplateSpec = z
     /** Idiomatic Go answer template, with the same placeholders. */
     canonical: z.string(),
     /**
-     * MCQ-specific: distractor templates. Each uses the same vars as the
-     * canonical so the *only* meaningful difference is the syntax under
-     * test.
+     * Distractor entries. Bare strings for MCQ option text and v0
+     * fill-line bank. The structured `{match, explain}` form
+     * supports targeted wrong-pattern feedback on fill-line —
+     * design-docs/99.
      */
-    distractors: z.array(z.string()).optional(),
+    distractors: z.array(DistractorEntrySpec).optional(),
   })
   .superRefine((spec, ctx) => {
     /* Every declared pool must be non-empty — pickFrom crashes on []. */
@@ -73,7 +107,13 @@ const TemplateSpec = z
     };
     checkRefs(spec.ts, ["ts"]);
     checkRefs(spec.canonical, ["canonical"]);
-    (spec.distractors ?? []).forEach((d, i) => checkRefs(d, ["distractors", i]));
+    (spec.distractors ?? []).forEach((d, i) =>
+      /* For structured `{match, explain}` entries, the `match`
+       * field is the templated text (it's the substituted-against-
+       * vars string a learner's submission is compared to). The
+       * `explain` field is plain prose — no ${vars} expected. */
+      checkRefs(distractorMatchText(d), ["distractors", i]),
+    );
   });
 
 const VariantSpec = z
@@ -84,7 +124,7 @@ const VariantSpec = z
         id: z.string(),
         ts: z.string(),
         canonical: z.string(),
-        distractors: z.array(z.string()).optional(),
+        distractors: z.array(DistractorEntrySpec).optional(),
       }),
     ),
   })
@@ -275,7 +315,10 @@ function generateTemplate(
       ? buildShuffledOptions(
           rng,
           canonical,
-          spec.distractors.map((d) => substitute(d, values)),
+          /* Extract the matchable text from each entry. MCQ doesn't
+           * surface `.explain`; the fill-line wrong-pattern path
+           * reads from the raw `spec.distractors` directly. */
+          spec.distractors.map((d) => substitute(distractorMatchText(d), values)),
         )
       : undefined;
 
@@ -310,7 +353,7 @@ function generateVariant(
   return {
     ts: variant.ts,
     canonical: variant.canonical,
-    ...buildShuffledOptions(rng, variant.canonical, variant.distractors),
+    ...buildShuffledOptions(rng, variant.canonical, variant.distractors.map(distractorMatchText)),
   };
 }
 

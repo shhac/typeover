@@ -6,7 +6,7 @@
  */
 
 import type { ExerciseInstance, FillSegment, GeneratorSpec } from "./generator";
-import { substitute } from "./generator";
+import { distractorMatchText, substitute } from "./generator";
 import { rngFromSeed, shuffle } from "./seed";
 
 /**
@@ -99,10 +99,13 @@ export function buildCandidatePool(
   /* Distractors are template strings; substitute against the same
    * values map so any ${refs} they contain resolve consistently.
    * For exercises whose distractors are static strings (the v0
-   * shape), substitute is a no-op. */
-  const distractors = (generator.distractors ?? []).map((d) =>
-    values ? substitute(d, values) : d,
-  );
+   * shape), substitute is a no-op. Structured `{match, explain}`
+   * entries collapse to their `.match` text — the pool only ever
+   * shows match strings, never the explanations. */
+  const distractors = (generator.distractors ?? []).map((d) => {
+    const match = distractorMatchText(d);
+    return values ? substitute(match, values) : match;
+  });
 
   /* Dedupe — defends against an author accidentally listing the
    * correct line in distractors too. */

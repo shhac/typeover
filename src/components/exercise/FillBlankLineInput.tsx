@@ -5,6 +5,7 @@ import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { CodeBlock } from "../ds/CodeBlock";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { ExerciseShell } from "./ExerciseShell";
@@ -56,6 +57,17 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   };
   const canSubmit = () => yaegi.runResult() !== null && !yaegi.running() && input().trim() !== "";
 
+  /* Targeted wrong-pattern feedback per design-docs/99. When the
+   * learner's submission matches an authored distractor's `match`
+   * (mod whitespace), surface the author's `explain` instead of
+   * the generic "stdout doesn't match" message. Bare-string
+   * distractors (current 12 fill-line YAMLs) flow through unchanged
+   * — no explain → generic message. */
+  const wrongExplain = () => {
+    if (props.generator.kind !== "template") return null;
+    return matchWrongPattern(input(), props.generator.distractors)?.explain ?? null;
+  };
+
   const phase = useExercisePhase({
     exerciseId: props.exerciseId,
     isCorrect,
@@ -91,10 +103,17 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       extraWrongActions={toolbar}
       correctMessage={<span>Correct — your line produces the expected output.</span>}
       wrongMessage={
-        <span>
-          Not the expected output yet. Edit, Run again, try a different exercise, or reveal the
-          canonical answer.
-        </span>
+        <Show
+          when={wrongExplain()}
+          fallback={
+            <span>
+              Not the expected output yet. Edit, Run again, try a different exercise, or reveal the
+              canonical answer.
+            </span>
+          }
+        >
+          {(explain) => <span>{explain()}</span>}
+        </Show>
       }
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}

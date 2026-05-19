@@ -76,24 +76,32 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
-- **Targeted wrong-pattern feedback on fill-line** *(surfaced
-  2026-05-19 design-goal pass, not built.)* The fill-line redesign
-  retained `generator.distractors` as an authoring-driven
-  "known-wrong-pattern bank" (see fill-line entry below). The UX
-  surface that consumes it doesn't exist yet — today wrong fill-line
-  submissions show a generic "Stdout doesn't match yet…" message
-  regardless of *how* they're wrong. Proposal: promote
-  `distractors: string[]` to a discriminated
-  `Array<string | {match, explain}>` shape (back-compat for bare
-  strings), normalise whitespace, and when a learner's submission
-  matches a known wrong pattern, render the authored explanation
-  inside the wrong-phase message slot — leaving the generic copy
-  in place when nothing matches. Pickup criterion: when a Module 1
-  learner reports an "I don't know why this is wrong" moment, or
-  when shipping fill-line content for Module 2+ (the explanation
-  authoring is then part of the new-content workflow rather than
-  a back-port). Cost: ~3 commits (schema + lib + component;
-  12-YAML upgrade; content-lint warning + tests).
+- **Targeted wrong-pattern feedback on fill-line** *(mechanism
+  landed 2026-05-19; content upgrade is incremental.)* The
+  fill-line redesign retained `generator.distractors` as an
+  authoring-driven "known-wrong-pattern bank". Today's shape:
+  `distractors: Array<string | {match, explain}>` — bare strings
+  are the v0 back-compat form (matched but no explanation
+  surfaced); structured `{match, explain}` entries fire targeted
+  feedback in FillBlankLineInput's wrong-phase message when the
+  learner's submission matches the `match` (mod whitespace,
+  via `matchWrongPattern` in `src/lib/wrong-pattern.ts`).
+  MCQ + variant distractors still flow through `buildShuffledOptions`
+  as match-text only (the `explain` field is unused on MCQ —
+  the canonical is adjacent for direct comparison).
+
+  Shipped (proof-of-concept): `foundations/variables/06.yaml`
+  upgrades its 4 distractors with author-written explanations
+  (`var doubled = count * 2` → "Use `:=` inside a function";
+  `doubled = count * 2` → "That's a re-assignment, not a
+  declaration"; etc.). The other 11 fill-line YAMLs keep their
+  bare-string distractors — back-compat path delivers the
+  existing generic-wrong-message UX.
+
+  Open: incrementally upgrading the remaining 11 fill-line YAMLs
+  with explanations, as authoring time permits. The structural
+  cost has been paid; each remaining upgrade is a pure content
+  edit.
 
 - **MobileKeyBar — sticky Go-symbol bar above the mobile
   keyboard** *(landed 2026-05-19 — first cut on Freeform.)*
