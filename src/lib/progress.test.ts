@@ -78,6 +78,57 @@ describe("progress storage — malformed inputs", () => {
   });
 });
 
+describe("progress storage — corrupt-blob backup (task #37)", () => {
+  /* Pinned per design-docs/99 — when a non-null payload fails to
+   * parse, we copy the raw value to typeover:progress:corrupt-<ts>
+   * before resetting, so a future migration / forensic pass can
+   * recover a learner's history instead of silently destroying it. */
+
+  const backupKeys = () => {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("typeover:progress:corrupt-")) keys.push(k);
+    }
+    return keys;
+  };
+
+  it("backs up the raw value when JSON is invalid", () => {
+    const raw = "{not json";
+    localStorage.setItem(STORAGE_KEY, raw);
+    getExerciseProgress("ex-1");
+    const keys = backupKeys();
+    expect(keys).toHaveLength(1);
+    expect(localStorage.getItem(keys[0]!)).toBe(raw);
+  });
+
+  it("backs up the raw value when the schema rejects a corrupt slot", () => {
+    const raw = JSON.stringify({
+      version: 1,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
+      exercises: { "ex-1": null },
+    });
+    localStorage.setItem(STORAGE_KEY, raw);
+    getExerciseProgress("ex-1");
+    const keys = backupKeys();
+    expect(keys).toHaveLength(1);
+    expect(localStorage.getItem(keys[0]!)).toBe(raw);
+  });
+
+  it("does NOT create a backup when storage is empty", () => {
+    /* fresh learner: no key at all → no backup needed */
+    getExerciseProgress("ex-1");
+    expect(backupKeys()).toHaveLength(0);
+  });
+
+  it("does NOT create a backup on the SSR path (no localStorage)", () => {
+    delete (globalThis as { localStorage?: Storage }).localStorage;
+    expect(() => getExerciseProgress("ex-1")).not.toThrow();
+    /* no localStorage to inspect, but the recorder also must not throw */
+  });
+});
+
 describe("progress storage — recorder semantics", () => {
   it("recordInstanceSeen creates the slot with firstSeenAt set", () => {
     recordInstanceSeen("ex-1");

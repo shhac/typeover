@@ -103,9 +103,17 @@ exercises" from corruption.
   behaviour: silent data loss; task #37 may revisit but at minimum this
   should be pinned).
 - **`read()` with `{ version: 1 }` and missing `exercises` field** →
-  currently crashes downstream at `exerciseSlot`. Either harden read()
-  or document this as expected and have a test that reproduces the
-  crash so the eventual fix lands deliberately.
+  returns `empty()`. Zod schema rejects the payload (since `exercises`
+  is required); the raw value is backed up to
+  `typeover:progress:corrupt-<ts>`.
+- **Corrupt-blob backup (task #37 — landed)** — when storage holds a
+  non-null payload that fails Zod validation (invalid JSON, schema
+  mismatch, corrupt slot), `read()` copies the raw value to
+  `typeover:progress:corrupt-<iso>` before returning `empty()`.
+  - **No backup** when storage is empty (null raw).
+  - **No backup** on the SSR path (no `localStorage`).
+  - Pinned per design-docs/99 — a learner never silently loses
+    history; a future migration / forensic pass can recover.
 - **`bumpExercise` idempotency of slot creation** — calling
   `recordInstanceSeen("x")` on a fresh blob creates the slot with
   `firstSeenAt` set; calling again preserves `firstSeenAt`, advances

@@ -105,13 +105,13 @@ was already big enough.
   - Mcq.tsx happy-path + wrong-path + reveal via
     `@solidjs/testing-library`.
 
-- **Zod-validate the localStorage progress blob.** Today
-  `progress.read()` accepts any JSON that parses and has `version: 1`.
-  A corrupt/partial blob (`null`, `[]`, `{version: 1}` without
-  `exercises`, `{exercises: "wrong type"}`) crashes downstream. Add a
-  `ProgressSchema` and `safeParse`; on mismatch, back up the raw value
-  to `typeover:progress:corrupt-<ts>` before resetting so we don't
-  silently destroy a learner's history.
+- **Zod-validate the localStorage progress blob.** *(Landed — task #37.)*
+  `safeParseProgress` is now a Zod-typed `ProgressSchema.safeParse`;
+  `read()` backs up any non-null payload that fails validation to
+  `typeover:progress:corrupt-<iso>` before returning `empty()`. Tests
+  cover invalid-JSON and schema-mismatch backup paths plus
+  no-backup-on-SSR and no-backup-when-empty. `ExerciseProgress` and
+  `Progress` are now `z.infer`'d from the schema.
 
 - **Content-schema `.refine()` cross-field checks.** Today nothing
   prevents an author from:
