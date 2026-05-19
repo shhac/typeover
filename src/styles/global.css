@@ -141,6 +141,33 @@
     font-family: var(--font-mono);
   }
 
+  /* `.ds-prose` is applied to any container that wraps the block-
+     level HTML returned by formatBlock() (theme intros, future
+     module summaries). Tailwind preflight zeroes the default list
+     marker / paragraph spacing; this restores just enough to read
+     as prose. Scoped via a class so we don't bias every <ul>/<p>
+     on the page. */
+  .ds-prose p {
+    margin: 0 0 0.75em 0;
+  }
+  .ds-prose p:last-child {
+    margin-bottom: 0;
+  }
+  .ds-prose ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+    margin: 0 0 0.75em 0;
+  }
+  .ds-prose ul:last-child {
+    margin-bottom: 0;
+  }
+  .ds-prose li {
+    margin-bottom: 0.25em;
+  }
+  .ds-prose li:last-child {
+    margin-bottom: 0;
+  }
+
   /* Inline <code> spans — rendered by formatInline() into hints,
      intros, summaries, etc. Subtle inset background + tight padding
      reads as inline code without competing visually with CodeBlock.

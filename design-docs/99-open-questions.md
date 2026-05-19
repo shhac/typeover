@@ -99,15 +99,19 @@ Flagged for "do later when triggered", not now.
   for a *second* time, or when an exercise genuinely needs to show
   TS template-literal syntax.
 
-- **Block-level markdown in content strings.** `formatInline()` covers
-  `` `code` `` and `**bold**` but theme intros (e.g.
-  `themes/foundations/variables.yaml`) author bulleted lists with
-  leading `-` markers that currently render as literal hyphens.
-  Pickup when a content reviewer asks for a list to render as a
-  list, or when intros adopt headings/links. Likely answer is to
-  reach for a small markdown library (e.g. `marked`) for these
-  block-context fields rather than extending `formatInline` to a
-  full parser.
+- **Block-level markdown in content strings.** *(Landed.)*
+  `src/lib/format-block.ts` walks the input line by line and emits
+  `<p>` + `<ul>`. Handles the CommonMark cases that actually show up
+  in shipped content: lists interrupting paragraphs without a blank
+  line, indented continuation lines joining the previous list item,
+  blank-line block separation. Tests in `format-block.test.ts`
+  (16 cases). The two theme-intro render sites use it via
+  `<Text as="div" class="ds-prose">`. Tailwind preflight zeros list
+  styles by default; `.ds-prose` in `global.css` restores enough
+  margin + `list-style-type: disc` to read as prose.
+  Headings, numbered lists, code fences, and nested lists are still
+  out of scope — when content demands them, escalate to a real
+  markdown library rather than growing the regex pile.
 
 - **Hint placeholder substitution.** *(Landed.)* `ExerciseInstance`
   now carries an optional `values: Record<string, string>` populated

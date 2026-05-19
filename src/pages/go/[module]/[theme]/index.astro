@@ -16,6 +16,7 @@ import {
   loadThemeContext,
 } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
+import { formatBlock } from "~/lib/format-block";
 
 type ThemeEntry = CollectionEntry<"themes">;
 
@@ -67,8 +68,8 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
         </Stack>
 
         <Panel padding="airy" tone="default">
-          <Text tone="secondary" size="md" class="whitespace-pre-line">
-            <Fragment set:html={formatInline(theme.data.intro)} />
+          <Text tone="secondary" size="md" as="div" class="ds-prose">
+            <Fragment set:html={formatBlock(theme.data.intro)} />
           </Text>
         </Panel>
 

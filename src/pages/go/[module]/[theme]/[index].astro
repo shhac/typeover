@@ -22,6 +22,7 @@ import {
   themeHref,
 } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
+import { formatBlock } from "~/lib/format-block";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -134,8 +135,8 @@ const parentThemeHref = themeHref(themeEntry.id);
 
         <Stack gap="sm">
           <Heading level={4}>About this theme</Heading>
-          <Text tone="secondary" size="md">
-            {themeEntry && <Fragment set:html={formatInline(themeEntry.data.intro)} />}
+          <Text tone="secondary" size="md" as="div" class="ds-prose">
+            {themeEntry && <Fragment set:html={formatBlock(themeEntry.data.intro)} />}
           </Text>
         </Stack>
       </Stack>
