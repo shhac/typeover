@@ -12,7 +12,10 @@ export function Kbd(props: ParentProps<KbdProps>) {
       class={cn(
         "inline-flex items-center px-1.5 py-0.5",
         "border border-border-strong bg-bg-elevated text-fg-primary",
-        "font-mono text-[11px] rounded-sm shadow-[0_1px_0_0_#000]",
+        /* Use bg-inset for the "physical key sits above darker recess"
+         * shadow so the colour participates in theme swaps. Hardcoded
+         * #000 used to live here; it broke under a light theme. */
+        "font-mono text-[11px] rounded-sm shadow-[0_1px_0_0_var(--color-bg-inset)]",
         local.class,
       )}
     >

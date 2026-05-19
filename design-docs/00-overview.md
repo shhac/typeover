@@ -27,6 +27,7 @@ from these files alone.
 | 10 | [curriculum-go.md](10-curriculum-go.md) | Full Go curriculum, top-down outline with iterative validation. |
 | 11 | [progress-tracking.md](11-progress-tracking.md) | What state we keep about each learner; gamification-ready schema. |
 | 12 | [test-plan.md](12-test-plan.md) | Critical-path test checklist for when Vitest lands. |
+| 13 | [themes.md](13-themes.md) | Theme catalogue + the data-theme swap mechanism. |
 
 ## Open / parked
 

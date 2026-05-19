@@ -55,8 +55,12 @@ way that *breaks* a11y (e.g. nested interactive elements).
 
 ## Tokens
 
-Defined in `src/styles/global.css` under `@theme`. Surface tokens
-graduate near-black to slightly-elevated:
+Defined in `src/styles/global.css` under `@theme`. The token *names*
+are the contract — every component reads from them, never from a
+literal. That's what makes themes (see
+[13-themes.md](13-themes.md)) one-override-block work.
+
+Surface tokens graduate near-black to slightly-elevated:
 
 - `bg-base`, `bg-panel`, `bg-elevated`, `bg-inset`
 
@@ -167,6 +171,13 @@ applied at all three call sites.
   Page-specific composition stays in `src/pages/` or
   `src/components/<feature>/`.
 - New tokens go in `@theme` first, never inline.
+- **Every colour goes through a token.** Never write `#hex`,
+  `rgb(…)`, `text-white`, `bg-zinc-…`, or any literal colour in a
+  class. If the colour you need doesn't exist as a token, add it to
+  `@theme` first. This is what keeps the "one override block adds a
+  theme" contract in [13-themes.md](13-themes.md) honest. Reviewers
+  grep for hex literals + Tailwind built-in colour utilities at
+  every code-structure pass.
 - New variants go in the lookup table, no conditional logic in JSX.
 - Components must be a11y-correct on first commit; we do not add a11y
   later as a polish pass.

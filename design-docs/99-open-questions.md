@@ -215,8 +215,13 @@ None of this is built yet — just keeping the room for it.
 
 ## Design
 
-- **Light theme.** Out of scope for v0. Worth doing later for accessibility
-  / preference reasons?
+- **Light theme.** *Resolved 2026-05-19.* Designed in
+  [13-themes.md](13-themes.md). Mechanism is `data-theme` on `<html>`
+  + CSS-variable cascade; the DS audit confirmed every colour already
+  goes through a token (after fixing one shadow leak in Kbd.tsx), so
+  adding a theme is one override block in `global.css` plus a
+  selector entry. Initial catalogue: `dark` (default), `light`,
+  `hc-dark`, `hc-light`. Implementation not started.
 - **Mobile.** v0 is desktop-first because exercises involve typing code.
   Read-only mobile view eventually?
 - **Animation.** Current bet: minimal. Quiz feedback transitions, nothing
