@@ -61,6 +61,11 @@ interface BlankInputProps {
    *  edit and re-submit. */
   locked: boolean;
   onInput: (value: string) => void;
+  /** Fires on Enter / numpad-Enter. Used by FillBlankLineInput to
+   *  Run the substituted program without forcing the learner to
+   *  reach for the mouse. fill-word doesn't pass this; Enter in a
+   *  multi-input fill-word context has no obvious target. */
+  onEnter?: () => void;
 }
 
 export function BlankInput(props: BlankInputProps) {
@@ -82,6 +87,12 @@ export function BlankInput(props: BlankInputProps) {
       value={props.value}
       aria-label={`fill-in blank ${props.varName}`}
       onInput={(e) => props.onInput(e.currentTarget.value)}
+      onKeyDown={(e) => {
+        if (props.onEnter && (e.key === "Enter" || e.key === "NumpadEnter")) {
+          e.preventDefault();
+          props.onEnter();
+        }
+      }}
       class={cn(
         "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-[13px]",
         "border rounded-sm outline-none align-baseline min-w-[5ch]",

@@ -1,3 +1,9 @@
 {
-  "ignorePatterns": ["**/*.md", "src/content/**/*.yaml", "src/content/**/*.yml", "pnpm-lock.yaml"]
+  "ignorePatterns": [
+    "**/*.md",
+    "src/content/**/*.yaml",
+    "src/content/**/*.yml",
+    "pnpm-lock.yaml",
+    "public/yaegi/**"
+  ]
 }

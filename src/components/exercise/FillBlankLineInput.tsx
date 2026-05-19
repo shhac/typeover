@@ -179,6 +179,9 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
                   revealed={false}
                   locked={phase.current() === "right"}
                   onInput={(value) => setInput(value)}
+                  onEnter={() => {
+                    if (input().trim() !== "" && !running()) void run();
+                  }}
                 />
               </span>
             );
