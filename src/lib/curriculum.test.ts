@@ -4,6 +4,7 @@ import {
   buildCurriculumTree,
   byOrder,
   exerciseHref,
+  findAdjacentExercises,
   loadExerciseContext,
   loadThemeContext,
   paramsForExercise,
@@ -245,6 +246,56 @@ describe("loadThemeContext", () => {
     const snapshot = exercises.map((e) => e.id);
     loadThemeContext(themeA1, { modules: [modA], exercises });
     expect(exercises.map((e) => e.id)).toEqual(snapshot);
+  });
+});
+
+describe("findAdjacentExercises", () => {
+  const ex1 = exercise("modA/themeA1/01", "modA/themeA1", 1);
+  const ex2 = exercise("modA/themeA1/02", "modA/themeA1", 2);
+  const ex3 = exercise("modA/themeA1/03", "modA/themeA1", 3);
+  /* Same module, different theme — must NOT be considered an adjacent. */
+  const otherTheme = exercise("modA/themeA2/01", "modA/themeA2", 1);
+
+  it("returns next-only for the first exercise in a theme", () => {
+    const { prev, next } = findAdjacentExercises(ex1, [ex1, ex2, ex3]);
+    expect(prev).toBeNull();
+    expect(next?.id).toBe("modA/themeA1/02");
+  });
+
+  it("returns both for a middle exercise", () => {
+    const { prev, next } = findAdjacentExercises(ex2, [ex1, ex2, ex3]);
+    expect(prev?.id).toBe("modA/themeA1/01");
+    expect(next?.id).toBe("modA/themeA1/03");
+  });
+
+  it("returns prev-only for the last exercise in a theme", () => {
+    const { prev, next } = findAdjacentExercises(ex3, [ex1, ex2, ex3]);
+    expect(prev?.id).toBe("modA/themeA1/02");
+    expect(next).toBeNull();
+  });
+
+  it("sorts by data.order, not input order", () => {
+    const { prev, next } = findAdjacentExercises(ex2, [ex3, ex1, ex2]);
+    expect(prev?.id).toBe("modA/themeA1/01");
+    expect(next?.id).toBe("modA/themeA1/03");
+  });
+
+  it("does not cross theme boundaries", () => {
+    /* The last exercise in theme1 has no next, even when theme2's
+     * exercises are in the same input list. Cross-theme progression
+     * is a deliberate future decision; today the theme boundary is
+     * a stop. */
+    const { prev, next } = findAdjacentExercises(ex3, [ex1, ex2, ex3, otherTheme]);
+    expect(prev?.id).toBe("modA/themeA1/02");
+    expect(next).toBeNull();
+  });
+
+  it("returns both nulls when the exercise isn't in the list", () => {
+    const orphan = exercise("modA/themeA1/99", "modA/themeA1", 99);
+    expect(findAdjacentExercises(orphan, [ex1, ex2])).toEqual({
+      prev: null,
+      next: null,
+    });
   });
 });
 

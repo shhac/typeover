@@ -14,6 +14,8 @@ interface FillBlankWordProps {
   generator: GeneratorSpec;
   blanks: string[];
   hints: readonly [string, string, string];
+  nextExerciseHref?: string;
+  themeHref?: string;
 }
 
 export function FillBlankWord(props: FillBlankWordProps) {
@@ -79,6 +81,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
           different exercise, or reveal the canonical answer.
         </span>
       }
+      nextExerciseHref={props.nextExerciseHref}
+      themeHref={props.themeHref}
     >
       <CodeBlock lang="go" filename="your turn — fill the blanks">
         <For each={segments()}>

@@ -9,6 +9,15 @@ import { Text } from "../ds/Text";
 import { recordHintUsed } from "~/lib/progress";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
 
+/* Anchor styled to match Button's primary variant + md size. Inlined
+ * here rather than via a polymorphic Button to keep the scope of the
+ * Next-exercise nav small; if a third site needs an anchor-button,
+ * extract a ButtonLink. */
+const primaryLinkClass =
+  "inline-flex items-center justify-center gap-2 rounded-sm transition-colors " +
+  "h-11 px-4 text-sm font-sans font-medium " +
+  "bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber";
+
 interface ExerciseShellProps {
   /** For progress recording from the Hint button. */
   exerciseId: string;
@@ -38,6 +47,17 @@ interface ExerciseShellProps {
   correctMessage?: JSX.Element;
   /** Override the default "Not quite — try again or reveal." message. */
   wrongMessage?: JSX.Element;
+
+  /** URL of the next exercise in this theme. When present, ExerciseShell
+   *  shows a "Next exercise →" button in the right-phase toolbar (and a
+   *  secondary "skip ahead" link in the picking-phase footer). When
+   *  absent (last exercise in theme), the right-phase Falls back to a
+   *  "back to theme" link. */
+  nextExerciseHref?: string;
+  /** URL of the parent theme's overview page. Always passed by the
+   *  route; used as the right-phase fallback when nextExerciseHref is
+   *  absent. */
+  themeHref?: string;
 
   /** The answer region — radio fieldset, blank inputs, code editor. */
   children: JSX.Element;
@@ -115,8 +135,22 @@ export function ExerciseShell(props: ExerciseShellProps) {
             </Show>
           </Match>
           <Match when={phase() === "right"}>
-            <Button variant="primary" onClick={() => props.phase.nextInstance()}>
-              Another
+            <Show
+              when={props.nextExerciseHref}
+              fallback={
+                <Show when={props.themeHref}>
+                  <a href={props.themeHref!} class={primaryLinkClass}>
+                    Back to theme overview
+                  </a>
+                </Show>
+              }
+            >
+              <a href={props.nextExerciseHref!} class={primaryLinkClass}>
+                Next exercise →
+              </a>
+            </Show>
+            <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
+              Try again with a different instance
             </Button>
           </Match>
         </Switch>

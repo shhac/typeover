@@ -160,3 +160,27 @@ export function loadExerciseContext(
   if (!module) return null;
   return { module, theme };
 }
+
+/**
+ * Find the previous and next exercises within the same theme, in
+ * `data.order` order. Returns `null` for either side that doesn't
+ * exist (first exercise has no prev; last has no next).
+ *
+ * Powers the "Next exercise →" button in ExerciseShell so learners
+ * can advance from Exercise 1 to Exercise 2 without bouncing back
+ * to the theme overview.
+ */
+export function findAdjacentExercises(
+  exercise: Exercise,
+  allExercises: readonly Exercise[],
+): { prev: Exercise | null; next: Exercise | null } {
+  const siblings = allExercises
+    .filter((ex) => ex.data.themeId === exercise.data.themeId)
+    .sort(byOrder);
+  const i = siblings.findIndex((ex) => ex.id === exercise.id);
+  if (i === -1) return { prev: null, next: null };
+  return {
+    prev: siblings[i - 1] ?? null,
+    next: siblings[i + 1] ?? null,
+  };
+}

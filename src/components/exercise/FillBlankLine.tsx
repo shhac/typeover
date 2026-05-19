@@ -17,6 +17,8 @@ interface FillBlankLineProps {
    *  the missing line. The var's pool *is* the candidate set. */
   blanks: string[];
   hints: readonly [string, string, string];
+  nextExerciseHref?: string;
+  themeHref?: string;
 }
 
 type BlankSlot = FillSegment & { kind: "blank" };
@@ -77,6 +79,8 @@ export function FillBlankLine(props: FillBlankLineProps) {
           the answer.
         </span>
       }
+      nextExerciseHref={props.nextExerciseHref}
+      themeHref={props.themeHref}
     >
       <CodeBlock lang="go" filename="your turn — pick the line">
         <For each={instance().blankSegments ?? []}>

@@ -10,6 +10,8 @@ interface McqProps {
   prompt: string;
   generator: GeneratorSpec;
   hints: readonly [string, string, string];
+  nextExerciseHref?: string;
+  themeHref?: string;
 }
 
 export function Mcq(props: McqProps) {
@@ -44,6 +46,8 @@ export function Mcq(props: McqProps) {
       canonical={instance().canonical}
       hints={props.hints}
       phase={phase}
+      nextExerciseHref={props.nextExerciseHref}
+      themeHref={props.themeHref}
     >
       <fieldset class="flex flex-col gap-2 m-0 p-0 border-0">
         <legend class="sr-only">Pick the idiomatic Go translation</legend>

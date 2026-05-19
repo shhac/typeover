@@ -13,7 +13,13 @@ import {
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 import { FillBlankLine } from "~/components/exercise/FillBlankLine";
-import { loadExerciseContext, paramsForExercise } from "~/lib/curriculum";
+import {
+  exerciseHref,
+  findAdjacentExercises,
+  loadExerciseContext,
+  paramsForExercise,
+  themeHref,
+} from "~/lib/curriculum";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -33,9 +39,10 @@ interface Props {
 const { entry } = Astro.props;
 const ex = entry.data;
 
-const [modules, themes] = await Promise.all([
+const [modules, themes, exercises] = await Promise.all([
   getCollection("modules"),
   getCollection("themes"),
+  getCollection("exercises"),
 ]);
 const ctx = loadExerciseContext(entry, { modules, themes });
 if (!ctx) {
@@ -44,6 +51,10 @@ if (!ctx) {
   );
 }
 const { module: moduleEntry, theme: themeEntry } = ctx;
+
+const { next } = findAdjacentExercises(entry, exercises);
+const nextExerciseHref = next ? exerciseHref(next.id) : undefined;
+const parentThemeHref = themeHref(themeEntry.id);
 ---
 
 <BaseLayout
@@ -74,6 +85,8 @@ const { module: moduleEntry, theme: themeEntry } = ctx;
               prompt={ex.prompt}
               generator={ex.generator}
               hints={ex.hints}
+              nextExerciseHref={nextExerciseHref}
+              themeHref={parentThemeHref}
             />
           )}
           {ex.type === "fill-word" && (
@@ -84,6 +97,8 @@ const { module: moduleEntry, theme: themeEntry } = ctx;
               generator={ex.generator}
               blanks={ex.blanks ?? []}
               hints={ex.hints}
+              nextExerciseHref={nextExerciseHref}
+              themeHref={parentThemeHref}
             />
           )}
           {ex.type === "fill-line" && (
@@ -94,6 +109,8 @@ const { module: moduleEntry, theme: themeEntry } = ctx;
               generator={ex.generator}
               blanks={ex.blanks ?? []}
               hints={ex.hints}
+              nextExerciseHref={nextExerciseHref}
+              themeHref={parentThemeHref}
             />
           )}
           {ex.type === "freeform" && (
