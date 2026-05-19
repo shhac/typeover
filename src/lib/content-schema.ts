@@ -44,6 +44,12 @@ export const exerciseSchema = z
     hints: z.tuple([z.string(), z.string(), z.string()]),
     runtime: z.enum(["yaegi", "server", "none"]).default("none"),
     notes: z.string().optional(),
+    /** Freeform exercises: the exact stdout we expect from running the
+     *  learner's `package main`. Required for `type: freeform`, rejected
+     *  for other types via the cross-field refinement below. v0 is
+     *  exact-string match; whitespace / trailing-newline normalisation
+     *  is a follow-up if authors find it too strict. */
+    expectStdout: z.string().optional(),
   })
   .superRefine((ex, ctx) => {
     /* fill-word / fill-line must declare which template vars render
@@ -111,6 +117,31 @@ export const exerciseSchema = z
         code: "custom",
         message: `\`blanks\` is only valid for fill-word / fill-line; got type "${ex.type}".`,
         path: ["blanks"],
+      });
+    }
+    /* Freeform requires expectStdout — without it Submit has no oracle
+     * and the exercise can't grade. Conversely, expectStdout on a
+     * non-freeform exercise is meaningless. */
+    if (ex.type === "freeform") {
+      if (ex.expectStdout === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Freeform exercises require `expectStdout` (the stdout to match against).",
+          path: ["expectStdout"],
+        });
+      }
+      if (ex.runtime === "none") {
+        ctx.addIssue({
+          code: "custom",
+          message: 'Freeform exercises need `runtime: "yaegi"` or `runtime: "server"`.',
+          path: ["runtime"],
+        });
+      }
+    } else if (ex.expectStdout !== undefined) {
+      ctx.addIssue({
+        code: "custom",
+        message: `\`expectStdout\` is only valid for freeform exercises; got type "${ex.type}".`,
+        path: ["expectStdout"],
       });
     }
   });

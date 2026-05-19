@@ -248,9 +248,49 @@ describe("exerciseSchema — stray blanks on non-fill types (#38)", () => {
     expect(r.success).toBe(false);
     if (!r.success) expect(paths(r.error.issues)).toContain("blanks");
   });
+});
 
-  it("accepts freeform with no blanks", () => {
-    const r = exerciseSchema.safeParse(baseEx({ type: "freeform", generator: tplGen() }));
+describe("exerciseSchema — freeform requirements (#17)", () => {
+  const freeformBase = {
+    target: "go" as const,
+    themeId: "foundations/variables",
+    type: "freeform" as const,
+    order: 1,
+    prompt: "Write a program that prints 42.",
+    generator: tplGen(),
+    hints: ["a", "b", "c"] as [string, string, string],
+    runtime: "yaegi" as const,
+    expectStdout: "42\n",
+  };
+
+  it("accepts a well-formed freeform exercise", () => {
+    const r = exerciseSchema.safeParse(freeformBase);
     expect(r.success).toBe(true);
+  });
+
+  it("rejects freeform without `expectStdout` (no oracle for Submit)", () => {
+    const { expectStdout: _, ...rest } = freeformBase;
+    void _;
+    const r = exerciseSchema.safeParse(rest);
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("expectStdout");
+  });
+
+  it('rejects freeform with `runtime: "none"` (need yaegi or server)', () => {
+    const r = exerciseSchema.safeParse({ ...freeformBase, runtime: "none" });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("runtime");
+  });
+
+  it("rejects non-freeform exercises that set `expectStdout`", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        generator: tplGen({ distractors: ["${x}+1"] }),
+        expectStdout: "stray",
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("expectStdout");
   });
 });

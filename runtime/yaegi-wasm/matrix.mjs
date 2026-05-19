@@ -310,12 +310,18 @@ function check(c, r) {
   if (c.expectStdout !== undefined) {
     return r.error === "" && r.stdout === c.expectStdout
       ? { ok: true }
-      : { ok: false, reason: `stdout mismatch (got ${JSON.stringify(r.stdout)}, error=${JSON.stringify(r.error)})` };
+      : {
+          ok: false,
+          reason: `stdout mismatch (got ${JSON.stringify(r.stdout)}, error=${JSON.stringify(r.error)})`,
+        };
   }
   if (c.expectError !== undefined) {
     return r.error.includes(c.expectError)
       ? { ok: true }
-      : { ok: false, reason: `expected error containing "${c.expectError}", got ${JSON.stringify(r.error)}` };
+      : {
+          ok: false,
+          reason: `expected error containing "${c.expectError}", got ${JSON.stringify(r.error)}`,
+        };
   }
   return { ok: false, reason: "case has no expectation" };
 }
@@ -335,7 +341,9 @@ for (const c of cases) {
 
 /* Markdown report. */
 console.log(`# Yaegi WASM POC — runtime matrix\n`);
-console.log(`**${pass}/${pass + fail} pass** (Yaegi v0.16.1, Go 1.22 generation, minimal stdlib subset).\n`);
+console.log(
+  `**${pass}/${pass + fail} pass** (Yaegi v0.16.1, Go 1.22 generation, minimal stdlib subset).\n`,
+);
 console.log(`| Category | Snippet | Result | t (ms) |`);
 console.log(`|---|---|---|---|`);
 for (const row of rows) {

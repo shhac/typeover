@@ -13,6 +13,7 @@ import {
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 import { FillBlankLine } from "~/components/exercise/FillBlankLine";
+import { Freeform } from "~/components/exercise/Freeform";
 import {
   exerciseHref,
   findAdjacentExercises,
@@ -114,10 +115,18 @@ const parentThemeHref = themeHref(themeEntry.id);
               themeHref={parentThemeHref}
             />
           )}
-          {ex.type === "freeform" && (
-            <Text tone="muted" size="sm" family="mono">
-              freeform exercise component not built yet
-            </Text>
+          {ex.type === "freeform" && ex.expectStdout !== undefined && ex.runtime !== "none" && (
+            <Freeform
+              client:only="solid-js"
+              exerciseId={entry.id}
+              prompt={ex.prompt}
+              generator={ex.generator}
+              hints={ex.hints}
+              expectStdout={ex.expectStdout}
+              runtime={ex.runtime}
+              nextExerciseHref={nextExerciseHref}
+              themeHref={parentThemeHref}
+            />
           )}
         </Panel>
 
