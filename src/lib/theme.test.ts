@@ -103,3 +103,26 @@ describe("setTheme", () => {
     expect(currentTheme()).toBe("light");
   });
 });
+
+describe("theme — SSR path (no localStorage)", () => {
+  /* Parallel to progress.test.ts's SSR section. The theme helpers
+   * run inside the BaseLayout bootstrap script before paint; an SSR
+   * crash on the no-localStorage path would block first frame. */
+  beforeEach(() => {
+    delete (globalThis as { localStorage?: Storage }).localStorage;
+  });
+
+  it('currentChoice() returns "system" when localStorage is undefined', () => {
+    expect(currentChoice()).toBe("system");
+  });
+
+  it('setTheme("dark") updates the DOM without throwing when localStorage is undefined', () => {
+    expect(() => setTheme("dark")).not.toThrow();
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+
+  it('setTheme("system") re-derives from OS without throwing when localStorage is undefined', () => {
+    expect(() => setTheme("system")).not.toThrow();
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+});

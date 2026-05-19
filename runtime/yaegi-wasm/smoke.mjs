@@ -10,27 +10,9 @@
  *
  * Lives outside the build path; not shipped to the browser.
  */
-import { readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { bootstrapYaegi } from "./bootstrap.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const wasmPath = join(here, "..", "..", "public", "yaegi", "yaegi.wasm");
-const execPath = join(here, "..", "..", "public", "yaegi", "wasm_exec.js");
-
-// wasm_exec.js leans on global `crypto` and `performance` which Node 24
-// exposes natively. The Go runtime also expects `globalThis.fs` (Node)
-// or `node:fs` indirection; the bundled wasm_exec.js handles both.
-const execSrc = await readFile(execPath, "utf8");
-new Function(execSrc)();
-
-const go = new globalThis.Go();
-const wasmBytes = await readFile(wasmPath);
-const { instance } = await WebAssembly.instantiate(wasmBytes, go.importObject);
-void go.run(instance); // fire and forget — the runtime loop blocks on a channel
-
-// Give the runtime a microtask to wire up yaegiEval.
-await new Promise((r) => setTimeout(r, 50));
+const yaegiEval = await bootstrapYaegi();
 
 const cases = [
   {
@@ -70,7 +52,7 @@ func main() { var p *int; _ = *p }`,
 let pass = 0;
 let fail = 0;
 for (const c of cases) {
-  const r = globalThis.yaegiEval(c.code);
+  const r = yaegiEval(c.code);
   console.log(`\n=== ${c.name} ===`);
   console.log("  stdout:", JSON.stringify(r.stdout));
   console.log("  stderr:", JSON.stringify(r.stderr));

@@ -203,3 +203,61 @@ describe("progress storage — single-now invariant (iter-18)", () => {
     expect(raw.exercises["ex-2"]?.lastSeenAt).toBe(raw.lastSeenAt);
   });
 });
+
+describe("progress storage — read-existing-blob round-trip", () => {
+  /* Pinned by the code-structure pass: existing tests all start from
+   * empty storage. A future Zod `.strict()` or `.readonly()` tightening
+   * (task #37 follow-ups) could break the `read() → mutate → write()`
+   * cycle silently — every recorder would fail to in-place-mutate the
+   * parsed value. Seeding storage with a non-empty blob and asserting
+   * the round-trip catches that regression. */
+
+  const seeded = {
+    version: 1,
+    startedAt: "2026-01-01T00:00:00.000Z",
+    lastSeenAt: "2026-01-02T00:00:00.000Z",
+    exercises: {
+      "ex-1": {
+        firstSeenAt: "2026-01-01T00:00:00.000Z",
+        lastSeenAt: "2026-01-02T00:00:00.000Z",
+        instancesSeen: 5,
+        instancesPassed: 3,
+        instancesFailed: 1,
+        hintsUsedTotal: 2,
+      },
+      "ex-2": {
+        firstSeenAt: "2026-01-01T00:00:00.000Z",
+        lastSeenAt: "2026-01-02T00:00:00.000Z",
+        instancesSeen: 7,
+        instancesPassed: 4,
+        instancesFailed: 0,
+        hintsUsedTotal: 1,
+      },
+    },
+  };
+
+  it("recordInstanceSeen on a pre-seeded blob increments ex-1, leaves ex-2 untouched", () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    recordInstanceSeen("ex-1");
+
+    const after1 = getExerciseProgress("ex-1");
+    expect(after1.instancesSeen).toBe(6);
+    expect(after1.instancesPassed).toBe(3);
+    expect(after1.instancesFailed).toBe(1);
+    expect(after1.hintsUsedTotal).toBe(2);
+    expect(after1.firstSeenAt).toBe("2026-01-01T00:00:00.000Z");
+    expect(after1.lastSeenAt > "2026-01-02T00:00:00.000Z").toBe(true);
+
+    const after2 = getExerciseProgress("ex-2");
+    expect(after2.instancesSeen).toBe(7);
+    expect(after2.instancesPassed).toBe(4);
+    expect(after2.lastSeenAt).toBe("2026-01-02T00:00:00.000Z");
+  });
+
+  it("progress.lastSeenAt advances on a pre-seeded blob mutation", () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    recordInstanceSeen("ex-1");
+    const raw = readRaw() as RawProgress;
+    expect(raw.lastSeenAt > "2026-01-02T00:00:00.000Z").toBe(true);
+  });
+});

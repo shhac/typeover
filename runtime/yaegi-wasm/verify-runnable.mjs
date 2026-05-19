@@ -17,20 +17,12 @@ import { glob } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
+import { bootstrapYaegi } from "./bootstrap.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
-const wasmPath = join(root, "public", "yaegi", "yaegi.wasm");
-const execPath = join(root, "public", "yaegi", "wasm_exec.js");
 
-const execSrc = await readFile(execPath, "utf8");
-new Function(execSrc)();
-
-const go = new globalThis.Go();
-const wasmBytes = await readFile(wasmPath);
-const { instance } = await WebAssembly.instantiate(wasmBytes, go.importObject);
-void go.run(instance);
-await new Promise((r) => setTimeout(r, 50));
+const yaegiEval = await bootstrapYaegi();
 
 /* Returns the program to run + a label, or null if the exercise
  * isn't runnable under this verifier. */
@@ -75,7 +67,7 @@ for (const { path, data, program } of exercises) {
     fail++;
     continue;
   }
-  const r = globalThis.yaegiEval(program.code);
+  const r = yaegiEval(program.code);
   const ok = r.error === "" && r.stdout === data.expectStdout;
   if (ok) {
     pass++;

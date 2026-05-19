@@ -12,22 +12,9 @@
  *
  * Run: pnpm runtime:smoke-matrix
  */
-import { readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { bootstrapYaegi } from "./bootstrap.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const wasmPath = join(here, "..", "..", "public", "yaegi", "yaegi.wasm");
-const execPath = join(here, "..", "..", "public", "yaegi", "wasm_exec.js");
-
-const execSrc = await readFile(execPath, "utf8");
-new Function(execSrc)();
-
-const go = new globalThis.Go();
-const wasmBytes = await readFile(wasmPath);
-const { instance } = await WebAssembly.instantiate(wasmBytes, go.importObject);
-void go.run(instance);
-await new Promise((r) => setTimeout(r, 50));
+const yaegiEval = await bootstrapYaegi();
 
 /* The 20-snippet matrix. Categories from design-docs/04. */
 const cases = [
@@ -331,7 +318,7 @@ let pass = 0;
 let fail = 0;
 for (const c of cases) {
   const t0 = performance.now();
-  const r = globalThis.yaegiEval(c.code);
+  const r = yaegiEval(c.code);
   const dt = (performance.now() - t0).toFixed(1);
   const v = check(c, r);
   if (v.ok) pass++;

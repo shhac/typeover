@@ -126,7 +126,7 @@ export const GeneratorSchema = z.discriminatedUnion("kind", [
 ]);
 
 export type GeneratorSpec = z.infer<typeof GeneratorSchema>;
-type TemplateGenerator = z.infer<typeof TemplateSpec>;
+export type TemplateGenerator = z.infer<typeof TemplateSpec>;
 type VariantGenerator = z.infer<typeof VariantSpec>;
 
 /* ---------------- Runtime ---------------- */
@@ -233,16 +233,35 @@ export function buildShuffledOptions(
   };
 }
 
+/**
+ * Pick one value from each declared var pool, deterministically by
+ * `rng`. The returned map is the substitution context used for ts /
+ * canonical / distractors and is also surfaced on `ExerciseInstance.values`
+ * so consumers (HintButton, FillBlankLineInput) can re-substitute
+ * other strings against the same instance.
+ *
+ * Extracted from generateTemplate so the values contract is
+ * independently visible and the orchestrator function reads
+ * top-down: resolve → substitute → blanks → mcq → assemble.
+ */
+export function resolveTemplateValues(
+  spec: TemplateGenerator,
+  rng: () => number,
+): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const [name, pool] of Object.entries(spec.vars)) {
+    values[name] = pickFrom(rng, pool);
+  }
+  return values;
+}
+
 function generateTemplate(
   spec: TemplateGenerator,
   seed: string,
   opts: GenerateOptions,
 ): ExerciseInstance {
   const rng = rngFromSeed(seed);
-  const values: Record<string, string> = {};
-  for (const [name, pool] of Object.entries(spec.vars)) {
-    values[name] = pickFrom(rng, pool);
-  }
+  const values = resolveTemplateValues(spec, rng);
   const ts = substitute(spec.ts, values);
   const canonical = substitute(spec.canonical, values);
 
