@@ -261,11 +261,18 @@ renders the cascaded `py-20` as `102.4px` (= 20 × 0.32rem).
 
 Open:
 
-6. **Live-preview region** under each picker — show a Panel +
+6. ~~**Live-preview region** under each picker — show a Panel +
    Button + Badge + CodeBlock so the learner sees what the
-   choice does without scrolling away. Cheap to add; deferred
-   only because the picker already responds instantly across the
-   page chrome, which is preview enough for v0.
+   choice does without scrolling away.~~ *Landed 2026-05-19.* A
+   `<PreviewSample>` block sits at the top of
+   `AppearancePicker.tsx` showing a focused mini-canvas (Panel
+   eyebrow + caption, Button row, Badge row + ProgressChip,
+   CodeBlock). Pure DS composition — no localStorage reads, no
+   Solid signals; the CSS cascade fans every picker mutation
+   through every primitive at once. Lands above the radios
+   rather than under each axis (proposal said "under each
+   picker") because all three axes affect the same primitives —
+   one canvas reads better than three repeats.
 7. **axe-core a11y test across the corner combinations** — the
    four corners (compact+sharp, airy+rounded, light+sharp,
    light+airy+rounded) get a Playwright pass driven through the
