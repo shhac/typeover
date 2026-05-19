@@ -25,10 +25,25 @@ generator:
     	fmt.Println(a, b)
     }
   distractors:
-    - "a := 1, b := 2"
-    - "var a, b = 1, 2"
-    - "a, b = 1, 2"
-    - "let a, b = 1, 2"
+    - match: "a := 1, b := 2"
+      explain: |-
+        Two `:=` in one statement isn't a Go thing. The short
+        declaration takes a tuple on each side — names on the left,
+        values on the right, one `:=` in the middle.
+    - match: "var a, b = 1, 2"
+      explain: |-
+        That compiles, but inside a function `:=` is the idiomatic
+        shape. Reach for `var` at package scope or when you want to
+        declare without initialising.
+    - match: "a, b = 1, 2"
+      explain: |-
+        That's a re-assignment, not a declaration. `a` and `b` don't
+        exist yet. Use `:=` to declare and assign in one step.
+    - match: "let a, b = 1, 2"
+      explain: |-
+        `let` is TypeScript. Go uses `:=` inside functions; the
+        tuple-on-each-side shape from your `a, b := 1, 2` intuition is
+        right, just swap the keyword.
 expectStdout: |
   1 2
 runtime: yaegi

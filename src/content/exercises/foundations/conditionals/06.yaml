@@ -35,10 +35,28 @@ generator:
     	${line}
     }
   distractors:
-    - 'user := lookup(id); if user != nil { greet(user) }'
-    - 'if (user := lookup(id)) != nil { greet(user) }'
-    - 'if user, err := lookup(id); err == nil { greet(user) }'
-    - 'let user = lookup(id); if user !== null { greet(user) }'
+    - match: 'user := lookup(id); if user != nil { greet(user) }'
+      explain: |-
+        That works, but it splits what Go bundles. The short-statement-if
+        form glues setup + condition: `if SETUP; CONDITION { … }`. The
+        `user` you declare is scoped to the if/else block too, which is
+        usually what you want.
+    - match: 'if (user := lookup(id)) != nil { greet(user) }'
+      explain: |-
+        Two Go-isms collide here. First, `if` doesn't take parens around
+        its condition. Second, you can't assign and compare in the same
+        expression — Go's short-statement-if separates the two halves
+        with a semicolon.
+    - match: 'if user, err := lookup(id); err == nil { greet(user) }'
+      explain: |-
+        That's the multi-return shape — right for an exercise where
+        `lookup` returns `(*User, error)`, wrong here. This `lookup`
+        returns one value (a pointer); compare against `nil` directly.
+    - match: 'let user = lookup(id); if user !== null { greet(user) }'
+      explain: |-
+        Three TS habits to swap: `let` → `:=`, the `=== null` triple-equal
+        → `!= nil`, and the two statements collapse into Go's
+        `if SETUP; CONDITION { … }` form.
 expectStdout: |
   hi, Ada
 runtime: yaegi

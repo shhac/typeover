@@ -35,10 +35,22 @@ generator:
     	}
     }
   distractors:
-    - "if (i == stopAt) { break }"
-    - "if i === stopAt { break }"
-    - "if i == stopAt: break"
-    - "break if i == stopAt"
+    - match: "if (i == stopAt) { break }"
+      explain: |-
+        Go doesn't take parens around the condition of an `if`. Drop the
+        parens; the braces stay.
+    - match: "if i === stopAt { break }"
+      explain: |-
+        Triple-equals is a JavaScript / TypeScript thing. Go uses `==`
+        for equality; the types either match or it won't compile.
+    - match: "if i == stopAt: break"
+      explain: |-
+        That's Python's shape — colon + indent for the body. Go uses
+        braces: `if cond { body }`. No colon.
+    - match: "break if i == stopAt"
+      explain: |-
+        Ruby's trailing-conditional reads nicely, but Go isn't Ruby.
+        Lead with `if`, body in braces — even one-liners like `break`.
 expectStdout: |
   0
   1

@@ -39,10 +39,27 @@ generator:
     	fmt.Println(err)
     }
   distractors:
-    - 'return null, "empty input"'
-    - 'return (0, "empty input")'
-    - 'return errors.New("empty input")'
-    - 'return nil, errors.New("empty input")'
+    - match: 'return null, "empty input"'
+      explain: |-
+        Two TS habits at once. Go doesn't have `null` — the zero value
+        for `int` is `0`. And the second return is an `error`, not a
+        bare string — wrap the message with `errors.New(...)`.
+    - match: 'return (0, "empty input")'
+      explain: |-
+        Go's multi-return isn't a tuple — no parens, no array. The
+        values are bare, comma-separated. (Parens around the return
+        VALUES; parens around the return TYPES in the function
+        signature — different thing.)
+    - match: 'return errors.New("empty input")'
+      explain: |-
+        The function signature is `(int, error)`. You have to return
+        both — the value AND the error. The zero value `0` goes first;
+        the error goes second.
+    - match: 'return nil, errors.New("empty input")'
+      explain: |-
+        `nil` is Go's null-ish for pointers, interfaces, maps, slices,
+        and channels. Not for `int` — its zero value is `0`. Use `0`
+        as the first return.
 expectStdout: |
   empty input
 runtime: yaegi
