@@ -1,5 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { currentChoice, currentTheme, setTheme, STORAGE_KEY } from "./theme";
+import {
+  currentChoice,
+  currentDensity,
+  currentRadius,
+  currentTheme,
+  DENSITY_STORAGE_KEY,
+  RADIUS_STORAGE_KEY,
+  setDensity,
+  setRadius,
+  setTheme,
+  STORAGE_KEY,
+} from "./theme";
 
 /*
  * Theme helpers. Pinned: localStorage round-trip, DOM data-theme is
@@ -26,8 +37,10 @@ const matchMediaStub = (prefersLight: boolean) => {
 
 beforeEach(() => {
   /* vitest.setup.ts already gives us a fresh localStorage shim per
-   * test. Reset the DOM attribute too. */
+   * test. Reset the DOM attributes too. */
   delete document.documentElement.dataset.theme;
+  delete document.documentElement.dataset.density;
+  delete document.documentElement.dataset.radius;
   vi.stubGlobal("matchMedia", matchMediaStub(false));
   /* matchMedia lives on window, not just globalThis */
   Object.defineProperty(window, "matchMedia", {
@@ -104,6 +117,68 @@ describe("setTheme", () => {
   });
 });
 
+describe("density axis", () => {
+  it("currentDensity defaults to 'normal' when no DOM attribute", () => {
+    expect(currentDensity()).toBe("normal");
+  });
+
+  it("currentDensity reads the DOM attribute when set", () => {
+    document.documentElement.dataset.density = "compact";
+    expect(currentDensity()).toBe("compact");
+  });
+
+  it("currentDensity falls back to 'normal' on an unknown attribute", () => {
+    document.documentElement.dataset.density = "ultra";
+    expect(currentDensity()).toBe("normal");
+  });
+
+  it("setDensity writes the pin and updates the DOM", () => {
+    setDensity("airy");
+    expect(localStorage.getItem(DENSITY_STORAGE_KEY)).toBe("airy");
+    expect(document.documentElement.dataset.density).toBe("airy");
+    expect(currentDensity()).toBe("airy");
+  });
+});
+
+describe("radius axis", () => {
+  it("currentRadius defaults to 'normal' when no DOM attribute", () => {
+    expect(currentRadius()).toBe("normal");
+  });
+
+  it("currentRadius reads the DOM attribute when set", () => {
+    document.documentElement.dataset.radius = "rounded";
+    expect(currentRadius()).toBe("rounded");
+  });
+
+  it("currentRadius falls back to 'normal' on an unknown attribute", () => {
+    document.documentElement.dataset.radius = "spiky";
+    expect(currentRadius()).toBe("normal");
+  });
+
+  it("setRadius writes the pin and updates the DOM", () => {
+    setRadius("sharp");
+    expect(localStorage.getItem(RADIUS_STORAGE_KEY)).toBe("sharp");
+    expect(document.documentElement.dataset.radius).toBe("sharp");
+    expect(currentRadius()).toBe("sharp");
+  });
+});
+
+describe("axes are independent", () => {
+  it("setting density doesn't touch the colour theme attribute", () => {
+    document.documentElement.dataset.theme = "dark";
+    setDensity("compact");
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+
+  it("setting theme doesn't touch density or radius attributes", () => {
+    setDensity("airy");
+    setRadius("rounded");
+    setTheme("light");
+    expect(document.documentElement.dataset.density).toBe("airy");
+    expect(document.documentElement.dataset.radius).toBe("rounded");
+  });
+});
+
 describe("theme — SSR path (no localStorage)", () => {
   /* Parallel to progress.test.ts's SSR section. The theme helpers
    * run inside the BaseLayout bootstrap script before paint; an SSR
@@ -124,5 +199,15 @@ describe("theme — SSR path (no localStorage)", () => {
   it('setTheme("system") re-derives from OS without throwing when localStorage is undefined', () => {
     expect(() => setTheme("system")).not.toThrow();
     expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+
+  it("setDensity updates the DOM without throwing when localStorage is undefined", () => {
+    expect(() => setDensity("compact")).not.toThrow();
+    expect(document.documentElement.dataset.density).toBe("compact");
+  });
+
+  it("setRadius updates the DOM without throwing when localStorage is undefined", () => {
+    expect(() => setRadius("rounded")).not.toThrow();
+    expect(document.documentElement.dataset.radius).toBe("rounded");
   });
 });

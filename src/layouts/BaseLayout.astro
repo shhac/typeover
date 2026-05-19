@@ -25,27 +25,43 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
     {/*
-     * Theme bootstrap — runs synchronously before paint to set
-     * data-theme on <html> from the learner's pin (localStorage) or
-     * the OS preference. Prevents flash-of-wrong-theme on first
-     * frame. Keep this inline and small; any growth lives in
-     * src/lib/theme.ts (which the settings page uses). See
-     * design-docs/13-themes.md.
+     * Appearance bootstrap — runs synchronously before paint to set
+     * three data-* attributes on <html> from the learner's pins
+     * (localStorage) or per-axis defaults. Prevents flash-of-wrong-
+     * theme on first frame for all three axes. Keep this inline and
+     * small; any growth lives in src/lib/theme.ts. See
+     * design-docs/13-themes.md + 14-stylistic-themes.md.
      */}
     <script is:inline>
       (() => {
         try {
-          var pinned = localStorage.getItem("typeover:theme");
+          var pinnedTheme = localStorage.getItem("typeover:theme");
           var theme =
-            pinned === "dark" || pinned === "light"
-              ? pinned
+            pinnedTheme === "dark" || pinnedTheme === "light"
+              ? pinnedTheme
               : window.matchMedia("(prefers-color-scheme: light)").matches
                 ? "light"
                 : "dark";
           document.documentElement.dataset.theme = theme;
+
+          var pinnedDensity = localStorage.getItem("typeover:density");
+          document.documentElement.dataset.density =
+            pinnedDensity === "compact" ||
+            pinnedDensity === "normal" ||
+            pinnedDensity === "airy"
+              ? pinnedDensity
+              : "normal";
+
+          var pinnedRadius = localStorage.getItem("typeover:radius");
+          document.documentElement.dataset.radius =
+            pinnedRadius === "sharp" ||
+            pinnedRadius === "normal" ||
+            pinnedRadius === "rounded"
+              ? pinnedRadius
+              : "normal";
         } catch (_) {
           /* localStorage unavailable (incognito quota / SSR / etc.) —
-           * fall through to the CSS @theme defaults (dark). */
+           * fall through to the CSS @theme defaults. */
         }
       })();
     </script>

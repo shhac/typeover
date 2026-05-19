@@ -229,29 +229,56 @@ manual VoiceOver/keyboard sanity pass before exposing the picker.
 
 ## Implementation plan
 
-This doc is the proposal. Implementation order, when picked up:
+Steps 1–5 landed 2026-05-19. The DS-does-the-heavy-lifting bet
+held again — zero component changes, every spacing utility and
+every rounded-* class picked up the swap atomically. End-to-end
+verified in Chromium: clicking the picker on `/settings` flips
+the `<html data-density="airy" data-radius="rounded">` attributes,
+`getComputedStyle(html).getPropertyValue('--spacing')` returns
+`0.32rem`, `--radius-sm` returns `4px`, and a freshly-loaded
+exercise page reads the persisted pins from localStorage and
+renders the cascaded `py-20` as `102.4px` (= 20 × 0.32rem).
 
-1. **Tokens** — add `--spacing` (already implicit in Tailwind 4)
-   to the `@theme` block explicitly; verify the radius tokens
-   already exist (they do).
-2. **Override blocks** — `:root[data-density="…"]` (2 blocks) and
-   `:root[data-radius="…"]` (2 blocks) in `global.css`.
-3. **Bootstrap script** — extend `BaseLayout.astro`'s inline
+1. ~~**Tokens** — add `--spacing` to the `@theme` block explicitly
+   so a reader sees it next to the colour/radius tokens; verify
+   the radius tokens already exist (they do).~~ `global.css`.
+2. ~~**Override blocks** — `:root[data-density="…"]` (compact +
+   airy) and `:root[data-radius="…"]` (sharp + rounded) in
+   `global.css`. `normal` is the @theme default; no override block
+   needed.~~ `global.css`.
+3. ~~**Bootstrap script** — extend `BaseLayout.astro`'s inline
    script to read + apply `typeover:density` and `typeover:radius`
-   alongside `typeover:theme`.
-4. **`src/lib/theme.ts`** — extend to expose `currentDensity()` /
+   alongside `typeover:theme`. Three pinned values resolved
+   pre-paint; no FOUC on any axis.~~ `BaseLayout.astro`.
+4. ~~**`src/lib/theme.ts`** — extend to expose `currentDensity()` /
    `setDensity()` and `currentRadius()` / `setRadius()` with the
-   same shape as the colour API.
-5. **`ThemePicker.tsx`** → rename to `AppearancePicker.tsx`, grow
-   from one radio group to three, add the live preview region.
-6. **Tests** — unit tests for `setDensity` / `setRadius` (same as
-   `setTheme`), plus an axe-core a11y test running through the
-   four corner combinations.
+   same shape as the colour API. No `system` choice for density
+   or radius (no OS-level signal exists for them).~~
+5. ~~**`ThemePicker.tsx` → `AppearancePicker.tsx`** — generalised
+   into a `<RadioGroup>` parameterised over option list +
+   getter/setter pair, then composed three times. Single picker
+   surface, three axes.~~ `src/components/settings/AppearancePicker.tsx`.
+
+Open:
+
+6. **Live-preview region** under each picker — show a Panel +
+   Button + Badge + CodeBlock so the learner sees what the
+   choice does without scrolling away. Cheap to add; deferred
+   only because the picker already responds instantly across the
+   page chrome, which is preview enough for v0.
+7. **axe-core a11y test across the corner combinations** — the
+   four corners (compact+sharp, airy+rounded, light+sharp,
+   light+airy+rounded) get a Playwright pass driven through the
+   `setDensity` / `setRadius` API. Pending the same harness #32
+   Lighthouse CI uses.
+8. **High-contrast pair** (`hc-dark`, `hc-light`) — landed
+   separately when an a11y reviewer asks; see 13-themes.md step 7.
 
 The DS-does-the-heavy-lifting bet for colour themes (zero
 component changes) held. The same bet here is *stronger* — the
 two new axes are even more atomic, because there's literally one
-variable (`--spacing`) doing all the density work.
+variable (`--spacing`) doing all the density work and three
+radius variables doing all the shape work.
 
 ## Future axes (parked)
 

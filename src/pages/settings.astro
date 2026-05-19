@@ -1,16 +1,13 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { Container, Heading, Stack, Text } from "~/components/ds";
-import { ThemePicker } from "~/components/settings/ThemePicker";
+import { AppearancePicker } from "~/components/settings/AppearancePicker";
 
 /*
- * Learner settings. Single concern today (theme picker); will grow
- * to hold any other learner-controlled preference that doesn't fit
- * inside an exercise — keybindings, reduced-motion override, etc.
- *
- * Per design-docs/13-themes.md the picker is the only theme UX
- * surface in v0; no header toggle until feedback says the footer
- * link is too buried.
+ * Learner settings. Three appearance axes — colour theme, density,
+ * shape — per design-docs/13 + 14. Will grow to hold any other
+ * learner-controlled preference that doesn't fit inside an exercise
+ * (keybindings, reduced-motion override, etc.).
  */
 ---
 
@@ -28,12 +25,13 @@ import { ThemePicker } from "~/components/settings/ThemePicker";
 
         <Stack gap="md">
           <Stack gap="xs">
-            <Heading level={2} class="!text-xl">Theme</Heading>
+            <Heading level={2} class="!text-xl">Appearance</Heading>
             <Text tone="muted" size="sm">
-              Pick a theme, or follow your operating system.
+              Three axes — pick what reads best for you. Changes apply
+              instantly across the whole site.
             </Text>
           </Stack>
-          <ThemePicker client:only="solid-js" />
+          <AppearancePicker client:only="solid-js" />
         </Stack>
       </Stack>
     </Container>
