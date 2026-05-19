@@ -14,6 +14,7 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
+import Accordion from "~/components/ds/Accordion.astro";
 import {
   buildCurriculumTree,
   exerciseHref,
@@ -76,16 +77,31 @@ func double(n int) int {
 
         <Divider />
 
-        <Stack gap="xl">
-          {tree.map(({ module, themes }) => (
-            <Stack gap="md">
-              <Stack direction="row" gap="sm" align="baseline" wrap>
-                <Heading level={2}>
+        <Stack gap="lg">
+          {tree.map(({ module, themes }) => {
+            /* Module 1 (Foundations) is the launch-gate content; it
+             * opens by default so a fresh visitor lands on
+             * shippable material. Modules 2-7 are scaffolded — they
+             * collapse so the page doesn't read as a wall. design-
+             * docs/15 pattern 10. */
+            const isShippedModule = module.data.order === 1;
+            const themeCount = themes.length;
+            const totalExercises = themes.reduce(
+              (n, { exerciseCount }) => n + exerciseCount,
+              0,
+            );
+            return (
+              <Accordion defaultOpen={isShippedModule}>
+                <Heading level={2} class="!text-2xl" slot="summary">
                   <span class="text-fg-faint font-mono mr-3">{module.data.order}.</span>
                   {module.data.title}
                 </Heading>
-              </Stack>
-              <Text tone="secondary" size="md">
+                <Fragment slot="meta">
+                  {totalExercises > 0
+                    ? `${themeCount} themes · ${totalExercises} exercises`
+                    : `${themeCount} themes · scaffolded`}
+                </Fragment>
+              <Text tone="secondary" size="md" class="mb-4">
                 <Fragment set:html={formatInline(module.data.summary)} />
               </Text>
 
@@ -141,8 +157,9 @@ func double(n int) int {
                   </Text>
                 )}
               </div>
-            </Stack>
-          ))}
+              </Accordion>
+            );
+          })}
         </Stack>
 
         <Divider />
