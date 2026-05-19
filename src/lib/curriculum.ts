@@ -92,6 +92,11 @@ export const exerciseHref = (exerciseId: string) => `/go/${exerciseId}`;
  *  /go/[module]/[theme] overview route. */
 export const themeHref = (themeId: string) => `/go/${themeId}`;
 
+/** Module-completion celebration page. Linked from the last
+ *  exercise of the last theme in a module via the `nextExerciseHref`
+ *  the route file computes. */
+export const moduleCompleteHref = (moduleId: string) => `/go/${moduleId}/complete`;
+
 /**
  * Parse an exercise collection id (`<module>/<theme>/<index>`) into
  * the route params Astro's `getStaticPaths` returns. Returns `null` if
@@ -177,4 +182,60 @@ export function findAdjacentExercises(
     prev: siblings[i - 1] ?? null,
     next: siblings[i + 1] ?? null,
   };
+}
+
+/**
+ * Is this the last exercise of the last theme in its module?
+ *
+ * Used by the exercise route to pick the right "Next →" target:
+ *   - within-theme next exists                → next exercise
+ *   - last in theme but more themes in module → first ex. of next theme
+ *   - last exercise of last theme in module   → module-complete page
+ *
+ * Returns the moduleId when true (so the caller can build the
+ * /go/<module>/complete href without re-resolving the parent) or
+ * null when not the last-in-module.
+ */
+export function lastExerciseInModule(
+  exercise: Exercise,
+  themes: readonly Theme[],
+  allExercises: readonly Exercise[],
+): { moduleId: string } | null {
+  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
+  if (!ownTheme) return null;
+  const moduleId = ownTheme.data.moduleId;
+  const moduleThemes = themes.filter((t) => t.data.moduleId === moduleId).sort(byOrder);
+  const isLastTheme = moduleThemes[moduleThemes.length - 1]?.id === ownTheme.id;
+  if (!isLastTheme) return null;
+  const themeExercises = allExercises.filter((ex) => ex.data.themeId === ownTheme.id).sort(byOrder);
+  const isLastExercise = themeExercises[themeExercises.length - 1]?.id === exercise.id;
+  return isLastExercise ? { moduleId } : null;
+}
+
+/**
+ * Cross-theme "next exercise" — first exercise of the next theme in
+ * the same module by order. Used by the route to keep the "Next
+ * exercise →" button moving forward across theme boundaries.
+ *
+ * Returns null when there is no next theme in this module (i.e.
+ * we're in the last theme; `lastExerciseInModule` covers that
+ * tail).
+ */
+export function firstExerciseOfNextTheme(
+  exercise: Exercise,
+  themes: readonly Theme[],
+  allExercises: readonly Exercise[],
+): Exercise | null {
+  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
+  if (!ownTheme) return null;
+  const moduleThemes = themes
+    .filter((t) => t.data.moduleId === ownTheme.data.moduleId)
+    .sort(byOrder);
+  const i = moduleThemes.findIndex((t) => t.id === ownTheme.id);
+  const nextTheme = moduleThemes[i + 1];
+  if (!nextTheme) return null;
+  const nextThemeExercises = allExercises
+    .filter((ex) => ex.data.themeId === nextTheme.id)
+    .sort(byOrder);
+  return nextThemeExercises[0] ?? null;
 }

@@ -17,7 +17,10 @@ import { Freeform } from "~/components/exercise/Freeform";
 import {
   exerciseHref,
   findAdjacentExercises,
+  firstExerciseOfNextTheme,
+  lastExerciseInModule,
   loadExerciseContext,
+  moduleCompleteHref,
   paramsForExercise,
   themeHref,
 } from "~/lib/curriculum";
@@ -54,8 +57,23 @@ if (!ctx) {
 }
 const { module: moduleEntry, theme: themeEntry } = ctx;
 
+/* "Next →" target priority:
+ *   1. next exercise within the same theme
+ *   2. first exercise of the next theme in the same module
+ *   3. /go/<module>/complete (last in module)
+ *   4. undefined → shell falls back to "Back to theme overview" */
 const { next } = findAdjacentExercises(entry, exercises);
-const nextExerciseHref = next ? exerciseHref(next.id) : undefined;
+const lastInModule = lastExerciseInModule(entry, themes, exercises);
+const nextThemeFirst = !next && !lastInModule
+  ? firstExerciseOfNextTheme(entry, themes, exercises)
+  : null;
+const nextExerciseHref = next
+  ? exerciseHref(next.id)
+  : nextThemeFirst
+    ? exerciseHref(nextThemeFirst.id)
+    : lastInModule
+      ? moduleCompleteHref(lastInModule.moduleId)
+      : undefined;
 const parentThemeHref = themeHref(themeEntry.id);
 ---
 
