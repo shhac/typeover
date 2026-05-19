@@ -65,6 +65,7 @@ export function FillBlankLine(props: FillBlankLineProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
+      hintValues={instance().values}
       phase={phase}
       correctMessage={<span>Correct — that's the line.</span>}
       wrongMessage={

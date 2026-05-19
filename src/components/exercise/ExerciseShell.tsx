@@ -30,6 +30,11 @@ interface ExerciseShellProps {
   canonical: string;
   /** Three-layer hint stack. */
   hints: readonly [string, string, string];
+  /** Resolved instance values, passed to HintButton so a hint like
+   *  `${name} := ${value}` renders with the learner's current values
+   *  substituted rather than as the literal placeholders. Optional —
+   *  template generators populate it; variant / procedural don't. */
+  hintValues?: Record<string, string>;
 
   /** The full lifecycle handle produced by useExercisePhase. The shell
    *  reads the current phase, the canSubmit gate, and dispatches every
@@ -157,7 +162,11 @@ export function ExerciseShell(props: ExerciseShellProps) {
       </Stack>
 
       <Stack direction="row" gap="lg" wrap>
-        <HintButton hints={props.hints} onReveal={() => recordHintUsed(props.exerciseId)} />
+        <HintButton
+          hints={props.hints}
+          values={props.hintValues}
+          onReveal={() => recordHintUsed(props.exerciseId)}
+        />
         <RevealButton canonical={props.canonical} lang="go" />
       </Stack>
     </Stack>

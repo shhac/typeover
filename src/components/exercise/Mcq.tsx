@@ -42,6 +42,7 @@ export function Mcq(props: McqProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
+      hintValues={instance().values}
       phase={phase}
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}

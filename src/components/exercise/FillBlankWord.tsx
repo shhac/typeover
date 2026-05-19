@@ -73,6 +73,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
       ts={instance().ts}
       canonical={instance().canonical}
       hints={props.hints}
+      hintValues={instance().values}
       phase={phase}
       extraPickingActions={clearButton}
       extraWrongActions={clearButton}

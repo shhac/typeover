@@ -4,10 +4,25 @@ import { formatInline } from "~/lib/format-inline";
 
 interface HintButtonProps {
   hints: readonly [string, string, string];
+  /** Resolved instance values for placeholder substitution. When present,
+   *  any `${name}` in a hint is replaced with `values[name]` before
+   *  formatInline runs. Lenient — unknown placeholders are left as-is
+   *  so a hint copy-pasted from a sibling exercise doesn't crash the
+   *  render, just renders with the placeholder visible (authoring
+   *  smell that the author will spot). */
+  values?: Record<string, string>;
   /** Called each time a hint is revealed. For tracking; the layer
    *  index is captured internally via `revealed()` if a future consumer
    *  needs per-layer stats — today's consumer only counts totals. */
   onReveal?: () => void;
+}
+
+/** Replace `${name}` occurrences with `values[name]` when known, leave
+ *  the placeholder intact when unknown. Used only for hint substitution
+ *  — template parsing uses the strict `substitute()` in generator.ts. */
+function resolveHint(hint: string, values: Record<string, string> | undefined): string {
+  if (!values) return hint;
+  return hint.replace(/\$\{(\w+)\}/g, (match, name: string) => values[name] ?? match);
 }
 
 /**
@@ -56,7 +71,7 @@ export function HintButton(props: HintButtonProps) {
             {(hint, i) => (
               <li>
                 <span class="text-fg-faint font-mono text-xs mr-2">hint {i() + 1}</span>
-                <span innerHTML={formatInline(hint)} />
+                <span innerHTML={formatInline(resolveHint(hint, props.values))} />
               </li>
             )}
           </For>

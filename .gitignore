@@ -31,3 +31,4 @@ Thumbs.db
 # Session handoffs (per-session scratch, not checked in)
 SESSION_HANDOVER.md
 .playwright-mcp/
+.claude/scheduled_tasks.lock

@@ -148,6 +148,12 @@ export type ExerciseInstance = {
    *  segments and named blank slots. Present only when generate() is
    *  called with a non-empty `blanks` option (template generator only). */
   blankSegments?: FillSegment[];
+  /** The resolved variable values for this instance. Present only for
+   *  template generators; variants and procedurals have no values
+   *  map (their `ts`/`canonical` aren't substituted). Consumers use
+   *  this to re-substitute *other* strings against the same instance,
+   *  e.g. hint text containing `${name}`. */
+  values?: Record<string, string>;
 };
 
 export type GenerateOptions = {
@@ -257,6 +263,7 @@ function generateTemplate(
   return {
     ts,
     canonical,
+    values,
     ...(blankSegments ? { blankSegments } : {}),
     ...mcq,
   };

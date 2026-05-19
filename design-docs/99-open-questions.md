@@ -95,16 +95,15 @@ Flagged for "do later when triggered", not now.
   block-context fields rather than extending `formatInline` to a
   full parser.
 
-- **Hint placeholder substitution.** `foundations/variables/01.yaml`
-  hint 3 is the literal string `` `${name} := ${value}` `` — it
-  renders unsubstituted because hints are passed as static strings
-  to HintButton, not run through `substitute()` against the current
-  instance's `vars`. The near-answer hint therefore shows
-  placeholders instead of the chosen `count := 5`. Pickup criterion:
-  when an author writes a hint that needs the instance-specific
-  values to make sense. Fix shape: thread the resolved `values` map
-  from `useExerciseInstance` into HintButton and run each hint
-  through `substitute(hint, values)` before `formatInline`.
+- **Hint placeholder substitution.** *(Landed.)* `ExerciseInstance`
+  now carries an optional `values: Record<string, string>` populated
+  by template generators. The three exercise components pass
+  `instance().values` to `ExerciseShell` as `hintValues`, which
+  forwards to `HintButton`. HintButton applies lenient substitution
+  (`${name}` → `values[name]`, unknown placeholders pass through)
+  before `formatInline`. Hint 3 on `foundations/variables/01` now
+  renders the chosen `score := -1` (or `count := 5`, etc.) instead
+  of the literal placeholders.
 
 ## Engineering follow-ups
 

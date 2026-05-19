@@ -80,4 +80,48 @@ describe("HintButton", () => {
     fireEvent.click(btn);
     expect(btn.getAttribute("aria-label")).toMatch(/1 of 3/);
   });
+
+  /*
+   * Placeholder substitution — a hint like `${name} := ${value}` should
+   * render with the current instance's chosen values, not the literal
+   * placeholders. Lenient: unknown vars stay as `${name}`.
+   */
+  describe("placeholder substitution", () => {
+    const PLACEHOLDER_HINTS: readonly [string, string, string] = [
+      "conceptual",
+      "structural",
+      "`${name} := ${value}`",
+    ];
+
+    it("substitutes known ${vars} from `values` against the hint text", () => {
+      const { getByRole, container } = render(() => (
+        <HintButton hints={PLACEHOLDER_HINTS} values={{ name: "count", value: "5" }} />
+      ));
+      const btn = getByRole("button");
+      fireEvent.click(btn);
+      fireEvent.click(btn);
+      fireEvent.click(btn);
+      /* Hint 3 should render as `count := 5` inside a <code> span. */
+      const code = container.querySelector("code");
+      expect(code?.textContent).toBe("count := 5");
+    });
+
+    it("leaves unknown placeholders intact (lenient — authoring smell, not crash)", () => {
+      const { getByRole, container } = render(() => (
+        <HintButton hints={["`${nope}`", "b", "c"]} values={{ other: "x" }} />
+      ));
+      fireEvent.click(getByRole("button"));
+      const code = container.querySelector("code");
+      expect(code?.textContent).toBe("${nope}");
+    });
+
+    it("passes hints through unchanged when `values` is undefined (variant/procedural)", () => {
+      const { getByRole, container } = render(() => <HintButton hints={PLACEHOLDER_HINTS} />);
+      fireEvent.click(getByRole("button"));
+      fireEvent.click(getByRole("button"));
+      fireEvent.click(getByRole("button"));
+      const code = container.querySelector("code");
+      expect(code?.textContent).toBe("${name} := ${value}");
+    });
+  });
 });
