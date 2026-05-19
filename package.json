@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "lint": "oxlint",
     "format": "oxfmt",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "runtime:build": "bash runtime/yaegi-wasm/build.sh",
+    "runtime:smoke": "node runtime/yaegi-wasm/smoke.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
