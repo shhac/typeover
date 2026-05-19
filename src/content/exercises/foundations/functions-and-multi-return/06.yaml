@@ -11,10 +11,6 @@ generator:
   vars:
     line:
       - 'return 0, errors.New("empty input")'
-      - 'return null, "empty input"'
-      - 'return (0, "empty input")'
-      - 'return errors.New("empty input")'
-      - 'return nil, errors.New("empty input")'
   ts: |-
     function parse(s) {
       if (!s) return { value: 0, err: new Error("empty input") };
@@ -27,6 +23,11 @@ generator:
         }
         return parseValid(s), nil
     }
+  distractors:
+    - 'return null, "empty input"'
+    - 'return (0, "empty input")'
+    - 'return errors.New("empty input")'
+    - 'return nil, errors.New("empty input")'
 blanks: [line]
 hints:
   - "Two things have to be right. The first is the zero value for the value type — for `int`, that's `0` (not `null`, not `nil`, not omitted). The second is how Go constructs an error from a string — there's a function in the `errors` package for this; the bare string literal doesn't satisfy the `error` interface."

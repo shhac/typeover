@@ -11,10 +11,6 @@ generator:
   vars:
     line:
       - 'if err != nil { handleError(err); return }'
-      - 'if (err) { handleError(err); return }'
-      - 'if err { handleError(err); return }'
-      - 'if err === null { handleError(err); return }'
-      - 'if err == null { handleError(err); return }'
   ts: |-
     const result = parse(s);
     if (result.err) { handleError(result.err); return; }
@@ -23,6 +19,11 @@ generator:
     n, err := parse(s)
     ${line}
     process(n)
+  distractors:
+    - 'if (err) { handleError(err); return }'
+    - 'if err { handleError(err); return }'
+    - 'if err === null { handleError(err); return }'
+    - 'if err == null { handleError(err); return }'
 blanks: [line]
 hints:
   - "Four reflexes at once: no parens around the condition (Theme 4), `nil` not `null` (Theme 3), explicit `!= nil` comparison (Go has no truthy-tests on errors), and braces required around the body (Theme 4)."

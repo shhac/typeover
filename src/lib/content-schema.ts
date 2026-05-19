@@ -85,6 +85,24 @@ export const exerciseSchema = z
         });
       }
     }
+    /* fill-line shows a tile picker — the candidates are the blank's
+     * substituted value (the correct tile) PLUS generator.distractors
+     * (the wrong tiles). Without distractors the tile pool is just
+     * the one correct option, which renders as a trivial single-tile
+     * "quiz". Catch the misauthoring at build time.
+     *
+     * fill-word is NOT subject to this rule — it's a free-text input,
+     * not a picker. */
+    if (ex.type === "fill-line" && ex.generator.kind === "template") {
+      if (!ex.generator.distractors || ex.generator.distractors.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "fill-line exercises require `generator.distractors` (the wrong-tile pool). Add the alternative lines there; keep `vars.<blank>` for the correct line only.",
+          path: ["generator", "distractors"],
+        });
+      }
+    }
     /* MCQ exercises must have distractors in the generator —
      * without them the option list collapses to one entry and the
      * exercise renders as a single-option "quiz". */

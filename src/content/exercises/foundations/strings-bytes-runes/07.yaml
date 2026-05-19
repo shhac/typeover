@@ -11,14 +11,15 @@ generator:
   vars:
     line:
       - 'path := strings.Join(parts, "/")'
-      - 'path := parts.join("/")'
-      - 'path := parts.Join("/")'
-      - 'path := strings.Join("/", parts)'
-      - 'path := strings.JoinWith(parts, "/")'
   ts: |-
     let path = parts.join("/");
   canonical: |-
     ${line}
+  distractors:
+    - 'path := parts.join("/")'
+    - 'path := parts.Join("/")'
+    - 'path := strings.Join("/", parts)'
+    - 'path := strings.JoinWith(parts, "/")'
 blanks: [line]
 hints:
   - "The Go shape is `strings.Join(slice, separator)`. Slice first, separator second — opposite of the TS method form where the slice is the receiver and the separator is the only argument."

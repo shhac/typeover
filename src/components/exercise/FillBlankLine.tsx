@@ -40,7 +40,9 @@ export function FillBlankLine(props: FillBlankLineProps) {
 
   const expected = () => blankSlot()?.expected ?? "";
 
-  const candidates = createMemo(() => buildCandidatePool(props.generator, props.blanks, seed()));
+  const candidates = createMemo(() =>
+    buildCandidatePool(props.generator, instance().values, props.blanks, seed()),
+  );
 
   // canSubmit requires both: (a) a tile has been picked, (b) the
   // exercise actually has a blank to fill (vacuous-truth guard).

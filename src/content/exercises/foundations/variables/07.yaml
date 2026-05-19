@@ -11,14 +11,15 @@ generator:
   vars:
     line:
       - "a, b := 1, 2"
-      - "a := 1, b := 2"
-      - "var a, b = 1, 2"
-      - "a, b = 1, 2"
-      - "let a, b = 1, 2"
   ts: |-
     let a = 1, b = 2;
   canonical: |-
     ${line}
+  distractors:
+    - "a := 1, b := 2"
+    - "var a, b = 1, 2"
+    - "a, b = 1, 2"
+    - "let a, b = 1, 2"
 blanks: [line]
 hints:
   - "Go has a single-statement short declaration that takes a tuple on each side — `name1, name2 := expr1, expr2`. The other tiles all break in different ways: TS keywords, separate `:=` per name, or `=` (assignment) without prior declaration."

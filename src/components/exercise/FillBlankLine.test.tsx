@@ -16,17 +16,17 @@ const STORAGE_KEY = "typeover:progress";
 const EX_ID = "test/fill-line";
 const HINTS: readonly [string, string, string] = ["c1", "c2", "c3"];
 
-/** Template generator where the `line` var's pool *is* the tile set.
- *  With a single-element pool there's nothing to compare against —
- *  use a four-element pool so reshuffle / wrong-pick / candidate-
- *  determinism tests have meaningful candidates. */
+/** Template generator with the post-distractor-bug-fix shape:
+ *  vars[blank] is correct-only (single entry); distractors holds the
+ *  wrong tiles. Tile pool = [picked vars] + distractors, shuffled. */
 const GEN: GeneratorSpec = {
   kind: "template",
   vars: {
-    line: ["x := value", "x = value", "var x = value", "const x := value"],
+    line: ["x := value"],
   },
   ts: "// line above",
   canonical: "${line}",
+  distractors: ["x = value", "var x = value", "const x := value"],
 };
 
 const renderFBL = (generator: GeneratorSpec = GEN, blanks: string[] = ["line"]) =>

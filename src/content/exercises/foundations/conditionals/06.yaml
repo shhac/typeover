@@ -11,15 +11,16 @@ generator:
   vars:
     line:
       - 'if user := lookup(id); user != nil { greet(user) }'
-      - 'user := lookup(id); if user != nil { greet(user) }'
-      - 'if (user := lookup(id)) != nil { greet(user) }'
-      - 'if user, err := lookup(id); err == nil { greet(user) }'
-      - 'let user = lookup(id); if user !== null { greet(user) }'
   ts: |-
     const user = lookup(id);
     if (user !== null) { greet(user); }
   canonical: |-
     ${line}
+  distractors:
+    - 'user := lookup(id); if user != nil { greet(user) }'
+    - 'if (user := lookup(id)) != nil { greet(user) }'
+    - 'if user, err := lookup(id); err == nil { greet(user) }'
+    - 'let user = lookup(id); if user !== null { greet(user) }'
 blanks: [line]
 hints:
   - "Three Go-isms must all be right at once: the SETUP-then-CONDITION is glued together with a semicolon inside the if, the declaration uses `:=` not `=`, and `nil` (not `null`) is the comparison value."

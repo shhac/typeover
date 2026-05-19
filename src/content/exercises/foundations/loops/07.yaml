@@ -11,10 +11,6 @@ generator:
   vars:
     line:
       - "if items[i] == nil { continue }"
-      - "if (items[i] == nil) continue"
-      - "if items[i] === nil { continue }"
-      - "if items[i] == null { continue }"
-      - "continue if items[i] == nil"
   ts: |-
     for (let i = 0; i < items.length; i++) {
       if (items[i] === null) continue;
@@ -25,6 +21,11 @@ generator:
         ${line}
         process(items[i])
     }
+  distractors:
+    - "if (items[i] == nil) continue"
+    - "if items[i] === nil { continue }"
+    - "if items[i] == null { continue }"
+    - "continue if items[i] == nil"
 blanks: [line]
 hints:
   - "Four things have to be right: no parens around the condition, braces around the continue body, `==` (not `===`) for equality, and Go's keyword for absence — which is *not* `null`."

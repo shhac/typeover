@@ -13,10 +13,6 @@ generator:
   vars:
     line:
       - 'switch n { case 1, 2: handle() }'
-      - 'switch n { case 1: case 2: handle() }'
-      - 'switch n { case 1 | 2: handle() }'
-      - 'switch n { case [1, 2]: handle() }'
-      - 'switch n { match 1, 2: handle() }'
   ts: |-
     switch (n) {
       case 1:
@@ -26,6 +22,11 @@ generator:
     }
   canonical: |-
     ${line}
+  distractors:
+    - 'switch n { case 1: case 2: handle() }'
+    - 'switch n { case 1 | 2: handle() }'
+    - 'switch n { case [1, 2]: handle() }'
+    - 'switch n { match 1, 2: handle() }'
 blanks: [line]
 hints:
   - "Go's `case` clause accepts a comma-separated list of values; matching any of them runs the body. Other languages use `|`, arrays, or pattern syntaxes; Go just uses commas."

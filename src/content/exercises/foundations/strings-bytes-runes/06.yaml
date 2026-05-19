@@ -11,14 +11,15 @@ generator:
   vars:
     line:
       - 'prefix := strings.HasPrefix(name, "Mr")'
-      - 'prefix := name.StartsWith("Mr")'
-      - 'prefix := name.HasPrefix("Mr")'
-      - 'prefix := strings.StartsWith(name, "Mr")'
-      - 'prefix := startsWith(name, "Mr")'
   ts: |-
     let prefix = name.startsWith("Mr");
   canonical: |-
     ${line}
+  distractors:
+    - 'prefix := name.StartsWith("Mr")'
+    - 'prefix := name.HasPrefix("Mr")'
+    - 'prefix := strings.StartsWith(name, "Mr")'
+    - 'prefix := startsWith(name, "Mr")'
 blanks: [line]
 hints:
   - "Three things must be right at once: package qualifier (`strings.X`), Go's name for this operation (it's not `StartsWith`), and the argument order (string first, prefix second)."

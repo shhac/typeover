@@ -9,20 +9,19 @@ prompt: |
 generator:
   kind: template
   vars:
-    base: [count, total, score, items]
-    multiplier: ["2", "3", "10"]
     line:
       - "doubled := count * 2"
-      - "var doubled = count * 2"
-      - "doubled = count * 2"
-      - "const doubled := count * 2"
-      - "let doubled = count * 2"
   ts: |-
     let count = 5;
     let doubled = count * 2;
   canonical: |-
     count := 5
     ${line}
+  distractors:
+    - "var doubled = count * 2"
+    - "doubled = count * 2"
+    - "const doubled := count * 2"
+    - "let doubled = count * 2"
 blanks: [line]
 hints:
   - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. None of `var name = value`, `name = value`, or anything with `let` or `const` belongs in a function body for a fresh local variable."

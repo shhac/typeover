@@ -11,14 +11,15 @@ generator:
   vars:
     line:
       - "var id int = 1_000_000_000"
-      - "var id int16 = 1_000_000_000"
-      - "var id int8 = 1_000_000_000"
-      - "var id uint8 = 1_000_000_000"
-      - "var id byte = 1_000_000_000"
   ts: |-
     let id: number = 1_000_000_000;
   canonical: |-
     ${line}
+  distractors:
+    - "var id int16 = 1_000_000_000"
+    - "var id int8 = 1_000_000_000"
+    - "var id uint8 = 1_000_000_000"
+    - "var id byte = 1_000_000_000"
 blanks: [line]
 hints:
   - "Each integer type holds a different range. A signed 8-bit holds about -128 to 127; signed 16-bit goes up to about 32 thousand; signed 32-bit reaches ~2 billion. Pick a type whose range comfortably covers a billion."

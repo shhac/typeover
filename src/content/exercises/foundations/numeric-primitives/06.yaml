@@ -11,14 +11,15 @@ generator:
   vars:
     line:
       - "ratio := double / float64(count)"
-      - "ratio := float64(double) / count"
-      - "ratio := double / count"
-      - "ratio := int(double) / count"
-      - "ratio := double / float(count)"
   ts: |-
     let ratio = double / count;
   canonical: |-
     ${line}
+  distractors:
+    - "ratio := float64(double) / count"
+    - "ratio := double / count"
+    - "ratio := int(double) / count"
+    - "ratio := double / float(count)"
 blanks: [line]
 hints:
   - "Look at the types. `double` is already a `float64`; `count` is an `int`. They can't divide as-is. To get a meaningful ratio, the integer needs to become a float — not the other way round, and not by truncating."
