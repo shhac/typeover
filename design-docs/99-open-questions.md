@@ -76,6 +76,51 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
+- **Reveal-diff UX** *(surfaced 2026-05-19 design-goal pass, not yet
+  built).* design-docs/06 commits to "Reveal diff — show submission
+  vs canonical, highlight the divergence." The current
+  `<RevealButton>` only shows the canonical, no diff. Applies
+  primarily to fill-word + fill-line + freeform (MCQ has the option
+  list as its visible diff surface). When picked up: pick a small
+  diff lib (e.g. `diff` v5+ on npm — well-established, license-clean)
+  for line/word diff, render a 2-column or inline-highlight view
+  driven off the existing `revealed` phase signal. Pairs with the
+  "distractors as known-wrong-pattern bank" follow-up — a learner
+  whose submission matches a distractor verbatim could see a richer
+  per-distractor explanation instead of a generic diff.
+
+- **Server-fallback runtime hosting** *(surfaced 2026-05-19 design-
+  goal pass, not yet built; original entry below merged here for
+  clarity).* design-docs/04 and 04a flag two Yaegi gaps that need a
+  server path: `defer` arg-capture semantics, and generic-stdlib
+  funcs like `slices.Sort` / `Min` / `Max` / `BinarySearch`. The
+  exercise dispatcher already differentiates `runtime: "server"` but
+  no endpoint exists. When picked up: simplest deployable shape is a
+  Vercel serverless function POSTing to a Go process running
+  `go run` in a tempdir under a small resource-limit wrapper (CPU,
+  memory, time), returning the `{stdout, stderr, error, durationMs}`
+  shape the existing client API expects. Sandboxing via a minimal
+  Docker container is enough for v0; firejail/nsjail is overkill.
+  Cost: at ~1500 invocations/day this is comfortably inside Vercel
+  free tier. The client side: getRunner() returns one of two
+  implementations based on the exercise's runtime tag. Module 1
+  doesn't need this; Modules 6-7 likely will.
+
+- **Authoring CLI — `content:lint`** *(surfaced 2026-05-19 design-
+  goal pass, not yet built).* design-docs/09 calls out three tools:
+  `pnpm exercise:check`, `pnpm content:lint`, `pnpm content:new
+  theme`. The first is partially done as `pnpm runtime:verify`
+  (freeform + fill-line canonicals against Yaegi). The other two
+  are open. `content:lint` is the highest-value next tool — it
+  catches authoring errors that today only surface at `pnpm build`
+  with a long Astro stack trace: hint-tuple length != 3, missing
+  prerequisite themes, prerequisites that point at unknown theme
+  IDs, missing or off-by-one slot ordering, theme without a parent
+  module. When picked up: walk every YAML, build a name-graph,
+  apply checks, print a markdown report with file:line refs.
+  Reuses the existing `yaml` package and `~/lib/content-schema`
+  Zod schemas. ~200 LOC for v0.
+
 - **fill-line UX redesign: input + Yaegi grading.** *(Surfaced 2026-05-19
   via user feedback.)* fill-line currently renders as MCQ-with-tile-UX
   (pick the right line from 5 shuffled candidates). The intent is

@@ -109,10 +109,23 @@ it if you want." Don't refuse to render; the user is the boss.
 
 ## Testing & verification
 
-- **`axe-core` in CI** for every page.
+- **`axe-core` against the design-system layer** — *landed.*
+  `src/a11y.test.tsx` (run via `pnpm test:a11y` or as part of
+  `pnpm test`) renders every DS primitive into JSDOM and runs
+  axe-core's WCAG-2.2-AA ruleset against it. 17 specs today
+  (every primitive plus a "typical page chrome" composite); zero
+  violations. Pinned to a fixed rule-tag list so an axe-core
+  upgrade can't quietly add a category we haven't audited.
 - **Manual VoiceOver pass** before launch and after any DS change.
-- **Lighthouse a11y ≥ 95** on every page.
-- **Colour-contrast snapshot test** in CI for the design tokens.
+- **Lighthouse a11y ≥ 95** on every page (still a launch-gate
+  follow-up — design-docs/07).
+- **Computed-colour-contrast in a real browser** — JSDOM can't
+  compute the real background colour off CSS custom properties +
+  Tailwind utilities, so axe's colour-contrast rule is disabled in
+  the JSDOM run. A future Playwright pass on each theme (dark +
+  light, eventually hc-\*) will run axe with colour-contrast enabled
+  against the live DOM. Pairs with the FOUC test parked in
+  design-docs/13.
 - **Real-device test** (iPhone + Android) before launch.
 
 ## Why this is at design-system layer
