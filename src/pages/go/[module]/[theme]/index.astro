@@ -15,6 +15,7 @@ import {
   exerciseHref,
   loadThemeContext,
 } from "~/lib/curriculum";
+import { formatInline } from "~/lib/format-inline";
 
 type ThemeEntry = CollectionEntry<"themes">;
 
@@ -67,7 +68,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
 
         <Panel padding="airy" tone="default">
           <Text tone="secondary" size="md" class="whitespace-pre-line">
-            {theme.data.intro}
+            <Fragment set:html={formatInline(theme.data.intro)} />
           </Text>
         </Panel>
 
@@ -105,7 +106,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
                         </Badge>
                       </Stack>
                       <Text tone="primary" size="sm">
-                        {ex.data.prompt.split("\n")[0]}
+                        <Fragment set:html={formatInline(ex.data.prompt.split("\n")[0] ?? "")} />
                       </Text>
                     </Stack>
                   </Panel>

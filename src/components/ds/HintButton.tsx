@@ -1,5 +1,6 @@
 import { createSignal, For, Show } from "solid-js";
 import { Button } from "./Button";
+import { formatInline } from "~/lib/format-inline";
 
 interface HintButtonProps {
   hints: readonly [string, string, string];
@@ -55,7 +56,7 @@ export function HintButton(props: HintButtonProps) {
             {(hint, i) => (
               <li>
                 <span class="text-fg-faint font-mono text-xs mr-2">hint {i() + 1}</span>
-                {hint}
+                <span innerHTML={formatInline(hint)} />
               </li>
             )}
           </For>

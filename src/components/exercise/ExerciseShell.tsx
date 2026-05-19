@@ -7,6 +7,7 @@ import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
 import { recordHintUsed } from "~/lib/progress";
+import { formatInline } from "~/lib/format-inline";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
 
 /* Anchor styled to match Button's primary variant + md size. Inlined
@@ -81,7 +82,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
     <Stack gap="lg">
       <Stack gap="sm">
         <Text tone="secondary" size="sm" family="mono">
-          {props.prompt}
+          <span innerHTML={formatInline(props.prompt)} />
         </Text>
         <CodeBlock lang="ts" filename="typescript">
           {props.ts}

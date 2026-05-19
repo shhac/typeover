@@ -20,6 +20,7 @@ import {
   paramsForExercise,
   themeHref,
 } from "~/lib/curriculum";
+import { formatInline } from "~/lib/format-inline";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -124,7 +125,9 @@ const parentThemeHref = themeHref(themeEntry.id);
 
         <Stack gap="sm">
           <Heading level={4}>About this theme</Heading>
-          <Text tone="secondary" size="md">{themeEntry?.data.intro}</Text>
+          <Text tone="secondary" size="md">
+            {themeEntry && <Fragment set:html={formatInline(themeEntry.data.intro)} />}
+          </Text>
         </Stack>
       </Stack>
     </Container>

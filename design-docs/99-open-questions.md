@@ -85,6 +85,27 @@ Flagged for "do later when triggered", not now.
   passes ~10. No reorganisation needed before then.
   (Iter-7 lens-2 finding, deferred.)
 
+- **Block-level markdown in content strings.** `formatInline()` covers
+  `` `code` `` and `**bold**` but theme intros (e.g.
+  `themes/foundations/variables.yaml`) author bulleted lists with
+  leading `-` markers that currently render as literal hyphens.
+  Pickup when a content reviewer asks for a list to render as a
+  list, or when intros adopt headings/links. Likely answer is to
+  reach for a small markdown library (e.g. `marked`) for these
+  block-context fields rather than extending `formatInline` to a
+  full parser.
+
+- **Hint placeholder substitution.** `foundations/variables/01.yaml`
+  hint 3 is the literal string `` `${name} := ${value}` `` — it
+  renders unsubstituted because hints are passed as static strings
+  to HintButton, not run through `substitute()` against the current
+  instance's `vars`. The near-answer hint therefore shows
+  placeholders instead of the chosen `count := 5`. Pickup criterion:
+  when an author writes a hint that needs the instance-specific
+  values to make sense. Fix shape: thread the resolved `values` map
+  from `useExerciseInstance` into HintButton and run each hint
+  through `substitute(hint, values)` before `formatInline`.
+
 ## Engineering follow-ups
 
 Surfaced by the first code-structure review pass (2026-05-17). Each is

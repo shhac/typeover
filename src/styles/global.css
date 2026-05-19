@@ -89,6 +89,26 @@
     font-family: var(--font-mono);
   }
 
+  /* Inline <code> spans — rendered by formatInline() into hints,
+     intros, summaries, etc. Subtle inset background + tight padding
+     reads as inline code without competing visually with CodeBlock.
+     `pre code` resets these because CodeBlock's <pre> wrapper owns
+     its own background/typography. */
+  code {
+    background-color: var(--color-bg-inset);
+    padding: 0 0.3em;
+    border-radius: var(--radius-sm);
+    font-size: 0.92em;
+    color: var(--color-fg-primary);
+  }
+  pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+
   /* Visible focus on all interactives. We never strip the ring without
      replacing it. */
   *:focus-visible {

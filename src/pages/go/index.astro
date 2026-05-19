@@ -17,6 +17,7 @@ import {
   themeHref,
   truncateIntro,
 } from "~/lib/curriculum";
+import { formatInline } from "~/lib/format-inline";
 
 /**
  * Curriculum overview. Browse-anywhere tree of modules → themes →
@@ -61,7 +62,9 @@ const tree = buildCurriculumTree(modules, themes, exercises);
                   {module.data.title}
                 </Heading>
               </Stack>
-              <Text tone="secondary" size="md">{module.data.summary}</Text>
+              <Text tone="secondary" size="md">
+                <Fragment set:html={formatInline(module.data.summary)} />
+              </Text>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {themes.map(({ theme, firstExercise, exerciseCount }) => {
@@ -84,7 +87,7 @@ const tree = buildCurriculumTree(modules, themes, exercises);
                           </Heading>
                         </Stack>
                         <Text tone="muted" size="sm">
-                          {truncateIntro(theme.data.intro)}
+                          <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
                         </Text>
                         <Stack direction="row" gap="sm" align="center" wrap>
                           <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
