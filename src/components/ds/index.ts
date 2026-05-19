@@ -12,6 +12,7 @@ export { HintButton } from "./HintButton";
 export { Kbd } from "./Kbd";
 export { LangCrumbs } from "./LangCrumbs";
 export { Panel } from "./Panel";
+export { ProgressChip } from "./ProgressChip";
 export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";
 export { Text } from "./Text";

@@ -145,3 +145,29 @@ export const recordHintUsed = (id: string) =>
 export function getExerciseProgress(id: string): ExerciseProgress {
   return exerciseSlot(read(), id);
 }
+
+/**
+ * Aggregate a set of exercises into the theme-level summary the
+ * curriculum UIs render. Single source of truth for the
+ * "theme complete" predicate — both ModuleCompleteCard and the
+ * ProgressChip island read from here so they can't disagree.
+ *
+ * `total` is the count of authored exercises in the theme — passed
+ * by the caller because the storage layer doesn't know about
+ * curriculum structure.
+ *
+ * `themeComplete` mirrors the completion-card rule: every authored
+ * exercise has `instancesPassed > 0`. An empty theme (no exercises
+ * authored) is NOT considered complete — that would falsely "credit"
+ * a learner for a stub module 2+ theme they couldn't actually have
+ * passed.
+ */
+export function summarizeTheme(exerciseIds: readonly string[]): {
+  passed: number;
+  total: number;
+  themeComplete: boolean;
+} {
+  const total = exerciseIds.length;
+  const passed = exerciseIds.filter((id) => getExerciseProgress(id).instancesPassed > 0).length;
+  return { passed, total, themeComplete: total > 0 && passed === total };
+}

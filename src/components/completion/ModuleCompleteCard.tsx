@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { getExerciseProgress } from "~/lib/progress";
+import { getExerciseProgress, summarizeTheme } from "~/lib/progress";
 
 interface ThemeSummary {
   id: string;
@@ -58,15 +58,19 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
     let total = 0;
     let themesComplete = 0;
     let hints = 0;
+    /* Per-theme aggregation delegates the "all exercises passed?"
+     * predicate to summarizeTheme so this card and ProgressChip's
+     * theme-overview tally read the same source of truth. The hint
+     * total is collected here because the helper doesn't carry
+     * hint stats (a chip never displays them). */
     for (const theme of props.themes) {
-      const themeExercisesPassed = theme.exerciseIds.filter((id) => {
-        const slot = getExerciseProgress(id);
-        hints += slot.hintsUsedTotal;
-        return slot.instancesPassed > 0;
-      });
-      passed += themeExercisesPassed.length;
-      total += theme.exerciseIds.length;
-      if (themeExercisesPassed.length === theme.exerciseIds.length) themesComplete++;
+      const summary = summarizeTheme(theme.exerciseIds);
+      passed += summary.passed;
+      total += summary.total;
+      if (summary.themeComplete) themesComplete++;
+      for (const id of theme.exerciseIds) {
+        hints += getExerciseProgress(id).hintsUsedTotal;
+      }
     }
     setProgress({
       exercisesPassed: passed,

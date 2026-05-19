@@ -11,6 +11,8 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
+import { ExerciseProgressChip } from "~/components/progress/ExerciseProgressChip";
+import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
 import {
   EXERCISE_TYPE_LABELS,
   exerciseHref,
@@ -86,6 +88,12 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
             <Text tone="faint" size="sm" family="mono">
               {themeExercises.length} ready
             </Text>
+            {themeExercises.length > 0 && (
+              <ThemeProgressChip
+                client:only="solid-js"
+                exerciseIds={themeExercises.map((ex) => ex.id)}
+              />
+            )}
           </Stack>
 
           {themeExercises.length === 0 ? (
@@ -112,6 +120,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
                         <Badge variant="default" outline>
                           {EXERCISE_TYPE_LABELS[ex.data.type]}
                         </Badge>
+                        <ExerciseProgressChip client:only="solid-js" exerciseId={ex.id} />
                       </Stack>
                       <Text tone="primary" size="sm">
                         <Fragment set:html={formatInline(ex.data.prompt.split("\n")[0] ?? "")} />

@@ -76,6 +76,68 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
+- **Targeted wrong-pattern feedback on fill-line** *(surfaced
+  2026-05-19 design-goal pass, not built.)* The fill-line redesign
+  retained `generator.distractors` as an authoring-driven
+  "known-wrong-pattern bank" (see fill-line entry below). The UX
+  surface that consumes it doesn't exist yet — today wrong fill-line
+  submissions show a generic "Stdout doesn't match yet…" message
+  regardless of *how* they're wrong. Proposal: promote
+  `distractors: string[]` to a discriminated
+  `Array<string | {match, explain}>` shape (back-compat for bare
+  strings), normalise whitespace, and when a learner's submission
+  matches a known wrong pattern, render the authored explanation
+  inside the wrong-phase message slot — leaving the generic copy
+  in place when nothing matches. Pickup criterion: when a Module 1
+  learner reports an "I don't know why this is wrong" moment, or
+  when shipping fill-line content for Module 2+ (the explanation
+  authoring is then part of the new-content workflow rather than
+  a back-port). Cost: ~3 commits (schema + lib + component;
+  12-YAML upgrade; content-lint warning + tests).
+
+- **MobileKeyBar — sticky Go-symbol bar above the mobile
+  keyboard** *(surfaced 2026-05-19 design-goal pass, not built;
+  named in design-docs/05's planned-components table since v0.)*
+  The current Freeform / FillBlankLineInput on a mobile viewport
+  is a plain `<textarea>` — every Go symbol (`{`, `}`, `:=`, `&`,
+  `*`, `\t`) is 2–3 taps deep on stock iOS/Android keyboards,
+  which silently invalidates the design-docs/08 commitment to
+  *full* mobile freeform editing. Proposal: new
+  `src/components/ds/MobileKeyBar.tsx` with a `role="toolbar"`
+  pinned `position: fixed; bottom: 0` on `<1024px`, hidden via
+  `lg:hidden` on desktop. Default key set: `{ } ( ) [ ] < > := =
+  * & " ; Tab ⏎`. Two callers (Freeform, FillBlankLineInput) +
+  a shared `insertAtSelection` helper in
+  `src/lib/textarea-insert.ts`. Pickup criterion: real-device
+  mobile QA from the launch checklist surfaces the freeform
+  unusability (it will), OR before exposing freeform on a
+  share-target link that lands a mobile-first audience. Risks:
+  iOS Safari `visualViewport` overlay (need real-device, not
+  simulator); Chrome Android `VirtualKeyboard API` is cleaner
+  but Chromium-only; caret restoration after Solid re-renders.
+  Cost: ~1 DS primitive + 1 helper + 2 caller wires + tests
+  (1–3 commits).
+
+- **`content:new theme <id>` — schema-aware scaffolder**
+  *(surfaced 2026-05-19 design-goal pass; previously noted as
+  parked in the content-lint entry below.)* The third of the
+  three design-docs/09 authoring tools. Stamps
+  `src/content/themes/<module>/<theme>.yaml` + nine prefilled
+  exercise YAMLs across the canonical
+  3×MCQ / 2×fill-word / 2×fill-line / 2×freeform progression.
+  Node script alongside `content-lint.mjs`; no deps; interactive
+  prompts for the four schema-required fields that can't be
+  guessed (`title`, `order`, `intro` seed, optional
+  `prerequisites`); `--yes` for non-interactive use. The
+  stamper's value isn't reducing copy-paste — it's encoding the
+  9-slot progression and the schema's `.refine()`s in
+  *executable* form, so the template can't silently drift from
+  what the schema accepts. Pickup criterion: either the
+  maintainer authoring Module 2 reaches for it, OR the first
+  community PR bounces off the manual scaffold. Cost: ~1
+  focused afternoon; defer until one of those triggers actually
+  fires.
+
 - **Reveal-diff UX** *(landed 2026-05-19.)* Inline "Show canonical"
   toggle next to the input area on fill-line + freeform —
   `<InlineCanonicalReveal>` renders `<DiffView>` against the

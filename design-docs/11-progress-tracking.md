@@ -95,14 +95,66 @@ type ExerciseProgress = {
 
 ## What we display in v0
 
-- Module/theme-level progress on the curriculum page: "Foundations —
-  3 of 5 themes complete."
-- Theme overview: "8 of 9 exercises passed at least once."
-- Per-exercise: "You've seen 3 instances, passed 2."
+- **Module-completion screen** (`/go/<module>/complete`) —
+  themes / exercises / hint totals. *Landed 2026-05-19 (#30).*
+- **Theme overview chip** (`/go/<module>/<theme>`):
+  "8 of 9 exercises passed at least once" beside the "exercises"
+  eyebrow. *Picked 2026-05-19 via design-goal round (validated);
+  implementation queued.*
+- **Per-exercise chip** on the theme-overview's exercise cards:
+  "seen 3 · passed 2" rendered only when prior instances exist.
+  *Picked 2026-05-19; bundled with the theme-overview chip.*
 - Resume button on the homepage if `currentLesson` is set.
+  *Not built; not blocking launch.*
 
 That's it. No streaks, no badges, no XP, no leaderboards. Information,
 not motivation.
+
+### Deferred: module/theme-level chip on the curriculum index
+
+A 2026-05-19 design-goal proposal floated aggregating progress
+into chips on `/go` itself ("· 1 theme complete · 14/45 passed"
+beside each module heading). The devil's-advocate validator
+pushed back on two grounds:
+
+1. **Action-adjacency.** Theme-overview chips sit next to the
+   action they inform ("which exercise to drill next?"). Index
+   chips sit beside "which theme to pick" — that re-frames the
+   page as a scoreboard.
+2. **Zero-JS regression.** `/go` and `/go/<module>/<theme>`
+   currently ship no client directives. Mounting Solid for
+   chip hydration costs Lighthouse score on the page that
+   carries the launch-gate ≥95 commitment.
+
+Decision: park the curriculum-index variant until a returning
+learner asks for it. Theme-overview chips are still the scoped
+v0 ship.
+
+### Implementation contract
+
+To honour the validator's architecture refinement, the chip is
+split in two:
+
+- **`<ProgressChip passed total>`** — pure presentational
+  primitive in `src/components/ds/`. No localStorage, no Solid
+  signal subscription. Reads two props, renders mono text + an
+  `aria-label="N of M exercises passed"`. Trivially testable.
+- **`<ThemeProgressIsland exerciseIds>`** — wrapper in
+  `src/components/progress/`. Mounts `client:only="solid-js"`,
+  reads `getExerciseProgress(id)` for each exercise on mount,
+  computes the summary, renders the chip. Layout shift mitigated
+  with a `min-w` placeholder that matches the chip's resolved
+  width during the pre-mount window.
+
+The shared `summarizeTheme(exerciseIds): {passed, total,
+themeComplete}` helper sits next to `progress.ts` so the
+completion card and the chip can't drift on the
+"theme complete" rule. Refactoring `ModuleCompleteCard` to
+consume the helper happens in the same commit that introduces
+it — otherwise the duplication that prompted the helper stays.
+
+The whole feature is 3–5 commits per the validator's honest
+estimate; "1–3" in the original proposal was optimistic.
 
 ## What we record for later
 
