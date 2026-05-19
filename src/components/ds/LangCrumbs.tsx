@@ -21,25 +21,15 @@ interface LangCrumbsProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * (theme name, exercise number, etc.).
  */
 export function LangCrumbs(props: ParentProps<LangCrumbsProps>) {
-  const [local, rest] = splitProps(props, [
-    "from",
-    "to",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["from", "to", "class", "children"]);
   return (
-    <Stack
-      {...rest}
-      direction="row"
-      gap="sm"
-      align="center"
-      wrap
-      class={cn(local.class)}
-    >
+    <Stack {...rest} direction="row" gap="sm" align="center" wrap class={cn(local.class)}>
       <Badge variant={local.from ?? "ts"} outline>
         {(local.from ?? "ts").toUpperCase()}
       </Badge>
-      <Text tone="muted" size="sm" family="mono">→</Text>
+      <Text tone="muted" size="sm" family="mono">
+        →
+      </Text>
       <Badge variant={local.to ?? "go"} outline>
         {(local.to ?? "go").toUpperCase()}
       </Badge>

@@ -25,13 +25,7 @@ const accentClass = {
 } as const;
 
 export function Heading(props: ParentProps<HeadingProps>) {
-  const [local, rest] = splitProps(props, [
-    "level",
-    "as",
-    "accent",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["level", "as", "accent", "class", "children"]);
   const level = local.level ?? 1;
   const tag = local.as ?? (`h${level}` as keyof JSX.HTMLElementTags);
   return (

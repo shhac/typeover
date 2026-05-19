@@ -73,9 +73,7 @@ const TemplateSpec = z
     };
     checkRefs(spec.ts, ["ts"]);
     checkRefs(spec.canonical, ["canonical"]);
-    (spec.distractors ?? []).forEach((d, i) =>
-      checkRefs(d, ["distractors", i]),
-    );
+    (spec.distractors ?? []).forEach((d, i) => checkRefs(d, ["distractors", i]));
   });
 
 const VariantSpec = z
@@ -260,7 +258,7 @@ function generateTemplate(
     ts,
     canonical,
     ...(blankSegments ? { blankSegments } : {}),
-    ...(mcq ?? {}),
+    ...mcq,
   };
 }
 
@@ -301,8 +299,6 @@ export function generate(
     case "variant":
       return generateVariant(spec, seed, opts);
     case "procedural":
-      throw new Error(
-        "Procedural generators not implemented yet (no exercises use them)",
-      );
+      throw new Error("Procedural generators not implemented yet (no exercises use them)");
   }
 }

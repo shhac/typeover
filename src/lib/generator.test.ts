@@ -3,18 +3,14 @@ import { buildBlankSegments, substitute } from "./generator";
 
 describe("buildBlankSegments", () => {
   it("emits text + blank for a basic 'name = ${value}' template", () => {
-    expect(
-      buildBlankSegments("name = ${value}", { value: "42" }, ["value"]),
-    ).toEqual([
+    expect(buildBlankSegments("name = ${value}", { value: "42" }, ["value"])).toEqual([
       { kind: "text", text: "name = " },
       { kind: "blank", varName: "value", expected: "42" },
     ]);
   });
 
   it("substitutes vars not in `blanks` as text", () => {
-    expect(
-      buildBlankSegments("${a} = ${b}", { a: "x", b: "1" }, ["b"]),
-    ).toEqual([
+    expect(buildBlankSegments("${a} = ${b}", { a: "x", b: "1" }, ["b"])).toEqual([
       { kind: "text", text: "x" },
       { kind: "text", text: " = " },
       { kind: "blank", varName: "b", expected: "1" },
@@ -23,9 +19,7 @@ describe("buildBlankSegments", () => {
 
   it("produces two independent blank segments when the same var appears twice", () => {
     /* FillBlankWord's per-occurrence input slots depend on this. */
-    expect(
-      buildBlankSegments("${x} + ${x}", { x: "v" }, ["x"]),
-    ).toEqual([
+    expect(buildBlankSegments("${x} + ${x}", { x: "v" }, ["x"])).toEqual([
       { kind: "blank", varName: "x", expected: "v" },
       { kind: "text", text: " + " },
       { kind: "blank", varName: "x", expected: "v" },
@@ -33,9 +27,7 @@ describe("buildBlankSegments", () => {
   });
 
   it("does not emit zero-length text segments between adjacent placeholders", () => {
-    expect(
-      buildBlankSegments("${a}${b}", { a: "x", b: "y" }, ["a", "b"]),
-    ).toEqual([
+    expect(buildBlankSegments("${a}${b}", { a: "x", b: "y" }, ["a", "b"])).toEqual([
       { kind: "blank", varName: "a", expected: "x" },
       { kind: "blank", varName: "b", expected: "y" },
     ]);

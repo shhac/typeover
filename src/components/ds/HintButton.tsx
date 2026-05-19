@@ -54,9 +54,7 @@ export function HintButton(props: HintButtonProps) {
           <For each={visible()}>
             {(hint, i) => (
               <li>
-                <span class="text-fg-faint font-mono text-xs mr-2">
-                  hint {i() + 1}
-                </span>
+                <span class="text-fg-faint font-mono text-xs mr-2">hint {i() + 1}</span>
                 {hint}
               </li>
             )}

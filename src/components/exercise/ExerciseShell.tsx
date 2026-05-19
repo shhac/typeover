@@ -97,8 +97,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
             fallback={
               props.wrongMessage ?? (
                 <span>
-                  Not quite. Try again, grab a different exercise, or reveal the
-                  canonical answer.
+                  Not quite. Try again, grab a different exercise, or reveal the canonical answer.
                 </span>
               )
             }
@@ -157,10 +156,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
       </Stack>
 
       <Stack direction="row" gap="lg" wrap>
-        <HintButton
-          hints={props.hints}
-          onReveal={() => recordHintUsed(props.exerciseId)}
-        />
+        <HintButton hints={props.hints} onReveal={() => recordHintUsed(props.exerciseId)} />
         <RevealButton canonical={props.canonical} lang="go" />
       </Stack>
     </Stack>

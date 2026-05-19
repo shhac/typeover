@@ -106,12 +106,7 @@ export const exerciseSchema = z
     /* `blanks` on a non-fill exercise is meaningless and probably an
      * authoring mistake — e.g. MCQ accidentally inheriting blanks
      * from a copy-pasted template. */
-    if (
-      ex.blanks &&
-      ex.blanks.length > 0 &&
-      ex.type !== "fill-word" &&
-      ex.type !== "fill-line"
-    ) {
+    if (ex.blanks && ex.blanks.length > 0 && ex.type !== "fill-word" && ex.type !== "fill-line") {
       ctx.addIssue({
         code: "custom",
         message: `\`blanks\` is only valid for fill-word / fill-line; got type "${ex.type}".`,

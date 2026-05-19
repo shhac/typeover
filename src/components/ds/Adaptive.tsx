@@ -21,19 +21,11 @@ const splitClass: Record<Breakpoint, string> = {
  * pages don't write media queries.
  */
 export function Adaptive(props: ParentProps<AdaptiveProps>) {
-  const [local, rest] = splitProps(props, [
-    "breakpoint",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["breakpoint", "class", "children"]);
   return (
     <div
       {...rest}
-      class={cn(
-        "grid grid-cols-1 gap-6",
-        splitClass[local.breakpoint ?? "lg"],
-        local.class,
-      )}
+      class={cn("grid grid-cols-1 gap-6", splitClass[local.breakpoint ?? "lg"], local.class)}
     >
       {local.children}
     </div>

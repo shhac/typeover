@@ -24,12 +24,7 @@ export function RevealButton(props: RevealButtonProps) {
 
   return (
     <div class="flex flex-col gap-3">
-      <Button
-        variant="ghost"
-        size="md"
-        onClick={toggle}
-        aria-expanded={shown()}
-      >
+      <Button variant="ghost" size="md" onClick={toggle} aria-expanded={shown()}>
         {shown() ? "Hide canonical" : "Show canonical"}
       </Button>
       <Show when={shown()}>

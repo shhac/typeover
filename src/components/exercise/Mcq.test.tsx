@@ -33,22 +33,24 @@ const GEN: GeneratorSpec = {
 
 const renderMcq = () =>
   render(() => (
-    <Mcq
-      exerciseId={EX_ID}
-      prompt="Translate to idiomatic Go."
-      generator={GEN}
-      hints={HINTS}
-    />
+    <Mcq exerciseId={EX_ID} prompt="Translate to idiomatic Go." generator={GEN} hints={HINTS} />
   ));
 
 const readProgress = () => {
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === null ? null : (JSON.parse(raw) as {
-    exercises: Record<
-      string,
-      { instancesSeen: number; instancesPassed: number; instancesFailed: number; hintsUsedTotal: number }
-    >;
-  });
+  return raw === null
+    ? null
+    : (JSON.parse(raw) as {
+        exercises: Record<
+          string,
+          {
+            instancesSeen: number;
+            instancesPassed: number;
+            instancesFailed: number;
+            hintsUsedTotal: number;
+          }
+        >;
+      });
 };
 
 const slot = () => readProgress()?.exercises[EX_ID];

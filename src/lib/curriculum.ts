@@ -69,15 +69,11 @@ export function buildCurriculumTree(
   }
 
   return [...modules].sort(byOrder).map((module) => {
-    const themesForModule = (themesByModule.get(module.id) ?? [])
-      .slice()
-      .sort(byOrder);
+    const themesForModule = (themesByModule.get(module.id) ?? []).slice().sort(byOrder);
     return {
       module,
       themes: themesForModule.map((theme) => {
-        const themeExercises = (exercisesByTheme.get(theme.id) ?? [])
-          .slice()
-          .sort(byOrder);
+        const themeExercises = (exercisesByTheme.get(theme.id) ?? []).slice().sort(byOrder);
         return {
           theme,
           firstExercise: themeExercises[0],
@@ -129,9 +125,7 @@ export function loadThemeContext(
   theme: Theme,
   collections: { modules: readonly Module[]; exercises: readonly Exercise[] },
 ): ThemeContext | null {
-  const module = collections.modules.find(
-    (m) => m.id === theme.data.moduleId,
-  );
+  const module = collections.modules.find((m) => m.id === theme.data.moduleId);
   if (!module) return null;
   const exercises = collections.exercises
     .filter((ex) => ex.data.themeId === theme.id)

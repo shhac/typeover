@@ -28,12 +28,7 @@ const outlineClass: Record<Variant, string> = {
 };
 
 export function Badge(props: ParentProps<BadgeProps>) {
-  const [local, rest] = splitProps(props, [
-    "variant",
-    "outline",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["variant", "outline", "class", "children"]);
   const variant = local.variant ?? "default";
   return (
     <span

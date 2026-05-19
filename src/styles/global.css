@@ -51,11 +51,8 @@
    * surrounding prose. Base size 16px (Tailwind default) — airy direction;
    * we never go below 14px for body text (a11y, normal-text contrast rules).
    */
-  --font-mono:
-    "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
-  --font-sans:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-    sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 
   /* === Radii ===
    * Sharp. The terminal aesthetic doesn't get rounded corners — but it

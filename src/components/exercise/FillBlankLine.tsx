@@ -24,11 +24,9 @@ interface FillBlankLineProps {
 type BlankSlot = FillSegment & { kind: "blank" };
 
 export function FillBlankLine(props: FillBlankLineProps) {
-  const { instance, another, seed } = useExerciseInstance(
-    props.exerciseId,
-    props.generator,
-    { blanks: props.blanks },
-  );
+  const { instance, another, seed } = useExerciseInstance(props.exerciseId, props.generator, {
+    blanks: props.blanks,
+  });
 
   const [selected, setSelected] = createSignal<string | null>(null);
 
@@ -37,16 +35,12 @@ export function FillBlankLine(props: FillBlankLineProps) {
   // a vacuous-truth submit doesn't auto-pass (parallel to FillBlankWord
   // fix in commit 7fc01bc).
   const blankSlot = createMemo<BlankSlot | undefined>(() =>
-    (instance().blankSegments ?? []).find(
-      (s): s is BlankSlot => s.kind === "blank",
-    ),
+    (instance().blankSegments ?? []).find((s): s is BlankSlot => s.kind === "blank"),
   );
 
   const expected = () => blankSlot()?.expected ?? "";
 
-  const candidates = createMemo(() =>
-    buildCandidatePool(props.generator, props.blanks, seed()),
-  );
+  const candidates = createMemo(() => buildCandidatePool(props.generator, props.blanks, seed()));
 
   // canSubmit requires both: (a) a tile has been picked, (b) the
   // exercise actually has a blank to fill (vacuous-truth guard).
@@ -75,8 +69,7 @@ export function FillBlankLine(props: FillBlankLineProps) {
       correctMessage={<span>Correct — that's the line.</span>}
       wrongMessage={
         <span>
-          Not quite. Pick a different tile, try a different exercise, or reveal
-          the answer.
+          Not quite. Pick a different tile, try a different exercise, or reveal the answer.
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}
@@ -103,11 +96,7 @@ export function FillBlankLine(props: FillBlankLineProps) {
         </For>
       </CodeBlock>
 
-      <div
-        role="radiogroup"
-        aria-label="candidate lines"
-        class="flex flex-col gap-2"
-      >
+      <div role="radiogroup" aria-label="candidate lines" class="flex flex-col gap-2">
         <Text tone="muted" size="xs" family="mono">
           Candidates — click one to fill the blank.
         </Text>

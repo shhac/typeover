@@ -30,9 +30,7 @@ export function useExerciseInstance(
   const [attempt, setAttempt] = createSignal(0);
 
   const seed = () => `${exerciseId}::${attempt()}`;
-  const instance = createMemo<ExerciseInstance>(() =>
-    generate(generator, seed(), opts),
-  );
+  const instance = createMemo<ExerciseInstance>(() => generate(generator, seed(), opts));
 
   createEffect(() => {
     // Re-runs whenever the seed changes (i.e. attempt advances). Records

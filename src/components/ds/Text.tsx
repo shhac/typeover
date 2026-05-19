@@ -29,14 +29,7 @@ const sizeClass: Record<Size, string> = {
 };
 
 export function Text(props: ParentProps<TextProps>) {
-  const [local, rest] = splitProps(props, [
-    "tone",
-    "size",
-    "family",
-    "as",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["tone", "size", "family", "as", "class", "children"]);
   return (
     <Dynamic
       component={local.as ?? "p"}

@@ -13,14 +13,12 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClass: Record<Variant, string> = {
-  primary:
-    "bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber",
+  primary: "bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber",
   secondary:
     "bg-bg-elevated text-fg-primary border border-border-strong hover:border-accent-amber/60 hover:text-accent-amber",
   ghost:
     "bg-transparent text-fg-secondary border border-transparent hover:text-fg-primary hover:border-border-default",
-  danger:
-    "bg-transparent text-error border border-error/60 hover:bg-error/10",
+  danger: "bg-transparent text-error border border-error/60 hover:bg-error/10",
 };
 
 /* Touch targets ≥ 44px on mobile per Apple HIG. The "sm" size uses 36px
@@ -33,13 +31,7 @@ const sizeClass: Record<Size, string> = {
 };
 
 export function Button(props: ParentProps<ButtonProps>) {
-  const [local, rest] = splitProps(props, [
-    "variant",
-    "size",
-    "terminal",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["variant", "size", "terminal", "class", "children"]);
   return (
     <button
       type="button"
@@ -47,9 +39,7 @@ export function Button(props: ParentProps<ButtonProps>) {
       class={cn(
         "inline-flex items-center justify-center gap-2 rounded-sm transition-colors",
         "disabled:opacity-50 disabled:cursor-not-allowed",
-        local.terminal
-          ? "font-mono uppercase tracking-wider"
-          : "font-sans font-medium",
+        local.terminal ? "font-mono uppercase tracking-wider" : "font-sans font-medium",
         variantClass[local.variant ?? "secondary"],
         sizeClass[local.size ?? "md"],
         local.class,

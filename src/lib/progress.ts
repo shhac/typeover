@@ -112,10 +112,7 @@ function exerciseSlot(p: Progress, id: string): ExerciseProgress {
  * touch `lastSeenAt`, write back. Every public recorder is built on
  * this — adding a new counter is a one-liner.
  */
-function bumpExercise(
-  id: string,
-  mutate: (slot: ExerciseProgress) => void,
-): void {
+function bumpExercise(id: string, mutate: (slot: ExerciseProgress) => void): void {
   const p = read();
   const slot = exerciseSlot(p, id);
   mutate(slot);

@@ -47,11 +47,7 @@ export function Panel(props: ParentProps<PanelProps>) {
   return (
     <section
       {...rest}
-      class={cn(
-        "border rounded-sm",
-        toneClass[local.tone ?? "default"],
-        local.class,
-      )}
+      class={cn("border rounded-sm", toneClass[local.tone ?? "default"], local.class)}
       aria-label={local.label}
     >
       <Show when={local.label}>
@@ -64,9 +60,7 @@ export function Panel(props: ParentProps<PanelProps>) {
           {local.label}
         </header>
       </Show>
-      <div class={paddingClass[local.padding ?? "default"]}>
-        {local.children}
-      </div>
+      <div class={paddingClass[local.padding ?? "default"]}>{local.children}</div>
     </section>
   );
 }

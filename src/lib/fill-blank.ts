@@ -22,9 +22,7 @@ export type BlankPosition = {
 /** Pick the blank segments out of a segment list and tag each with its
  *  original index. The index is the slot key the component renders
  *  against. */
-export function extractBlankPositions(
-  segments: readonly FillSegment[],
-): BlankPosition[] {
+export function extractBlankPositions(segments: readonly FillSegment[]): BlankPosition[] {
   return segments
     .map((seg, idx) => ({ seg, idx }))
     .filter((b): b is BlankPosition => b.seg.kind === "blank");

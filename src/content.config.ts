@@ -1,10 +1,6 @@
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
-import {
-  exerciseSchema,
-  moduleSchema,
-  themeSchema,
-} from "~/lib/content-schema";
+import { exerciseSchema, moduleSchema, themeSchema } from "~/lib/content-schema";
 
 /*
  * Astro content-collection bindings. Schemas live in

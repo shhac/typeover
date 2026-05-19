@@ -15,12 +15,14 @@ import { GeneratorSchema } from "./generator";
  * the exact field that needs fixing.
  */
 
-const tplGen = (overrides: Partial<{
-  vars: Record<string, string[]>;
-  ts: string;
-  canonical: string;
-  distractors: string[];
-}> = {}) => ({
+const tplGen = (
+  overrides: Partial<{
+    vars: Record<string, string[]>;
+    ts: string;
+    canonical: string;
+    distractors: string[];
+  }> = {},
+) => ({
   kind: "template" as const,
   vars: { x: ["1"] },
   ts: "${x}",
@@ -51,9 +53,7 @@ const paths = (issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey> }>) =>
 
 describe("GeneratorSchema — template refinements (#38)", () => {
   it("rejects an empty value pool", () => {
-    const r = GeneratorSchema.safeParse(
-      tplGen({ vars: { x: [] }, ts: "${x}", canonical: "${x}" }),
-    );
+    const r = GeneratorSchema.safeParse(tplGen({ vars: { x: [] }, ts: "${x}", canonical: "${x}" }));
     expect(r.success).toBe(false);
     if (!r.success) expect(paths(r.error.issues)).toContain("vars.x");
   });
@@ -147,9 +147,7 @@ describe("GeneratorSchema — variant refinements (#38)", () => {
 
 describe("exerciseSchema — fill-* require non-empty blanks (#38)", () => {
   it("rejects fill-word without blanks", () => {
-    const r = exerciseSchema.safeParse(
-      baseEx({ type: "fill-word", generator: tplGen() }),
-    );
+    const r = exerciseSchema.safeParse(baseEx({ type: "fill-word", generator: tplGen() }));
     expect(r.success).toBe(false);
     if (!r.success) expect(paths(r.error.issues)).toContain("blanks");
   });
@@ -163,9 +161,7 @@ describe("exerciseSchema — fill-* require non-empty blanks (#38)", () => {
   });
 
   it("rejects fill-line without blanks", () => {
-    const r = exerciseSchema.safeParse(
-      baseEx({ type: "fill-line", generator: tplGen() }),
-    );
+    const r = exerciseSchema.safeParse(baseEx({ type: "fill-line", generator: tplGen() }));
     expect(r.success).toBe(false);
     if (!r.success) expect(paths(r.error.issues)).toContain("blanks");
   });
@@ -212,8 +208,7 @@ describe("exerciseSchema — MCQ requires distractors (#38)", () => {
       baseEx({ type: "mcq", generator: tplGen({ distractors: [] }) }),
     );
     expect(r.success).toBe(false);
-    if (!r.success)
-      expect(paths(r.error.issues)).toContain("generator.distractors");
+    if (!r.success) expect(paths(r.error.issues)).toContain("generator.distractors");
   });
 
   it("rejects an MCQ variant where any variant has no distractors", () => {
@@ -227,8 +222,7 @@ describe("exerciseSchema — MCQ requires distractors (#38)", () => {
       }),
     );
     expect(r.success).toBe(false);
-    if (!r.success)
-      expect(paths(r.error.issues)).toContain("generator.variants.1.distractors");
+    if (!r.success) expect(paths(r.error.issues)).toContain("generator.variants.1.distractors");
   });
 
   it("accepts an MCQ with a template generator + distractors", () => {
@@ -256,9 +250,7 @@ describe("exerciseSchema — stray blanks on non-fill types (#38)", () => {
   });
 
   it("accepts freeform with no blanks", () => {
-    const r = exerciseSchema.safeParse(
-      baseEx({ type: "freeform", generator: tplGen() }),
-    );
+    const r = exerciseSchema.safeParse(baseEx({ type: "freeform", generator: tplGen() }));
     expect(r.success).toBe(true);
   });
 });

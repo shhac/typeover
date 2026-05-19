@@ -20,11 +20,7 @@ export function Container(props: ParentProps<ContainerProps>) {
   return (
     <div
       {...rest}
-      class={cn(
-        "mx-auto px-6 sm:px-8 w-full",
-        widthClass[local.width ?? "default"],
-        local.class,
-      )}
+      class={cn("mx-auto px-6 sm:px-8 w-full", widthClass[local.width ?? "default"], local.class)}
     >
       {local.children}
     </div>

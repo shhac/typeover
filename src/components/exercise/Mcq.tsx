@@ -15,10 +15,7 @@ interface McqProps {
 }
 
 export function Mcq(props: McqProps) {
-  const { instance, another } = useExerciseInstance(
-    props.exerciseId,
-    props.generator,
-  );
+  const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
 
   const [selected, setSelected] = createSignal<number | null>(null);
 

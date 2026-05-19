@@ -34,22 +34,11 @@ const langBarBg: Record<Lang, string> = {
 };
 
 export function CodeBlock(props: ParentProps<CodeBlockProps>) {
-  const [local, rest] = splitProps(props, [
-    "lang",
-    "filename",
-    "showLang",
-    "class",
-    "children",
-  ]);
+  const [local, rest] = splitProps(props, ["lang", "filename", "showLang", "class", "children"]);
   const lang = local.lang ?? "plain";
   const showLang = local.showLang ?? true;
   return (
-    <div
-      class={cn(
-        "border border-border-default rounded-sm overflow-hidden",
-        local.class,
-      )}
-    >
+    <div class={cn("border border-border-default rounded-sm overflow-hidden", local.class)}>
       <Show when={local.filename || showLang}>
         <div
           class={cn(
@@ -57,9 +46,7 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
             langBarBg[lang],
           )}
         >
-          <span class="font-mono text-[11px] text-fg-muted">
-            {local.filename}
-          </span>
+          <span class="font-mono text-[11px] text-fg-muted">{local.filename}</span>
           <Show when={showLang && langLabel[lang]}>
             <span
               class={cn(

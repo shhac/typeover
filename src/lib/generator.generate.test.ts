@@ -132,9 +132,7 @@ describe("generate — variant path", () => {
   });
 
   it("throws when called with blanks (iter-5 safety guard)", () => {
-    expect(() => generate(variantSpec, "any-seed", { blanks: ["x"] })).toThrow(
-      /variant/,
-    );
+    expect(() => generate(variantSpec, "any-seed", { blanks: ["x"] })).toThrow(/variant/);
   });
 
   it("does NOT throw with empty blanks (the `?? []` default path)", () => {
@@ -156,8 +154,8 @@ describe("generate — variant path", () => {
 
 describe("generate — procedural path", () => {
   it("throws the not-implemented message", () => {
-    expect(() =>
-      generate({ kind: "procedural", module: "any" }, "seed"),
-    ).toThrow(/not implemented/i);
+    expect(() => generate({ kind: "procedural", module: "any" }, "seed")).toThrow(
+      /not implemented/i,
+    );
   });
 });

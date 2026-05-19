@@ -19,11 +19,9 @@ interface FillBlankWordProps {
 }
 
 export function FillBlankWord(props: FillBlankWordProps) {
-  const { instance, another } = useExerciseInstance(
-    props.exerciseId,
-    props.generator,
-    { blanks: props.blanks },
-  );
+  const { instance, another } = useExerciseInstance(props.exerciseId, props.generator, {
+    blanks: props.blanks,
+  });
 
   // Keyed by segment index — the same blank var may legitimately appear
   // more than once in the canonical (e.g. `${x} == ${x}`), so each
@@ -34,9 +32,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
   const blankPositions = createMemo(() => extractBlankPositions(segments()));
   const valueFor = (idx: number) => inputs()[idx] ?? "";
 
-  const evaluation = createMemo(() =>
-    evaluateBlanks(blankPositions(), inputs()),
-  );
+  const evaluation = createMemo(() => evaluateBlanks(blankPositions(), inputs()));
   const allFilled = () => evaluation().allFilled;
   const allCorrect = () => evaluation().allCorrect;
 
@@ -77,8 +73,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
       correctMessage={<span>Correct — every blank matches.</span>}
       wrongMessage={
         <span>
-          One or more blanks are off. Try again, clear and start over, grab a
-          different exercise, or reveal the canonical answer.
+          One or more blanks are off. Try again, clear and start over, grab a different exercise, or
+          reveal the canonical answer.
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}
@@ -98,9 +94,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
                 submitted={phase.submitted()}
                 revealed={phase.revealed()}
                 locked={phase.current() === "right"}
-                onInput={(value) =>
-                  setInputs((prev) => ({ ...prev, [slotIdx]: value }))
-                }
+                onInput={(value) => setInputs((prev) => ({ ...prev, [slotIdx]: value }))}
               />
             );
           }}

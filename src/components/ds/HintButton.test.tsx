@@ -46,9 +46,7 @@ describe("HintButton", () => {
 
   it("onReveal fires exactly once per click, up to the cap", () => {
     const onReveal = vi.fn();
-    const { getByRole } = render(() => (
-      <HintButton hints={HINTS} onReveal={onReveal} />
-    ));
+    const { getByRole } = render(() => <HintButton hints={HINTS} onReveal={onReveal} />);
     const btn = getByRole("button");
     fireEvent.click(btn);
     fireEvent.click(btn);
@@ -61,9 +59,7 @@ describe("HintButton", () => {
      * future variant that re-enables the button must not fire
      * onReveal past the cap. */
     const onReveal = vi.fn();
-    const { getByRole } = render(() => (
-      <HintButton hints={HINTS} onReveal={onReveal} />
-    ));
+    const { getByRole } = render(() => <HintButton hints={HINTS} onReveal={onReveal} />);
     const btn = getByRole("button");
     fireEvent.click(btn);
     fireEvent.click(btn);

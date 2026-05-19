@@ -16,12 +16,7 @@ type Row = {
   submitted: boolean;
   revealed: boolean;
   isCorrect: boolean;
-  expected:
-    | "correctSubmitted"
-    | "incorrectSubmitted"
-    | "correctRevealed"
-    | "selected"
-    | "neutral";
+  expected: "correctSubmitted" | "incorrectSubmitted" | "correctRevealed" | "selected" | "neutral";
 };
 
 const F = false;

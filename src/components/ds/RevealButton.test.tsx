@@ -15,26 +15,20 @@ const CANONICAL = "x := 42";
 
 describe("RevealButton", () => {
   it("starts hidden — canonical content is not rendered", () => {
-    const { getByRole, queryByText } = render(() => (
-      <RevealButton canonical={CANONICAL} />
-    ));
+    const { getByRole, queryByText } = render(() => <RevealButton canonical={CANONICAL} />);
     expect(getByRole("button").textContent).toBe("Show canonical");
     expect(queryByText(CANONICAL)).toBeNull();
   });
 
   it("first click shows the canonical and flips the label", () => {
-    const { getByRole, getByText } = render(() => (
-      <RevealButton canonical={CANONICAL} />
-    ));
+    const { getByRole, getByText } = render(() => <RevealButton canonical={CANONICAL} />);
     fireEvent.click(getByRole("button"));
     expect(getByRole("button").textContent).toBe("Hide canonical");
     expect(getByText(CANONICAL)).toBeTruthy();
   });
 
   it("second click hides the canonical again", () => {
-    const { getByRole, queryByText } = render(() => (
-      <RevealButton canonical={CANONICAL} />
-    ));
+    const { getByRole, queryByText } = render(() => <RevealButton canonical={CANONICAL} />);
     const btn = getByRole("button");
     fireEvent.click(btn);
     fireEvent.click(btn);
@@ -47,9 +41,7 @@ describe("RevealButton", () => {
      * should fire onReveal exactly twice (once per show), not four
      * times (once per toggle). */
     const onReveal = vi.fn();
-    const { getByRole } = render(() => (
-      <RevealButton canonical={CANONICAL} onReveal={onReveal} />
-    ));
+    const { getByRole } = render(() => <RevealButton canonical={CANONICAL} onReveal={onReveal} />);
     const btn = getByRole("button");
     fireEvent.click(btn); // show
     fireEvent.click(btn); // hide
@@ -59,9 +51,7 @@ describe("RevealButton", () => {
   });
 
   it("aria-expanded reflects the shown state", () => {
-    const { getByRole } = render(() => (
-      <RevealButton canonical={CANONICAL} />
-    ));
+    const { getByRole } = render(() => <RevealButton canonical={CANONICAL} />);
     const btn = getByRole("button");
     expect(btn.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(btn);

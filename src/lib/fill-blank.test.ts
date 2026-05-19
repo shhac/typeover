@@ -26,13 +26,7 @@ describe("buildCandidatePool", () => {
     const out = buildCandidatePool(TEMPLATE, ["line"], "ex-1::0");
     expect(out).toHaveLength(5);
     expect([...out].sort()).toEqual(
-      [
-        "a := 1",
-        "a = 1",
-        "var a = 1",
-        "const a = 1",
-        "let a = 1",
-      ].sort(),
+      ["a := 1", "a = 1", "var a = 1", "const a = 1", "let a = 1"].sort(),
     );
   });
 
@@ -53,9 +47,7 @@ describe("buildCandidatePool", () => {
      * than one unique permutation. */
     const observed = new Set<string>();
     for (let i = 0; i < 10; i++) {
-      observed.add(
-        buildCandidatePool(TEMPLATE, ["line"], `ex::${i}`).join("|"),
-      );
+      observed.add(buildCandidatePool(TEMPLATE, ["line"], `ex::${i}`).join("|"));
     }
     expect(observed.size).toBeGreaterThan(1);
     /* Sanity check the first pair we did up top: probably differ,
@@ -76,11 +68,7 @@ describe("buildCandidatePool", () => {
      * that two callers passing the same seed value get the same
      * output (the deterministic contract above), and that the
      * "fixed-seed" run differs from a "fixed-seed-other" run. */
-    const otherNamespace = buildCandidatePool(
-      TEMPLATE,
-      ["line"],
-      "fixed-seed-other",
-    );
+    const otherNamespace = buildCandidatePool(TEMPLATE, ["line"], "fixed-seed-other");
     expect(withTiles).not.toEqual(otherNamespace);
   });
 

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  evaluateBlanks,
-  extractBlankPositions,
-} from "./fill-blank";
+import { evaluateBlanks, extractBlankPositions } from "./fill-blank";
 import type { FillSegment } from "./generator";
 
 /*
@@ -22,12 +19,7 @@ const blank = (varName: string, expected: string): FillSegment => ({
 
 describe("extractBlankPositions", () => {
   it("returns blank segments tagged with their original index", () => {
-    const segs = [
-      text("name = "),
-      blank("name", "x"),
-      text(" + "),
-      blank("op", ":="),
-    ];
+    const segs = [text("name = "), blank("name", "x"), text(" + "), blank("op", ":=")];
     expect(extractBlankPositions(segs)).toEqual([
       { idx: 1, seg: { kind: "blank", varName: "name", expected: "x" } },
       { idx: 3, seg: { kind: "blank", varName: "op", expected: ":=" } },

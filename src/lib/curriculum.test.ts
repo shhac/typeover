@@ -25,15 +25,11 @@ import {
  */
 
 const mod = (id: string, order: number) =>
-  ({ id, data: { order } } as Parameters<typeof buildCurriculumTree>[0][number]);
+  ({ id, data: { order } }) as Parameters<typeof buildCurriculumTree>[0][number];
 const theme = (id: string, moduleId: string, order: number) =>
-  ({ id, data: { order, moduleId } } as Parameters<
-    typeof buildCurriculumTree
-  >[1][number]);
+  ({ id, data: { order, moduleId } }) as Parameters<typeof buildCurriculumTree>[1][number];
 const exercise = (id: string, themeId: string, order: number) =>
-  ({ id, data: { order, themeId } } as Parameters<
-    typeof buildCurriculumTree
-  >[2][number]);
+  ({ id, data: { order, themeId } }) as Parameters<typeof buildCurriculumTree>[2][number];
 
 describe("byOrder", () => {
   it("sorts ascending by data.order", () => {
@@ -54,21 +50,13 @@ describe("byOrder", () => {
       { id: "second", data: { order: 5 } },
       { id: "third", data: { order: 5 } },
     ];
-    expect([...arr].sort(byOrder).map((x) => x.id)).toEqual([
-      "first",
-      "second",
-      "third",
-    ]);
+    expect([...arr].sort(byOrder).map((x) => x.id)).toEqual(["first", "second", "third"]);
   });
 });
 
 describe("buildCurriculumTree", () => {
   it("sorts modules by data.order", () => {
-    const tree = buildCurriculumTree(
-      [mod("m2", 2), mod("m1", 1), mod("m3", 3)],
-      [],
-      [],
-    );
+    const tree = buildCurriculumTree([mod("m2", 2), mod("m1", 1), mod("m3", 3)], [], []);
     expect(tree.map((n) => n.module.id)).toEqual(["m1", "m2", "m3"]);
   });
 
@@ -97,11 +85,7 @@ describe("buildCurriculumTree", () => {
   });
 
   it("theme with no exercises returns firstExercise=undefined, exerciseCount=0", () => {
-    const tree = buildCurriculumTree(
-      [mod("m1", 1)],
-      [theme("t1", "m1", 1)],
-      [],
-    );
+    const tree = buildCurriculumTree([mod("m1", 1)], [theme("t1", "m1", 1)], []);
     expect(tree[0].themes[0].firstExercise).toBeUndefined();
     expect(tree[0].themes[0].exerciseCount).toBe(0);
   });
@@ -112,10 +96,7 @@ describe("buildCurriculumTree", () => {
      * subtle dev-mode hydration bugs. Pin this. */
     const modules = [mod("m2", 2), mod("m1", 1)];
     const themes = [theme("t2", "m1", 2), theme("t1", "m1", 1)];
-    const exercises = [
-      exercise("e2", "t1", 2),
-      exercise("e1", "t1", 1),
-    ];
+    const exercises = [exercise("e2", "t1", 2), exercise("e1", "t1", 1)];
     const beforeM = modules.map((m) => m.id);
     const beforeT = themes.map((t) => t.id);
     const beforeE = exercises.map((e) => e.id);
@@ -158,9 +139,7 @@ describe("truncateIntro", () => {
 
 describe("exerciseHref", () => {
   it("returns /go/<exerciseId>", () => {
-    expect(exerciseHref("foundations/variables/01")).toBe(
-      "/go/foundations/variables/01",
-    );
+    expect(exerciseHref("foundations/variables/01")).toBe("/go/foundations/variables/01");
   });
 });
 
@@ -221,16 +200,11 @@ describe("loadThemeContext", () => {
       exercises: [exA1b, exA1a, exB1a],
     });
     expect(ctx?.module.id).toBe("modA");
-    expect(ctx?.exercises.map((e) => e.id)).toEqual([
-      "modA/themeA1/01",
-      "modA/themeA1/02",
-    ]);
+    expect(ctx?.exercises.map((e) => e.id)).toEqual(["modA/themeA1/01", "modA/themeA1/02"]);
   });
 
   it("returns null when the parent module is missing", () => {
-    expect(
-      loadThemeContext(themeA1, { modules: [modB], exercises: [exA1a] }),
-    ).toBeNull();
+    expect(loadThemeContext(themeA1, { modules: [modB], exercises: [exA1a] })).toBeNull();
   });
 
   it("returns empty exercises when the theme has none yet", () => {
@@ -314,14 +288,10 @@ describe("loadExerciseContext", () => {
   });
 
   it("returns null when the parent theme is missing", () => {
-    expect(
-      loadExerciseContext(exA1, { modules: [modA], themes: [] }),
-    ).toBeNull();
+    expect(loadExerciseContext(exA1, { modules: [modA], themes: [] })).toBeNull();
   });
 
   it("returns null when the parent module is missing", () => {
-    expect(
-      loadExerciseContext(exA1, { modules: [], themes: [themeA1] }),
-    ).toBeNull();
+    expect(loadExerciseContext(exA1, { modules: [], themes: [themeA1] })).toBeNull();
   });
 });
