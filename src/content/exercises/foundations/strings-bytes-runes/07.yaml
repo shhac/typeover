@@ -3,9 +3,10 @@ themeId: foundations/strings-bytes-runes
 type: fill-line
 order: 7
 prompt: |
-  TypeScript joins string arrays with `array.join(separator)`. Go's
-  equivalent — same `strings` package, swapped argument shape. Pick
-  the idiomatic Go line.
+  TypeScript joins arrays with `array.join(separator)`. Go's
+  equivalent is in the `strings` package with the arg order swapped.
+  Type the line that builds `path` from `parts` joined by `"/"`. The
+  program should print `home/user/docs`.
 generator:
   kind: template
   vars:
@@ -13,33 +14,32 @@ generator:
       - 'path := strings.Join(parts, "/")'
   ts: |-
     let path = parts.join("/");
+    console.log(path);
   canonical: |-
-    ${line}
+    package main
+
+    import (
+    	"fmt"
+    	"strings"
+    )
+
+    func main() {
+    	parts := []string{"home", "user", "docs"}
+    	${line}
+    	fmt.Println(path)
+    }
   distractors:
     - 'path := parts.join("/")'
     - 'path := parts.Join("/")'
     - 'path := strings.Join("/", parts)'
     - 'path := strings.JoinWith(parts, "/")'
+expectStdout: |
+  home/user/docs
+runtime: yaegi
 blanks: [line]
 hints:
-  - "The Go shape is `strings.Join(slice, separator)`. Slice first, separator second — opposite of the TS method form where the slice is the receiver and the separator is the only argument."
-  - "Order matters: `strings.Join(parts, \"/\")` builds the path; `strings.Join(\"/\", parts)` would be asking Go to call Join on the string \"/\" which doesn't typecheck."
-  - "Pick `path := strings.Join(parts, \"/\")`."
+  - 'The Go shape is `strings.Join(slice, separator)`. Slice first, separator second — opposite of the TS method form where the slice is the receiver.'
+  - 'Order matters: `strings.Join(parts, "/")` builds the path; `strings.Join("/", parts)` doesn''t typecheck.'
+  - 'Type `path := strings.Join(parts, "/")`.'
 notes: |
-  Second Theme 3 fill-line. The closing exercise of the
-  package-vs-method drill — by now the learner has seen four
-  instances of `strings.X(s, ...)` and should reach for the
-  pattern reflexively.
-
-  Distractors target the specific mistakes a learner makes when
-  the reflex hasn't landed yet:
-   - `parts.join("/")` — straight TS leakage
-   - `parts.Join("/")` — Go casing but TS-method shape
-   - `strings.Join("/", parts)` — right package + name, wrong
-     order (subtle; would type-check the wrong way)
-   - `strings.JoinWith(parts, "/")` — invented function name (a
-     learner who guessed `JoinWith` based on TS habit)
-
-  Theme 3 finishes its launch-gate slots at 7/9. Slots 8-9 are
-  freeform and blocked on the Yaegi runtime (#22).
-runtime: none
+  Migrated to input+Yaegi UX. Distractors kept as wrong-pattern bank.

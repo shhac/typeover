@@ -60,7 +60,13 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
       <Stack gap="xl">
         <Stack gap="sm">
           <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="amber">{moduleEntry.data.title}</Badge>
+            <a
+              href="/go"
+              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              aria-label={`Up to curriculum (${moduleEntry.data.title})`}
+            >
+              <Badge variant="amber">{moduleEntry.data.title}</Badge>
+            </a>
             <Text tone="muted" size="sm" family="mono">→</Text>
             <Badge variant="default" outline>{theme.data.title}</Badge>
           </Stack>

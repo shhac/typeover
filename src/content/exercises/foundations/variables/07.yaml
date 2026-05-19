@@ -4,8 +4,9 @@ type: fill-line
 order: 7
 prompt: |
   TS uses comma-separated declarations to introduce several variables
-  in one statement. Go has its own shape for the same idea — pick the
-  line that declares both variables in one go.
+  in one statement. Go has its own shape — type the idiomatic Go line
+  that declares both `a` and `b` in one go so the program prints
+  `1 2`.
 generator:
   kind: template
   vars:
@@ -13,32 +14,30 @@ generator:
       - "a, b := 1, 2"
   ts: |-
     let a = 1, b = 2;
+    console.log(a, b);
   canonical: |-
-    ${line}
+    package main
+
+    import "fmt"
+
+    func main() {
+    	${line}
+    	fmt.Println(a, b)
+    }
   distractors:
     - "a := 1, b := 2"
     - "var a, b = 1, 2"
     - "a, b = 1, 2"
     - "let a, b = 1, 2"
+expectStdout: |
+  1 2
+runtime: yaegi
 blanks: [line]
 hints:
-  - "Go has a single-statement short declaration that takes a tuple on each side — `name1, name2 := expr1, expr2`. The other tiles all break in different ways: TS keywords, separate `:=` per name, or `=` (assignment) without prior declaration."
-  - "The shape is `a, b := 1, 2` — comma between names, comma between values, one `:=` in the middle. This same shape comes back when you unpack multiple return values later in the curriculum."
-  - "Pick `a, b := 1, 2`."
+  - "Go has a single-statement short declaration that takes a tuple on each side — `name1, name2 := expr1, expr2`."
+  - "Comma between names, comma between values, one `:=` in the middle. This same shape comes back when you unpack multiple return values later."
+  - "Type `a, b := 1, 2`."
 notes: |
-  Second fill-line. The distractors here are each a plausible-looking
-  but distinctly wrong form:
-   - `a := 1, b := 2` — chains two `:=` operators with a comma. Doesn't
-     parse; Go's grammar treats the comma as a value separator only on
-     a single declaration.
-   - `var a, b = 1, 2` — the long form. Compiles and works, but the
-     theme intro established that `:=` is idiomatic at function scope.
-     This one's the "almost-right" trap.
-   - `a, b = 1, 2` — pure assignment. Would fail to compile because
-     `a` and `b` haven't been declared.
-   - `let a, b = 1, 2` — TypeScript leaking in.
-
-  This shape (`name1, name2 := expr1, expr2`) re-appears when we hit
-  multi-return functions later (e.g. `result, err := parse(s)`), so
-  the muscle memory pays off.
-runtime: none
+  Second fill-line under the input+Yaegi UX. The distractors stay in
+  the YAML — repurposable as a known-wrong-pattern bank for targeted
+  feedback in a later iteration.

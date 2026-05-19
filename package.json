@@ -18,7 +18,7 @@
     "runtime:build": "bash runtime/yaegi-wasm/build.sh",
     "runtime:smoke": "node runtime/yaegi-wasm/smoke.mjs",
     "runtime:matrix": "node runtime/yaegi-wasm/matrix.mjs",
-    "runtime:verify-freeform": "node runtime/yaegi-wasm/verify-freeform.mjs"
+    "runtime:verify": "node runtime/yaegi-wasm/verify-runnable.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

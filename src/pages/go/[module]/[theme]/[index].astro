@@ -70,9 +70,21 @@ const parentThemeHref = themeHref(themeEntry.id);
       <Stack gap="xl">
         <Stack gap="sm">
           <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="amber">{moduleEntry.data.title}</Badge>
+            <a
+              href="/go"
+              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              aria-label={`Up to curriculum (${moduleEntry.data.title})`}
+            >
+              <Badge variant="amber">{moduleEntry.data.title}</Badge>
+            </a>
             <Text tone="muted" size="sm" family="mono">→</Text>
-            <Badge variant="default" outline>{themeEntry.data.title}</Badge>
+            <a
+              href={parentThemeHref}
+              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              aria-label={`Up to theme overview (${themeEntry.data.title})`}
+            >
+              <Badge variant="default" outline>{themeEntry.data.title}</Badge>
+            </a>
             <Text tone="muted" size="sm" family="mono">·</Text>
             <Text tone="muted" size="sm" family="mono">
               exercise {ex.order} · {ex.type}

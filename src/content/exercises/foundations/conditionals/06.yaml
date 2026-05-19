@@ -3,9 +3,10 @@ themeId: foundations/conditionals
 type: fill-line
 order: 6
 prompt: |
-  The TS declares a variable in one statement and checks it in the
-  next. Pick the Go line that does both in one statement using the
-  short-statement-if form.
+  Type the Go line that uses the **short-statement-if** form to
+  declare `user` from `lookup(id)` AND check it isn't nil in one
+  statement, calling `greet(user)` when it's present. The program
+  should print `hi, Ada`.
 generator:
   kind: template
   vars:
@@ -15,30 +16,38 @@ generator:
     const user = lookup(id);
     if (user !== null) { greet(user); }
   canonical: |-
-    ${line}
+    package main
+
+    import "fmt"
+
+    func lookup(id int) *string {
+    	name := "Ada"
+    	return &name
+    }
+
+    func greet(u *string) {
+    	fmt.Println("hi,", *u)
+    }
+
+    func main() {
+    	id := 1
+    	_ = id
+    	${line}
+    }
   distractors:
     - 'user := lookup(id); if user != nil { greet(user) }'
     - 'if (user := lookup(id)) != nil { greet(user) }'
     - 'if user, err := lookup(id); err == nil { greet(user) }'
     - 'let user = lookup(id); if user !== null { greet(user) }'
+expectStdout: |
+  hi, Ada
+runtime: yaegi
 blanks: [line]
 hints:
   - "Three Go-isms must all be right at once: the SETUP-then-CONDITION is glued together with a semicolon inside the if, the declaration uses `:=` not `=`, and `nil` (not `null`) is the comparison value."
   - "The shape is `if SETUP; CONDITION { body }`. Setup goes first, semicolon, then the boolean check. The whole declaration is scoped to the if/else block."
-  - "Pick `if user := lookup(id); user != nil { greet(user) }`."
+  - "Type `if user := lookup(id); user != nil { greet(user) }`."
 notes: |
-  First Theme 4 fill-line. Tests recognition of the short-
-  statement-if at line composition (slot 2 was MCQ recognition,
-  slot 4 was fill-word production of the comparison half — this
-  is the full-line composition).
-
-  Distractor failure modes are specific:
-   - Two-statement form (compiles, valid, but doesn't use the
-     short-statement-if idiom — loses scoping benefit)
-   - C-style `(decl) != value` — doesn't parse in Go (`:=` is a
-     statement, not an expression)
-   - Multi-return form `(user, err)` — has the right structure
-     but wrong arity; mismatches the TS source's single-value
-     return
-   - Pure TS leakage with `let` and `!==`
-runtime: none
+  Migrated to input+Yaegi UX. Scaffold provides `lookup` returning
+  a non-nil `*string` and `greet` printing "hi, <name>". Distractors
+  kept as wrong-pattern bank.

@@ -3,10 +3,10 @@ themeId: foundations/loops
 type: fill-line
 order: 6
 prompt: |
-  TypeScript exits a loop early with a bare `break` after a
-  condition. Go's break works the same way, but the surrounding if
-  shape changes. Pick the Go line that breaks when the counter
-  reaches a stop value.
+  Type the Go line inside the loop that exits early when `i` reaches
+  `stopAt`. The program processes 0..n-1 and prints each value via
+  `process(i)`. With `n=5` and `stopAt=3` it should print `0`, `1`,
+  `2` on separate lines.
 generator:
   kind: template
   vars:
@@ -18,29 +18,37 @@ generator:
       process(i);
     }
   canonical: |-
-    for i := 0; i < n; i++ {
-        ${line}
-        process(i)
+    package main
+
+    import "fmt"
+
+    func process(i int) {
+    	fmt.Println(i)
+    }
+
+    func main() {
+    	n := 5
+    	stopAt := 3
+    	for i := 0; i < n; i++ {
+    		${line}
+    		process(i)
+    	}
     }
   distractors:
     - "if (i == stopAt) { break }"
     - "if i === stopAt { break }"
     - "if i == stopAt: break"
     - "break if i == stopAt"
+expectStdout: |
+  0
+  1
+  2
+runtime: yaegi
 blanks: [line]
 hints:
-  - "Three things all need to be right at once: no parens around the condition (Theme 4 covered this), `==` not `===` for equality (also Theme 4), and braces required around the `break` body even though it's a single statement (yes, single-statement bodies still need braces in Go)."
+  - "Three things all need to be right at once: no parens around the condition (Theme 4 covered this), `==` not `===` for equality (also Theme 4), and braces required around the `break` body even though it's a single statement."
   - "The Go shape is `if condition { body }`. Bare keyword `break` stays the same as TS. Braces always."
-  - "Pick `if i == stopAt { break }`."
+  - "Type `if i == stopAt { break }`."
 notes: |
-  First Theme 5 fill-line. Recycles Theme 4's if-syntax lessons
-  in the context of a loop body. Distractor failure modes:
-   - Parens around condition (Theme 4's "legal but unidiomatic")
-   - `===` strict equality (Theme 1/4 leak)
-   - Python-style `if cond: body` (compact but not Go)
-   - Ruby-style `break if cond` (postfix conditional)
-
-  All four distractors leak from another language; the canonical
-  drops to the same three reflexes the learner internalised in
-  Theme 4 (no parens, `==`, braces).
-runtime: none
+  Migrated to input+Yaegi UX. Scaffold provides `process` that prints
+  each value. Distractors kept as wrong-pattern bank.

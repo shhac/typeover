@@ -3,9 +3,9 @@ themeId: foundations/numeric-primitives
 type: fill-line
 order: 6
 prompt: |
-  Mixing float and int operands won't compile in Go — one of them
-  has to be converted to match the other. Pick the line that produces
-  the correct ratio without truncating.
+  `double` is already a `float64`; `count` is an `int`. They can't
+  divide as-is. Type the idiomatic Go line that computes the ratio
+  without truncating. The program should print `2.5`.
 generator:
   kind: template
   vars:
@@ -13,35 +13,31 @@ generator:
       - "ratio := double / float64(count)"
   ts: |-
     let ratio = double / count;
+    console.log(ratio);
   canonical: |-
-    ${line}
+    package main
+
+    import "fmt"
+
+    func main() {
+    	double := 10.0
+    	count := 4
+    	${line}
+    	fmt.Println(ratio)
+    }
   distractors:
     - "ratio := float64(double) / count"
     - "ratio := double / count"
     - "ratio := int(double) / count"
     - "ratio := double / float(count)"
+expectStdout: |
+  2.5
+runtime: yaegi
 blanks: [line]
 hints:
   - "Look at the types. `double` is already a `float64`; `count` is an `int`. They can't divide as-is. To get a meaningful ratio, the integer needs to become a float — not the other way round, and not by truncating."
   - "The general form is `targetType(value)`. Target type is `float64`. Value is the operand whose type doesn't match."
-  - "Pick `ratio := double / float64(count)`."
+  - "Type `ratio := double / float64(count)`."
 notes: |
-  Third recognition exercise on conversion, this time as line
-  composition. The distractors each fail in a distinct way:
-
-   - `float64(double) / count` — `double` is already a `float64`;
-     wrapping is a no-op. The *other* operand still needs casting.
-     This is a real Go beginner mistake.
-   - `double / count` — won't compile at all. Type mismatch error
-     at the `/` site.
-   - `int(double) / count` — compiles but is wrong: truncates
-     `double` to an int, then does int division. The ratio loses
-     all precision.
-   - `double / float(count)` — there is no `float` type in Go. Has
-     to be `float32` or `float64`.
-
-  The "convert the int operand, not the float" reflex is the load-
-  bearing insight; everything else is mechanics. Pairs with slot 5's
-  fill-word that drilled "convert *both* operands" — slot 6 teaches
-  the subtler "convert the *one that needs it*" version.
-runtime: none
+  Migrated to input+Yaegi UX. Distractors kept as the
+  wrong-pattern bank for future targeted feedback.
