@@ -27,3 +27,6 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# Session handoffs (per-session scratch, not checked in)
+SESSION_HANDOVER.md
