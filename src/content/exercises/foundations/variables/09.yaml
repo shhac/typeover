@@ -3,47 +3,43 @@ themeId: foundations/variables
 type: freeform
 order: 9
 prompt: |
-  Write a Go program that demonstrates all three variable-declaration
-  forms together:
-
-  - `const Pi = 3.14` at package scope (a compile-time constant).
-  - `var label string = "radius"` inside `main` (the full form with
-    an explicit type).
-  - `radius := 5` inside `main` (the short form).
-
-  Then print on one line: `label = 5`, computed by composing the three
-  values via `fmt.Println(label, "=", radius)`. The `const` shows it
-  exists but isn't strictly needed for the output — that's the point:
-  Go's variable surface is wider than TypeScript's.
+  Write a Go program that declares three `int` variables — `a := 3`,
+  `b := 4`, and `c := a + b` — then prints them on three lines via
+  `fmt.Println`. The expected output is shown below.
 generator:
   kind: template
   vars: {}
   ts: |-
-    const PI = 3.14;
-    let label: string = "radius";
-    let radius = 5;
-    console.log(label, "=", radius);
+    let a = 3;
+    let b = 4;
+    let c = a + b;
+    console.log(a);
+    console.log(b);
+    console.log(c);
   canonical: |-
     package main
 
     import "fmt"
 
-    const Pi = 3.14
-
     func main() {
-    	var label string = "radius"
-    	radius := 5
-    	fmt.Println(label, "=", radius)
+    	a := 3
+    	b := 4
+    	c := a + b
+    	fmt.Println(a)
+    	fmt.Println(b)
+    	fmt.Println(c)
     }
 expectStdout: |
-  radius = 5
+  3
+  4
+  7
 runtime: yaegi
 hints:
-  - "`const` at package scope is for compile-time constants. `var` with an explicit type goes inside a function when you want to be explicit. `:=` is the short form everywhere else."
-  - "`fmt.Println` separates its args with spaces and ends with a newline. Three args here: the string `label`, the literal `\"=\"`, and the int `radius`."
-  - "`package main; import \"fmt\"; const Pi = 3.14; func main() { var label string = \"radius\"; radius := 5; fmt.Println(label, \"=\", radius) }`"
+  - "Inside a function, the short declaration `name := value` is the idiomatic form. No `var`, no `let`, no semicolon."
+  - "`fmt.Println` writes its argument followed by a newline. Three calls = three lines of output."
+  - "`package main` / `import \"fmt\"` / `func main()` is the standard scaffold for a runnable Go program."
 notes: |
-  The compile-time const isn't used in the output by design — the
-  exercise is about declaring all three forms in one program, not
-  about computing with Pi. A more advanced version (Module 2 onward)
-  would reach for the const in arithmetic.
+  First freeform exercise on the curriculum. Goal: verify that the
+  Yaegi runtime + freeform component chain works end-to-end with a
+  trivially-shaped program. If a learner submits the canonical here,
+  Yaegi runs in ~10 ms and stdout matches exactly.

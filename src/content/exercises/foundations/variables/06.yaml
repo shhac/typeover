@@ -1,66 +1,36 @@
 target: go
 themeId: foundations/variables
-type: fill-line
+type: fill-word
 order: 6
 prompt: |
-  The TS program on the left declares two variables and prints
-  `doubled`. The Go translation has its second line missing — type
-  the idiomatic Go that, plugged in, makes the program print `10`.
+  Fill in the blanks to produce the idiomatic Go form when you want
+  to spell out the variable's type. (Exercise 2 covered this with
+  multiple choice — now you write it yourself.)
 generator:
   kind: template
   vars:
-    line:
-      - "doubled := count * 2"
+    name: [count, total, age, score, attempts]
+    value: ["5", "42", "0", "100", "-1"]
+    kw: [var]
+    type: [int]
   ts: |-
-    let count = 5;
-    let doubled = count * 2;
-    console.log(doubled);
+    let ${name}: number = ${value};
   canonical: |-
-    package main
-
-    import "fmt"
-
-    func main() {
-    	count := 5
-    	${line}
-    	fmt.Println(doubled)
-    }
-  distractors:
-    - match: "var doubled = count * 2"
-      explain: |-
-        That compiles, but inside a function Go reaches for `:=`. `var` is fine
-        at package scope; here it's the un-idiomatic shape — you'd be writing
-        the more verbose form for no gain.
-    - match: "doubled = count * 2"
-      explain: |-
-        That's a re-assignment, not a declaration. `doubled` doesn't exist
-        yet — Go won't auto-create it the way TS's `let` would. Use `:=` to
-        declare and assign in one step.
-    - match: "const doubled := count * 2"
-      explain: |-
-        Go's `const` is for compile-time constants only (integers, strings,
-        floats, booleans). `count * 2` is computed at runtime, so this won't
-        compile. For a runtime value use `:=`.
-    - match: "let doubled = count * 2"
-      explain: |-
-        `let` is TypeScript. Go uses `:=` inside functions, `var` at package
-        scope.
-expectStdout: |
-  10
-runtime: yaegi
-blanks: [line]
+    ${kw} ${name} ${type} = ${value}
+blanks: [kw, type]
 hints:
-  - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. Not `var`, not bare `=`, and definitely not `let` or `const` — that's TS."
-  - "The operator is `:=`. It both declares the variable and assigns the right-hand side."
-  - "Type `doubled := count * 2`."
+  - "Two blanks. The keyword goes first; the type goes between the name and the `=`. Neither uses a colon — Go is positional."
+  - "The keyword is the one that introduces a typed declaration in Go (not the short-form `:=` operator). The type for TS `number` (when initialised with an integer literal) is the default Go integer type."
+  - "Keyword: `var`. Type: `int`. The blanks fill to: `var` and `int`."
 notes: |
-  First fill-line under the redesigned input+Yaegi UX. The learner
-  types the line; we substitute into the canonical scaffold and run.
-  Expected stdout `10` is the round-trip from count=5 doubled.
+  Companion to MCQ #2 — same concept, but the learner now produces
+  the declaration instead of recognising it. The `kw` and `type`
+  blanks are single-pool template vars (same trick as exercise 4's
+  `op: [":="]` literal blank). When task #38's schema refinements
+  land, this pattern of "single-pool literal var" is a candidate to
+  formalise as a `literals:` field.
 
-  Distractors landed in their structured `{match, explain}` form
-  2026-05-19 — the first fill-line exercise to ship targeted
-  wrong-pattern feedback per design-docs/99. Submitting any of
-  the four documented wrong shapes now surfaces a specific
-  explanation in the wrong-phase message; submitting an
-  unrecognised wrong line falls back to the generic message.
+  The `name` and `value` aren't blanked — they're just for visual
+  context. The learner already saw them in the TS source; the
+  exercise is about the *keyword and type*.
+runtime: none

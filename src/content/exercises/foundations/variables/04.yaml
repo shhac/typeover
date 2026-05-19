@@ -1,40 +1,53 @@
 target: go
 themeId: foundations/variables
-type: fill-word
+type: mcq
 order: 4
 prompt: |
-  Fill in the blanks to produce the idiomatic Go translation of the
-  TypeScript above.
+  TypeScript can declare several variables in one statement by
+  comma-separating them. Which is the idiomatic Go form for the
+  same intent?
 generator:
   kind: template
   vars:
-    name: [count, total, n, score, attempts]
-    value: ["5", "42", "0", "100", "-1"]
-    op: [":="]
+    a: [a, x, lo, first]
+    b: [b, y, hi, last]
+    av: ["1", "10", "0", "-1"]
+    bv: ["2", "20", "1", "0"]
   ts: |-
-    let ${name} = ${value};
+    let ${a} = ${av}, ${b} = ${bv};
   canonical: |-
-    ${name} ${op} ${value}
-blanks: [name, op]
+    ${a}, ${b} := ${av}, ${bv}
+  distractors:
+    - "${a} := ${av}, ${b} := ${bv}"
+    - "var ${a}, ${b} = ${av}, ${bv}"
+    - "${a}, ${b} = ${av}, ${bv}"
+    - "let ${a}, ${b} = ${av}, ${bv}"
 hints:
-  - "You need the variable name (same as TS) and the short-declaration operator. The operator is the one Go uses inside functions to declare AND assign in one step."
-  - "The operator is two characters. Look at exercise 1's canonical answer if you've forgotten."
-  - "The blanks fill to: `${name}` and `:=`."
+  - |-
+    Go has a single-statement shape for multi-declaration that takes
+    a tuple on each side — names on the left, values on the right.
+    No second `:=`, no `let`, no `var` keyword needed at function
+    scope.
+  - |-
+    The shape is `name1, name2 := expr1, expr2`. Comma between
+    names, comma between values, one `:=` in the middle. (This same
+    shape comes back when you unpack multi-return values later in
+    the curriculum.)
+  - |-
+    `${a}, ${b} := ${av}, ${bv}`
 notes: |
-  First fill-blank-word exercise. The `name` blank is also a var in
-  the generator vars block — so the learner has to *type the same
-  name they saw in the TS source* into the blank. That tightens the
-  read-then-write loop: you can't fill the blank without having
-  parsed the TS prompt.
+  Introduced 2026-05-20 to fix the design-docs/02 MCQ-first
+  violation flagged on the previous slot-7 (now slot-8) fill-line —
+  the multi-decl shape was being introduced productively without any
+  prior recognition exposure. This MCQ is the recognition slot; the
+  fill-line two slots later is the production slot.
 
-  The `op` blank is a fixed `:=` — we model it as a "var" with a
-  one-element pool so the template substitution machinery treats it
-  uniformly. Slight overload of the template generator's mental
-  model — once we have a third or fourth fill-word exercise that
-  needs literal-blank slots, we may want a dedicated `literals:`
-  field in the schema. Parked.
-
-  Distractors set to empty list because fill-word doesn't use them
-  (no MCQ shuffle). The schema allows `distractors` on template
-  generators; we just don't engage it here.
+  Distractors:
+    1. `a := 1, b := 2` — two `:=` in one statement isn't a Go
+       thing. The single-`:=`-with-tuples shape is the point.
+    2. `var a, b = 1, 2` — compiles but un-idiomatic at function
+       scope; the same pattern came up in slot 02's distractor bank.
+    3. `a, b = 1, 2` — re-assignment, not declaration; `a` and `b`
+       don't exist yet.
+    4. `let a, b = 1, 2` — TypeScript.
 runtime: none

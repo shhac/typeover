@@ -150,33 +150,36 @@ concrete TS↔Go content per slot, hints, and notes. Example for
 `foundations/variables`:
 
 ```
-1. MCQ "let x = 5;" → which Go is idiomatic?              (shipped)
-2. MCQ typed decl "let x: number = 5;" → which Go form?   (shipped)
-3. MCQ "const PI = 3.14;" → which Go preserves const-ness? (shipped, variant kind)
-4. fill-blank-word: produce `name := value` (blanks at op) (shipped)
-5. fill-blank-word: produce `var name int = value`        (shipped, blanks at kw + type)
-6. fill-blank-line: pick the right line for a Go translation (shipped)
-7. fill-blank-line: multi-variable short decl `a, b := 1, 2` (shipped)
-8. freeform: declare three vars from a TS snippet         (shipped)
-9. freeform: open problem with type+const+:= constraints  (shipped)
+ 1. MCQ "let x = 5;" → which Go is idiomatic?              (shipped)
+ 2. MCQ typed decl "let x: number = 5;" → which Go form?   (shipped)
+ 3. MCQ "const PI = 3.14;" → which Go preserves const-ness? (shipped, variant kind)
+ 4. MCQ multi-decl "let a = 1, b = 2;" → which Go form?    (shipped 2026-05-20)
+ 5. fill-blank-word: produce `name := value` (blanks at op) (shipped)
+ 6. fill-blank-word: produce `var name int = value`        (shipped, blanks at kw + type)
+ 7. fill-blank-line: pick the right line for a Go translation (shipped)
+ 8. fill-blank-line: multi-variable short decl `a, b := 1, 2` (shipped)
+ 9. freeform: declare three vars from a TS snippet         (shipped)
+10. freeform: open problem with type+const+:= constraints  (shipped)
 ```
 
-(All nine slots above reflect the actual shipped progression in
-`src/content/exercises/foundations/variables/`. The earlier draft of
-this illustration drifted from the implementation as exercises
-landed; the shipped order is canonical.)
+(All ten slots above reflect the actual shipped progression in
+`src/content/exercises/foundations/variables/`.)
 
-**Known pedagogy gap, flagged 2026-05-20:** slot 7 introduces the
-multi-declaration shape `a, b := 1, 2` as a fill-line, but this
-shape doesn't appear in any prior MCQ. A learner reaching slot 7
-has to invent the syntax. Per
+**MCQ-first pedagogy gap — fixed 2026-05-20.** The previous
+9-slot progression introduced the multi-declaration shape `a, b
+:= 1, 2` as a fill-line at the original slot 7 without any
+prior MCQ exposure. Per
 [02-pedagogy.md](02-pedagogy.md#introducing-a-new-pattern-rule),
-the fix options are: add a multi-decl MCQ slot, move the
-multi-decl fill-line later (after a freeform demonstrates it),
-or preview the shape in an earlier MCQ. A full per-theme audit
-for "new shape introduced inside fill-line/freeform without
-prior MCQ" is part of Module 1's pre-launch QA pass and
-re-applied to every Module 2+ theme as it lands.
+a new MCQ slot was inserted at position 4 introducing the
+multi-decl shape as recognition; the old slots 4-9 shifted down
+to 5-10. The fill-line that violated the rule now follows the
+introducing-MCQ by four slots.
+
+The theme grew from 9 to 10 slots — the rule explicitly permits
+this: "Better a slightly longer theme than a learner who has to
+guess." A full per-theme audit for "new shape introduced inside
+fill-line/freeform without prior MCQ" remains part of Module 1's
+pre-launch QA and is applied to every Module 2+ theme as it lands.
 
 Pass 3 is per-theme work; doesn't have to land all at once. Each theme's
 Pass 3 lives in `design-docs/lessons/<module>/<theme>.md` (planned —

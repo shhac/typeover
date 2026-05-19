@@ -1,0 +1,49 @@
+target: go
+themeId: foundations/variables
+type: freeform
+order: 10
+prompt: |
+  Write a Go program that demonstrates all three variable-declaration
+  forms together:
+
+  - `const Pi = 3.14` at package scope (a compile-time constant).
+  - `var label string = "radius"` inside `main` (the full form with
+    an explicit type).
+  - `radius := 5` inside `main` (the short form).
+
+  Then print on one line: `label = 5`, computed by composing the three
+  values via `fmt.Println(label, "=", radius)`. The `const` shows it
+  exists but isn't strictly needed for the output — that's the point:
+  Go's variable surface is wider than TypeScript's.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const PI = 3.14;
+    let label: string = "radius";
+    let radius = 5;
+    console.log(label, "=", radius);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    const Pi = 3.14
+
+    func main() {
+    	var label string = "radius"
+    	radius := 5
+    	fmt.Println(label, "=", radius)
+    }
+expectStdout: |
+  radius = 5
+runtime: yaegi
+hints:
+  - "`const` at package scope is for compile-time constants. `var` with an explicit type goes inside a function when you want to be explicit. `:=` is the short form everywhere else."
+  - "`fmt.Println` separates its args with spaces and ends with a newline. Three args here: the string `label`, the literal `\"=\"`, and the int `radius`."
+  - "`package main; import \"fmt\"; const Pi = 3.14; func main() { var label string = \"radius\"; radius := 5; fmt.Println(label, \"=\", radius) }`"
+notes: |
+  The compile-time const isn't used in the output by design — the
+  exercise is about declaring all three forms in one program, not
+  about computing with Pi. A more advanced version (Module 2 onward)
+  would reach for the const in arithmetic.
