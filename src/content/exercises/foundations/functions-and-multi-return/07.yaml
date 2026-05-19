@@ -42,10 +42,26 @@ generator:
     	process(n)
     }
   distractors:
-    - 'if (err) { handleError(err); return }'
-    - 'if err { handleError(err); return }'
-    - 'if err === null { handleError(err); return }'
-    - 'if err == null { handleError(err); return }'
+    - match: 'if (err) { handleError(err); return }'
+      explain: |-
+        Two TS habits: Go doesn't take parens around `if` conditions,
+        and there are no truthy-tests on errors — `error` isn't a
+        bool. Compare against `nil` explicitly: `if err != nil`.
+    - match: 'if err { handleError(err); return }'
+      explain: |-
+        Go has no truthy / falsy. An `error` value is either `nil`
+        or non-nil — say so directly: `if err != nil { ... }`.
+    - match: 'if err === null { handleError(err); return }'
+      explain: |-
+        Two things: triple-equals is JS / TS, and Go's empty-marker
+        is `nil`, not `null`. The idiom is `if err != nil` — note
+        also the comparison is `!=` (we want the error-PRESENT
+        branch).
+    - match: 'if err == null { handleError(err); return }'
+      explain: |-
+        Two corrections at once. Go uses `nil` not `null`, AND you
+        want the `!= nil` branch (this body runs on error). The
+        idiom is `if err != nil { ... }`.
 expectStdout: |
   caught: oops
 runtime: yaegi

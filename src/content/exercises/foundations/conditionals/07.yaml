@@ -31,10 +31,26 @@ generator:
     	${line}
     }
   distractors:
-    - 'switch n { case 1: case 2: handle() }'
-    - 'switch n { case 1 | 2: handle() }'
-    - 'switch n { case [1, 2]: handle() }'
-    - 'switch n { match 1, 2: handle() }'
+    - match: 'switch n { case 1: case 2: handle() }'
+      explain: |-
+        Go's `case` doesn't fall through by default the way C / Java
+        / TS do. Empty `case 1:` matches `1` and does nothing —
+        `handle()` only runs for `case 2`. To match multiple values
+        with one body, list them comma-separated: `case 1, 2:`.
+    - match: 'switch n { case 1 | 2: handle() }'
+      explain: |-
+        That's pipe-or pattern syntax from Rust / OCaml /
+        pattern-matching languages. Go uses commas: `case 1, 2:`.
+    - match: 'switch n { case [1, 2]: handle() }'
+      explain: |-
+        That would compare `n` against a slice literal — Go would
+        reject it as a type mismatch. The `case` clause takes a list
+        of *expressions*, comma-separated, each compared to the
+        switch value: `case 1, 2:`.
+    - match: 'switch n { match 1, 2: handle() }'
+      explain: |-
+        Some languages use `match` (Rust) or `when` (Kotlin) — Go
+        sticks with `case`. The shape is `case VALUE, VALUE: …`.
 expectStdout: |
   matched
 runtime: yaegi

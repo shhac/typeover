@@ -29,10 +29,26 @@ generator:
     	fmt.Println(path)
     }
   distractors:
-    - 'path := parts.join("/")'
-    - 'path := parts.Join("/")'
-    - 'path := strings.Join("/", parts)'
-    - 'path := strings.JoinWith(parts, "/")'
+    - match: 'path := parts.join("/")'
+      explain: |-
+        Slices don't have methods in Go — there's no
+        `Array.prototype.join` equivalent on the value itself. The
+        operation lives in the `strings` package as a function.
+    - match: 'path := parts.Join("/")'
+      explain: |-
+        Same problem with capitalisation flipped — slices still
+        don't have methods. Call `strings.Join(parts, "/")` instead.
+    - match: 'path := strings.Join("/", parts)'
+      explain: |-
+        Right function, args swapped. The Go signature is
+        `Join(elems []string, sep string)` — slice first, separator
+        second. Opposite of TS's `parts.join("/")` where the slice
+        is the receiver.
+    - match: 'path := strings.JoinWith(parts, "/")'
+      explain: |-
+        `JoinWith` doesn't exist. Go names are usually concise — the
+        function is just `Join`. Look up the `strings` package for
+        the actual API.
 expectStdout: |
   home/user/docs
 runtime: yaegi

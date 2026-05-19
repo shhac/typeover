@@ -90,18 +90,32 @@ Flagged for "do later when triggered", not now.
   as match-text only (the `explain` field is unused on MCQ —
   the canonical is adjacent for direct comparison).
 
-  Shipped (proof-of-concept): `foundations/variables/06.yaml`
-  upgrades its 4 distractors with author-written explanations
-  (`var doubled = count * 2` → "Use `:=` inside a function";
-  `doubled = count * 2` → "That's a re-assignment, not a
-  declaration"; etc.). The other 11 fill-line YAMLs keep their
-  bare-string distractors — back-compat path delivers the
-  existing generic-wrong-message UX.
+  Shipped: all 12 fill-line YAMLs in Module 1 (Foundations) now
+  carry `{match, explain}` distractors with per-pattern
+  explanations written for a TS dev's mental model. Examples:
+  - `var doubled = count * 2` → "Use `:=` inside a function"
+    (variables/06)
+  - `doubled = count * 2` → "That's a re-assignment, not a
+    declaration; `doubled` doesn't exist yet" (variables/06)
+  - `ratio := int(double) / count` → "That would truncate
+    `double` to `10` before dividing, then give integer division"
+    (numeric-primitives/06)
+  - `parts.join("/")` → "Slices don't have methods in Go"
+    (strings-bytes-runes/07)
+  - `if (err) { ... }` → "Go has no truthy / falsy. An `error`
+    value is either `nil` or non-nil" (functions/07)
+  - `continue if items[i] == nil` → "Ruby's trailing-conditional.
+    Go isn't Ruby" (loops/07)
 
-  Open: incrementally upgrading the remaining 11 fill-line YAMLs
-  with explanations, as authoring time permits. The structural
-  cost has been paid; each remaining upgrade is a pure content
-  edit.
+  Each explanation names the specific habit it's correcting and
+  points at the idiomatic Go shape, so the wrong-phase message
+  reads as targeted teaching rather than generic "no".
+
+  Future upgrades: when Module 2+ ships, the structured
+  distractor shape is part of the new-content authoring workflow
+  rather than a back-port. Content-lint could add a warning for
+  fill-line distractors that ship as bare strings (lowering the
+  ratchet over time) — small follow-up if author velocity drops.
 
 - **MobileKeyBar — sticky Go-symbol bar above the mobile
   keyboard** *(landed 2026-05-19 — first cut on Freeform.)*

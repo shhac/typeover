@@ -35,10 +35,25 @@ generator:
     	}
     }
   distractors:
-    - "if (items[i] == nil) continue"
-    - "if items[i] === nil { continue }"
-    - "if items[i] == null { continue }"
-    - "continue if items[i] == nil"
+    - match: "if (items[i] == nil) continue"
+      explain: |-
+        Two TS habits at once: Go doesn't take parens around the
+        condition of an `if`, and the body needs braces — even a
+        single `continue`. The shape is `if cond { body }`.
+    - match: "if items[i] === nil { continue }"
+      explain: |-
+        Triple-equals is a JavaScript / TypeScript thing. Go uses
+        `==` for equality; the types either match or it won't
+        compile.
+    - match: "if items[i] == null { continue }"
+      explain: |-
+        Close — right shape, wrong empty-marker. Go's "no value"
+        keyword is `nil`, not `null`. `nil` is what pointers,
+        interfaces, maps, slices, and channels compare against.
+    - match: "continue if items[i] == nil"
+      explain: |-
+        Ruby's trailing-conditional. Go isn't Ruby — `if` always
+        leads, body always in braces.
 expectStdout: |
   a
   c

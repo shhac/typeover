@@ -26,10 +26,27 @@ generator:
     	fmt.Println(ratio)
     }
   distractors:
-    - "ratio := float64(double) / count"
-    - "ratio := double / count"
-    - "ratio := int(double) / count"
-    - "ratio := double / float(count)"
+    - match: "ratio := float64(double) / count"
+      explain: |-
+        Wrong side. `double` is already `float64` — casting it to its
+        own type is a no-op; `count` is the `int` that needs to become
+        a float so the divide stays in floating-point.
+    - match: "ratio := double / count"
+      explain: |-
+        Go won't mix numeric types implicitly the way TS does. A
+        `float64` and an `int` can't divide as-is — the compiler
+        refuses rather than guessing which one to coerce. Convert the
+        `int` to `float64` explicitly.
+    - match: "ratio := int(double) / count"
+      explain: |-
+        That would truncate `double` to `10` before dividing, then
+        give you integer division — `10 / 4 == 2`, not `2.5`. Push
+        toward the wider type, not the narrower one.
+    - match: "ratio := double / float(count)"
+      explain: |-
+        Go doesn't have a bare `float` type — it's `float32` or
+        `float64` specifically. `float64` is the default; that's what
+        you want here.
 expectStdout: |
   2.5
 runtime: yaegi

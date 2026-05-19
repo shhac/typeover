@@ -24,10 +24,27 @@ generator:
     	fmt.Println(id)
     }
   distractors:
-    - "var id int16 = 1_000_000_000"
-    - "var id int8 = 1_000_000_000"
-    - "var id uint8 = 1_000_000_000"
-    - "var id byte = 1_000_000_000"
+    - match: "var id int16 = 1_000_000_000"
+      explain: |-
+        `int16` tops out around 32,767. A billion overflows it by
+        five orders of magnitude. Reach for `int` (sized to the
+        platform, ≥32 bits in practice) unless you have a specific
+        reason to pick a width.
+    - match: "var id int8 = 1_000_000_000"
+      explain: |-
+        `int8` holds -128 to 127. Storing a billion in it is an
+        immediate overflow. Use `int` for general-purpose integers
+        — fixed widths are for specific encodings, not defaults.
+    - match: "var id uint8 = 1_000_000_000"
+      explain: |-
+        `uint8` is 0 to 255 — one byte. Same overflow problem as
+        `int8`, and `uint`-prefixed types are for cases where the
+        value can't be negative *by design*. Default to `int`.
+    - match: "var id byte = 1_000_000_000"
+      explain: |-
+        `byte` is an alias for `uint8` — same 0..255 range. The name
+        signals intent ("this is raw byte data"), not capacity. `int`
+        is the default integer type.
 expectStdout: |
   1000000000
 runtime: yaegi

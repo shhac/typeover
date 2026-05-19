@@ -29,10 +29,27 @@ generator:
     	fmt.Println(prefix)
     }
   distractors:
-    - 'prefix := name.StartsWith("Mr")'
-    - 'prefix := name.HasPrefix("Mr")'
-    - 'prefix := strings.StartsWith(name, "Mr")'
-    - 'prefix := startsWith(name, "Mr")'
+    - match: 'prefix := name.StartsWith("Mr")'
+      explain: |-
+        Go strings don't have methods like TS's `String.prototype`.
+        String operations live in the `strings` package as plain
+        functions — pass the string in as the first argument.
+    - match: 'prefix := name.HasPrefix("Mr")'
+      explain: |-
+        Right name, wrong shape — `HasPrefix` is a package function,
+        not a string method. The call is `strings.HasPrefix(name,
+        "Mr")`.
+    - match: 'prefix := strings.StartsWith(name, "Mr")'
+      explain: |-
+        Right package, wrong name. Go calls this `HasPrefix` (named
+        for what it returns: does this string HAS the given PREFIX?).
+        The TS verb `startsWith` becomes the Go predicate `HasPrefix`.
+    - match: 'prefix := startsWith(name, "Mr")'
+      explain: |-
+        That looks like an unqualified function call. Go doesn't have
+        a top-level `startsWith` — string utilities live in the
+        `strings` package, so the call needs `strings.` in front and
+        `HasPrefix` as the name.
 expectStdout: |
   true
 runtime: yaegi
