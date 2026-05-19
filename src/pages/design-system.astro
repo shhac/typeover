@@ -1,0 +1,155 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Button,
+  CodeBlock,
+  Compare,
+  Container,
+  Divider,
+  Eyebrow,
+  Heading,
+  Kbd,
+  ProgressChip,
+  Stack,
+  Text,
+} from "~/components/ds";
+
+/*
+ * Design-system inventory. Lives at /design-system per
+ * design-docs/15 pattern 11 — moved off the homepage so the
+ * landing page can lead with the course offering rather than
+ * the DS contributor's catalogue.
+ *
+ * Anyone hacking on the DS opens this route intentionally;
+ * learners never see it. The page is unlinked from the global
+ * footer too — it's a contributor surface, not a learner one.
+ */
+---
+
+<BaseLayout
+  title="Design system — typeover"
+  description="Inventory of the typeover design-system primitives."
+>
+  <main class="py-12 sm:py-20">
+    <Container width="wide">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Heading level={1}>Design system</Heading>
+          <Text tone="secondary" size="lg">
+            Inventory of typeover's design-system primitives. Compose
+            them — every page on the site is built from this list.
+          </Text>
+        </Stack>
+
+        <Divider />
+
+        {/* Example of <Compare> + filename labels — the killer
+          * move for the TS → Go translation pattern. */}
+        <Stack gap="sm">
+          <Eyebrow>compare — side by side</Eyebrow>
+          <Compare
+            caption="<Compare> renders a <figure> + <figcaption> wrapping <Adaptive>. Side-by-side at ≥1024px, stacked below. Used wherever TS↔Go translation is the point."
+          >
+            <CodeBlock lang="ts" filename="users.ts">{`type User = {
+  id: string;
+  name: string;
+};
+
+function greet(u: User) {
+  return \`hi \${u.name}\`;
+}`}</CodeBlock>
+            <CodeBlock lang="go" filename="users.go">{`type User struct {
+    ID   string
+    Name string
+}
+
+func greet(u User) string {
+    return "hi " + u.Name
+}`}</CodeBlock>
+          </Compare>
+        </Stack>
+
+        <Divider />
+
+        <Stack gap="md">
+          <Eyebrow>primitives</Eyebrow>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <Stack gap="xs">
+              <Eyebrow tone="amber">buttons</Eyebrow>
+              <Stack direction="row" gap="sm" wrap>
+                <Button variant="primary">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="danger">Danger</Button>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="ts">badges</Eyebrow>
+              <Stack direction="row" gap="sm" wrap>
+                <Badge>default</Badge>
+                <Badge variant="ts">typescript</Badge>
+                <Badge variant="go">golang</Badge>
+                <Badge variant="amber">focus</Badge>
+                <Badge variant="success">passed</Badge>
+                <Badge variant="error">failed</Badge>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="go">keys</Eyebrow>
+              <Stack direction="row" gap="sm" align="center">
+                <Kbd>⌘</Kbd>
+                <Kbd>K</Kbd>
+                <Text tone="muted" size="sm" family="mono">open palette</Text>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">tones</Eyebrow>
+              <Stack gap="xs">
+                <Text tone="primary">Primary — main reading text</Text>
+                <Text tone="secondary">Secondary — supporting prose</Text>
+                <Text tone="muted">Muted — captions and hints</Text>
+                <Text tone="faint">Faint — barely-there metadata</Text>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">progress chips</Eyebrow>
+              <Stack gap="xs">
+                <ProgressChip kind="theme" passed={6} total={9} />
+                <ProgressChip kind="exercise" seen={3} passed={2} />
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">eyebrows</Eyebrow>
+              <Stack gap="xs">
+                <Eyebrow>default</Eyebrow>
+                <Eyebrow tone="muted">muted</Eyebrow>
+                <Eyebrow tone="amber">amber</Eyebrow>
+                <Eyebrow tone="ts">typescript</Eyebrow>
+                <Eyebrow tone="go">golang</Eyebrow>
+              </Stack>
+            </Stack>
+          </div>
+        </Stack>
+
+        <Divider />
+
+        <Stack gap="sm">
+          <Eyebrow>further reading</Eyebrow>
+          <Text tone="muted" size="sm">
+            Design rationale lives in
+            <code class="font-mono">design-docs/</code> at the repo
+            root. Theme axes (colour / density / corners / style)
+            are in 13 and 14; the docs-site patterns this DS is
+            built against are in 15.
+          </Text>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

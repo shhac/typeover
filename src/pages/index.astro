@@ -9,21 +9,22 @@ import {
   Divider,
   Eyebrow,
   Heading,
-  Kbd,
   LangCrumbs,
   Stack,
   Text,
 } from "~/components/ds";
+import TrackCard from "~/components/ds/TrackCard.astro";
 
 /*
- * Landing page. Three rhythms separated by hairlines per
- * design-docs/15 patterns 1 + 4 + 8:
- *   - hero (title + dek + actions)
- *   - example (shared-caption side-by-side TS/Go via <Compare>)
- *   - DS index (small mono eyebrow per group; no panel chrome)
+ * Landing page — design-docs/15 pattern 11. The structural
+ * commitment: the homepage treats Go as the first of many
+ * language tracks. A second language (Rust/Zig/Python/…) lands
+ * as another <TrackCard> below this one with no homepage
+ * restructure.
  *
- * Replaces the prior "h4 block label + grid of labelled panels"
- * Confluence rhythm.
+ * Rhythm: hero → TS↔Go wedge example → "what's on offer" Go
+ * TrackCard → future-language slot → footer. The DS inventory
+ * has moved off this page — see /design-system.
  */
 ---
 
@@ -43,30 +44,21 @@ import {
             <span class="text-accent-ts">type</span><span class="text-accent-amber">over</span>
           </Heading>
           <Text tone="secondary" size="lg">
-            Learn Go from your TypeScript knowledge. Side-by-side translation,
-            multiple choice, fill-in-the-tile, and code-runner exercises —
-            scaffolded so you build real intuition, not just syntax recognition.
+            A bilingual learning site that bridges the languages you
+            already know to the ones you want next. Side-by-side
+            translation, multiple choice, fill-in-the-tile, and
+            code-runner exercises — scaffolded so you build real
+            intuition, not just syntax recognition.
           </Text>
-          <Stack direction="row" gap="sm" wrap>
-            <a href="/go/foundations/variables/01" class="inline-flex">
-              <Button variant="primary" size="md">Start learning</Button>
-            </a>
-            <a href="/go" class="inline-flex">
-              <Button variant="secondary" size="md">Browse curriculum</Button>
-            </a>
-            {/* Shortcuts button removed 2026-05-20 — was a first-class
-              * CTA that did nothing. Per design-docs/99: re-add when
-              * there are ≥3 site-wide shortcuts worth documenting. */}
-          </Stack>
         </Stack>
 
         <Divider />
 
         {/* Side-by-side example */}
         <Stack gap="sm">
-          <Eyebrow>example</Eyebrow>
+          <Eyebrow>the wedge</Eyebrow>
           <Compare
-            caption="Each lesson presents a TS snippet and its Go counterpart, then asks you to identify, translate, or write the equivalent."
+            caption="Each lesson presents the source language and its target counterpart, then asks you to identify, translate, or write the equivalent."
           >
             <CodeBlock lang="ts" filename="users.ts">{`type User = {
   id: string;
@@ -89,57 +81,65 @@ func greet(u User) string {
 
         <Divider />
 
-        {/* Design system inventory — small mono eyebrows per group,
-            no panel-label chrome. */}
+        {/* Track offerings — Go today, future targets stack
+            alongside or below. */}
         <Stack gap="md">
-          <Eyebrow>design system</Eyebrow>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-            <Stack gap="xs">
-              <Eyebrow tone="amber">buttons</Eyebrow>
-              <Stack direction="row" gap="sm" wrap>
-                <Button variant="primary">Primary</Button>
-                <Button variant="secondary">Secondary</Button>
-                <Button variant="ghost">Ghost</Button>
-                <Button variant="danger">Danger</Button>
-              </Stack>
-            </Stack>
+          <Eyebrow>tracks</Eyebrow>
 
-            <Stack gap="xs">
-              <Eyebrow tone="ts">badges</Eyebrow>
-              <Stack direction="row" gap="sm" wrap>
-                <Badge>default</Badge>
-                <Badge variant="ts">typescript</Badge>
-                <Badge variant="go">golang</Badge>
-                <Badge variant="amber">focus</Badge>
-                <Badge variant="success">passed</Badge>
-                <Badge variant="error">failed</Badge>
-              </Stack>
+          <TrackCard status="available">
+            <Heading level={2} class="!text-2xl" slot="title">
+              <span class="text-accent-go">Go</span> for TypeScript devs
+            </Heading>
+            <Fragment slot="dek">
+              Module 1 (Foundations) ships 54 exercises across six
+              themes — variables, numeric primitives, strings, conditionals,
+              loops, functions and multi-return. Modules 2-7 cover
+              collections, types, interfaces, errors, concurrency, and
+              idioms.
+            </Fragment>
+            <Stack gap="xs" slot="modules">
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-go">1.</span> Foundations · ready
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>2.</span> Collections · soon
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>3.</span> Types & methods · soon
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>4–7.</span> Interfaces, errors, concurrency, idioms · soon
+              </Text>
             </Stack>
+            <a href="/go/foundations/variables/01" class="inline-flex">
+              <Button variant="primary" size="md">Start with Foundations</Button>
+            </a>
+            <a href="/go" class="inline-flex">
+              <Button variant="secondary" size="md">Browse the curriculum</Button>
+            </a>
+          </TrackCard>
 
-            <Stack gap="xs">
-              <Eyebrow tone="go">keys</Eyebrow>
-              <Stack direction="row" gap="sm" align="center">
-                <Kbd>⌘</Kbd>
-                <Kbd>K</Kbd>
-                <Text tone="muted" size="sm" family="mono">open palette</Text>
-              </Stack>
+          <TrackCard status="soon">
+            <Heading level={2} class="!text-2xl" slot="title">
+              <span class="text-fg-secondary">Rust</span> for TypeScript devs
+            </Heading>
+            <Fragment slot="dek">
+              A future track. Same bilingual progression — same
+              recognition → fill-in → freeform shape — for the
+              ownership / borrowing / lifetime moves Rust asks of you.
+            </Fragment>
+            <Stack gap="xs" slot="modules">
+              <Text tone="faint" size="sm" family="mono">
+                proposed; not yet authored
+              </Text>
             </Stack>
-
-            <Stack gap="xs">
-              <Eyebrow tone="muted">tones</Eyebrow>
-              <Stack gap="xs">
-                <Text tone="primary">Primary — main reading text</Text>
-                <Text tone="secondary">Secondary — supporting prose</Text>
-                <Text tone="muted">Muted — captions and hints</Text>
-                <Text tone="faint">Faint — barely-there metadata</Text>
-              </Stack>
-            </Stack>
-          </div>
+            <Button variant="ghost" size="md" disabled>Coming later</Button>
+          </TrackCard>
         </Stack>
 
         <Divider />
 
-        <Stack direction="row" justify="between" align="center">
+        <Stack direction="row" justify="between" align="center" wrap>
           <Text tone="muted" size="xs" family="mono">
             typeover · 2026 · built with astro + solid + tailwind
           </Text>

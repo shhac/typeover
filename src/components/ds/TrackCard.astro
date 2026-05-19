@@ -1,0 +1,59 @@
+---
+/*
+ * TrackCard — the "course offering" block on the homepage.
+ * design-docs/15 pattern 11.
+ *
+ * One TrackCard per target language. Today there's a Go card
+ * authored; future TS→Rust / TS→Zig / TS→Python cards slot in
+ * alongside or below without homepage restructure.
+ *
+ * Shape: title + dek + a small module list + a primary CTA.
+ * "Coming soon" tracks render the same shape with a muted CTA
+ * (so the layout reads the same even when only one track exists).
+ *
+ * Named slots:
+ *   - `title` (required): the language name as a Heading.
+ *   - `dek` (required): one-line dek beneath the title.
+ *   - `modules` (required): a small list / grid of module names
+ *     + statuses. The card renders this body verbatim.
+ *   - default: the CTA row (Buttons / links). Renders last.
+ *
+ * The card itself is hairline-only — no panel chrome, no
+ * coloured fill. Identity comes from the accent token chosen
+ * per-track (amber/ts/go pull from the colour theme).
+ */
+
+interface Props {
+  /** Status badge shown beside the title. "available" lights up
+   *  the start-CTA copy; "soon" keeps it muted. */
+  status?: "available" | "soon";
+  class?: string;
+}
+
+const { status = "available", class: className } = Astro.props;
+---
+
+<article
+  class:list={[
+    "border border-border-default p-6 sm:p-8 rounded-md flex flex-col gap-4",
+    status === "soon" && "opacity-60",
+    className,
+  ]}
+  aria-label="course track"
+>
+  <div class="flex flex-row gap-3 items-baseline flex-wrap">
+    <slot name="title" />
+    <span class="font-mono text-xs uppercase tracking-widest text-fg-muted">
+      {status === "available" ? "ready" : "soon"}
+    </span>
+  </div>
+  <div class="text-fg-secondary text-base sm:text-lg">
+    <slot name="dek" />
+  </div>
+  <div class="mt-2">
+    <slot name="modules" />
+  </div>
+  <div class="mt-4 flex flex-row gap-3 flex-wrap">
+    <slot />
+  </div>
+</article>
