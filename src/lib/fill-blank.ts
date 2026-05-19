@@ -5,7 +5,7 @@
  * Solid-rendering tests.
  */
 
-import type { FillSegment, GeneratorSpec } from "./generator";
+import type { ExerciseInstance, FillSegment, GeneratorSpec } from "./generator";
 import { substitute } from "./generator";
 import { rngFromSeed, shuffle } from "./seed";
 
@@ -108,4 +108,26 @@ export function buildCandidatePool(
    * correct line in distractors too. */
   const all = [expected, ...distractors].filter((v, i, a) => a.indexOf(v) === i);
   return shuffle(rngFromSeed(`${seed}::tiles`), all);
+}
+
+/**
+ * Substitute the learner's typed line into an instance at the blank
+ * position. Rebuilds from the segment stream rather than from the
+ * raw canonical template so the scaffold (already-substituted vars
+ * + non-blank text) is preserved exactly.
+ *
+ * Used by FillBlankLineInput to assemble the program text sent to
+ * Yaegi for grading. Extracted from the component so it can be
+ * unit-tested without rendering and so future fill-* surfaces (or
+ * a future "validate the typed line against the canonical without
+ * running it" feature) can reuse the helper.
+ *
+ * For an instance without blank segments, the segments fallback to
+ * [] and the result is "" — defence in depth; the schema rejects a
+ * fill-line authored without a blank, but components carry their
+ * own guards too.
+ */
+export function substituteAtBlank(instance: ExerciseInstance, userLine: string): string {
+  const segments = instance.blankSegments ?? [];
+  return segments.map((seg) => (seg.kind === "blank" ? userLine : seg.text)).join("");
 }

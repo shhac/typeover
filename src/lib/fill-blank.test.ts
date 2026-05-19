@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildCandidatePool } from "./fill-blank";
-import type { GeneratorSpec } from "./generator";
+import { buildCandidatePool, substituteAtBlank } from "./fill-blank";
+import type { ExerciseInstance, FillSegment, GeneratorSpec } from "./generator";
 
 /*
  * Tests for the fill-line candidate-pool helper. Pins:
@@ -135,5 +135,55 @@ describe("buildCandidatePool", () => {
      * the contract. */
     const out = buildCandidatePool(TEMPLATE, undefined, ["line"], "seed");
     expect(out).toContain(CORRECT);
+  });
+});
+
+describe("substituteAtBlank", () => {
+  const makeInstance = (segments: FillSegment[]): ExerciseInstance => ({
+    ts: "",
+    canonical: "",
+    blankSegments: segments,
+  });
+
+  it("substitutes the user's line at the blank position", () => {
+    const instance = makeInstance([
+      { kind: "text", text: "before\n" },
+      { kind: "blank", varName: "line", expected: "x := 1" },
+      { kind: "text", text: "\nafter" },
+    ]);
+    expect(substituteAtBlank(instance, "y := 2")).toBe("before\ny := 2\nafter");
+  });
+
+  it("preserves the scaffold around the blank exactly", () => {
+    const instance = makeInstance([
+      { kind: "text", text: 'package main\n\nimport "fmt"\n\nfunc main() {\n\t' },
+      { kind: "blank", varName: "line", expected: "doubled := count * 2" },
+      { kind: "text", text: "\n\tfmt.Println(doubled)\n}" },
+    ]);
+    expect(substituteAtBlank(instance, "doubled := count * 2")).toBe(
+      'package main\n\nimport "fmt"\n\nfunc main() {\n\tdoubled := count * 2\n\tfmt.Println(doubled)\n}',
+    );
+  });
+
+  it("returns empty string when there are no segments (defence in depth)", () => {
+    const instance: ExerciseInstance = { ts: "", canonical: "" };
+    expect(substituteAtBlank(instance, "anything")).toBe("");
+  });
+
+  it("substitutes the same userLine into every blank when multiple blanks exist", () => {
+    /* Today fill-line components only declare one blank, but the
+     * helper is segment-agnostic — pin the contract so a future
+     * multi-blank surface knows what it gets. */
+    const instance = makeInstance([
+      { kind: "blank", varName: "a", expected: "1" },
+      { kind: "text", text: " + " },
+      { kind: "blank", varName: "b", expected: "2" },
+    ]);
+    expect(substituteAtBlank(instance, "X")).toBe("X + X");
+  });
+
+  it("handles the no-blank case (variant generator → no blankSegments)", () => {
+    const instance = makeInstance([{ kind: "text", text: "plain text only" }]);
+    expect(substituteAtBlank(instance, "ignored")).toBe("plain text only");
   });
 });

@@ -1,11 +1,17 @@
 import { createSignal, Show } from "solid-js";
-import { getRunner } from "~/runtime";
+import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { RunResetToolbar } from "../exercise/RunResetToolbar";
+import { RunResultPanel } from "../exercise/RunResultPanel";
 
 /*
  * Browser-side smoke island for the Yaegi worker. Exists purely to
- * verify the worker + Comlink + WASM chain end-to-end before the
- * freeform exercise component lands. Mounted at /runtime-smoke for
- * dev inspection; not linked from the curriculum.
+ * verify the worker + Comlink + WASM chain end-to-end before
+ * exercise components consume it. Mounted at /runtime-smoke for dev
+ * inspection; not linked from any user-facing nav.
+ *
+ * Shares useYaegiRun + RunResetToolbar + RunResultPanel with the
+ * production exercise surfaces — same lifecycle, same visual
+ * vocabulary.
  */
 
 const DEFAULT_CODE = `package main
@@ -20,42 +26,19 @@ func main() {
 }
 `;
 
-interface RunOutcome {
-  stdout: string;
-  stderr: string;
-  error: string;
-  durationMs: number;
-}
+/* Expected stdout for the default snippet — used by RunResultPanel to
+ * green-vs-red the stdout pane. The smoke probe isn't grading
+ * anything; this is only visual feedback for "did the run produce
+ * what we expected?". */
+const DEFAULT_EXPECT = `hello from yaegi (browser)
+  i = 1
+  i = 2
+  i = 3
+`;
 
 export function YaegiSmoke() {
   const [code, setCode] = createSignal(DEFAULT_CODE);
-  const [running, setRunning] = createSignal(false);
-  const [outcome, setOutcome] = createSignal<RunOutcome | null>(null);
-
-  async function run() {
-    setRunning(true);
-    setOutcome(null);
-    const t0 = performance.now();
-    try {
-      const runner = getRunner();
-      const r = await runner.eval(code());
-      setOutcome({
-        stdout: r.stdout,
-        stderr: r.stderr,
-        error: r.error,
-        durationMs: performance.now() - t0,
-      });
-    } catch (e) {
-      setOutcome({
-        stdout: "",
-        stderr: "",
-        error: e instanceof Error ? e.message : String(e),
-        durationMs: performance.now() - t0,
-      });
-    } finally {
-      setRunning(false);
-    }
-  }
+  const yaegi = useYaegiRun({ buildProgram: () => code() });
 
   return (
     <div class="flex flex-col gap-3">
@@ -64,31 +47,14 @@ export function YaegiSmoke() {
         value={code()}
         onInput={(e) => setCode(e.currentTarget.value)}
       />
-      <button
-        type="button"
-        onClick={run}
-        disabled={running()}
-        class="h-11 px-4 self-start rounded-sm bg-accent-amber text-bg-base font-medium disabled:opacity-50"
-      >
-        {running() ? "Running…" : "Run"}
-      </button>
-      <Show when={outcome()}>
-        {(r) => (
-          <div class="flex flex-col gap-2 font-mono text-sm">
-            <div class="text-fg-faint text-xs">{r().durationMs.toFixed(1)}ms</div>
-            <Show when={r().stdout}>
-              <pre class="bg-bg-inset p-3 rounded-sm border border-success/30">{r().stdout}</pre>
-            </Show>
-            <Show when={r().stderr}>
-              <pre class="bg-bg-inset p-3 rounded-sm border border-error/30">{r().stderr}</pre>
-            </Show>
-            <Show when={r().error}>
-              <pre class="bg-error/5 p-3 rounded-sm border border-error/40 text-error">
-                {r().error}
-              </pre>
-            </Show>
-          </div>
-        )}
+      <RunResetToolbar
+        running={yaegi.running()}
+        canRun={code().trim() !== ""}
+        onRun={yaegi.run}
+        onReset={yaegi.reset}
+      />
+      <Show when={yaegi.runResult()}>
+        {(r) => <RunResultPanel result={r()} expectStdout={DEFAULT_EXPECT} />}
       </Show>
     </div>
   );
