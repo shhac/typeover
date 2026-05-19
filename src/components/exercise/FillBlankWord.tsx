@@ -36,21 +36,27 @@ export function FillBlankWord(props: FillBlankWordProps) {
   const allFilled = () => evaluation().allFilled;
   const allCorrect = () => evaluation().allCorrect;
 
-  function clearInputs() {
-    setInputs({});
-  }
-
   const phase = useExercisePhase({
     exerciseId: props.exerciseId,
     isCorrect: allCorrect,
     canSubmit: allFilled,
     onAnother: () => {
       another();
-      clearInputs();
+      setInputs({});
     },
     // tryAgain deliberately keeps partial inputs — the learner is
     // iterating, not restarting. Clear is its own explicit button.
   });
+
+  /* Per design-docs/12 P1: Clear empties inputs AND resets
+   * submitted/revealed (returning the learner to the picking phase).
+   * `phase.tryAgain()` does the submitted/revealed reset; we follow
+   * up with the input wipe. Compose, don't duplicate the reset
+   * logic into the hook. */
+  function clearInputs() {
+    setInputs({});
+    phase.tryAgain();
+  }
 
   const clearButton = (
     <Show when={Object.keys(inputs()).length > 0}>
