@@ -77,7 +77,7 @@ func yaegiEval(this js.Value, args []js.Value) any {
 func runWithCapture(code string) (string, string, error) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 
-	syms := withFmtOverrides(symbols.Symbols, &stdoutBuf, &stderrBuf)
+	syms := withFmtOverrides(symbols.Symbols, &stdoutBuf)
 
 	i := interp.New(interp.Options{
 		Stdout: &stdoutBuf,
@@ -101,14 +101,19 @@ func runWithCapture(code string) (string, string, error) {
 }
 
 // withFmtOverrides returns a shallow copy of the symbol map with the
-// `fmt` package's Print/Printf/Println (and their Fprint counterparts
-// when given os.Stdout/os.Stderr) replaced with versions that write
-// to the provided buffers. Pure — doesn't mutate the input map.
+// `fmt` package's Print/Printf/Println replaced with versions that
+// write to the provided stdout buffer. Pure — doesn't mutate the
+// input map.
 //
 // We override only the small surface a learner is likely to call from
 // a freeform exercise; the long-tail (fmt.Sprint*, fmt.Errorf, etc.)
-// either is buffer-based already or doesn't emit, so no override needed.
-func withFmtOverrides(base map[string]map[string]reflect.Value, stdout, stderr io.Writer) map[string]map[string]reflect.Value {
+// either is buffer-based already or doesn't emit, so no override
+// needed. Stderr override deferred: no exercise routes user output
+// through stderr today, and interp.Options.Stderr captures Yaegi's
+// own emissions. When a learner exercise needs `fmt.Fprintln(os.Stderr, ...)`
+// captured, add a stderr io.Writer parameter and an Fprint override
+// that switches on the writer argument.
+func withFmtOverrides(base map[string]map[string]reflect.Value, stdout io.Writer) map[string]map[string]reflect.Value {
 	out := make(map[string]map[string]reflect.Value, len(base))
 	for k, v := range base {
 		out[k] = v
@@ -123,8 +128,6 @@ func withFmtOverrides(base map[string]map[string]reflect.Value, stdout, stderr i
 	})
 	fmtPkg["Println"] = reflect.ValueOf(func(a ...any) (int, error) { return fmt.Fprintln(stdout, a...) })
 	out["fmt/fmt"] = fmtPkg
-	// stderr override would land here too once a learner exercise needs it.
-	_ = stderr
 	return out
 }
 

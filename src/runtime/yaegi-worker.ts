@@ -47,40 +47,43 @@ interface YaegiResult {
 
 let initPromise: Promise<void> | null = null;
 
-async function init(): Promise<void> {
-  /* 1. Load wasm_exec.js. */
-  if (typeof self.Go === "undefined") {
-    const execSrc = await fetch("/yaegi/wasm_exec.js").then((r) => {
-      if (!r.ok) throw new Error(`wasm_exec.js fetch failed (${r.status})`);
-      return r.text();
-    });
-    /* The script writes to `globalThis.Go` via the `self`/`window`
-     * branch inside it. Function-constructor execution gives the
-     * script global scope without the CSP cost of inline <script>. */
-    new Function(execSrc)();
-  }
+/** Step 1: fetch + eval wasm_exec.js, which registers `Go` on the
+ *  worker's globalThis. No-op if Go is already registered. */
+async function loadGoBootstrap(): Promise<void> {
+  if (typeof self.Go !== "undefined") return;
+  const execSrc = await fetch("/yaegi/wasm_exec.js").then((r) => {
+    if (!r.ok) throw new Error(`wasm_exec.js fetch failed (${r.status})`);
+    return r.text();
+  });
+  /* The script writes to `globalThis.Go` via the `self`/`window`
+   * branch inside it. Function-constructor execution gives the
+   * script global scope without the CSP cost of inline <script>. */
+  new Function(execSrc)();
   if (typeof self.Go === "undefined") {
     throw new Error("wasm_exec.js loaded but did not register globalThis.Go");
   }
+}
 
-  /* 2. Instantiate the WASM. */
-  const go = new self.Go();
+/** Step 2+3: instantiate yaegi.wasm against go.importObject and start
+ *  the Go runtime. The returned promise from `go.run` resolves only
+ *  when the runtime exits, which it won't by design — we fire it and
+ *  yield a microtask so the yaegiEval registration completes before
+ *  the first eval call. */
+async function instantiateYaegi(go: GoRuntime): Promise<void> {
   const wasmRes = await WebAssembly.instantiateStreaming(
     fetch("/yaegi/yaegi.wasm"),
     go.importObject,
   );
-
-  /* 3. Run — fire and forget. The Go runtime parks on a channel
-   * after registering yaegiEval; the returned promise resolves
-   * when the runtime exits (which it won't, by design). We don't
-   * await it. */
   void go.run(wasmRes.instance);
-
-  /* Yield one microtask so yaegiEval registration completes. */
   await Promise.resolve();
   if (typeof self.yaegiEval !== "function") {
     throw new Error("WASM ran but did not register yaegiEval");
   }
+}
+
+async function init(): Promise<void> {
+  await loadGoBootstrap();
+  await instantiateYaegi(new self.Go!());
 }
 
 const api = {

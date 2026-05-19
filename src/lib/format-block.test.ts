@@ -112,4 +112,13 @@ describe("formatBlock", () => {
     const input = "- one\n- two\n\nFinal paragraph.";
     expect(formatBlock(input)).toBe("<ul><li>one</li><li>two</li></ul><p>Final paragraph.</p>");
   });
+
+  it("a hyphen WITHOUT a trailing space is paragraph text, not a list marker", () => {
+    /* Pins the marker contract — list detection requires `-` + at
+     * least one whitespace char (per LIST_MARKER_RE in format-block).
+     * A future "support `-x` for terse lists" tweak would silently
+     * reclassify paragraphs; this test catches that. */
+    expect(formatBlock("-no-space-here")).toBe("<p>-no-space-here</p>");
+    expect(formatBlock("- with-space")).toBe("<ul><li>with-space</li></ul>");
+  });
 });
