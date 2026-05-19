@@ -3,9 +3,9 @@ themeId: foundations/variables
 type: fill-line
 order: 6
 prompt: |
-  The TS block on the right declares two variables. The Go translation
-  has its second line missing — pick the tile below that completes it
-  idiomatically.
+  The TS program on the left declares two variables and prints
+  `doubled`. The Go translation has its second line missing — type
+  the idiomatic Go that, plugged in, makes the program print `10`.
 generator:
   kind: template
   vars:
@@ -14,31 +14,37 @@ generator:
   ts: |-
     let count = 5;
     let doubled = count * 2;
+    console.log(doubled);
   canonical: |-
-    count := 5
-    ${line}
+    package main
+
+    import "fmt"
+
+    func main() {
+    	count := 5
+    	${line}
+    	fmt.Println(doubled)
+    }
   distractors:
     - "var doubled = count * 2"
     - "doubled = count * 2"
     - "const doubled := count * 2"
     - "let doubled = count * 2"
+expectStdout: |
+  10
+runtime: yaegi
 blanks: [line]
 hints:
-  - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. None of `var name = value`, `name = value`, or anything with `let` or `const` belongs in a function body for a fresh local variable."
+  - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. Not `var`, not bare `=`, and definitely not `let` or `const` — that's TS."
   - "The operator is `:=`. It both declares the variable and assigns the right-hand side."
-  - "The right tile is `doubled := count * 2`."
+  - "Type `doubled := count * 2`."
 notes: |
-  First fill-blank-line exercise. The candidate pool for the `line`
-  var IS the multiple-choice — the component shuffles them per seed
-  and the learner picks one.
+  First fill-line under the redesigned input+Yaegi UX. The learner
+  types the line; we substitute into the canonical scaffold and run.
+  Expected stdout `10` is the round-trip from count=5 doubled.
 
-  The other vars (`base`, `multiplier`) aren't used in the canonical
-  yet; they're scaffolding for future variant exercises that share
-  this theme. Removing them is fine but they don't bloat the
-  rendered instance. Authoring-time note for future me.
-
-  The canonical's first line is hard-coded `count := 5` so that the
-  blanked second line stays the focus. Once we have a generic line-
-  composition exercise type (with TWO blanks, both lines), we'll
-  revisit.
-runtime: none
+  The distractors stay in the YAML — for the legacy tile-picker they
+  were the wrong tiles; under the new UX they're a "known wrong-
+  pattern bank" that future iterations can use to surface targeted
+  feedback (e.g. "your line matches a common assignment-not-
+  declaration mistake; here's why it's not idiomatic").

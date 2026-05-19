@@ -85,20 +85,39 @@ export const exerciseSchema = z
         });
       }
     }
-    /* fill-line shows a tile picker — the candidates are the blank's
-     * substituted value (the correct tile) PLUS generator.distractors
-     * (the wrong tiles). Without distractors the tile pool is just
-     * the one correct option, which renders as a trivial single-tile
-     * "quiz". Catch the misauthoring at build time.
+    /* fill-line has TWO UX modes, distinguished by whether
+     * `expectStdout` is set on the exercise:
      *
-     * fill-word is NOT subject to this rule — it's a free-text input,
-     * not a picker. */
+     *   MODE A (tile picker — legacy): no expectStdout. The component
+     *     renders the picked vars[blank] value + generator.distractors
+     *     as candidate tiles. distractors must be non-empty.
+     *
+     *   MODE B (input + Yaegi grading — the redesign): expectStdout
+     *     present. The component renders a single line input; on
+     *     Submit we substitute the user's text into the canonical,
+     *     run via Yaegi, and check stdout matches expectStdout.
+     *     runtime must be "yaegi" (server fallback isn't wired yet).
+     *     distractors stay valid but optional — repurposable as a
+     *     known-wrong-pattern bank for targeted feedback later.
+     *
+     * fill-word is NOT subject to either rule today — it's a
+     * free-text input graded by string match (slated for the same
+     * Yaegi-grading rewrite per design-docs/99). */
     if (ex.type === "fill-line" && ex.generator.kind === "template") {
-      if (!ex.generator.distractors || ex.generator.distractors.length === 0) {
+      if (ex.expectStdout !== undefined) {
+        if (ex.runtime !== "yaegi") {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              'fill-line with `expectStdout` (input+Yaegi grading) requires `runtime: "yaegi"`.',
+            path: ["runtime"],
+          });
+        }
+      } else if (!ex.generator.distractors || ex.generator.distractors.length === 0) {
         ctx.addIssue({
           code: "custom",
           message:
-            "fill-line exercises require `generator.distractors` (the wrong-tile pool). Add the alternative lines there; keep `vars.<blank>` for the correct line only.",
+            "fill-line requires either `expectStdout` (input+Yaegi grading) or `generator.distractors` (legacy tile picker). Add one or the other.",
           path: ["generator", "distractors"],
         });
       }
@@ -155,10 +174,13 @@ export const exerciseSchema = z
           path: ["runtime"],
         });
       }
-    } else if (ex.expectStdout !== undefined) {
+    } else if (ex.expectStdout !== undefined && ex.type !== "fill-line") {
+      /* fill-line opts into the input+Yaegi UX via expectStdout
+       * (handled above). For any other non-freeform type,
+       * expectStdout is meaningless and probably copy-paste smell. */
       ctx.addIssue({
         code: "custom",
-        message: `\`expectStdout\` is only valid for freeform exercises; got type "${ex.type}".`,
+        message: `\`expectStdout\` is only valid for freeform or fill-line exercises; got type "${ex.type}".`,
         path: ["expectStdout"],
       });
     }
