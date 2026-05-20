@@ -180,20 +180,25 @@ The lenses flagged three structural refactors that didn't fit a
 single iteration. Recording here so a future `/improve-code-structure`
 or proposer cycle can pick them up cold.
 
-**FW-1 — `defineAppearanceAxis<T>()` factory in `theme.ts`**
+**FW-1 — `defineAppearanceAxis<T>()` factory in `theme.ts`** — **SHIPPED 2026-05-20 (round 4)**
 - Flagged by lens 1 (#4), lens 3 (#2), AND lens 4 (#1) — the
   highest-impact convergence in the sweep.
-- Four near-identical axis modules (`THEMES`/`DENSITIES`/`RADII`/
-  `STYLES` with their `currentX`/`setX`/`STORAGE_KEY` triples) collapse
-  to one factory call each. The bootstrap script in
-  `BaseLayout.astro` (lens 3 #3) duplicates the same enum lists and
-  could read from the factory too — drift risk eliminated.
-- Why deferred: the colour axis has a `system` variant that doesn't
-  fit the factory shape; the factory needs careful generic typing
-  to keep test mocks happy; the bootstrap.test.ts enum-coverage
-  test needs to keep working. Real refactor effort: ~half a day.
-- Estimated reward: ~80 lines of duplication eliminated, drift
-  surface closed, ~3 tests collapse into 1 generic test.
+- Shipped as `defineAppearanceAxis<T>({ values, storageKey,
+  datasetKey, default })` returning `{ isValue, current, set }`.
+  The three OS-signal-free axes (density / radius / style) now
+  collapse to one factory call apiece — ~5 lines each instead of
+  ~12. The colour axis keeps its bespoke `currentTheme`/
+  `currentChoice`/`setTheme` to handle the `system` choice, but
+  shares the factory's typeguard for the `dark|light` validation.
+- Every exported name is preserved (`THEMES`, `DENSITIES`, `RADII`,
+  `STYLES`, `*_STORAGE_KEY`, `currentX`, `setX`, `isX` via the
+  factory return) so `AppearancePicker.tsx` and
+  `BaseLayout.bootstrap.test.ts` need no changes. All 463 tests
+  pass; the bootstrap-enum-coverage gate still iterates the four
+  enum exports as before.
+- The bootstrap script in `BaseLayout.astro` deliberately stays
+  inline (it runs pre-paint and can't import from theme.ts). The
+  existing `bootstrap.test.ts` guards drift between the two.
 
 **FW-2 — Split `generator.ts` into schema + runtime**
 - Flagged by lens 2 (#1). The file has an in-source
