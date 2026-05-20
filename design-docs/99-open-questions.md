@@ -232,24 +232,36 @@ Flagged for "do later when triggered", not now.
     wired it'll grow the same shortcut.
 
 - **`content:new theme <id>` — schema-aware scaffolder**
-  *(surfaced 2026-05-19 design-goal pass; previously noted as
-  parked in the content-lint entry below.)* The third of the
-  three design-docs/09 authoring tools. Stamps
-  `src/content/themes/<module>/<theme>.yaml` + nine prefilled
-  exercise YAMLs across the canonical
-  3×MCQ / 2×fill-word / 2×fill-line / 2×freeform progression.
-  Node script alongside `content-lint.mjs`; no deps; interactive
-  prompts for the four schema-required fields that can't be
-  guessed (`title`, `order`, `intro` seed, optional
-  `prerequisites`); `--yes` for non-interactive use. The
-  stamper's value isn't reducing copy-paste — it's encoding the
-  9-slot progression and the schema's `.refine()`s in
-  *executable* form, so the template can't silently drift from
-  what the schema accepts. Pickup criterion: either the
-  maintainer authoring Module 2 reaches for it, OR the first
-  community PR bounces off the manual scaffold. Cost: ~1
-  focused afternoon; defer until one of those triggers actually
-  fires.
+  *(landed 2026-05-20.)* The third of the three
+  design-docs/09 authoring tools. `scripts/content-new-theme.mjs`
+  wired into `package.json` as `content:new`.
+
+  Two starting states supported:
+  1. **Genuinely new theme** — stamps both `src/content/themes/
+     <module>/<theme>.yaml` and the 9 exercise stubs. Interactive
+     prompts (or `--yes`) collect title / order / intro /
+     prerequisites.
+  2. **Pre-launch stub** — theme.yaml already exists (Modules 2-7
+     ship with stub theme metadata per design-docs/10); stamps
+     only the 9 exercise stubs into a fresh exercises directory.
+
+  Stamped content satisfies every Zod refinement AND
+  `pnpm runtime:verify`. Trick: fill-line stubs use
+  `fmt.Print("")` as the placeholder line (zero bytes of stdout,
+  matches the stub's empty `expectStdout`); freeform stubs use
+  an empty `func main(){}`. Authors replace TODO markers
+  iteratively without breaking the test gate.
+
+  Refuses to overwrite an existing exercises directory; the
+  operator must `rm` it first to re-stamp. No `--force`. The
+  schema-required fields (`title`, `order`, `intro`,
+  `prerequisites`) are prompted-for on the new-theme path or
+  inherited from the existing YAML on the stub path.
+
+  Verified end-to-end: `pnpm content:new theme
+  collections/arrays-and-slices --yes` followed by
+  `pnpm runtime:verify` yields 28/28 canonicals passing
+  (24 shipped + 4 newly-stamped runnable stubs).
 
 - **Reveal-diff UX** *(landed 2026-05-19.)* Inline "Show canonical"
   toggle next to the input area on fill-line + freeform —

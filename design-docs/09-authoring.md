@@ -140,10 +140,16 @@ Three planned tools, two shipped:
   half-authored theme warnings. The per-file Zod schema and
   `runtime:verify` cover the other two layers (per-file and
   per-canonical); this covers the graph.
-- **`pnpm content:new theme <id>`** — *not built.* Stamper for a
-  theme.yaml + 9 prefilled exercise YAMLs across the canonical
+- **`pnpm content:new theme <id>`** — *shipped 2026-05-20.*
+  `scripts/content-new-theme.mjs`. Stamps a `theme.yaml` (when
+  new) plus the 9 exercise YAMLs across the canonical
   3 × MCQ / 2 × fill-word / 2 × fill-line / 2 × freeform
-  progression. Proposed shape in
-  [99-open-questions.md](99-open-questions.md). Pickup gated on
-  either the maintainer authoring Module 2 reaching for it OR
-  the first community PR bouncing off the manual scaffold.
+  progression. Two valid starting states: (1) genuinely new
+  theme — interactive prompts collect title/order/intro/
+  prerequisites; (2) pre-launch stub — `theme.yaml` already
+  exists, stamps only the exercises. Stamped content satisfies
+  every Zod refinement AND `pnpm runtime:verify` (fill-line
+  stubs use `fmt.Print("")`, freeform stubs use an empty
+  `func main(){}`; both produce empty stdout matching the
+  stub's empty `expectStdout`). Authors replace TODO markers
+  iteratively without breaking the test gate.
