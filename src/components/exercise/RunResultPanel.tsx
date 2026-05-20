@@ -1,4 +1,5 @@
 import { Show } from "solid-js";
+import { FOCUS_RING_CLASS } from "../ds/_internal";
 import { Text } from "../ds/Text";
 import type { RunResult } from "~/lib/use-yaegi-run";
 
@@ -51,7 +52,7 @@ export function RunResultPanel(props: RunResultPanelProps) {
       role="region"
       aria-label="Run result"
       tabindex="-1"
-      class="flex flex-col gap-2 font-mono text-sm focus:outline-2 focus:outline-accent-primary focus:outline-offset-2 rounded-sm"
+      class={"flex flex-col gap-2 font-mono text-sm rounded-sm " + FOCUS_RING_CLASS}
     >
       <Text tone="faint" size="xs" family="mono">
         {props.result.durationMs.toFixed(1)} ms

@@ -1,9 +1,10 @@
-import { createEffect, createSignal, For, onMount, Show } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
 import { normaliseSubmission } from "~/lib/submission-normalise";
+import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
@@ -110,21 +111,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
     onTryAgain: () => yaegi.clear(),
   });
 
-  /* Move focus to the RunResultPanel when a fresh result lands.
-   * Sighted keyboard users land on the parsed result instead of
-   * staying on the Run button; SR users hit a labelled region.
-   * Lighter variant of design-docs/24 P4. */
-  let runPanelRef: HTMLDivElement | undefined;
-  let lastResultId: object | null = null;
-  createEffect(() => {
-    const r = yaegi.runResult();
-    if (r !== null && r !== lastResultId) {
-      lastResultId = r;
-      queueMicrotask(() => runPanelRef?.focus());
-    } else if (r === null) {
-      lastResultId = null;
-    }
-  });
+  const runPanelFocus = useRunResultFocus(yaegi.runResult);
 
   const toolbar = (
     <div class="flex flex-row gap-3 items-center flex-wrap">
@@ -240,9 +227,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
           <RunResultPanel
             result={r()}
             expectStdout={props.expectStdout}
-            ref={(el) => {
-              runPanelRef = el;
-            }}
+            ref={runPanelFocus.ref}
           />
         )}
       </Show>

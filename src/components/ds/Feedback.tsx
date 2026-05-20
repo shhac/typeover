@@ -1,6 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
-import { cn } from "./_internal";
+import { cn, FOCUS_RING_CLASS } from "./_internal";
 
 type Status = "idle" | "correct" | "incorrect" | "pending";
 
@@ -42,7 +42,7 @@ export function Feedback(props: ParentProps<FeedbackProps>) {
       tabindex="-1"
       class={cn(
         "border rounded-sm px-4 py-3 font-mono text-sm",
-        "focus:outline-2 focus:outline-accent-primary focus:outline-offset-2",
+        FOCUS_RING_CLASS,
         statusClass[local.status],
         local.class,
       )}
