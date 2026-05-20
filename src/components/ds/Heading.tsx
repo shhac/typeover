@@ -23,13 +23,18 @@ interface HeadingProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
   accent?: "amber" | "ts" | "go";
 }
 
+/* Size = font-size + tracking only. Weight comes from the heading-
+ * weight system in global.css: `.ds-heading-font.ds-heading-h{N}`
+ * reads `calc(--heading-weight-base × --heading-scale-hN)`. Each
+ * style rebinds the base; per-level scalars stay constant.
+ * design-docs/21 #3. */
 const sizeClass: Record<Size, string> = {
-  base: "text-base font-semibold uppercase tracking-wider text-fg-secondary",
-  lg: "text-lg font-semibold",
-  xl: "text-xl font-semibold tracking-tight",
-  "2xl": "text-2xl font-semibold tracking-tight",
-  "3xl": "text-3xl font-semibold tracking-tight",
-  "4xl": "text-4xl font-semibold tracking-tight",
+  base: "text-base uppercase tracking-wider text-fg-secondary",
+  lg: "text-lg",
+  xl: "text-xl tracking-tight",
+  "2xl": "text-2xl tracking-tight",
+  "3xl": "text-3xl tracking-tight",
+  "4xl": "text-4xl tracking-tight",
 };
 
 /** Default visual size per semantic level — used when the caller
@@ -58,6 +63,7 @@ export function Heading(props: ParentProps<HeadingProps>) {
       {...rest}
       class={cn(
         "ds-heading-font",
+        `ds-heading-h${level}`,
         sizeClass[size],
         local.accent ? accentClass[local.accent] : "text-fg-primary",
         local.class,

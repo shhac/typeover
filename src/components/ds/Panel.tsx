@@ -16,10 +16,21 @@ interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
   padding?: Padding;
 }
 
+/* Border colors via Tailwind utility (stable per tone). The
+ * background colour is set inline so the `--panel-bg-mix` token
+ * (design-docs/21 — glass transparency) takes effect; Tailwind's
+ * `bg-*` utilities live in @layer utilities and would override
+ * any background-color set in the base layer. */
 const toneClass: Record<Tone, string> = {
-  default: "bg-bg-panel border-border-default",
-  inset: "bg-bg-inset border-border-default",
-  elevated: "bg-bg-elevated border-border-strong",
+  default: "border-border-default",
+  inset: "border-border-default",
+  elevated: "border-border-strong",
+};
+
+const toneBgVar: Record<Tone, string> = {
+  default: "var(--color-bg-panel)",
+  inset: "var(--color-bg-inset)",
+  elevated: "var(--color-bg-elevated)",
 };
 
 const accentClass: Record<LangAccent, string> = {
@@ -44,10 +55,14 @@ export function Panel(props: ParentProps<PanelProps>) {
     "class",
     "children",
   ]);
+  const tone = local.tone ?? "default";
   return (
     <section
       {...rest}
-      class={cn("ds-panel border rounded-sm", toneClass[local.tone ?? "default"], local.class)}
+      class={cn("ds-panel border rounded-sm", toneClass[tone], local.class)}
+      style={{
+        "background-color": `color-mix(in oklab, ${toneBgVar[tone]} var(--panel-bg-mix), transparent)`,
+      }}
       aria-label={local.label}
     >
       <Show when={local.label}>
