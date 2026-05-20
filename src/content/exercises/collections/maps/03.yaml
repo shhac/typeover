@@ -1,0 +1,62 @@
+target: go
+themeId: collections/maps
+type: mcq
+order: 3
+prompt: |
+  TypeScript: `scores["nope"]` gives `undefined` for a missing key.
+  In Go, a map lookup ALWAYS returns a value — even for keys that
+  were never inserted. What does `v` hold below?
+
+  ```go
+  scores := map[string]int{"alan": 7}
+  v := scores["nope"]
+  ```
+generator:
+  kind: variant
+  variants:
+    - id: int-map
+      ts: 'const v = scores["nope"]; // v === undefined'
+      canonical: "v == 0  // the int zero value"
+      distractors:
+        - "v == nil"
+        - "panic: lookup of missing key"
+        - "does not compile"
+    - id: string-map
+      ts: 'const v = names["nope"]; // v === undefined'
+      canonical: 'v == ""  // the string zero value'
+      distractors:
+        - "v == nil"
+        - "panic: lookup of missing key"
+        - "does not compile"
+    - id: bool-map
+      ts: 'const v = flags["nope"]; // v === undefined'
+      canonical: "v == false  // the bool zero value"
+      distractors:
+        - "v == nil"
+        - "panic: lookup of missing key"
+        - "does not compile"
+hints:
+  - "Missing-key lookup in Go DOESN'T error and DOESN'T return `nil`. It returns the zero value for the map's value type — `0` for `int`, `\"\"` for `string`, `false` for `bool`."
+  - "This is THE trap. You can't tell apart `\"key was missing\"` from `\"key was present with the zero value\"` by reading the result alone — slot 4's comma-ok lookup is the antidote."
+  - "The int zero value is `0`. Pick the line that says so."
+runtime: none
+notes: |
+  Theme 2.2's load-bearing trap. The TS habit `if (scores[k] === undefined)`
+  silently breaks because Go's map index always succeeds — and the
+  result is indistinguishable from a present-but-zero value. This
+  exercise PINS the surprise; slot 4 then introduces comma-ok as the
+  proper distinguishing tool.
+
+  Distractor explainers:
+    - `v == nil` — only pointer-shaped types (pointer, interface,
+      slice, map, channel, func) can be nil. `int` / `string` / `bool`
+      can't.
+    - "panic at runtime" — write to a nil map panics; reading from a
+      regular map never does.
+    - "does not compile" — type-checks fine. This is the soundless
+      part of the trap.
+
+  Variant kinds drill the same shape across three value types so the
+  pattern (NOT the int-specific zero) is the takeaway. design-docs/02
+  introducing-a-new-pattern rule: MCQ first for novel-shape "missing
+  is zero, not undefined".

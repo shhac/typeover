@@ -1,0 +1,52 @@
+target: go
+themeId: collections/maps
+type: mcq
+order: 2
+prompt: |
+  Declare a Go map pre-populated with initial entries. Pick the
+  idiomatic composite literal.
+generator:
+  kind: variant
+  variants:
+    - id: ages
+      ts: 'const ages: Record<string, number> = { alice: 30, bob: 25 };'
+      canonical: 'ages := map[string]int{"alice": 30, "bob": 25}'
+      distractors:
+        - 'ages := {"alice": 30, "bob": 25}'
+        - 'ages := map[string]int("alice": 30, "bob": 25)'
+        - 'ages := make(map[string]int){"alice": 30, "bob": 25}'
+    - id: weekdays
+      ts: 'const weekdays = { mon: 1, tue: 2, wed: 3 };'
+      canonical: 'weekdays := map[string]int{"mon": 1, "tue": 2, "wed": 3}'
+      distractors:
+        - 'weekdays := {"mon": 1, "tue": 2, "wed": 3}'
+        - 'weekdays := map[string]int["mon": 1, "tue": 2, "wed": 3]'
+        - 'weekdays := map<string, int>{"mon": 1, "tue": 2, "wed": 3}'
+    - id: status-codes
+      ts: 'const codes = { ok: 200, notFound: 404 };'
+      canonical: 'codes := map[string]int{"ok": 200, "notFound": 404}'
+      distractors:
+        - 'codes := {"ok": 200, "notFound": 404}'
+        - 'codes := map[string]int{ok: 200, notFound: 404}'
+        - 'codes := map[string]int("ok": 200, "notFound": 404)'
+hints:
+  - "Map literals need the TYPE before the brace, then `key: value` pairs separated by commas. TS object-literal habit drops the type; Go can't infer it."
+  - "Shape: `map[K]V{ \"k1\": v1, \"k2\": v2 }`. Keys are full expressions — string literals get quoted."
+  - "Type prefix + braces + quoted-string keys."
+runtime: none
+notes: |
+  Distractors:
+    1. `{"a": 1, "b": 2}` — no type prefix. Go won't infer; there's
+       no implicit Record.
+    2. `map[K]V[...]` or `map[K]V(...)` — wrong brackets. Maps use
+       braces for the composite literal.
+    3. Unquoted keys (`{ok: 200}`) — Go's map literals quote string
+       keys. The TS unquoted-property-name shorthand doesn't carry
+       over.
+    4. `make(map[K]V){...}` — can't combine `make` with a brace
+       literal. Either you make-then-write, OR you use the literal
+       directly.
+
+  The unquoted-key trap (variant 3 of status-codes) is the most
+  common TS-leak — TS lets you write `{ok: 200}` because `ok` is
+  a valid identifier; Go requires the string literal `"ok"`.

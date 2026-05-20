@@ -1,0 +1,95 @@
+target: go
+themeId: collections/maps
+type: fill-line
+order: 7
+prompt: |
+  Productive comma-ok: a `getScore` helper that returns the score
+  when the name is present, or `-1` when it's missing.
+
+  In TypeScript:
+  ```ts
+  function getScore(scores: Record<string, number>, name: string): number {
+    return scores[name] ?? -1;
+  }
+  ```
+
+  Go's nullish-coalesce equivalent is the comma-ok idiom. Type the
+  IF-INIT line that early-returns the score when present. The
+  `return -1` fallthrough is already in place.
+
+  Crucially, a present-but-ZERO score is still "present" — so
+  `getScore(scores, "zero")` must return `0`, NOT `-1`.
+
+  Expected output: `7`, `-1`, `0` on separate lines.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if v, ok := scores[name]; ok { return v }"
+  ts: |-
+    function getScore(scores: Record<string, number>, name: string): number {
+      return scores[name] ?? -1;
+    }
+    const scores = { alan: 7, zero: 0 };
+    console.log(getScore(scores, "alan"));      // 7
+    console.log(getScore(scores, "missing"));   // -1
+    console.log(getScore(scores, "zero"));      // 0  ← present-zero
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func getScore(scores map[string]int, name string) int {
+    	${line}
+    	return -1
+    }
+
+    func main() {
+    	scores := map[string]int{"alan": 7, "zero": 0}
+    	fmt.Println(getScore(scores, "alan"))
+    	fmt.Println(getScore(scores, "missing"))
+    	fmt.Println(getScore(scores, "zero"))
+    }
+  distractors:
+    - match: "if v := scores[name]; v != 0 { return v }"
+      explain: |-
+        Classic present-zero bug. `scores["zero"]` is `0`, so
+        `v != 0` is false, and the function falls through to
+        `return -1` — even though the key IS present. This is
+        the exact mistake comma-ok exists to prevent.
+    - match: "if scores[name] != 0 { return scores[name] }"
+      explain: |-
+        Same present-zero bug, plus you index twice. The result
+        for `getScore(scores, "zero")` is `-1`, not `0`. The
+        comma-ok form is one lookup that also tells you presence.
+    - match: "return scores[name]"
+      explain: |-
+        Drops the presence check entirely. `getScore(scores,
+        "missing")` returns `0` (the zero value), not `-1`. The
+        whole point of the function is to distinguish missing
+        from present.
+    - match: "v, ok := scores[name]; if ok { return v }"
+      explain: |-
+        Right semantics, wrong shape — that's two statements
+        without the `if`-init form. The compact `if v, ok :=
+        m[k]; ok` puts both inside one statement, with `v` and
+        `ok` scoped to the if-block.
+expectStdout: |
+  7
+  -1
+  0
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Use the if-init form: `if v, ok := m[k]; ok { ... }`. The comma-ok lookup gives you the value AND a bool — the bool is what distinguishes present-zero from missing."
+  - "Shape: `if v, ok := scores[name]; ok { return v }`. The trailing `return -1` is already there for the missing case."
+  - "`if v, ok := scores[name]; ok { return v }`."
+notes: |
+  THE productive comma-ok exercise. Slot 4's MCQ pinned the SHAPE;
+  this slot forces the learner to USE it, with a concrete bug
+  (present-zero) the four distractors all fall into.
+
+  The if-init form (statement + condition separated by `;`) is a
+  load-bearing Go idiom — also used with errors (`if err := f(); err
+  != nil { ... }`) and channel receives. Teaching it on maps means
+  the shape transfers to those later modules without re-introduction.
