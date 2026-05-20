@@ -123,6 +123,11 @@
    * gradient reads through. design-docs/21. */
   --border-style: solid;
   --panel-bg-mix: 100%;
+
+  /* Body backdrop gradient. Defaults to `none` (no gradient).
+   * Glass palettes set this so the page has something to blur
+   * through; non-glass palettes leave it `none`. design-docs/22. */
+  --body-gradient: none;
 }
 
 /* ===========================================================================
@@ -207,31 +212,19 @@
 
 /* ----- cardboard ----- */
 :root[data-style="cardboard"] {
-  /* Serif heading, dashed border (paper-seam look), warm panel
-   * tilt, stipple grain. Paper-physical feel via dashed border-
-   * style + slight fold shadow underneath the panel. */
+  /* Style block carries chrome only — typography, border-style,
+   * stipple grain, shadow chrome, radius progression. Colour
+   * identity (panel tilt, accent hue) lives in palette blocks
+   * (design-docs/22). */
   --font-heading: var(--font-serif);
   --heading-weight-base: 700;
   --border-style: dashed;
-  --color-bg-panel: #1a1612;
-  --color-bg-elevated: #221c17;
-  --color-border-default: color-mix(in oklab, var(--color-accent-primary) 35%, transparent);
   --surface-pattern: radial-gradient(
     circle at 1px 1px,
     color-mix(in oklab, var(--color-fg-faint) 35%, transparent) 1px,
     transparent 1.5px
   );
   --shadow-panel: 0 2px 0 -1px color-mix(in oklab, #000 35%, transparent);
-}
-
-:root[data-style="cardboard"][data-theme="light"],
-:root[data-style="cardboard"][data-theme="system"] {
-  /* Light theme keeps the original near-white panel surfaces; the
-   * cardboard tilt above is the warm-dark-paper variant for dark
-   * themes. On light, the stipple over an off-white surface reads
-   * as paper grain without needing a colour shift. */
-  --color-bg-panel: #f5f0e8;
-  --color-bg-elevated: #ebe4d6;
 }
 
 /* Cardboard radius progression: axis + 1 step. `1 / 4 / 8 / 14`. */
@@ -242,34 +235,16 @@
 
 /* ----- textbook ----- */
 :root[data-style="textbook"] {
-  /* Serif EVERYWHERE — body too, not just headings. Reading
-   * column narrows to a book-measure 60ch. Amber left-rule on
-   * Panel replaces the box border so the page reads as
-   * typographic structure, not chrome. Parchment palette tilt
-   * via separate theme-conditional override below. */
+  /* Chrome only. Serif everywhere (heading + body); narrow
+   * reading measure; amber left-rule via shadow chrome
+   * (`--color-accent-primary` resolves to whatever the active
+   * palette sets — desaturated ink under parchment-ink, deeper
+   * spine-orange under pelican, etc.). */
   --font-heading: var(--font-serif);
   --font-body: var(--font-serif);
   --heading-weight-base: 700;
   --measure: 60ch;
-  --color-border-default: transparent;
   --shadow-panel: inset 4px 0 0 0 color-mix(in oklab, var(--color-accent-primary) 70%, transparent);
-}
-
-:root[data-style="textbook"][data-theme="light"],
-:root[data-style="textbook"][data-theme="system"] {
-  /* Parchment surface on light theme. Dimmer amber accent reads
-   * as printed ink rather than CRT phosphor. */
-  --color-bg-base: #faf6ef;
-  --color-bg-panel: #fbf8f3;
-  --color-bg-elevated: #f4eee2;
-  --color-accent-primary: #b06e1a;
-}
-
-:root[data-style="textbook"][data-theme="dark"] {
-  /* Aged-paper feel on dark — desk-lamp on a yellowed page. */
-  --color-bg-base: #1a1612;
-  --color-bg-panel: #1f1a14;
-  --color-fg-primary: #ede0c8;
 }
 
 /* Textbook radius progression: heavy compression `0 / 0 / 2 / 4`.
@@ -292,14 +267,13 @@
 
 /* ----- glass ----- */
 :root[data-style="glass"] {
-  /* Light-weight headings, translucent panels with strong blur,
-   * widened reading measure, transparent border (lift via gradient
-   * + shadow instead). The body gradient is the load-bearing
-   * backdrop — without something to blur, the filter is a no-op. */
+  /* Chrome only. Light heading, 60% panel transparency, strong
+   * blur. The actual body gradient is a palette token
+   * (`--body-gradient`) since palette identity determines the
+   * bloom colours. design-docs/22. */
   --heading-weight-base: 300;
   --measure: 80ch;
   --panel-bg-mix: 60%;
-  --color-border-default: transparent;
   --panel-backdrop-filter: blur(20px) saturate(180%);
   --shadow-panel:
     inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 14%, transparent),
@@ -307,18 +281,13 @@
     0 8px 28px -10px color-mix(in oklab, #000 40%, transparent);
 }
 
-:root[data-style="glass"] body {
-  background-image:
-    radial-gradient(
-      ellipse 1200px 600px at 80% -10%,
-      color-mix(in oklab, var(--color-accent-primary) 18%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 900px 500px at 0% 110%,
-      color-mix(in oklab, var(--color-accent-ts) 12%, transparent),
-      transparent 55%
-    );
+/* Body backdrop — palette sets `--body-gradient`. Glass-home
+ * palettes fill it with their characteristic bloom; non-glass
+ * palettes applied to glass style leave it as the @theme default
+ * (`none`), and the panels' translucency reads against flat
+ * page bg with reduced effect. design-docs/22. */
+body {
+  background-image: var(--body-gradient);
   background-attachment: fixed;
 }
 
@@ -330,11 +299,11 @@
 
 /* ----- islands ----- */
 :root[data-style="islands"] {
-  /* Bold sans headings; no border (lift via shadow + page-vs-
-   * panel contrast). The shadow stack reads as elevated tiles
-   * on a desk: layered drop + inner-top highlight. */
+  /* Chrome only. Bold sans, layered shadow stack. The page-vs-
+   * panel contrast lives in the palette's bg-base + bg-panel
+   * values — islands-home palettes (desk-felt, app-store, etc.)
+   * authored that delta into their token values. */
   --heading-weight-base: 700;
-  --color-border-default: transparent;
   --shadow-panel:
     inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 8%, transparent),
     0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
@@ -344,25 +313,817 @@
     0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
 }
 
-/* Deepen the page-vs-panel contrast so the lift is unmistakable.
- * Dark: page drops a notch, panel stays. Light: page goes neutral
- * grey (felt-like), panel stays near-white. */
-:root[data-style="islands"][data-theme="dark"] {
-  --color-bg-base: #050507;
-  --color-bg-panel: #1a1a1d;
-}
-:root[data-style="islands"][data-theme="light"],
-:root[data-style="islands"][data-theme="system"] {
-  --color-bg-base: #e8e8ea;
-  --color-bg-panel: #ffffff;
-}
-
 /* Islands radius progression: amplified modestly `3 / 6 / 12 / 20`. */
 :root[data-style="islands"][data-radius="sharp"]   { --radius-sm: 3px;  --radius-md: 4px;  --radius-lg: 5px;  }
 :root[data-style="islands"][data-radius="normal"]  { --radius-sm: 6px;  --radius-md: 10px; --radius-lg: 12px; }
-:root[data-style="islands"][data-radius="rounded"] { --radius-sm: 12px; --radius-md: 16px; --radius-lg: 18px; }
+:root[data-style="islands"][data-radius="rounded"] { --radius-sm: 12px; --radius-md: 18px; --radius-lg: 18px; }
 :root[data-style="islands"][data-radius="pill"]    { --radius-sm: 20px; --radius-md: 28px; --radius-lg: 36px; }
 
+/* ===========================================================================
+ * Palette axis (design-docs/22) — 22 named palettes grouped by home
+ * style. Each palette ships dark + light variants:
+ *
+ *   :root[data-palette="<id>"]                          → dark
+ *   :root[data-palette="<id>"][data-theme="light"]      → light
+ *
+ * Glass-home palettes additionally set `--body-gradient` which the
+ * top-level `body` rule reads. Other palettes leave it `none`.
+ *
+ * The Default magic value (no `data-palette` attribute, or
+ * `typeover:palette === "default"`) is resolved by the bootstrap
+ * script to the active style's default palette ID. So a freshly-
+ * loaded page never paints without a palette attribute set.
+ *
+ * Generic [data-theme="light"] block lower in the cascade is kept
+ * as a no-palette fallback (SSR / JS-disabled). All 22 palettes
+ * have higher specificity and win when active.
+ * ========================================================================= */
+
+/* ===== TERMINAL palettes ===== */
+
+/* phosphor-amber — terminal default. Matches the @theme defaults so
+ * applying it is a no-op visually; explicit here as the anchor. */
+:root[data-palette="phosphor-amber"] {
+  --color-bg-base: #0a0a0b;
+  --color-bg-panel: #121214;
+  --color-bg-elevated: #1a1a1d;
+  --color-bg-inset: #08080a;
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
+  --color-accent-primary: #ffa726;
+  --color-accent-ts: #4a9eff;
+  --color-accent-go: #00add8;
+  --color-border-default: #26262a;
+  --color-border-strong: #3a3a40;
+}
+:root[data-palette="phosphor-amber"][data-theme="light"] {
+  --color-bg-base: #fafaf8;
+  --color-bg-panel: #f2f2ef;
+  --color-bg-elevated: #e9e9e5;
+  --color-bg-inset: #ffffff;
+  --color-fg-primary: #111113;
+  --color-fg-secondary: #3a3a3e;
+  --color-fg-muted: #5a5a5f;
+  --color-fg-faint: #8a8a8f;
+  --color-accent-primary: #a85d00;
+  --color-accent-ts: #1d4ed8;
+  --color-accent-go: #006d8c;
+  --color-border-default: #d4d4cf;
+  --color-border-strong: #b8b8b2;
+}
+
+:root[data-palette="phosphor-green"] {
+  --color-bg-base: #050a06;
+  --color-bg-panel: #0a120c;
+  --color-bg-elevated: #111913;
+  --color-bg-inset: #020604;
+  --color-fg-primary: #b8f5c2;
+  --color-fg-secondary: #7ec48b;
+  --color-fg-muted: #5a9968;
+  --color-fg-faint: #3d6b48;
+  --color-accent-primary: #5cff7a;
+  --color-accent-ts: #5cd6ff;
+  --color-accent-go: #7affd9;
+  --color-border-default: #1d2e22;
+  --color-border-strong: #2e4836;
+}
+:root[data-palette="phosphor-green"][data-theme="light"] {
+  --color-bg-base: #f4f6ee;
+  --color-bg-panel: #ebefdf;
+  --color-bg-elevated: #e2e7d3;
+  --color-bg-inset: #fafbf4;
+  --color-fg-primary: #0c2410;
+  --color-fg-secondary: #2a4a30;
+  --color-fg-muted: #4a6a50;
+  --color-fg-faint: #7a8f80;
+  --color-accent-primary: #1f6b2a;
+  --color-accent-ts: #155a8a;
+  --color-accent-go: #006d6d;
+  --color-border-default: #c8d0b8;
+  --color-border-strong: #a8b298;
+}
+
+:root[data-palette="ice-blue"] {
+  --color-bg-base: #0a0e14;
+  --color-bg-panel: #11161f;
+  --color-bg-elevated: #1a212c;
+  --color-bg-inset: #070a0f;
+  --color-fg-primary: #dde8f2;
+  --color-fg-secondary: #9fb3c8;
+  --color-fg-muted: #7a8fa6;
+  --color-fg-faint: #586878;
+  --color-accent-primary: #5ab8ff;
+  --color-accent-ts: #7f9cff;
+  --color-accent-go: #4dd9d6;
+  --color-border-default: #1f2935;
+  --color-border-strong: #2f3d4d;
+}
+:root[data-palette="ice-blue"][data-theme="light"] {
+  --color-bg-base: #f4f7fa;
+  --color-bg-panel: #eaeff5;
+  --color-bg-elevated: #dfe6ee;
+  --color-bg-inset: #ffffff;
+  --color-fg-primary: #0c1419;
+  --color-fg-secondary: #2e424f;
+  --color-fg-muted: #4d6373;
+  --color-fg-faint: #7a8fa0;
+  --color-accent-primary: #155a9c;
+  --color-accent-ts: #1a3fa3;
+  --color-accent-go: #006b78;
+  --color-border-default: #c8d4e0;
+  --color-border-strong: #a4b3c2;
+}
+
+:root[data-palette="tape-reel"] {
+  --color-bg-base: #0c0707;
+  --color-bg-panel: #14090a;
+  --color-bg-elevated: #1d0e10;
+  --color-bg-inset: #080404;
+  --color-fg-primary: #f0d8d4;
+  --color-fg-secondary: #c49a92;
+  --color-fg-muted: #9a7068;
+  --color-fg-faint: #6b4843;
+  --color-accent-primary: #ff5b4a;
+  --color-accent-ts: #ff8a5c;
+  --color-accent-go: #ffb86b;
+  --color-border-default: #2a1416;
+  --color-border-strong: #432025;
+}
+:root[data-palette="tape-reel"][data-theme="light"] {
+  --color-bg-base: #f4ead8;
+  --color-bg-panel: #ebe0c8;
+  --color-bg-elevated: #e1d4b8;
+  --color-bg-inset: #faf3e4;
+  --color-fg-primary: #1a0a0a;
+  --color-fg-secondary: #3d1a17;
+  --color-fg-muted: #5e3530;
+  --color-fg-faint: #8a6a60;
+  --color-accent-primary: #9c2418;
+  --color-accent-ts: #6a3a14;
+  --color-accent-go: #1f5a48;
+  --color-border-default: #cdbf9c;
+  --color-border-strong: #ad9f7a;
+}
+
+/* ===== CARDBOARD palettes ===== */
+
+/* warm-paper — cardboard default. Matches the @theme defaults (dark
+ * has bg-base #0a0a0b) plus the cardboard-specific warm panel tilt. */
+:root[data-palette="warm-paper"] {
+  --color-bg-base: #0a0a0b;
+  --color-bg-panel: #1a1612;
+  --color-bg-elevated: #221c17;
+  --color-bg-inset: #08080a;
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
+  --color-accent-primary: #ffa726;
+  --color-accent-ts: #4a9eff;
+  --color-accent-go: #00add8;
+  --color-border-default: color-mix(in oklab, #ffa726 35%, transparent);
+  --color-border-strong: #3a3a40;
+}
+:root[data-palette="warm-paper"][data-theme="light"] {
+  --color-bg-base: #ffffff;
+  --color-bg-panel: #f5f0e8;
+  --color-bg-elevated: #ebe4d6;
+  --color-bg-inset: #f0f2f5;
+  --color-fg-primary: #14171f;
+  --color-fg-secondary: #4a5060;
+  --color-fg-muted: #6b7280;
+  --color-fg-faint: #94989f;
+  --color-accent-primary: #a06400;
+  --color-accent-ts: #2057b8;
+  --color-accent-go: #006d8e;
+  --color-border-default: color-mix(in oklab, #a06400 35%, transparent);
+  --color-border-strong: #c4c9d2;
+}
+
+:root[data-palette="kraft"] {
+  --color-bg-base: #1a1410;
+  --color-bg-panel: #241c15;
+  --color-bg-elevated: #2e251c;
+  --color-bg-inset: #120e0a;
+  --color-fg-primary: #ecddc4;
+  --color-fg-secondary: #bda884;
+  --color-fg-muted: #9a8765;
+  --color-fg-faint: #6e5d44;
+  --color-accent-primary: #f4a437;
+  --color-accent-ts: #7ab5ff;
+  --color-accent-go: #4dc7e6;
+  --color-border-default: color-mix(in oklab, #f4a437 35%, transparent);
+  --color-border-strong: #5a4a36;
+}
+:root[data-palette="kraft"][data-theme="light"] {
+  --color-bg-base: #d8c7a3;
+  --color-bg-panel: #e6d6b3;
+  --color-bg-elevated: #f0e2c2;
+  --color-bg-inset: #c8b58e;
+  --color-fg-primary: #1f1208;
+  --color-fg-secondary: #4a3520;
+  --color-fg-muted: #6a523a;
+  --color-fg-faint: #8c7456;
+  --color-accent-primary: #7a3f00;
+  --color-accent-ts: #1a3f8a;
+  --color-accent-go: #005066;
+  --color-border-default: color-mix(in oklab, #7a3f00 35%, transparent);
+  --color-border-strong: #9a7c52;
+}
+
+:root[data-palette="manila"] {
+  --color-bg-base: #15130c;
+  --color-bg-panel: #1f1c12;
+  --color-bg-elevated: #2a2618;
+  --color-bg-inset: #0e0c07;
+  --color-fg-primary: #f0e6c8;
+  --color-fg-secondary: #b8a982;
+  --color-fg-muted: #8f8262;
+  --color-fg-faint: #5e553e;
+  --color-accent-primary: #5fa8ff;
+  --color-accent-ts: #4a9eff;
+  --color-accent-go: #00add8;
+  --color-border-default: color-mix(in oklab, #5fa8ff 35%, transparent);
+  --color-border-strong: #4a4332;
+}
+:root[data-palette="manila"][data-theme="light"] {
+  --color-bg-base: #ecd9a8;
+  --color-bg-panel: #f4e4ba;
+  --color-bg-elevated: #f9edca;
+  --color-bg-inset: #dcc78c;
+  --color-fg-primary: #1a1408;
+  --color-fg-secondary: #3e3220;
+  --color-fg-muted: #5f5238;
+  --color-fg-faint: #8a7d5a;
+  --color-accent-primary: #0f3d8c;
+  --color-accent-ts: #1a3f8a;
+  --color-accent-go: #005066;
+  --color-border-default: color-mix(in oklab, #0f3d8c 40%, transparent);
+  --color-border-strong: #9a8b62;
+}
+
+:root[data-palette="newsprint"] {
+  --color-bg-base: #161616;
+  --color-bg-panel: #1e1d1b;
+  --color-bg-elevated: #282724;
+  --color-bg-inset: #101010;
+  --color-fg-primary: #ebe6dc;
+  --color-fg-secondary: #b0a99c;
+  --color-fg-muted: #8a8478;
+  --color-fg-faint: #5f5a50;
+  --color-accent-primary: #e85a3c;
+  --color-accent-ts: #6fa8e6;
+  --color-accent-go: #3fb0c4;
+  --color-border-default: color-mix(in oklab, #e85a3c 35%, transparent);
+  --color-border-strong: #3e3c38;
+}
+:root[data-palette="newsprint"][data-theme="light"] {
+  --color-bg-base: #e8e3d6;
+  --color-bg-panel: #efebe0;
+  --color-bg-elevated: #f5f1e7;
+  --color-bg-inset: #d8d2c2;
+  --color-fg-primary: #0c0a06;
+  --color-fg-secondary: #33302a;
+  --color-fg-muted: #56524a;
+  --color-fg-faint: #82796c;
+  --color-accent-primary: #9a2410;
+  --color-accent-ts: #1c3f7a;
+  --color-accent-go: #00566e;
+  --color-border-default: color-mix(in oklab, #9a2410 40%, transparent);
+  --color-border-strong: #a89e8a;
+}
+
+:root[data-palette="calfskin"] {
+  --color-bg-base: #191510;
+  --color-bg-panel: #221d16;
+  --color-bg-elevated: #2c2519;
+  --color-bg-inset: #120f0a;
+  --color-fg-primary: #ede2c8;
+  --color-fg-secondary: #b8a684;
+  --color-fg-muted: #8f7f5e;
+  --color-fg-faint: #5f543e;
+  --color-accent-primary: #d68a3a;
+  --color-accent-ts: #7aa8e0;
+  --color-accent-go: #4ab8c8;
+  --color-border-default: color-mix(in oklab, #d68a3a 30%, transparent);
+  --color-border-strong: #4e4434;
+}
+:root[data-palette="calfskin"][data-theme="light"] {
+  --color-bg-base: #f4ecd8;
+  --color-bg-panel: #faf3e1;
+  --color-bg-elevated: #fdf8ec;
+  --color-bg-inset: #e6dcc2;
+  --color-fg-primary: #1a1408;
+  --color-fg-secondary: #46381f;
+  --color-fg-muted: #6a5837;
+  --color-fg-faint: #9a8a64;
+  --color-accent-primary: #7a4a08;
+  --color-accent-ts: #1f3f7c;
+  --color-accent-go: #005062;
+  --color-border-default: color-mix(in oklab, #7a4a08 35%, transparent);
+  --color-border-strong: #a89464;
+}
+
+/* ===== TEXTBOOK palettes ===== */
+
+/* textbook palettes set border-default: transparent — textbook
+ * removes the box; the amber/sienna/orange left-rule comes from
+ * `--shadow-panel: inset 4px 0 0 0 var(--color-accent-primary)`
+ * which inherits the active palette's accent. */
+
+:root[data-palette="parchment-ink"] {
+  --color-bg-base: #1a1612;
+  --color-bg-panel: #1f1a14;
+  --color-bg-elevated: #272015;
+  --color-bg-inset: #120e0a;
+  --color-fg-primary: #ede0c8;
+  --color-fg-secondary: #bfb29a;
+  --color-fg-muted: #8e826b;
+  --color-fg-faint: #5d5443;
+  --color-accent-primary: #d89640;
+  --color-accent-ts: #7eb6ff;
+  --color-accent-go: #4dcfee;
+  --color-border-default: transparent;
+  --color-border-strong: #3a3225;
+}
+:root[data-palette="parchment-ink"][data-theme="light"] {
+  --color-bg-base: #faf6ef;
+  --color-bg-panel: #fbf8f3;
+  --color-bg-elevated: #f4eee2;
+  --color-bg-inset: #f0e9d8;
+  --color-fg-primary: #1a1a1a;
+  --color-fg-secondary: #3d3a32;
+  --color-fg-muted: #6a6555;
+  --color-fg-faint: #9a9180;
+  --color-accent-primary: #b06e1a;
+  --color-accent-ts: #2a6fbf;
+  --color-accent-go: #007a99;
+  --color-border-default: transparent;
+  --color-border-strong: #d8cfb8;
+}
+
+:root[data-palette="vellum"] {
+  --color-bg-base: #1c1610;
+  --color-bg-panel: #221b13;
+  --color-bg-elevated: #2c2317;
+  --color-bg-inset: #140f08;
+  --color-fg-primary: #e6d4b5;
+  --color-fg-secondary: #b59c78;
+  --color-fg-muted: #897355;
+  --color-fg-faint: #5a4a35;
+  --color-accent-primary: #cf8a47;
+  --color-accent-ts: #8fb0d8;
+  --color-accent-go: #62b8b0;
+  --color-border-default: transparent;
+  --color-border-strong: #3d2f1f;
+}
+:root[data-palette="vellum"][data-theme="light"] {
+  --color-bg-base: #f3ead7;
+  --color-bg-panel: #f7f0df;
+  --color-bg-elevated: #ebe0c6;
+  --color-bg-inset: #e6daba;
+  --color-fg-primary: #2a1d10;
+  --color-fg-secondary: #4a3826;
+  --color-fg-muted: #74604a;
+  --color-fg-faint: #9c886e;
+  --color-accent-primary: #8a4a14;
+  --color-accent-ts: #2b5d8f;
+  --color-accent-go: #1f6e6e;
+  --color-border-default: transparent;
+  --color-border-strong: #c9b893;
+}
+
+:root[data-palette="pelican"] {
+  --color-bg-base: #101010;
+  --color-bg-panel: #161616;
+  --color-bg-elevated: #1f1f1f;
+  --color-bg-inset: #0a0a0a;
+  --color-fg-primary: #f1ebd9;
+  --color-fg-secondary: #bdb8a8;
+  --color-fg-muted: #8e8a7d;
+  --color-fg-faint: #5e5b52;
+  --color-accent-primary: #e87b3e;
+  --color-accent-ts: #7eb6ff;
+  --color-accent-go: #4dcfee;
+  --color-border-default: transparent;
+  --color-border-strong: #2e2e2e;
+}
+:root[data-palette="pelican"][data-theme="light"] {
+  --color-bg-base: #f5ecd2;
+  --color-bg-panel: #f8f1de;
+  --color-bg-elevated: #efe5c5;
+  --color-bg-inset: #ebe0b8;
+  --color-fg-primary: #0a0a0a;
+  --color-fg-secondary: #2d2d2c;
+  --color-fg-muted: #5d5b54;
+  --color-fg-faint: #8a8779;
+  --color-accent-primary: #b8421b;
+  --color-accent-ts: #1f5fa8;
+  --color-accent-go: #006680;
+  --color-border-default: transparent;
+  --color-border-strong: #cbbf9a;
+}
+
+:root[data-palette="sepia"] {
+  --color-bg-base: #1d140c;
+  --color-bg-panel: #241910;
+  --color-bg-elevated: #2e2114;
+  --color-bg-inset: #150e07;
+  --color-fg-primary: #e8c9a1;
+  --color-fg-secondary: #b89a73;
+  --color-fg-muted: #8b7152;
+  --color-fg-faint: #5d4a36;
+  --color-accent-primary: #c87a35;
+  --color-accent-ts: #9fbdd6;
+  --color-accent-go: #74b8b0;
+  --color-border-default: transparent;
+  --color-border-strong: #3e2e1d;
+}
+:root[data-palette="sepia"][data-theme="light"] {
+  --color-bg-base: #efe2cc;
+  --color-bg-panel: #f3e8d6;
+  --color-bg-elevated: #e6d6b9;
+  --color-bg-inset: #dfcca8;
+  --color-fg-primary: #2d1a08;
+  --color-fg-secondary: #503a22;
+  --color-fg-muted: #7a6044;
+  --color-fg-faint: #a08768;
+  --color-accent-primary: #7a3d0e;
+  --color-accent-ts: #2e5680;
+  --color-accent-go: #1f6363;
+  --color-border-default: transparent;
+  --color-border-strong: #c3a878;
+}
+
+:root[data-palette="almanac"] {
+  --color-bg-base: #0f1414;
+  --color-bg-panel: #141a1a;
+  --color-bg-elevated: #1c2424;
+  --color-bg-inset: #0a0e0e;
+  --color-fg-primary: #e4ece8;
+  --color-fg-secondary: #a8b8b3;
+  --color-fg-muted: #7a8a85;
+  --color-fg-faint: #52615d;
+  --color-accent-primary: #4ea69a;
+  --color-accent-ts: #7eb6ff;
+  --color-accent-go: #d4a64a;
+  --color-border-default: transparent;
+  --color-border-strong: #2a3635;
+}
+:root[data-palette="almanac"][data-theme="light"] {
+  --color-bg-base: #f4f1e8;
+  --color-bg-panel: #f8f5ec;
+  --color-bg-elevated: #ece7d6;
+  --color-bg-inset: #e6e0c8;
+  --color-fg-primary: #0e1f1e;
+  --color-fg-secondary: #2e4543;
+  --color-fg-muted: #5a6f6c;
+  --color-fg-faint: #8a9a96;
+  --color-accent-primary: #0d5e55;
+  --color-accent-ts: #1f5fa8;
+  --color-accent-go: #8a6010;
+  --color-border-default: transparent;
+  --color-border-strong: #c4c0a8;
+}
+
+/* ===== GLASS palettes ===== */
+
+/* Glass palettes also set --body-gradient (the radial bloom that
+ * gives the blur something to filter). */
+
+:root[data-palette="aurora-amber"] {
+  --color-bg-base: #0a0a0b;
+  --color-bg-panel: #121214;
+  --color-bg-elevated: #1a1a1d;
+  --color-bg-inset: #08080a;
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
+  --color-accent-primary: #ffa726;
+  --color-accent-ts: #4a9eff;
+  --color-accent-go: #00add8;
+  --color-border-default: transparent;
+  --color-border-strong: #3a3a40;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #ffa726 18%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #4a9eff 12%, transparent), transparent 55%);
+}
+:root[data-palette="aurora-amber"][data-theme="light"] {
+  --color-bg-base: #fafafa;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #f4f4f6;
+  --color-bg-inset: #ededee;
+  --color-fg-primary: #18181b;
+  --color-fg-secondary: #52525b;
+  --color-fg-muted: #71717a;
+  --color-fg-faint: #a1a1aa;
+  --color-accent-primary: #b06e1a;
+  --color-accent-ts: #2563eb;
+  --color-accent-go: #0891b2;
+  --color-border-default: transparent;
+  --color-border-strong: #d4d4d8;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #ffa726 22%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #2563eb 14%, transparent), transparent 55%);
+}
+
+:root[data-palette="glacier-blue"] {
+  --color-bg-base: #07101a;
+  --color-bg-panel: #0e1a28;
+  --color-bg-elevated: #152538;
+  --color-bg-inset: #050c14;
+  --color-fg-primary: #e6f1ff;
+  --color-fg-secondary: #a8c2dc;
+  --color-fg-muted: #7d97b3;
+  --color-fg-faint: #56708a;
+  --color-accent-primary: #7dd3fc;
+  --color-accent-ts: #60a5fa;
+  --color-accent-go: #22d3ee;
+  --color-border-default: transparent;
+  --color-border-strong: #2a3d52;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #7dd3fc 20%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #6366f1 14%, transparent), transparent 55%);
+}
+:root[data-palette="glacier-blue"][data-theme="light"] {
+  --color-bg-base: #f0f7fc;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #e6f0f8;
+  --color-bg-inset: #dce8f1;
+  --color-fg-primary: #0c1929;
+  --color-fg-secondary: #475569;
+  --color-fg-muted: #64748b;
+  --color-fg-faint: #94a3b8;
+  --color-accent-primary: #0369a1;
+  --color-accent-ts: #1d4ed8;
+  --color-accent-go: #0e7490;
+  --color-border-default: transparent;
+  --color-border-strong: #b8cee0;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #38bdf8 24%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #818cf8 16%, transparent), transparent 55%);
+}
+
+:root[data-palette="lavender-mist"] {
+  --color-bg-base: #100a18;
+  --color-bg-panel: #1a1326;
+  --color-bg-elevated: #241a33;
+  --color-bg-inset: #0c0712;
+  --color-fg-primary: #f0e7ff;
+  --color-fg-secondary: #c4b5dc;
+  --color-fg-muted: #9b8ab8;
+  --color-fg-faint: #6f5e8a;
+  --color-accent-primary: #c4b5fd;
+  --color-accent-ts: #a78bfa;
+  --color-accent-go: #f472b6;
+  --color-border-default: transparent;
+  --color-border-strong: #3a2b50;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #a78bfa 22%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #f472b6 14%, transparent), transparent 55%);
+}
+:root[data-palette="lavender-mist"][data-theme="light"] {
+  --color-bg-base: #faf7ff;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #f3eeff;
+  --color-bg-inset: #ebe4fa;
+  --color-fg-primary: #1e1530;
+  --color-fg-secondary: #5b4b78;
+  --color-fg-muted: #78678f;
+  --color-fg-faint: #a89cbf;
+  --color-accent-primary: #7c3aed;
+  --color-accent-ts: #6d28d9;
+  --color-accent-go: #be185d;
+  --color-border-default: transparent;
+  --color-border-strong: #d4c7ed;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #c4b5fd 30%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #fbcfe8 24%, transparent), transparent 55%);
+}
+
+:root[data-palette="monochrome"] {
+  --color-bg-base: #0c0c0e;
+  --color-bg-panel: #16161a;
+  --color-bg-elevated: #1f1f24;
+  --color-bg-inset: #08080a;
+  --color-fg-primary: #f5f5f7;
+  --color-fg-secondary: #b4b4b8;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #5a5a5f;
+  --color-accent-primary: #ffffff;
+  --color-accent-ts: #d4d4d8;
+  --color-accent-go: #a1a1aa;
+  --color-border-default: transparent;
+  --color-border-strong: #3a3a40;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #ffffff 10%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #ffffff 6%, transparent), transparent 55%);
+}
+:root[data-palette="monochrome"][data-theme="light"] {
+  --color-bg-base: #f5f5f7;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #ededf0;
+  --color-bg-inset: #e4e4e7;
+  --color-fg-primary: #09090b;
+  --color-fg-secondary: #3f3f46;
+  --color-fg-muted: #71717a;
+  --color-fg-faint: #a1a1aa;
+  --color-accent-primary: #000000;
+  --color-accent-ts: #18181b;
+  --color-accent-go: #52525b;
+  --color-border-default: transparent;
+  --color-border-strong: #c4c4c8;
+  --body-gradient:
+    radial-gradient(ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, #000000 6%, transparent), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, #000000 4%, transparent), transparent 55%);
+}
+
+/* ===== ISLANDS palettes ===== */
+
+/* Islands palettes carefully maintain ≥ 8% luminance Δ between
+ * bg-base (page) and bg-panel (lifted tiles) so the float effect
+ * reads regardless of which palette is active. */
+
+:root[data-palette="desk-felt"] {
+  --color-bg-base: #050507;
+  --color-bg-panel: #1a1a1d;
+  --color-bg-elevated: #232328;
+  --color-bg-inset: #020203;
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
+  --color-accent-primary: #ffa726;
+  --color-accent-ts: #4a9eff;
+  --color-accent-go: #00add8;
+  --color-border-default: transparent;
+  --color-border-strong: #3a3a40;
+}
+:root[data-palette="desk-felt"][data-theme="light"] {
+  --color-bg-base: #e8e8ea;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #f6f6f8;
+  --color-bg-inset: #dcdce0;
+  --color-fg-primary: #18181b;
+  --color-fg-secondary: #3f3f46;
+  --color-fg-muted: #52525b;
+  --color-fg-faint: #71717a;
+  --color-accent-primary: #b06e1a;
+  --color-accent-ts: #1d6fd9;
+  --color-accent-go: #00788f;
+  --color-border-default: transparent;
+  --color-border-strong: #d4d4d8;
+}
+
+:root[data-palette="app-store"] {
+  --color-bg-base: #000003;
+  --color-bg-panel: #1c1c1f;
+  --color-bg-elevated: #28282c;
+  --color-bg-inset: #08080a;
+  --color-fg-primary: #f5f5f7;
+  --color-fg-secondary: #a1a1a6;
+  --color-fg-muted: #86868b;
+  --color-fg-faint: #6c6c70;
+  --color-accent-primary: #0a84ff;
+  --color-accent-ts: #0a84ff;
+  --color-accent-go: #64d2ff;
+  --color-border-default: transparent;
+  --color-border-strong: #38383c;
+}
+:root[data-palette="app-store"][data-theme="light"] {
+  --color-bg-base: #f2f2f5;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #fbfbfd;
+  --color-bg-inset: #e5e5ea;
+  --color-fg-primary: #1d1d1f;
+  --color-fg-secondary: #3a3a3c;
+  --color-fg-muted: #515154;
+  --color-fg-faint: #6e6e73;
+  --color-accent-primary: #0066cc;
+  --color-accent-ts: #0066cc;
+  --color-accent-go: #006a85;
+  --color-border-default: transparent;
+  --color-border-strong: #d2d2d7;
+}
+
+:root[data-palette="dark-wood"] {
+  --color-bg-base: #1a0f08;
+  --color-bg-panel: #2a1d12;
+  --color-bg-elevated: #362414;
+  --color-bg-inset: #120902;
+  --color-fg-primary: #f0e4d0;
+  --color-fg-secondary: #c9b896;
+  --color-fg-muted: #a89674;
+  --color-fg-faint: #806f55;
+  --color-accent-primary: #e8a23b;
+  --color-accent-ts: #6ab0ff;
+  --color-accent-go: #5fc8e0;
+  --color-border-default: transparent;
+  --color-border-strong: #4a3422;
+}
+:root[data-palette="dark-wood"][data-theme="light"] {
+  --color-bg-base: #c9a880;
+  --color-bg-panel: #fbf5e6;
+  --color-bg-elevated: #fdf9ef;
+  --color-bg-inset: #b89870;
+  --color-fg-primary: #2a1f10;
+  --color-fg-secondary: #4a3820;
+  --color-fg-muted: #5d4628;
+  --color-fg-faint: #7a5d36;
+  --color-accent-primary: #8a4d0a;
+  --color-accent-ts: #1f5db8;
+  --color-accent-go: #006478;
+  --color-border-default: transparent;
+  --color-border-strong: #d9c39a;
+}
+
+:root[data-palette="studio-grey"] {
+  --color-bg-base: #0c0d10;
+  --color-bg-panel: #1e2025;
+  --color-bg-elevated: #292c33;
+  --color-bg-inset: #06070a;
+  --color-fg-primary: #e6e8ec;
+  --color-fg-secondary: #a4a8b0;
+  --color-fg-muted: #868a93;
+  --color-fg-faint: #62656d;
+  --color-accent-primary: #7c8cff;
+  --color-accent-ts: #7c8cff;
+  --color-accent-go: #2dd4bf;
+  --color-border-default: transparent;
+  --color-border-strong: #383c44;
+}
+:root[data-palette="studio-grey"][data-theme="light"] {
+  --color-bg-base: #dcdee3;
+  --color-bg-panel: #fafbfc;
+  --color-bg-elevated: #f1f2f5;
+  --color-bg-inset: #c8cbd2;
+  --color-fg-primary: #15171c;
+  --color-fg-secondary: #3a3d45;
+  --color-fg-muted: #4f535c;
+  --color-fg-faint: #6f7480;
+  --color-accent-primary: #4f46e5;
+  --color-accent-ts: #4f46e5;
+  --color-accent-go: #0d7d72;
+  --color-border-default: transparent;
+  --color-border-strong: #c4c7cf;
+}
+
+:root[data-palette="sunlit-pine"] {
+  --color-bg-base: #14100a;
+  --color-bg-panel: #2d2418;
+  --color-bg-elevated: #3a2f1f;
+  --color-bg-inset: #0c0805;
+  --color-fg-primary: #f4ead4;
+  --color-fg-secondary: #cdbb96;
+  --color-fg-muted: #ab9974;
+  --color-fg-faint: #7f6f52;
+  --color-accent-primary: #f0a838;
+  --color-accent-ts: #6cb4ff;
+  --color-accent-go: #4ec9b0;
+  --color-border-default: transparent;
+  --color-border-strong: #4a3e28;
+}
+:root[data-palette="sunlit-pine"][data-theme="light"] {
+  --color-bg-base: #efe3cc;
+  --color-bg-panel: #fdf9f0;
+  --color-bg-elevated: #faf2df;
+  --color-bg-inset: #e0d2b6;
+  --color-fg-primary: #1f1a10;
+  --color-fg-secondary: #433a26;
+  --color-fg-muted: #5a4d34;
+  --color-fg-faint: #7a6948;
+  --color-accent-primary: #9e5a0a;
+  --color-accent-ts: #2563b0;
+  --color-accent-go: #006a72;
+  --color-border-default: transparent;
+  --color-border-strong: #d6c8aa;
+}
+
+/* ===========================================================================
+ * Legacy generic light-theme block — kept as a fallback for the
+ * (very rare) case where no palette is set. Bootstrap always sets
+ * `data-palette` pre-paint, so this should not be reached in
+ * practice. design-docs/22.
+ * ========================================================================= */
 :root[data-theme="light"] {
   /* Surfaces — off-white base, subtle elevated tints toward warm grey. */
   --color-bg-base: #ffffff;

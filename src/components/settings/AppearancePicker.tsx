@@ -15,15 +15,23 @@ import {
 import {
   currentChoice,
   currentDensity,
+  currentPaletteChoice,
   currentRadius,
   currentStyle,
   type DensityId,
+  type PaletteChoice,
+  type PaletteId,
+  PALETTE_HOME_STYLE,
+  PALETTES,
   type RadiusId,
+  reapplyDefaultPaletteForCurrentStyle,
   setDensity,
+  setPalette,
   setRadius,
   setStyle,
   setTheme,
   type StyleId,
+  STYLE_DEFAULT_PALETTE,
   type ThemeChoice,
 } from "~/lib/theme";
 
@@ -187,6 +195,36 @@ const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
   },
 ];
 
+/* Palette options — `default` is the magic value that follows the
+ * active style. Per-palette labels + descriptions live here; the
+ * picker filters by PALETTE_HOME_STYLE unless "Show all" is on.
+ * design-docs/22. */
+const PALETTE_LABELS: Record<PaletteId, { label: string; description: string }> = {
+  "phosphor-amber": { label: "Phosphor Amber", description: "Bloomberg trading-floor amber on near-black." },
+  "phosphor-green": { label: "Phosphor Green", description: "IBM 3270 / VT220 CRT ghost." },
+  "ice-blue": { label: "Ice Blue", description: "Arctic quant-desk slate." },
+  "tape-reel": { label: "Tape Reel", description: "DEC oxblood on parchment." },
+  "warm-paper": { label: "Warm Paper", description: "Off-white panels on light, warm-dark on dark." },
+  kraft: { label: "Kraft", description: "True brown shipping-carton paper." },
+  manila: { label: "Manila", description: "Folder yellow with ink-blue accent." },
+  newsprint: { label: "Newsprint", description: "Off-white pulp + headline red." },
+  calfskin: { label: "Calfskin", description: "Pale calfskin with sepia ink." },
+  "parchment-ink": { label: "Parchment & Ink", description: "Cream-on-light, aged-paper-on-dark." },
+  vellum: { label: "Vellum", description: "Warm old-paper + brown ink." },
+  pelican: { label: "Pelican", description: "Penguin paperback orange spine." },
+  sepia: { label: "Sepia", description: "Brown-everything; faded photograph." },
+  almanac: { label: "Almanac", description: "Off-white + deep teal headings." },
+  "aurora-amber": { label: "Aurora Amber", description: "Amber + TS-blue radial bloom." },
+  "glacier-blue": { label: "Glacier Blue", description: "Cool cyan-to-ice bloom." },
+  "lavender-mist": { label: "Lavender Mist", description: "Lilac + rose synthwave." },
+  monochrome: { label: "Monochrome", description: "Clinical, accent-free glass." },
+  "desk-felt": { label: "Desk Felt", description: "Felt grey desk under white islands." },
+  "app-store": { label: "App Store", description: "Apple System — TS-blue CTA." },
+  "dark-wood": { label: "Dark Wood", description: "Warm walnut under parchment tiles." },
+  "studio-grey": { label: "Studio Grey", description: "Cool slate; Linear / Figma vibe." },
+  "sunlit-pine": { label: "Sunlit Pine", description: "Warm cream + pale pine cabin." },
+};
+
 /* Focused mini-canvas showing the visual elements every axis
  * touches: surface colours (theme), padding/gap (density), corner
  * radii (radius). Pure DS composition — no localStorage reads, no
@@ -246,6 +284,13 @@ function labelOf<T extends string>(options: readonly RadioOption<T>[], value: T)
 
 export function AppearancePicker() {
   const toast = useToast();
+  const [showAllPalettes, setShowAllPalettes] = createSignal(false);
+  /* Local mirror of the active style — the palette picker filters
+   * its options by `PALETTE_HOME_STYLE[opt] === style()` when "Show
+   * all" is off. Updated when the Style radio changes (via the
+   * wrappedSetStyle below). */
+  const [style, setStyleLocal] = createSignal<StyleId>("terminal");
+  onMount(() => setStyleLocal(currentStyle()));
 
   /* Wrap each setter so flipping any axis announces the change via
    * Toast with an undo button restoring the previous value. design-
@@ -268,6 +313,53 @@ export function AppearancePicker() {
       });
     };
   }
+
+  /* Style setter wrapped further: after changing style, also
+   * re-resolve the effective palette IF the user hasn't pinned one
+   * (Default magic value). This is the "leaving Default selected
+   * and changing Style means the palette changes too" contract
+   * (design-docs/22). */
+  function setStyleAndReapplyPalette(next: StyleId): void {
+    setStyle(next);
+    reapplyDefaultPaletteForCurrentStyle();
+    setStyleLocal(next);
+  }
+
+  /* Palette-specific setter wrapping — the radio group emits
+   * `PaletteChoice` (PaletteId | "default"); the Toast label uses
+   * the friendly name. */
+  function paletteWrap(next: PaletteChoice): void {
+    const prev = currentPaletteChoice();
+    setPalette(next);
+    if (prev === next) return;
+    const friendly =
+      next === "default"
+        ? `Default (${PALETTE_LABELS[STYLE_DEFAULT_PALETTE[style()]].label})`
+        : PALETTE_LABELS[next].label;
+    toast.emit({
+      message: `Palette: ${friendly}`,
+      onUndo: () => setPalette(prev),
+    });
+  }
+
+  /* Filter the palette list by home style unless "Show all" is on.
+   * Default radio is always shown first. */
+  const paletteOptions = (): RadioOption<PaletteChoice>[] => {
+    const defaultLabel = STYLE_DEFAULT_PALETTE[style()];
+    const defaultOption: RadioOption<PaletteChoice> = {
+      value: "default",
+      label: `Default — ${PALETTE_LABELS[defaultLabel].label}`,
+      description: `Follow the active style's default palette. Changes as you switch Style.`,
+    };
+    const filtered = (showAllPalettes() ? PALETTES : PALETTES.filter((p) => PALETTE_HOME_STYLE[p] === style())).map(
+      (p): RadioOption<PaletteChoice> => ({
+        value: p,
+        label: PALETTE_LABELS[p].label,
+        description: PALETTE_LABELS[p].description,
+      }),
+    );
+    return [defaultOption, ...filtered];
+  };
 
   /* Desktop: 2-column split — controls on the left, preview on the
    * right, preview sticks to the viewport top as the controls
@@ -319,7 +411,29 @@ export function AppearancePicker() {
             options={STYLE_OPTIONS}
             initial="terminal"
             read={currentStyle}
-            write={wrap(STYLE_OPTIONS, "Style", currentStyle, setStyle)}
+            write={wrap(STYLE_OPTIONS, "Style", currentStyle, setStyleAndReapplyPalette)}
+          />
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-row items-center justify-between gap-3">
+            <Eyebrow tone="muted">Palette</Eyebrow>
+            <label class="flex flex-row items-center gap-2 cursor-pointer font-mono text-xs text-fg-muted">
+              <input
+                type="checkbox"
+                checked={showAllPalettes()}
+                onChange={(e) => setShowAllPalettes(e.currentTarget.checked)}
+                class="accent-accent-primary"
+              />
+              <span>Show all</span>
+            </label>
+          </div>
+          <RadioGroup<PaletteChoice>
+            legend="Palette"
+            name="palette"
+            options={paletteOptions()}
+            initial="default"
+            read={currentPaletteChoice}
+            write={paletteWrap}
           />
         </div>
       </div>

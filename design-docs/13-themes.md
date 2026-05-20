@@ -32,9 +32,18 @@ Tailwind 4 compiles utility classes against those vars:
 
 A component writing `class="bg-bg-panel text-fg-primary"` doesn't bind
 to a colour — it binds to a name. Changing the name's value at
-runtime (via `:root[data-theme="…"] { … }`) propagates to every
-component atomically. No reactive subscription, no media-query
-sprinkling, no `dark:` / `light:` Tailwind variants.
+runtime (via `:root[data-theme="…"] { … }`, `:root[data-palette="…"]`,
+etc.) propagates to every component atomically. No reactive
+subscription, no media-query sprinkling, no `dark:` / `light:`
+Tailwind variants.
+
+**Update 2026-05-20** — design-docs/22 first-classed the palette
+axis. `data-theme` (dark/light/system) now selects between the
+active palette's two variants; the *colour identity* lives in
+`data-palette` (22 named palettes, defaults per style). This doc
+remains accurate at the mechanism level — the cascade-via-data-attr
+pattern is the same — but the colour-token override blocks are now
+keyed by palette, not theme alone.
 
 The current codebase audit (2026-05-19) found **zero** colour
 references that bypass the token layer after the Kbd.tsx fix. That's

@@ -77,7 +77,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
               : "normal";
 
           var pinnedStyle = localStorage.getItem("typeover:style");
-          document.documentElement.dataset.style =
+          var style =
             pinnedStyle === "terminal" ||
             pinnedStyle === "cardboard" ||
             pinnedStyle === "textbook" ||
@@ -85,6 +85,33 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
             pinnedStyle === "islands"
               ? pinnedStyle
               : "terminal";
+          document.documentElement.dataset.style = style;
+
+          /* Palette resolution per design-docs/22 — `default` (or
+           * absent) follows the active style's default; a specific
+           * palette ID persists across style switches. The list
+           * below must stay in sync with PALETTES + STYLE_DEFAULT_PALETTE
+           * in src/lib/theme.ts — bootstrap.test asserts every
+           * literal appears. */
+          var styleDefaultPalette = {
+            terminal: "phosphor-amber",
+            cardboard: "warm-paper",
+            textbook: "parchment-ink",
+            glass: "aurora-amber",
+            islands: "desk-felt",
+          };
+          var palettes = [
+            "phosphor-amber", "phosphor-green", "ice-blue", "tape-reel",
+            "warm-paper", "kraft", "manila", "newsprint", "calfskin",
+            "parchment-ink", "vellum", "pelican", "sepia", "almanac",
+            "aurora-amber", "glacier-blue", "lavender-mist", "monochrome",
+            "desk-felt", "app-store", "dark-wood", "studio-grey", "sunlit-pine",
+          ];
+          var pinnedPalette = localStorage.getItem("typeover:palette");
+          document.documentElement.dataset.palette =
+            pinnedPalette && pinnedPalette !== "default" && palettes.indexOf(pinnedPalette) >= 0
+              ? pinnedPalette
+              : styleDefaultPalette[style];
         } catch (_) {
           /* localStorage unavailable (incognito quota / SSR / etc.) —
            * fall through to the CSS @theme defaults. */

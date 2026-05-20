@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { DENSITIES, RADII, STYLES, THEMES } from "~/lib/theme";
+import { DENSITIES, PALETTES, RADII, STYLES, STYLE_DEFAULT_PALETTE, THEMES } from "~/lib/theme";
 
 /*
  * BaseLayout's inline pre-paint bootstrap script duplicates every
@@ -45,5 +45,23 @@ describe("BaseLayout bootstrap — enum coverage", () => {
   it.each(STYLES)("style literal %s appears in bootstrap", async (value) => {
     const src = await bootstrapSource();
     expect(src).toContain(`"${value}"`);
+  });
+
+  it.each(PALETTES)("palette literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
+  });
+
+  it("every style maps to a default palette that bootstrap can resolve", async () => {
+    /* Drift guard — if theme.ts changes the default for a style, the
+     * bootstrap's literal map must follow. Check every (style →
+     * default-palette) pair appears as an object-literal pair in the
+     * bootstrap source. */
+    const src = await bootstrapSource();
+    for (const [style, palette] of Object.entries(STYLE_DEFAULT_PALETTE)) {
+      expect(src, `expected bootstrap to contain "${style}: \\"${palette}\\""`).toMatch(
+        new RegExp(`${style}:\\s*"${palette}"`),
+      );
+    }
   });
 });

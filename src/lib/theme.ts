@@ -1,10 +1,12 @@
 /*
- * Appearance helpers — four independent axes per design-docs/13 + 14.
+ * Appearance helpers — FIVE independent axes per design-docs/13 + 14 + 22.
  *
  *   1. Colour theme — `dark` | `light` (pin)  or `system` (follow OS).
  *   2. Density      — `compact` | `normal` | `airy`.
  *   3. Shape        — `sharp` | `normal` | `rounded` | `pill`.
  *   4. Style        — `terminal` | `cardboard` | `textbook` | `glass` | `islands`.
+ *   5. Palette      — `default` (follow active style's default palette)
+ *                     or one of 22 named palette IDs (design-docs/22).
  *
  * NAMING NOTE — design-docs/18 F-1. The shape axis carries three
  * surface names: "shape" (design-docs/13 + this comment), "Shape"
@@ -191,3 +193,138 @@ const styleAxis = defineAppearanceAxis<StyleId>({
 
 export const currentStyle = styleAxis.current;
 export const setStyle = styleAxis.set;
+
+/* =============================== Palette ============================ */
+
+/* design-docs/22 — 22 named palettes grouped by home style. Each has
+ * a dark + light variant defined in global.css. The `default` magic
+ * value isn't a palette ID; it means "follow the active style's
+ * default palette" (so flipping Style with no palette pin changes
+ * palette too). A non-default palette ID persists across style
+ * switches (custom pin behaviour). */
+export const PALETTES = [
+  /* terminal */
+  "phosphor-amber",
+  "phosphor-green",
+  "ice-blue",
+  "tape-reel",
+  /* cardboard */
+  "warm-paper",
+  "kraft",
+  "manila",
+  "newsprint",
+  "calfskin",
+  /* textbook */
+  "parchment-ink",
+  "vellum",
+  "pelican",
+  "sepia",
+  "almanac",
+  /* glass */
+  "aurora-amber",
+  "glacier-blue",
+  "lavender-mist",
+  "monochrome",
+  /* islands */
+  "desk-felt",
+  "app-store",
+  "dark-wood",
+  "studio-grey",
+  "sunlit-pine",
+] as const;
+export type PaletteId = (typeof PALETTES)[number];
+
+/** "default" means "follow the active style's default palette" — the
+ *  user has not customised. Any specific palette ID is a custom pin
+ *  that persists across style switches. */
+export type PaletteChoice = PaletteId | "default";
+
+export const PALETTE_STORAGE_KEY = "typeover:palette";
+
+/** Each style's default palette — used when `typeover:palette` is
+ *  absent or set to the literal `"default"`. Mirrors the bootstrap
+ *  script in BaseLayout; if you edit one, edit both (the
+ *  bootstrap.test asserts every PaletteId literal appears in the
+ *  bootstrap source). */
+export const STYLE_DEFAULT_PALETTE: Record<StyleId, PaletteId> = {
+  terminal: "phosphor-amber",
+  cardboard: "warm-paper",
+  textbook: "parchment-ink",
+  glass: "aurora-amber",
+  islands: "desk-felt",
+};
+
+/** Home style for each palette — drives the settings UI grouping.
+ *  Cross-style application is allowed; this is the picker's default
+ *  layout, not a hard restriction. */
+export const PALETTE_HOME_STYLE: Record<PaletteId, StyleId> = {
+  "phosphor-amber": "terminal",
+  "phosphor-green": "terminal",
+  "ice-blue": "terminal",
+  "tape-reel": "terminal",
+  "warm-paper": "cardboard",
+  kraft: "cardboard",
+  manila: "cardboard",
+  newsprint: "cardboard",
+  calfskin: "cardboard",
+  "parchment-ink": "textbook",
+  vellum: "textbook",
+  pelican: "textbook",
+  sepia: "textbook",
+  almanac: "textbook",
+  "aurora-amber": "glass",
+  "glacier-blue": "glass",
+  "lavender-mist": "glass",
+  monochrome: "glass",
+  "desk-felt": "islands",
+  "app-store": "islands",
+  "dark-wood": "islands",
+  "studio-grey": "islands",
+  "sunlit-pine": "islands",
+};
+
+const paletteValueSet: ReadonlySet<string> = new Set(PALETTES);
+const isPalette = (s: string | null | undefined): s is PaletteId =>
+  typeof s === "string" && paletteValueSet.has(s);
+
+/** The current pin, or "default" if none. The settings UI renders
+ *  "Default" as a distinct radio option. */
+export function currentPaletteChoice(): PaletteChoice {
+  if (typeof localStorage === "undefined") return "default";
+  const raw = localStorage.getItem(PALETTE_STORAGE_KEY);
+  return isPalette(raw) ? raw : "default";
+}
+
+/** The current EFFECTIVE palette — what's actually painted. Reads the
+ *  resolved DOM attribute the bootstrap set pre-paint. */
+export function currentPalette(): PaletteId {
+  if (typeof document !== "undefined") {
+    const attr = document.documentElement.dataset.palette;
+    if (isPalette(attr)) return attr;
+  }
+  /* SSR fallback — resolve from style default. */
+  return STYLE_DEFAULT_PALETTE[currentStyle()];
+}
+
+/** Apply a choice. `"default"` clears the pin and re-resolves via
+ *  the active style's default. A specific ID pins regardless of
+ *  style. The DOM `data-palette` attribute updates immediately. */
+export function setPalette(choice: PaletteChoice): void {
+  if (typeof document === "undefined") return;
+  if (choice === "default") {
+    if (typeof localStorage !== "undefined") localStorage.removeItem(PALETTE_STORAGE_KEY);
+    document.documentElement.dataset.palette = STYLE_DEFAULT_PALETTE[currentStyle()];
+    return;
+  }
+  if (typeof localStorage !== "undefined") localStorage.setItem(PALETTE_STORAGE_KEY, choice);
+  document.documentElement.dataset.palette = choice;
+}
+
+/** When the user changes Style and HAS NOT pinned a palette, the
+ *  effective palette must shift to the new style's default. Settings
+ *  UI calls this from inside the style setter wrapper. */
+export function reapplyDefaultPaletteForCurrentStyle(): void {
+  if (typeof document === "undefined") return;
+  if (currentPaletteChoice() !== "default") return; /* custom pin — leave alone */
+  document.documentElement.dataset.palette = STYLE_DEFAULT_PALETTE[currentStyle()];
+}
