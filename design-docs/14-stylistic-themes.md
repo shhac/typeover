@@ -1,21 +1,44 @@
-# 14 — Stylistic themes (density + shape + style)
+# 14 — Stylistic themes (density + shape + style + palette)
 
-Four theme **axes**, each independently set by the learner:
+**STATUS update — 2026-05-20.** This doc captures the original
+Style-axis design (landed v0). Two follow-ups expanded its scope
+significantly:
 
-1. **Colour** — `dark` / `light` (today) + `hc-*`, `sepia`, etc. (parked).
-   See [13-themes.md](13-themes.md).
+- [`21-style-axis-rebind`](21-style-axis-rebind-2026-05-20.md) —
+  radical per-style rebind. Style now controls typography,
+  border-style, radius interpretation (the shape axis BENDS per
+  style), reading measure, and shadow chrome. The original "at
+  most three token overrides" contract was deliberately broken
+  to make each style feel meaningfully different.
+- [`22-palette-axis-rfc`](22-palette-axis-rfc-2026-05-20.md) —
+  palette became its own axis. The colour-identity overrides that
+  used to live inside `[data-style="..."]` blocks now live in 22
+  named palettes, each shipping dark + light variants. Style
+  blocks hold chrome only.
+
+The "Doesn't fight the colour axis" line below is now stale —
+palette IS the colour-identity axis, and it can deliberately
+diverge from amber-on-near-black on a per-palette basis.
+
+Five **axes** total today, each independently set by the learner:
+
+1. **Colour theme** — `dark` / `light` / `system` (follow OS).
+   See [13-themes.md](13-themes.md). Now selects between an
+   active palette's two variants.
 2. **Density** — `compact` / `normal` / `airy`. How much whitespace
    the site uses. *This doc.*
 3. **Shape** — `sharp` / `normal` / `rounded` / `pill`. How rounded
-   the corners are. *This doc.*
+   the corners are. *This doc, refined by doc 21.*
 4. **Style** — `terminal` (default) / `cardboard` / `textbook` /
-   `glass` / `islands`. The aesthetic "feel" of surfaces and
-   chrome, composed on top of the other three axes. *Landed
-   2026-05-20.*
+   `glass` / `islands`. Typography + chrome + radius bending +
+   reading measure. *This doc + doc 21.*
+5. **Palette** — `default` (follow active style's default) or one
+   of 22 named palettes. Colour identity. *Doc 22.*
 
-The four axes compose: a learner can run `dark` + `compact` +
-`rounded` + `glass` if that's what reads best to them. The DS holds
-the contract that any combination just works.
+The axes compose: a learner can run `dark` + `compact` +
+`rounded` + `glass` + `lavender-mist` if that's what reads best
+to them. The DS holds the contract that any combination just
+works.
 
 ## Why two new axes
 
@@ -202,11 +225,21 @@ on all sides. Reads modern-app rather than terminal.
 
 ### Style contract
 
-**Each style adds at most three token overrides + one optional
-texture URL.** No JS, no component-level conditionals, no
-per-style component code. If a style needs the DS to know what
-style is active (e.g. to swap a Tailwind class), the DS has
-leaked — styles are a token-layer concern only.
+**Original contract (v0): "Each style adds at most three token
+overrides + one optional texture URL."** Deliberately broken in
+[doc 21](21-style-axis-rebind-2026-05-20.md) — styles now also
+rebind typography (`--font-heading`, `--font-body`,
+`--heading-weight-base`), reading measure (`--measure`), border
+treatment (`--border-style`), panel transparency
+(`--panel-bg-mix`), and the shape axis itself (per-style
+`--radius-sm/md/lg` overrides keyed by `[data-radius]`). The new
+contract: **a style is a complete answer to "what kind of
+document is this?"** with as many token overrides as the answer
+demands.
+
+The component layer still doesn't branch on style. No JS, no
+component-level conditionals. Every override flows through CSS
+variables.
 
 The component layer reads `--shadow-panel`, `--shadow-island`,
 `--surface-pattern`, `--border-style` etc. as it already reads
@@ -220,10 +253,13 @@ in `@theme` first with the `terminal` default values; each
   token set provides. A "card" looks different under glass and
   cardboard because the *shadow token* changed, not because the
   Card component branches on style.
-- **Doesn't fight the colour axis.** Cardboard isn't an
-  alternative to "light" — it's "light + warm-paper" or
-  "dark + warm-paper" depending on the colour axis. The same
-  amber stays amber; the same Go cyan stays Go cyan.
+- **Originally: "doesn't fight the colour axis."** Now palette
+  IS the colour axis ([doc 22](22-palette-axis-rfc-2026-05-20.md)).
+  Each style declares a default palette; the user can override.
+  A style applied to a different palette than its default is
+  supported but may look visually mixed (e.g. glass under
+  `phosphor-green` blooms green-on-green, which is valid but
+  not the design intent).
 - **Doesn't replace the visual identity.** Mono-amber-on-near-
   black is typeover's identity floor; styles are surface-level
   variations, not rebrands.
