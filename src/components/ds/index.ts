@@ -16,4 +16,5 @@ export { Panel } from "./Panel";
 export { ProgressChip } from "./ProgressChip";
 export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";
+export { StatBlock } from "./StatBlock";
 export { Text } from "./Text";

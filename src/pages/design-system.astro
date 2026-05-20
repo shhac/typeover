@@ -3,17 +3,25 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Badge,
   Button,
+  ButtonLink,
   CodeBlock,
   Compare,
   Container,
   Divider,
   Eyebrow,
+  Feedback,
   Heading,
+  HintButton,
   Kbd,
+  Panel,
   ProgressChip,
+  RevealButton,
   Stack,
+  StatBlock,
   Text,
 } from "~/components/ds";
+import Accordion from "~/components/ds/Accordion.astro";
+import TrackCard from "~/components/ds/TrackCard.astro";
 
 /*
  * Design-system inventory. Lives at /design-system per
@@ -134,7 +142,105 @@ func greet(u User) string {
                 <Eyebrow tone="go">golang</Eyebrow>
               </Stack>
             </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">stat block</Eyebrow>
+              <Stack direction="row" gap="md">
+                <StatBlock value={6} label="themes" />
+                <StatBlock value={54} label="exercises" />
+                <StatBlock value={12} label="hints" tone="secondary" />
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">button link</Eyebrow>
+              <Stack direction="row" gap="sm" wrap>
+                <ButtonLink href="#" variant="primary">Primary nav</ButtonLink>
+                <ButtonLink href="#" variant="secondary">Secondary nav</ButtonLink>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">feedback</Eyebrow>
+              <Stack gap="xs">
+                <Feedback status="correct">Correct — and idiomatic.</Feedback>
+                <Feedback status="incorrect">Not quite. Try again or reveal the answer.</Feedback>
+                <Feedback status="pending">Checking…</Feedback>
+              </Stack>
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">hint button</Eyebrow>
+              <HintButton
+                hints={[
+                  "Layer 1 — observational.",
+                  "Layer 2 — pointed.",
+                  "Layer 3 — the answer.",
+                ]}
+              />
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">reveal button</Eyebrow>
+              <RevealButton canonical="package main\nfunc main() {}" lang="go" />
+            </Stack>
+
+            <Stack gap="xs">
+              <Eyebrow tone="muted">panel</Eyebrow>
+              <Panel padding="default" tone="default">
+                <Text tone="muted" size="sm">A Panel — surface container with hairline.</Text>
+              </Panel>
+              <Panel padding="default" tone="default" label="LABEL STRIP" accent="amber">
+                <Text tone="muted" size="sm">With a labelled top strip (use sparingly).</Text>
+              </Panel>
+            </Stack>
           </div>
+        </Stack>
+
+        <Divider />
+
+        <Stack gap="md">
+          <Eyebrow>composed surfaces</Eyebrow>
+
+          <Stack gap="xs">
+            <Eyebrow tone="muted">accordion (native &lt;details&gt;)</Eyebrow>
+            <Accordion defaultOpen={true}>
+              <Heading level={3} size="lg" slot="summary">Open by default</Heading>
+              <Fragment slot="meta">3 items</Fragment>
+              <Text tone="muted" size="sm">
+                Accordion body. Click the summary to collapse.
+              </Text>
+            </Accordion>
+            <Accordion>
+              <Heading level={3} size="lg" slot="summary">Closed by default</Heading>
+              <Fragment slot="meta">scaffolded</Fragment>
+              <Text tone="muted" size="sm">Body hidden until clicked.</Text>
+            </Accordion>
+          </Stack>
+
+          <Stack gap="xs">
+            <Eyebrow tone="muted">track card</Eyebrow>
+            <TrackCard status="available">
+              <Heading level={3} size="xl" slot="title">
+                <span class="text-accent-go">Go</span> for TypeScript devs
+              </Heading>
+              <Fragment slot="dek">One-line dek explaining the track.</Fragment>
+              <Stack gap="xs" slot="modules">
+                <Text tone="muted" size="sm" family="mono">1. Foundations · ready</Text>
+                <Text tone="faint" size="sm" family="mono">2–7. soon</Text>
+              </Stack>
+              <ButtonLink href="#" variant="primary">Start</ButtonLink>
+            </TrackCard>
+          </Stack>
+
+          <Stack gap="xs">
+            <Eyebrow tone="muted">mobile key bar</Eyebrow>
+            <Text tone="muted" size="sm">
+              <code class="font-mono">&lt;MobileKeyBar&gt;</code> renders at the bottom of the
+              viewport on <code class="font-mono">&lt;1024px</code> only. Resize the window
+              to see it; it overlays the Go symbol bank above the soft keyboard.
+            </Text>
+          </Stack>
         </Stack>
 
         <Divider />

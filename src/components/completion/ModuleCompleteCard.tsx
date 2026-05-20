@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { Button, ButtonLink } from "~/components/ds";
+import { Button, ButtonLink, Eyebrow, Heading, StatBlock, Text } from "~/components/ds";
 import { getExerciseProgress, summarizeTheme } from "~/lib/progress";
 
 interface ThemeSummary {
@@ -146,24 +146,26 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
   return (
     <Show
       when={progress()}
-      fallback={<div class="text-fg-faint text-sm font-mono">Loading your progress…</div>}
+      fallback={
+        <Text tone="faint" size="sm" family="mono">
+          Loading your progress…
+        </Text>
+      }
     >
       {(p) => (
         <Show
           when={isComplete()}
           fallback={
             <div class="flex flex-col gap-4">
-              <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">
-                Module — Almost there
-              </div>
-              <div class="text-fg-primary text-2xl font-semibold tracking-tight">
+              <Eyebrow tone="muted">Module — almost there</Eyebrow>
+              <Heading level={2} size="2xl">
                 {props.moduleTitle}
-              </div>
-              <div class="text-fg-secondary text-sm">
+              </Heading>
+              <Text tone="secondary" size="sm">
                 You've passed {p().exercisesPassed} of {p().totalExercises} exercises across{" "}
                 {p().themesComplete} of {props.themes.length} themes. Come back when the rest are
                 done and the celebration screen unlocks.
-              </div>
+              </Text>
               <For each={props.themes}>
                 {(theme) => {
                   /* Delegate to summarizeTheme so the empty-theme rule
@@ -207,28 +209,15 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
           }
         >
           <div class="flex flex-col gap-6">
-            <div class="font-mono text-xs uppercase tracking-widest text-accent-amber">
-              typeover · MODULE COMPLETE
-            </div>
-            <div class="text-fg-primary text-3xl font-semibold tracking-tight">
+            <Eyebrow tone="amber">typeover · module complete</Eyebrow>
+            <Heading level={2} size="3xl">
               {props.moduleTitle}
-            </div>
+            </Heading>
             <div class="flex flex-row gap-6 flex-wrap">
-              <div class="flex flex-col">
-                <div class="text-accent-amber text-3xl font-mono">{p().themesComplete}</div>
-                <div class="text-fg-faint text-xs font-mono uppercase tracking-widest">themes</div>
-              </div>
-              <div class="flex flex-col">
-                <div class="text-accent-amber text-3xl font-mono">{p().exercisesPassed}</div>
-                <div class="text-fg-faint text-xs font-mono uppercase tracking-widest">
-                  exercises
-                </div>
-              </div>
+              <StatBlock value={p().themesComplete} label="themes" />
+              <StatBlock value={p().exercisesPassed} label="exercises" />
               <Show when={p().hintsUsedTotal > 0}>
-                <div class="flex flex-col">
-                  <div class="text-fg-secondary text-3xl font-mono">{p().hintsUsedTotal}</div>
-                  <div class="text-fg-faint text-xs font-mono uppercase tracking-widest">hints</div>
-                </div>
+                <StatBlock value={p().hintsUsedTotal} label="hints" tone="secondary" />
               </Show>
             </div>
             <div class="flex flex-row gap-3 flex-wrap">
@@ -240,18 +229,20 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
               </ButtonLink>
             </div>
             <Show when={shareState() === "copied"}>
-              <div class="text-fg-muted text-xs font-mono">
+              <Text tone="muted" size="xs" family="mono">
                 Copied to clipboard — paste anywhere you like.
-              </div>
+              </Text>
             </Show>
             <Show when={shareState() === "shared"}>
-              <div class="text-fg-muted text-xs font-mono">Shared. Thanks for telling someone.</div>
+              <Text tone="muted" size="xs" family="mono">
+                Shared. Thanks for telling someone.
+              </Text>
             </Show>
             <Show when={shareState() === "error"}>
-              <div class="text-error text-xs font-mono">
+              <Text size="xs" family="mono" class="text-error">
                 Share unavailable. Copy this and paste it manually:{" "}
                 <code class="text-fg-primary">{shareText()}</code>
-              </div>
+              </Text>
             </Show>
           </div>
         </Show>

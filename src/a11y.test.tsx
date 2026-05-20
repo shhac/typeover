@@ -5,15 +5,21 @@ import {
   Adaptive,
   Badge,
   Button,
+  ButtonLink,
   CodeBlock,
+  Compare,
   Container,
   Divider,
+  Eyebrow,
   Feedback,
   Heading,
   Kbd,
   LangCrumbs,
+  MobileKeyBar,
   Panel,
+  ProgressChip,
   Stack,
+  StatBlock,
   Text,
 } from "~/components/ds";
 import { HintButton } from "~/components/ds/HintButton";
@@ -225,6 +231,69 @@ describe("design system — a11y (WCAG 2.2 AA, JSDOM)", () => {
         <Text>Left pane</Text>
         <Text>Right pane</Text>
       </Adaptive>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("ButtonLink — anchor styled to match Button", async () => {
+    const { container } = render(() => (
+      <ButtonLink href="/go" variant="primary">
+        Browse curriculum
+      </ButtonLink>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("Compare — figure/figcaption around side-by-side code", async () => {
+    const { container } = render(() => (
+      <Compare caption="Same intent, two syntaxes.">
+        <CodeBlock lang="ts" filename="a.ts">{`let x = 5;`}</CodeBlock>
+        <CodeBlock lang="go" filename="a.go">{`x := 5`}</CodeBlock>
+      </Compare>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("Eyebrow — small mono uppercase label", async () => {
+    const { container } = render(() => (
+      <Stack gap="xs">
+        <Eyebrow>default</Eyebrow>
+        <Eyebrow tone="amber">amber</Eyebrow>
+        <Eyebrow tone="ts">typescript</Eyebrow>
+        <Eyebrow tone="go">golang</Eyebrow>
+      </Stack>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("MobileKeyBar — Go-symbol bar with role=toolbar", async () => {
+    const { container } = render(() => <MobileKeyBar onInsert={() => {}} />);
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("ProgressChip — both kinds", async () => {
+    const { container } = render(() => (
+      <Stack gap="xs">
+        <ProgressChip kind="theme" passed={6} total={9} />
+        <ProgressChip kind="exercise" seen={3} passed={2} />
+      </Stack>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("StatBlock — big number + small label", async () => {
+    const { container } = render(() => (
+      <Stack direction="row" gap="md">
+        <StatBlock value={6} label="themes" />
+        <StatBlock value={54} label="exercises" />
+        <StatBlock value={12} label="hints" tone="secondary" />
+      </Stack>
     ));
     const v = await runAxe(container);
     expect(v, describeViolations(v)).toEqual([]);
