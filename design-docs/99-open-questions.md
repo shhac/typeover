@@ -76,32 +76,18 @@ Captured here so they don't sit only in conversation history.
 
 Flagged for "do later when triggered", not now.
 
-- **Auto-indent on code-box Enter** *(surfaced 2026-05-20.)*
-  In Freeform's `<textarea>` (and the future CodeMirror surface),
-  pressing Enter on a line beginning `^(\s+)` should prepend the
-  same whitespace prefix to the new line — standard editor
-  behaviour. Today Enter drops to column 0; the learner has to
-  re-indent every nested block by hand. Implementation: an
-  `onKeyDown` on the textarea that intercepts Enter, reads the
-  current line's leading whitespace via `value.slice(0,
-  selectionStart).split("\n").pop()`, and inserts `"\n" +
-  prefix` via `insertAtSelection`. Belongs in
-  `src/lib/textarea-insert.ts` as a sibling helper to the
-  existing functions; one-line wire-up in Freeform. CodeMirror
-  handles this for free when #23 lands.
+- **Auto-indent on code-box Enter** *(landed.)* Shipped as
+  `handleAutoIndentEnter` in `src/lib/textarea-insert.ts`, wired
+  into Freeform's textarea `onKeyDown`. Enter on an indented line
+  carries the same leading whitespace into the new line via
+  `insertAtSelection`; modified Enter (Shift/Cmd/Ctrl/Alt) falls
+  through to a bare newline. CodeMirror will handle this for free
+  when #23 lands.
 
-- **Homepage Shortcuts button — decide and act** *(surfaced
-  2026-05-20.)* The `?` Shortcuts button on `/` is a first-class
-  CTA that does nothing. Two options: (a) **build the overlay**
-  — a `<KeyboardShortcuts>` Solid island that opens on
-  `?`-keydown OR button click, lists the keybinds (`?` to open,
-  `Esc` to close, exercise-page shortcuts when added later); or
-  (b) **remove the button** entirely until shortcuts exist.
-  Recommendation: (b) — option (a) commits us to authoring and
-  maintaining a shortcuts list the rest of the site doesn't yet
-  earn. Re-add when there are ≥3 site-wide shortcuts worth
-  documenting. Tiny change; ship in the homepage redesign
-  (design-docs/15 pattern 11) commit.
+- **Homepage Shortcuts button — decide and act** *(landed: option
+  b.)* The `?` Shortcuts button on `/` was removed in the homepage
+  redesign (design-docs/15 pattern 11). Re-add when there are ≥3
+  site-wide shortcuts worth documenting.
 
 - **Module 2+ content authoring velocity** *(surfaced
   2026-05-20: "lets also build out more of the exercises".)*
@@ -419,19 +405,15 @@ Surfaced by the first code-structure review pass (2026-05-17). Each is
 a should-definitely-do that was parked because the immediate iteration
 was already big enough.
 
-- **Add Vitest + critical-path unit tests.** No test infrastructure
-  exists yet. Cover at minimum:
-  - PRNG determinism in `src/lib/seed.ts` (snapshot a known seed → known
-    sequence; re-seeding produces same sequence).
-  - `generate()` in `src/lib/generator.ts` (snapshot a fixed exercise +
-    seed → known instance; the dedupe-distractor path drops collisions
-    cleanly; substitute() throws on unknown vars).
-  - `progress.ts` `bumpExercise` (idempotency of slot creation, counter
-    mutations, lastSeenAt always advances).
-  - `optionCellState` in `McqOption.tsx` (truth table across all
-    boolean combinations).
-  - Mcq.tsx happy-path + wrong-path + reveal via
-    `@solidjs/testing-library`.
+- **Add Vitest + critical-path unit tests.** *(Landed.)* Vitest +
+  `@solidjs/testing-library` + jsdom wired (`pnpm test`). 463 tests
+  across 36 files cover the listed surfaces and more: seed PRNG,
+  `generate()` + dedup + `substitute`, `bumpExercise` lifecycle +
+  corrupt-blob recovery, `optionCellState` truth table, Mcq /
+  FillBlankWord / FillBlankLineInput / Freeform happy + wrong +
+  reveal paths, the use-yaegi-run boot/race lifecycle, the
+  ProgressChip / Toast / HintButton / RevealButton DS contracts,
+  and an axe-core a11y gate. CI-runnable; `<5s` typical run time.
 
 - **Zod-validate the localStorage progress blob.** *(Landed — task #37.)*
   `safeParseProgress` is now a Zod-typed `ProgressSchema.safeParse`;
@@ -458,12 +440,15 @@ was already big enough.
   Each issue carries a path pointing at the offending field.
 
 - **`progress.write()` should dispatch a same-tab storage event.**
-  Browsers only fire `storage` in *other* tabs, so any future Solid
-  signal subscribed to localStorage won't refresh in the current tab.
-  Fix: `window.dispatchEvent(new StorageEvent("storage", { key: ... }))`
-  inside `write()`. Pair with restoring a `useExerciseProgress` hook
-  with proper `onCleanup` listener removal — both were dropped in the
-  refactor pass because nothing currently consumes them.
+  *(Landed — design-docs/19 F-20 + design-docs/20 lens-5.)*
+  `write()` in `src/lib/progress.ts` now dispatches a custom
+  `PROGRESS_CHANGED_EVENT` for same-tab listeners (the native
+  `storage` event only fires in OTHER tabs). `ExerciseProgressChip`
+  + `ThemeProgressChip` islands subscribe to both that event and
+  the cross-tab `storage` event, invalidating the module-level
+  cache via `invalidateProgressCache()` before re-reading. Tested
+  end-to-end in the chip islands' new test files (12 tests
+  across both).
 
 ## Unvalidated assumptions
 
@@ -509,13 +494,18 @@ None of this is built yet — just keeping the room for it.
 
 ## Design
 
-- **Light theme.** *Resolved 2026-05-19.* Designed in
+- **Light theme.** *Resolved + shipped.* Designed in
   [13-themes.md](13-themes.md). Mechanism is `data-theme` on `<html>`
   + CSS-variable cascade; the DS audit confirmed every colour already
   goes through a token (after fixing one shadow leak in Kbd.tsx), so
   adding a theme is one override block in `global.css` plus a
-  selector entry. Initial catalogue: `dark` (default), `light`,
-  `hc-dark`, `hc-light`. Implementation not started.
+  selector entry. Catalogue today: `dark` (default) and `light` —
+  both ship with WCAG AA contrast pass (light theme's primary CTA
+  was darkened from #c97a00 to #a06400 per design-docs/16 F-25).
+  The radio control on `/settings` exposes `system` / `dark` /
+  `light`; the bootstrap script in `BaseLayout.astro` resolves the
+  pin pre-paint. High-contrast variants (`hc-dark`, `hc-light`)
+  remain future work — not blocking launch.
 - **Mobile.** v0 is desktop-first because exercises involve typing code.
   Read-only mobile view eventually?
 - **Animation.** Current bet: minimal. Quiz feedback transitions, nothing
