@@ -104,7 +104,7 @@ a circular import.
 tick. Concrete iOS Safari pain point, clean addition to an
 existing hook, no new deps, axe matrix untouched. 2-5h.
 
-### P12 — Boot-stall escalation when Yaegi WASM cold-start exceeds 5s (recovery)
+### P12 — Boot-stall escalation when Yaegi WASM cold-start exceeds 5s (recovery) ✅ SHIPPED 2026-05-20 (`dbedeff`)
 
 **Shape.** Add a `bootStalled` signal to `useYaegiRun` that flips
 true if `status === "booting"` for >5s. `RunResetToolbar`
@@ -129,9 +129,16 @@ opens.
   to scroll the panel above the iOS soft keyboard slice with
   `prefers-reduced-motion` respected. 5 jsdom-mocked tests pin
   the visualViewport-driven scroll path.
-- **Next ship-able candidate:**
-  1. **P12 Yaegi boot-stall escalation** — concrete stuck-state
-     fix for flaky networks. ~2-3h.
+- ✅ **P12 Yaegi boot-stall escalation** shipped 2026-05-20 in
+  commit `dbedeff`. `bootStalled` signal on `YaegiRunHandle`
+  flips at 5s; RunResetToolbar escalates the badge + surfaces
+  a "Retry runtime" ghost button. 2 fake-timer tests pin the
+  threshold + reset behaviour.
+
+Cycle 4's queue is now empty. Three of four proposals shipped
+(P10 sitemap, P11 mobile scroll, P12 boot-stall); P9 `--types`
+flag remained deferred per its devil's-advocate verdict. Next
+/loop tick should open cycle 5 with fresh lenses.
 - **Deferred:**
   - **P9 `--types` flag** — twice-deferred follow-up; revisit
     with fresh Module 3 pain.
