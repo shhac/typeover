@@ -64,14 +64,22 @@ type ParseResult =
 /** Tagged-result parser. `empty` means the slot was never written
  *  (no backup needed); `invalid-json` and `schema-mismatch` are
  *  corrupt-blob outcomes the caller may want to preserve. */
+/* Small wrapper around JSON.parse so the caller can stay `const`
+ * and read top-to-bottom — the previous `let parsed; try {...} catch`
+ * smell is the exact shape lens-3 flagged in design-docs/20. */
+const JSON_PARSE_FAILED = Symbol("json-parse-failed");
+function tryJsonParse(raw: string): unknown | typeof JSON_PARSE_FAILED {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return JSON_PARSE_FAILED;
+  }
+}
+
 function parseProgressResult(raw: string | null): ParseResult {
   if (raw === null) return { ok: false, reason: "empty" };
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return { ok: false, reason: "invalid-json" };
-  }
+  const parsed = tryJsonParse(raw);
+  if (parsed === JSON_PARSE_FAILED) return { ok: false, reason: "invalid-json" };
   const result = ProgressSchema.safeParse(parsed);
   if (!result.success) return { ok: false, reason: "schema-mismatch" };
   return { ok: true, value: result.data };
