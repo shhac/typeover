@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "_comment": "Cache the Yaegi WASM and bootstrap shim aggressively but NOT immutable — the files are unhashed (public/yaegi/yaegi.wasm) so a Yaegi upgrade reuses the same path. max-age=86400 means a return visit within 24h skips the network entirely; after that the browser revalidates with If-Modified-Since. design-docs/20 proposer-cycle round 2. Pair with the <link rel=preload> in BaseLayout for the cold-start path.",
+  "headers": [
+    {
+      "source": "/yaegi/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ]
+}

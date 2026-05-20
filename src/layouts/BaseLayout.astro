@@ -15,6 +15,21 @@ const { title, description } = Astro.props;
 const SITE_ORIGIN = import.meta.env.SITE ?? "https://typeover.paulie.app";
 const ogImage = new URL("/og-image.svg", SITE_ORIGIN).toString();
 const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
+
+/* Preload the Yaegi WASM on /go/* routes so the ~1.9 MB brotli
+ * download happens in parallel with HTML parsing instead of waiting
+ * for the first `getRunner()` call inside a Solid island. Cuts the
+ * cold-start latency a learner perceives between landing on an
+ * exercise route and clicking Run.
+ *
+ * Gated to /go/* paths to avoid loading the WASM for /, /settings,
+ * /privacy, /design-system etc. MCQ and fill-word exercises never
+ * call getRunner() either, but the route-level gate is the
+ * pragmatic v0 cut — refining further means a per-exercise-type
+ * preload signal we don't currently surface. design-docs/20
+ * proposer-cycle round 2 — the lighter alternative to a service
+ * worker. */
+const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
 ---
 
 <!doctype html>
@@ -77,6 +92,9 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {isExerciseRoute && (
+      <link rel="preload" href="/yaegi/yaegi.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+    )}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
