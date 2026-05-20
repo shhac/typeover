@@ -9,6 +9,7 @@ import {
   currentTheme,
   DENSITY_STORAGE_KEY,
   PALETTE_HOME_STYLE,
+  PALETTE_LABELS,
   PALETTE_STORAGE_KEY,
   PALETTES,
   RADIUS_STORAGE_KEY,
@@ -265,6 +266,15 @@ describe("palette axis", () => {
      * PALETTE_HOME_STYLE entry, the settings UI's per-style
      * grouping silently breaks. This catches it. */
     expect(Object.keys(PALETTE_HOME_STYLE).sort()).toEqual([...PALETTES].sort());
+  });
+
+  it("PALETTE_LABELS has an entry for every palette — drift guard", () => {
+    /* Mirror of the PALETTE_HOME_STYLE guard. PALETTE_LABELS is
+     * `Record<PaletteId, ...>` so TS catches missing entries at
+     * the type level, but the runtime equality check catches
+     * extra keys (a palette removed from PALETTES whose label
+     * declaration is stale). */
+    expect(Object.keys(PALETTE_LABELS).sort()).toEqual([...PALETTES].sort());
   });
 
   it("currentPalette SSR fallback resolves through current style", () => {

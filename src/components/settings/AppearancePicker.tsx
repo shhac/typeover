@@ -21,8 +21,8 @@ import {
   currentStyle,
   type DensityId,
   type PaletteChoice,
-  type PaletteId,
   PALETTE_HOME_STYLE,
+  PALETTE_LABELS,
   PALETTES,
   type RadiusId,
   reapplyDefaultPaletteForCurrentStyle,
@@ -211,36 +211,6 @@ const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
     description: "Generously curved — 8–24px. Small elements pill out.",
   },
 ];
-
-/* Palette options — `default` is the magic value that follows the
- * active style. Per-palette labels + descriptions live here; the
- * picker filters by PALETTE_HOME_STYLE unless "Show all" is on.
- * design-docs/22. */
-const PALETTE_LABELS: Record<PaletteId, { label: string; description: string }> = {
-  "phosphor-amber": { label: "Phosphor Amber", description: "Bloomberg trading-floor amber on near-black." },
-  "phosphor-green": { label: "Phosphor Green", description: "IBM 3270 / VT220 CRT ghost." },
-  "ice-blue": { label: "Ice Blue", description: "Arctic quant-desk slate." },
-  "tape-reel": { label: "Tape Reel", description: "DEC oxblood on parchment." },
-  "warm-paper": { label: "Warm Paper", description: "Off-white panels on light, warm-dark on dark." },
-  kraft: { label: "Kraft", description: "True brown shipping-carton paper." },
-  manila: { label: "Manila", description: "Folder yellow with ink-blue accent." },
-  newsprint: { label: "Newsprint", description: "Off-white pulp + headline red." },
-  calfskin: { label: "Calfskin", description: "Pale calfskin with sepia ink." },
-  "parchment-ink": { label: "Parchment & Ink", description: "Cream-on-light, aged-paper-on-dark — the warm textbook canon." },
-  pelican: { label: "Pelican", description: "Penguin paperback orange spine." },
-  almanac: { label: "Almanac", description: "Off-white + deep teal headings." },
-  "e-reader": { label: "E-Reader", description: "Modern e-ink — cool grey paper on light, warm night-mode + amber highlight on dark." },
-  "slate-rule": { label: "Slate Rule", description: "Modern academic — cool slate ground, steel-blue accent. Gwern-influenced." },
-  "aurora-amber": { label: "Aurora Amber", description: "Amber + TS-blue radial bloom." },
-  "glacier-blue": { label: "Glacier Blue", description: "Cool cyan-to-ice bloom." },
-  "lavender-mist": { label: "Lavender Mist", description: "Lilac + rose synthwave." },
-  monochrome: { label: "Monochrome", description: "Clinical, accent-free glass." },
-  "desk-felt": { label: "Desk Felt", description: "Felt grey desk under white islands." },
-  "app-store": { label: "App Store", description: "Apple System — TS-blue CTA." },
-  "dark-wood": { label: "Dark Wood", description: "Warm walnut under parchment tiles." },
-  "studio-grey": { label: "Studio Grey", description: "Cool slate; Linear / Figma vibe." },
-  "sunlit-pine": { label: "Sunlit Pine", description: "Warm cream + pale pine cabin." },
-};
 
 /* Focused mini-canvas showing the visual elements every axis
  * touches: surface colours (theme), padding/gap (density), corner
