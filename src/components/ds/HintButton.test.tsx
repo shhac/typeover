@@ -31,17 +31,22 @@ describe("HintButton", () => {
     expect(getByRole("button").textContent).toBe("Another hint");
   });
 
-  it("three clicks reveal all three hints, label becomes 'No more hints', button disabled", () => {
-    const { getByRole, getByText } = render(() => <HintButton hints={HINTS} />);
-    const btn = getByRole("button");
+  it("three clicks reveal all three hints, then the button collapses to a quiet caption", () => {
+    /* design-docs/16 F-5 — the earlier behaviour kept a permanently
+     * disabled "No more hints" button. After the cap the button now
+     * disappears entirely and is replaced by an "all three hints
+     * shown" caption; the canonical Reveal lives on the shell's
+     * footer RevealButton from here. */
+    const { queryByRole, getByText } = render(() => <HintButton hints={HINTS} />);
+    const btn = queryByRole("button") as HTMLButtonElement;
     fireEvent.click(btn);
     fireEvent.click(btn);
     fireEvent.click(btn);
     expect(getByText(HINTS[0])).toBeTruthy();
     expect(getByText(HINTS[1])).toBeTruthy();
     expect(getByText(HINTS[2])).toBeTruthy();
-    expect(btn.textContent).toBe("No more hints");
-    expect((btn as HTMLButtonElement).disabled).toBe(true);
+    expect(queryByRole("button")).toBeNull();
+    expect(getByText("all three hints shown")).toBeTruthy();
   });
 
   it("onReveal fires exactly once per click, up to the cap", () => {
@@ -54,23 +59,18 @@ describe("HintButton", () => {
     expect(onReveal).toHaveBeenCalledTimes(3);
   });
 
-  it("clicking past the cap is a no-op — onReveal does not fire", () => {
-    /* The button is disabled at 3, but a programmatic click or a
-     * future variant that re-enables the button must not fire
-     * onReveal past the cap. */
+  it("button removal at cap means there's no further click target", () => {
+    /* Belt-and-braces — the post-cap UI collapses the button so the
+     * user can't re-click. The internal `next()` cap is still in
+     * place (see "Hint label resets" tests below); this test pins
+     * the UI-level contract. */
     const onReveal = vi.fn();
-    const { getByRole } = render(() => <HintButton hints={HINTS} onReveal={onReveal} />);
-    const btn = getByRole("button");
-    fireEvent.click(btn);
-    fireEvent.click(btn);
-    fireEvent.click(btn);
-    /* Force a 4th click despite the disabled attribute — Solid's
-     * disabled attribute prevents user clicks but fireEvent on a
-     * disabled button still dispatches the event. The internal
-     * cap guards this. */
-    onReveal.mockClear();
-    fireEvent.click(btn);
-    expect(onReveal).not.toHaveBeenCalled();
+    const { queryByRole } = render(() => <HintButton hints={HINTS} onReveal={onReveal} />);
+    fireEvent.click(queryByRole("button")!);
+    fireEvent.click(queryByRole("button")!);
+    fireEvent.click(queryByRole("button")!);
+    expect(onReveal).toHaveBeenCalledTimes(3);
+    expect(queryByRole("button")).toBeNull();
   });
 
   it("aria-label includes the current reveal count", () => {

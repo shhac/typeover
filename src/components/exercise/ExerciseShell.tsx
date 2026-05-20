@@ -210,7 +210,18 @@ export function ExerciseShell(props: ExerciseShellProps) {
           onReveal={() => recordHintUsed(props.exerciseId)}
         />
         <Show when={!props.ownsReveal}>
-          <RevealButton canonical={props.canonical} lang="go" />
+          {/* Footer reveal records the same way Hint does — a peek
+           * at the canonical pre-submit is a hint-equivalent.
+           * Without this, a learner who clicked "Show canonical"
+           * before picking an MCQ got no progress signal, while a
+           * learner who tried and failed and THEN revealed paid a
+           * full failure — same surface, different cost. design-
+           * docs/19 F-15. */}
+          <RevealButton
+            canonical={props.canonical}
+            lang="go"
+            onReveal={() => recordHintUsed(props.exerciseId)}
+          />
         </Show>
       </Stack>
     </Stack>

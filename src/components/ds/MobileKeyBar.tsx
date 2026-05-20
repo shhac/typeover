@@ -136,11 +136,17 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
         data-mobile-key-bar
       >
         <div class="flex flex-row min-h-11">
+          {/* Bar buttons live outside the natural keyboard tab order
+            * (tabindex=-1). They're discoverable by sight on the bar
+            * itself and only useful from a thumb-tap; a hardware-
+            * keyboard user shouldn't have to Tab through 17 symbol
+            * buttons to escape the textarea. design-docs/19 F-14. */}
           <For each={keys()}>
             {(k) => (
               <button
                 type="button"
                 aria-label={k.ariaLabel ?? k.label}
+                tabindex={-1}
                 onPointerDown={(e) => e.preventDefault()}
                 onClick={() => local.onInsert(k.insert)}
                 class="font-mono text-sm text-fg-primary min-w-11 min-h-11 px-3 hover:bg-bg-panel transition-colors border-r border-border-default last:border-r-0 flex items-center justify-center"
@@ -153,6 +159,7 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
             <button
               type="button"
               aria-label="Run"
+              tabindex={-1}
               onPointerDown={(e) => e.preventDefault()}
               onClick={() => local.onRun?.()}
               class="font-mono text-sm font-medium text-bg-base bg-accent-amber min-w-11 min-h-11 px-4 ml-auto flex items-center justify-center hover:bg-accent-amber/90 transition-colors"

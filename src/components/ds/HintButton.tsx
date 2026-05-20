@@ -42,26 +42,33 @@ export function HintButton(props: HintButtonProps) {
     props.onReveal?.();
   };
 
-  const label = () => {
-    const r = revealed();
-    if (r === 0) return "Hint";
-    if (r < 3) return "Another hint";
-    return "No more hints";
-  };
+  const label = () => (revealed() === 0 ? "Hint" : "Another hint");
+  const exhausted = () => revealed() >= 3;
 
   const visible = () => props.hints.slice(0, revealed());
 
+  /* After the third hint is revealed the button collapses to a quiet
+   * "all three shown" caption. The earlier "No more hints" label was
+   * a permanent dead button that read as punitive — design-docs/16
+   * F-5. The RevealButton in the shell handles the canonical from
+   * here. */
   return (
     <div class="flex flex-col gap-3">
-      <Button
-        variant="ghost"
-        size="md"
-        onClick={next}
-        disabled={revealed() >= 3}
-        aria-label={`${label()} — currently showing ${revealed()} of 3`}
+      <Show
+        when={!exhausted()}
+        fallback={
+          <span class="font-mono text-xs text-fg-faint">all three hints shown</span>
+        }
       >
-        {label()}
-      </Button>
+        <Button
+          variant="ghost"
+          size="md"
+          onClick={next}
+          aria-label={`${label()} — currently showing ${revealed()} of 3`}
+        >
+          {label()}
+        </Button>
+      </Show>
       <Show when={revealed() > 0}>
         <ul
           class="flex flex-col gap-2 text-sm text-fg-secondary border-l-2 border-accent-amber/40 pl-4"

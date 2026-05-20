@@ -12,14 +12,24 @@ interface RevealButtonProps {
 /**
  * RevealButton: persistent "Show canonical" toggle. Available before
  * and after submission. Reveals the idiomatic answer for comparison.
+ *
+ * onReveal fires once per component instance — toggling closed and
+ * back open does NOT re-fire. Consumers that record this as
+ * progress (ExerciseShell wires it to recordHintUsed per design-
+ * docs/19 F-15) get one hint-equivalent per peek session, not one
+ * per click.
  */
 export function RevealButton(props: RevealButtonProps) {
   const [shown, setShown] = createSignal(false);
+  let alreadyReported = false;
 
   const toggle = () => {
     const next = !shown();
     setShown(next);
-    if (next) props.onReveal?.();
+    if (next && !alreadyReported) {
+      alreadyReported = true;
+      props.onReveal?.();
+    }
   };
 
   return (

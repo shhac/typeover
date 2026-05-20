@@ -3,12 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import { RevealButton } from "./RevealButton";
 
 /*
- * Pins the off→on edge semantics for onReveal. The reveal action is
- * the only path that records a learner failure (see
- * design-docs/12-test-plan.md P1 — useExercisePhase.revealCorrect).
- * If a future ExerciseShell wires `onReveal` to recordInstanceFailed
- * and the button regresses to firing on every toggle (off→on AND
- * on→off), every reveal-cycle would double-count failures.
+ * Pins the once-per-component-lifetime semantics for onReveal.
+ * ExerciseShell wires `onReveal` to `recordHintUsed` (design-docs/19
+ * F-15) — the footer Reveal counts as one hint-equivalent per peek
+ * session, not per click. Without the latch, toggling closed/open
+ * would over-report; without the off→on guard, every click would
+ * double-count.
  */
 
 const CANONICAL = "x := 42";
@@ -36,18 +36,19 @@ describe("RevealButton", () => {
     expect(queryByText(CANONICAL)).toBeNull();
   });
 
-  it("onReveal fires only on the off → on edge, never on on → off", () => {
-    /* The load-bearing assertion. show → hide → show → hide
-     * should fire onReveal exactly twice (once per show), not four
-     * times (once per toggle). */
+  it("onReveal fires once per component lifetime — never re-fires on subsequent reopens", () => {
+    /* The load-bearing assertion. design-docs/19 F-15 wires this to
+     * recordHintUsed; a learner toggling closed and reopening the
+     * canonical should not pay a second hint. show → hide → show →
+     * hide fires onReveal exactly once. */
     const onReveal = vi.fn();
     const { getByRole } = render(() => <RevealButton canonical={CANONICAL} onReveal={onReveal} />);
     const btn = getByRole("button");
     fireEvent.click(btn); // show
     fireEvent.click(btn); // hide
-    fireEvent.click(btn); // show
+    fireEvent.click(btn); // show again — already reported
     fireEvent.click(btn); // hide
-    expect(onReveal).toHaveBeenCalledTimes(2);
+    expect(onReveal).toHaveBeenCalledTimes(1);
   });
 
   it("aria-expanded reflects the shown state", () => {
