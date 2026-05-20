@@ -21,7 +21,9 @@ import {
   Stack,
   StatBlock,
   Text,
+  Toast,
 } from "~/components/ds";
+import { createSignal } from "solid-js";
 import { HintButton } from "~/components/ds/HintButton";
 import { RevealButton } from "~/components/ds/RevealButton";
 
@@ -294,6 +296,15 @@ describe("design system — a11y (WCAG 2.2 AA, JSDOM)", () => {
         <StatBlock value={54} label="exercises" />
         <StatBlock value={12} label="hints" tone="secondary" />
       </Stack>
+    ));
+    const v = await runAxe(container);
+    expect(v, describeViolations(v)).toEqual([]);
+  });
+
+  it("Toast — status region with optional undo (announce-only, focus stays put)", async () => {
+    const [state] = createSignal({ message: "Theme: Dark", onUndo: () => {} });
+    const { container } = render(() => (
+      <Toast state={state} onDismiss={() => {}} durationMs={4000} />
     ));
     const v = await runAxe(container);
     expect(v, describeViolations(v)).toEqual([]);

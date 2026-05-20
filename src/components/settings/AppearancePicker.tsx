@@ -9,6 +9,8 @@ import {
   ProgressChip,
   Stack,
   Text,
+  Toast,
+  useToast,
 } from "~/components/ds";
 import {
   currentChoice,
@@ -234,7 +236,39 @@ func main() {
   );
 }
 
+/** Find an option's user-facing label for a given enum value, falling
+ *  back to the raw value if the option list is out of date. Used by
+ *  the toast so the announcement says "Theme: Dark" rather than
+ *  "Theme: dark" — a small but meaningful UX detail. */
+function labelOf<T extends string>(options: readonly RadioOption<T>[], value: T): string {
+  return options.find((o) => o.value === value)?.label ?? value;
+}
+
 export function AppearancePicker() {
+  const toast = useToast();
+
+  /* Wrap each setter so flipping any axis announces the change via
+   * Toast with an undo button restoring the previous value. design-
+   * docs/16 F-15. Without this the only feedback was the preview
+   * pane silently re-rendering — easy to miss and impossible to
+   * undo if the new theme made the page unreadable. */
+  function wrap<T extends string>(
+    options: readonly RadioOption<T>[],
+    axis: string,
+    read: () => T,
+    write: (next: T) => void,
+  ): (next: T) => void {
+    return (next) => {
+      const prev = read();
+      write(next);
+      if (prev === next) return;
+      toast.emit({
+        message: `${axis}: ${labelOf(options, next)}`,
+        onUndo: () => write(prev),
+      });
+    };
+  }
+
   return (
     <div class="flex flex-col gap-8">
       <PreviewSample />
@@ -246,7 +280,7 @@ export function AppearancePicker() {
           options={THEME_OPTIONS}
           initial="system"
           read={currentChoice}
-          write={setTheme}
+          write={wrap(THEME_OPTIONS, "Theme", currentChoice, setTheme)}
         />
       </div>
       <div class="flex flex-col gap-3">
@@ -257,7 +291,7 @@ export function AppearancePicker() {
           options={DENSITY_OPTIONS}
           initial="normal"
           read={currentDensity}
-          write={setDensity}
+          write={wrap(DENSITY_OPTIONS, "Density", currentDensity, setDensity)}
         />
       </div>
       <div class="flex flex-col gap-3">
@@ -268,7 +302,7 @@ export function AppearancePicker() {
           options={RADIUS_OPTIONS}
           initial="normal"
           read={currentRadius}
-          write={setRadius}
+          write={wrap(RADIUS_OPTIONS, "Shape", currentRadius, setRadius)}
         />
       </div>
       <div class="flex flex-col gap-3">
@@ -279,9 +313,10 @@ export function AppearancePicker() {
           options={STYLE_OPTIONS}
           initial="terminal"
           read={currentStyle}
-          write={setStyle}
+          write={wrap(STYLE_OPTIONS, "Style", currentStyle, setStyle)}
         />
       </div>
+      <Toast state={toast.state} onDismiss={toast.dismiss} />
     </div>
   );
 }
