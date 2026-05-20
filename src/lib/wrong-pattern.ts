@@ -1,4 +1,4 @@
-import { distractorExplain, distractorMatchText, type DistractorEntry } from "./generator";
+import { distractorExplain, distractorMatchText, type DistractorEntry } from "./generator-schema";
 
 /**
  * Match a learner's fill-line submission against the exercise's

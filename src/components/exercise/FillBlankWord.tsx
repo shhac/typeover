@@ -1,7 +1,7 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { Button } from "../ds/Button";
 import { CodeBlock } from "../ds/CodeBlock";
-import { type GeneratorSpec } from "~/lib/generator";
+import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { evaluateBlanks, extractBlankPositions } from "~/lib/fill-blank";

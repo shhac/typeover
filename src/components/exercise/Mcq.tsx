@@ -1,5 +1,5 @@
 import { createSignal, For } from "solid-js";
-import { type GeneratorSpec } from "~/lib/generator";
+import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { ExerciseShell } from "./ExerciseShell";

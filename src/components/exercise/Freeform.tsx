@@ -1,6 +1,6 @@
 import { createSignal, onMount, Show } from "solid-js";
 import { MobileKeyBar, Text } from "~/components/ds";
-import { type GeneratorSpec } from "~/lib/generator";
+import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { handleAutoIndentEnter, insertAtFocused } from "~/lib/textarea-insert";

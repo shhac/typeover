@@ -1,10 +1,6 @@
 import { createEffect, createMemo, createSignal } from "solid-js";
-import {
-  generate,
-  type ExerciseInstance,
-  type GenerateOptions,
-  type GeneratorSpec,
-} from "./generator";
+import { generate, type ExerciseInstance, type GenerateOptions } from "./generator-runtime";
+import type { GeneratorSpec } from "./generator-schema";
 import { recordInstanceSeen } from "./progress";
 
 /**

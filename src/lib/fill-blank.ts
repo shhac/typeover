@@ -5,8 +5,8 @@
  * Solid-rendering tests.
  */
 
-import type { ExerciseInstance, FillSegment, GeneratorSpec } from "./generator";
-import { distractorMatchText, substitute } from "./generator";
+import { distractorMatchText, type GeneratorSpec } from "./generator-schema";
+import { type ExerciseInstance, type FillSegment, substitute } from "./generator-runtime";
 import { rngFromSeed, shuffle } from "./seed";
 
 /**

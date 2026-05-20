@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { exerciseSchema } from "./content-schema";
-import { GeneratorSchema } from "./generator";
+import { GeneratorSchema } from "./generator-schema";
 
 /*
  * Cross-field refinement tests (task #38). The runtime tests for

@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
 import { Mcq } from "./Mcq";
-import type { GeneratorSpec } from "~/lib/generator";
+import type { GeneratorSpec } from "~/lib/generator-schema";
 
 /*
  * Component-level integration test for <Mcq>. Pins the phase

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GeneratorSchema } from "./generator";
+import { GeneratorSchema } from "./generator-schema";
 
 /*
  * Plain-Zod content schemas. Kept out of `content.config.ts` so vitest
