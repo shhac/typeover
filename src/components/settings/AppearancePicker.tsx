@@ -269,52 +269,62 @@ export function AppearancePicker() {
     };
   }
 
+  /* Desktop: 2-column split — controls on the left, preview on the
+   * right, preview sticks to the viewport top as the controls
+   * column scrolls. Mobile: stacked — controls first, preview
+   * below (closer to thumb, fewer pixels between flip and result).
+   * Source-order is controls-first so a screen reader hits the
+   * radio groups before the decorative preview. */
   return (
-    <div class="flex flex-col gap-8">
-      <PreviewSample />
-      <div class="flex flex-col gap-3">
-        <Eyebrow tone="muted">Theme</Eyebrow>
-        <RadioGroup<ThemeChoice>
-          legend="Theme"
-          name="theme"
-          options={THEME_OPTIONS}
-          initial="system"
-          read={currentChoice}
-          write={wrap(THEME_OPTIONS, "Theme", currentChoice, setTheme)}
-        />
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,420px)] gap-8 items-start">
+      <div class="flex flex-col gap-8 order-1">
+        <div class="flex flex-col gap-3">
+          <Eyebrow tone="muted">Theme</Eyebrow>
+          <RadioGroup<ThemeChoice>
+            legend="Theme"
+            name="theme"
+            options={THEME_OPTIONS}
+            initial="system"
+            read={currentChoice}
+            write={wrap(THEME_OPTIONS, "Theme", currentChoice, setTheme)}
+          />
+        </div>
+        <div class="flex flex-col gap-3">
+          <Eyebrow tone="muted">Density</Eyebrow>
+          <RadioGroup<DensityId>
+            legend="Density"
+            name="density"
+            options={DENSITY_OPTIONS}
+            initial="normal"
+            read={currentDensity}
+            write={wrap(DENSITY_OPTIONS, "Density", currentDensity, setDensity)}
+          />
+        </div>
+        <div class="flex flex-col gap-3">
+          <Eyebrow tone="muted">Shape</Eyebrow>
+          <RadioGroup<RadiusId>
+            legend="Shape"
+            name="radius"
+            options={RADIUS_OPTIONS}
+            initial="normal"
+            read={currentRadius}
+            write={wrap(RADIUS_OPTIONS, "Shape", currentRadius, setRadius)}
+          />
+        </div>
+        <div class="flex flex-col gap-3">
+          <Eyebrow tone="muted">Style</Eyebrow>
+          <RadioGroup<StyleId>
+            legend="Style"
+            name="style"
+            options={STYLE_OPTIONS}
+            initial="terminal"
+            read={currentStyle}
+            write={wrap(STYLE_OPTIONS, "Style", currentStyle, setStyle)}
+          />
+        </div>
       </div>
-      <div class="flex flex-col gap-3">
-        <Eyebrow tone="muted">Density</Eyebrow>
-        <RadioGroup<DensityId>
-          legend="Density"
-          name="density"
-          options={DENSITY_OPTIONS}
-          initial="normal"
-          read={currentDensity}
-          write={wrap(DENSITY_OPTIONS, "Density", currentDensity, setDensity)}
-        />
-      </div>
-      <div class="flex flex-col gap-3">
-        <Eyebrow tone="muted">Shape</Eyebrow>
-        <RadioGroup<RadiusId>
-          legend="Shape"
-          name="radius"
-          options={RADIUS_OPTIONS}
-          initial="normal"
-          read={currentRadius}
-          write={wrap(RADIUS_OPTIONS, "Shape", currentRadius, setRadius)}
-        />
-      </div>
-      <div class="flex flex-col gap-3">
-        <Eyebrow tone="muted">Style</Eyebrow>
-        <RadioGroup<StyleId>
-          legend="Style"
-          name="style"
-          options={STYLE_OPTIONS}
-          initial="terminal"
-          read={currentStyle}
-          write={wrap(STYLE_OPTIONS, "Style", currentStyle, setStyle)}
-        />
+      <div class="order-2 lg:sticky lg:top-20 lg:self-start">
+        <PreviewSample />
       </div>
       <Toast state={toast.state} onDismiss={toast.dismiss} />
     </div>
