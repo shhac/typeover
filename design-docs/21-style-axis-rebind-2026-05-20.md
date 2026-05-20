@@ -195,6 +195,14 @@ each style rebinds.
    `width="default"` consult `--measure` when the token is set;
    styles that don't override `--measure` get today's behaviour.
    No new prop. Less DS surface, same expressiveness.
+
+   **Revised 2026-05-20 (post-implementation)** — too aggressive.
+   Routes like `/settings` use `width="default"` for non-prose
+   layouts (the 2-col controls + sticky preview grid) and got
+   squashed at textbook's 60ch. Added a new `width="prose"` that
+   explicitly opts INTO `--measure`; `width="default"` reverts
+   to today's `max-w-4xl`. Opt-in is per-route on genuine
+   reading surfaces (exercise page, privacy).
 5. **Drop-cap-lite in textbook** — adopted at half strength
    (Paul's compromise: skip the `float`). A traditional drop-cap
    wraps multiple lines around the giant first letter via
