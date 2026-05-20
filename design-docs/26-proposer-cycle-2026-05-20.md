@@ -88,7 +88,7 @@ high-priority routes present. Skips when `dist/` is absent so
 the suite doesn't break for developers running `pnpm test`
 without a recent build.
 
-### P11 — `scrollIntoView` the RunResultPanel above the soft keyboard (mobile UX)
+### P11 — `scrollIntoView` the RunResultPanel above the soft keyboard (mobile UX) ✅ SHIPPED 2026-05-20 (`872b107`)
 
 **Shape.** Extend `useRunResultFocus` (used by Freeform +
 FillBlankLineInput) to detect when the freshly-focused
@@ -123,12 +123,15 @@ opens.
 ## Synthesis & next steps
 
 - ✅ **P10 Sitemap + robots + canonical** shipped this cycle.
-- **Best ship-able candidates for the NEXT cycle (in priority
-  order):**
-  1. **P11 Mobile scrollIntoView** — iOS Safari pain, clean
-     extension of `useRunResultFocus`.
-  2. **P12 Yaegi boot-stall escalation** — concrete stuck-state
-     fix for flaky networks.
+- ✅ **P11 Mobile scrollIntoView** shipped 2026-05-20 in commit
+  `872b107`. `useKeyboardInset` lifted from MobileKeyBar into
+  `src/lib/use-keyboard-inset.ts`; `useRunResultFocus` reads it
+  to scroll the panel above the iOS soft keyboard slice with
+  `prefers-reduced-motion` respected. 5 jsdom-mocked tests pin
+  the visualViewport-driven scroll path.
+- **Next ship-able candidate:**
+  1. **P12 Yaegi boot-stall escalation** — concrete stuck-state
+     fix for flaky networks. ~2-3h.
 - **Deferred:**
   - **P9 `--types` flag** — twice-deferred follow-up; revisit
     with fresh Module 3 pain.
