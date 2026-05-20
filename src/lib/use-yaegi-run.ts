@@ -91,7 +91,7 @@ const BOOT_STALL_MS = 5000;
 export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
-  const [runtimeStatus, setRuntimeStatus] = createSignal<RuntimeStatus>("uninit");
+  const [runtimeStatus, setRuntimeStatusRaw] = createSignal<RuntimeStatus>("uninit");
   const [bootError, setBootError] = createSignal<string | null>(null);
   const [bootStalled, setBootStalled] = createSignal(false);
   let stallTimer: ReturnType<typeof setTimeout> | null = null;
@@ -101,6 +101,18 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
       stallTimer = null;
     }
     setBootStalled(false);
+  }
+
+  /** Central status setter. Owns the "any transition out of
+   *  `booting` clears the stall timer" invariant so a future
+   *  RuntimeStatus addition (e.g. a cancel state) can't forget
+   *  to call clearStallTimer(). Arming the timer when entering
+   *  `booting` is the caller's job — preflight pairs the
+   *  generation closure with the timer. */
+  function setStatus(next: RuntimeStatus): void {
+    const prev = runtimeStatus();
+    if (prev === "booting" && next !== "booting") clearStallTimer();
+    setRuntimeStatusRaw(next);
   }
 
   /* Monotonic counter — bumped on every reset() and clear(). run()
@@ -119,13 +131,15 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
      * starts a fresh boot against the respawned worker. */
     if (runtimeStatus() !== "uninit") return;
     const bootGen = currentGen();
-    setRuntimeStatus("booting");
+    setStatus("booting");
     setBootError(null);
     /* Arm the stall timer — if we're STILL booting at BOOT_STALL_MS,
      * the bootStalled signal flips on so the UI can surface a
      * "Retry runtime" affordance. The generation guard mirrors the
      * one on the ready() callbacks: a reset() mid-boot bumps the
-     * generation, the timer's callback no-ops harmlessly. */
+     * generation, the timer's callback no-ops harmlessly. The
+     * setStatus() wrapper handles clearing on the way OUT; arming
+     * here is preflight's job. */
     setBootStalled(false);
     if (stallTimer !== null) clearTimeout(stallTimer);
     stallTimer = setTimeout(() => {
@@ -138,13 +152,11 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
       .then(
         () => {
           if (bootGen !== currentGen()) return; /* reset happened mid-boot */
-          clearStallTimer();
-          setRuntimeStatus("ready");
+          setStatus("ready");
         },
         (e: unknown) => {
           if (bootGen !== currentGen()) return;
-          clearStallTimer();
-          setRuntimeStatus("error");
+          setStatus("error");
           setBootError(e instanceof Error ? e.message : String(e));
         },
       );
@@ -193,12 +205,12 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     bumpGen();
     terminateRunner();
     setRunning(false);
-    clearStallTimer();
     /* Runtime is gone — flip back to "uninit" so a subsequent
      * preflight() / run() triggers a fresh boot. Without this the
      * status would lie that the runtime is "ready" while the worker
-     * has been terminated. */
-    setRuntimeStatus("uninit");
+     * has been terminated. The setStatus() wrapper handles the
+     * stall-timer cleanup when transitioning out of "booting". */
+    setStatus("uninit");
     setBootError(null);
     setRunResult({
       stdout: "",
