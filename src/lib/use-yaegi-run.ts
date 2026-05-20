@@ -37,18 +37,34 @@ export interface RunResult {
   durationMs: number;
 }
 
+/** Runtime boot lifecycle. `uninit` is the pre-mount default and the
+ *  state reset() returns to. `booting` is in-flight WASM load. `ready`
+ *  means subsequent eval() calls don't pay the ~1.9 MB cold-start
+ *  cost. `error` surfaces a boot failure to the UI. */
+export type RuntimeStatus = "uninit" | "booting" | "ready" | "error";
+
 export interface YaegiRunHandle {
   /** Last completed run's outcome, or null pre-first-run / post-reset. */
   runResult: () => RunResult | null;
   /** True while an eval is in flight. Block double-Run, show spinner. */
   running: () => boolean;
-  /** Assemble + send the program. Idempotent under racing clicks. */
+  /** Runtime boot status. Lets the UI show a "Booting Go runtime…"
+   *  indicator and gate Run until ready. design-docs/16 F-4. */
+  runtimeStatus: () => RuntimeStatus;
+  /** Message when runtimeStatus === "error"; null otherwise. */
+  bootError: () => string | null;
+  /** Assemble + send the program. Idempotent under racing clicks.
+   *  Kicks off preflight if the runtime hasn't been booted yet. */
   run: () => Promise<void>;
   /** Hard-reset the worker (for a runaway loop). Sets a sentinel
    *  runResult so the UI shows what happened. */
   reset: () => void;
   /** Clear runResult (e.g. for an exercise's onTryAgain / onAnother). */
   clear: () => void;
+  /** Proactively trigger the WASM load so the first Run doesn't pay
+   *  the cold-start latency. Safe to call from onMount; idempotent
+   *  (subsequent calls during boot are no-ops). */
+  preflight: () => void;
 }
 
 interface UseYaegiRunArgs {
@@ -62,6 +78,8 @@ interface UseYaegiRunArgs {
 export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
+  const [runtimeStatus, setRuntimeStatus] = createSignal<RuntimeStatus>("uninit");
+  const [bootError, setBootError] = createSignal<string | null>(null);
 
   /* Monotonic counter — bumped on every reset() and clear(). run()
    * captures the value at start, then settlements compare against
@@ -72,8 +90,35 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     generation += 1;
   };
 
+  function preflight(): void {
+    /* Idempotent — every state except "uninit" already represents an
+     * in-flight or settled boot, so a re-call is a no-op. After
+     * reset() flips status back to "uninit", a subsequent preflight()
+     * starts a fresh boot against the respawned worker. */
+    if (runtimeStatus() !== "uninit") return;
+    const bootGen = currentGen();
+    setRuntimeStatus("booting");
+    setBootError(null);
+    getRunner()
+      .ready()
+      .then(
+        () => {
+          if (bootGen !== currentGen()) return; /* reset happened mid-boot */
+          setRuntimeStatus("ready");
+        },
+        (e: unknown) => {
+          if (bootGen !== currentGen()) return;
+          setRuntimeStatus("error");
+          setBootError(e instanceof Error ? e.message : String(e));
+        },
+      );
+  }
+
   async function run(): Promise<void> {
     if (running()) return;
+    /* If the consumer never called preflight(), boot lazily — Run is
+     * still the canonical trigger for the first WASM load. */
+    preflight();
     const gen = currentGen();
     setRunning(true);
     const t0 = performance.now();
@@ -112,6 +157,12 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     bumpGen();
     terminateRunner();
     setRunning(false);
+    /* Runtime is gone — flip back to "uninit" so a subsequent
+     * preflight() / run() triggers a fresh boot. Without this the
+     * status would lie that the runtime is "ready" while the worker
+     * has been terminated. */
+    setRuntimeStatus("uninit");
+    setBootError(null);
     setRunResult({
       stdout: "",
       stderr: "",
@@ -128,5 +179,5 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     setRunResult(null);
   }
 
-  return { runResult, running, run, reset, clear };
+  return { runResult, running, runtimeStatus, bootError, run, reset, clear, preflight };
 }

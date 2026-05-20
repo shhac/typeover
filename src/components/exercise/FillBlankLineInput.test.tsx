@@ -28,7 +28,7 @@ const { evalMock, terminateMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("~/runtime", () => ({
-  getRunner: () => ({ eval: evalMock, ready: vi.fn() }),
+  getRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
   terminateRunner: terminateMock,
 }));
 
@@ -108,8 +108,13 @@ describe("<FillBlankLineInput> — submit gate", () => {
     expect(submit.disabled).toBe(true);
   });
 
-  it("Run button is disabled until input is non-empty", () => {
+  it("Run button is disabled until input is non-empty", async () => {
     const { container } = renderFBL();
+    /* Flush microtasks so the onMount → preflight → ready() resolution
+     * settles; otherwise the disabled state still reflects the
+     * "booting" gate from design-docs/16 F-4. */
+    await Promise.resolve();
+    await Promise.resolve();
     /* The toolbar Run carries the disabled-state contract; the
      * MobileKeyBar Run shortcut is unconditional (it fires when
      * tapped if input is non-empty, but no disabled attribute).

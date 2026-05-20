@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -52,6 +52,12 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
     buildProgram: () => substituteAtBlank(instance(), input()),
   });
 
+  /* Preflight WASM on mount — fill-line is always Yaegi-runtime per
+   * schema, so there's no `runtime === "yaegi"` gate here. Surfaces
+   * the cold-start as a "Booting Go runtime…" badge instead of a
+   * frozen Run button. design-docs/16 F-4. */
+  onMount(() => yaegi.preflight());
+
   const isCorrect = () => {
     const r = yaegi.runResult();
     return r !== null && r.error === "" && r.stdout === props.expectStdout;
@@ -88,6 +94,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
         canRun={input().trim() !== ""}
         onRun={yaegi.run}
         onReset={yaegi.reset}
+        runtimeStatus={yaegi.runtimeStatus()}
+        bootError={yaegi.bootError()}
       />
       {/* Disabled-Submit explainer per design-docs/16 F-18. */}
       <Show when={yaegi.runResult() === null && input().trim() !== ""}>

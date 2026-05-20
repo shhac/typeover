@@ -24,7 +24,7 @@ const { evalMock, terminateMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("~/runtime", () => ({
-  getRunner: () => ({ eval: evalMock, ready: vi.fn() }),
+  getRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
   terminateRunner: terminateMock,
 }));
 

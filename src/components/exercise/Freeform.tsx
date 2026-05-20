@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { MobileKeyBar, Text } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
@@ -61,6 +61,15 @@ export function Freeform(props: FreeformProps) {
 
   const yaegi = useYaegiRun({ buildProgram: () => code() });
 
+  /* Preflight the Yaegi worker on mount when this exercise uses it.
+   * Hides the ~1.9 MB WASM cold-start behind a visible "Booting Go
+   * runtime…" badge instead of a frozen-looking Run button on first
+   * click. MCQ / fill-word pages skip this hook entirely so they
+   * never pay the WASM cost. design-docs/16 F-4. */
+  onMount(() => {
+    if (props.runtime === "yaegi") yaegi.preflight();
+  });
+
   const isCorrect = () => {
     const r = yaegi.runResult();
     return r !== null && r.error === "" && r.stdout === props.expectStdout;
@@ -86,6 +95,8 @@ export function Freeform(props: FreeformProps) {
         canRun={props.runtime === "yaegi"}
         onRun={yaegi.run}
         onReset={yaegi.reset}
+        runtimeStatus={yaegi.runtimeStatus()}
+        bootError={yaegi.bootError()}
       />
       {/* Disabled-Submit explainer per design-docs/16 F-18.
        * Submit is gated on a prior Run; without this hint a

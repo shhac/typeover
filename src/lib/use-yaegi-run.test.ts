@@ -20,13 +20,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 /* vi.mock is hoisted to the top of the file, so the mock factory
  * can't close over locals. Use vi.hoisted() to create the spy refs
  * inside the same hoisted phase. */
-const { evalMock, terminateMock } = vi.hoisted(() => ({
+const { evalMock, readyMock, terminateMock } = vi.hoisted(() => ({
   evalMock: vi.fn(),
+  readyMock: vi.fn(),
   terminateMock: vi.fn(),
 }));
 
 vi.mock("~/runtime", () => ({
-  getRunner: () => ({ eval: evalMock, ready: vi.fn() }),
+  getRunner: () => ({ eval: evalMock, ready: readyMock }),
   terminateRunner: terminateMock,
 }));
 
@@ -34,6 +35,11 @@ import { useYaegiRun } from "./use-yaegi-run";
 
 beforeEach(() => {
   evalMock.mockReset();
+  /* Default ready() to a resolved promise — most lifecycle tests
+   * don't care about the boot phase, they just need preflight() to
+   * not throw. Boot-specific tests override per-test. */
+  readyMock.mockReset();
+  readyMock.mockResolvedValue(undefined);
   terminateMock.mockReset();
 });
 
@@ -139,6 +145,73 @@ describe("useYaegiRun", () => {
     expect(h.runResult()).toBeNull();
   });
 
+  it("preflight() flips runtimeStatus uninit→booting→ready", async () => {
+    /* design-docs/16 F-4. Without an explicit boot lifecycle the UI
+     * had no way to surface the ~1.9 MB WASM cold-start. */
+    let resolveReady!: () => void;
+    readyMock.mockReset();
+    readyMock.mockReturnValueOnce(
+      new Promise<void>((res) => {
+        resolveReady = res;
+      }),
+    );
+    const h = setup();
+    expect(h.runtimeStatus()).toBe("uninit");
+    h.preflight();
+    expect(h.runtimeStatus()).toBe("booting");
+    resolveReady();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("ready");
+    expect(h.bootError()).toBeNull();
+  });
+
+  it("preflight() is idempotent — re-calls during boot don't restart", () => {
+    readyMock.mockReset();
+    readyMock.mockReturnValue(new Promise<void>(() => {}));
+    const h = setup();
+    h.preflight();
+    h.preflight();
+    h.preflight();
+    expect(readyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preflight() failure → runtimeStatus 'error', bootError carries message", async () => {
+    readyMock.mockReset();
+    readyMock.mockRejectedValueOnce(new Error("wasm fetch failed"));
+    const h = setup();
+    h.preflight();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("error");
+    expect(h.bootError()).toBe("wasm fetch failed");
+  });
+
+  it("reset() flips runtimeStatus back to 'uninit' so the next preflight re-boots", async () => {
+    /* Without this, the status would lie that the runtime is "ready"
+     * after a terminated worker; the next Run would await ready() on
+     * a respawned worker but the UI would already say it was up. */
+    const h = setup();
+    h.preflight();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("ready");
+    h.reset();
+    expect(h.runtimeStatus()).toBe("uninit");
+    expect(h.bootError()).toBeNull();
+  });
+
+  it("run() triggers preflight when runtimeStatus is 'uninit'", async () => {
+    /* Lazy-boot path — consumers that don't call preflight() in
+     * onMount still pay the cold-start on first Run, but it surfaces
+     * as a runtimeStatus transition the UI can render. */
+    evalMock.mockResolvedValueOnce({ stdout: "", stderr: "", error: "" });
+    const h = setup();
+    expect(h.runtimeStatus()).toBe("uninit");
+    await h.run();
+    expect(readyMock).toHaveBeenCalled();
+  });
+
   it("buildProgram is called per-run, not at hook setup", async () => {
     const programs: string[] = [];
     let current = "a";
@@ -193,6 +266,29 @@ describe("useYaegiRun — generation-tagged settlements", () => {
     rejectEval(new Error("worker terminated"));
     await inFlight;
     expect(h.runResult()?.error).toMatch(/Runtime was reset/);
+  });
+
+  it("ignores a stale boot resolution after reset() during preflight", async () => {
+    /* Boot started, learner clicks Reset before WASM finished. The
+     * late ready() resolution must NOT flip runtimeStatus back to
+     * "ready" — the worker we'd be referring to has been terminated.
+     * Mirrors the eval-side race in F-2. */
+    let resolveReady!: () => void;
+    readyMock.mockReset();
+    readyMock.mockReturnValueOnce(
+      new Promise<void>((res) => {
+        resolveReady = res;
+      }),
+    );
+    const h = setup();
+    h.preflight();
+    expect(h.runtimeStatus()).toBe("booting");
+    h.reset();
+    expect(h.runtimeStatus()).toBe("uninit");
+    resolveReady();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("uninit");
   });
 
   it("ignores a previous run's settlement after clear()", async () => {
