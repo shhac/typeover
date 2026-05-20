@@ -137,6 +137,93 @@ alternatives that DID ship.
     cut that survives a Yaegi upgrade gracefully (no stale-forever
     risk).
 
+## Round 3 — /improve-code-structure pass (2026-05-20)
+
+Ran the full 5-lens sweep. **Five small-to-medium structural wins
+shipped**; three larger items deferred here as future-work.
+
+### Shipped (5 commits)
+
+1. **`@utility focus-ring`** (lens 4) — sweeps 17 hand-pasted
+   `focus-visible:outline-2 focus-visible:outline-accent-amber
+   rounded-sm` strings into one Tailwind 4 utility. Future ring
+   widening / recolouring lives in one place.
+2. **Toast timer-reset on re-emit** + **manual-dismiss
+   double-fire guard** (lens 5) — Toast's `createEffect` now
+   resets `remaining` + `startedAt` whenever `props.state` updates;
+   rapid setting flips now show each toast for the full duration.
+   Tests cover both contracts (11/11 Toast tests).
+3. **ProgressChip reactivity fix** (lens 5 → surfaced a real bug,
+   not just a coverage gap) — the IIFE children pattern in both
+   chip islands was non-reactive (`{(() => {...})()}` ran once at
+   render), so chips never updated post-mount even when the
+   storage/custom-event listeners fired. Switched to function-child
+   pattern. Also added `{...slot}` clone to defeat the in-place-
+   mutation eq-skip in `ExerciseProgressChip` (since `bumpExercise`
+   mutates `cachedProgress.exercises[id]` in place). 12 new tests
+   across both chip files.
+4. **`aggregateModuleProgress(themes)`** + **`findNextUnfinished
+   ExerciseId(themes)`** extracted from `ModuleCompleteCard` to
+   `progress.ts` (lens 1 + lens 3). Pure functions, testable
+   without a Solid render harness. 6 new direct tests.
+5. **Yaegi error-recovery contract pinned** + **`nextExerciseHref`
+   ternary → guarded early returns** + **`tryJsonParse` helper in
+   progress.ts** — three small lens-3/5 wins landed in one
+   sequential pass.
+
+Test count: 442 → 463 (+21). 0 typecheck errors, 0 lint warnings,
+build green, working tree clean.
+
+### Deferred to future-work — too big for this slot
+
+The lenses flagged three structural refactors that didn't fit a
+single iteration. Recording here so a future `/improve-code-structure`
+or proposer cycle can pick them up cold.
+
+**FW-1 — `defineAppearanceAxis<T>()` factory in `theme.ts`**
+- Flagged by lens 1 (#4), lens 3 (#2), AND lens 4 (#1) — the
+  highest-impact convergence in the sweep.
+- Four near-identical axis modules (`THEMES`/`DENSITIES`/`RADII`/
+  `STYLES` with their `currentX`/`setX`/`STORAGE_KEY` triples) collapse
+  to one factory call each. The bootstrap script in
+  `BaseLayout.astro` (lens 3 #3) duplicates the same enum lists and
+  could read from the factory too — drift risk eliminated.
+- Why deferred: the colour axis has a `system` variant that doesn't
+  fit the factory shape; the factory needs careful generic typing
+  to keep test mocks happy; the bootstrap.test.ts enum-coverage
+  test needs to keep working. Real refactor effort: ~half a day.
+- Estimated reward: ~80 lines of duplication eliminated, drift
+  surface closed, ~3 tests collapse into 1 generic test.
+
+**FW-2 — Split `generator.ts` into schema + runtime**
+- Flagged by lens 2 (#1). The file has an in-source
+  `/* ---------------- Runtime ---------------- */` divider at
+  line 172 separating Zod schemas (content-validation time) from
+  runtime instantiation. Component islands today pull the full
+  superRefine + zod-issue construction code via the barrel even
+  though they only use `generate()` and `buildBlankSegments`.
+- Why deferred: every component file imports from `~/lib/generator`;
+  splitting requires either a re-export barrel (no change to call
+  sites but new file to maintain) or updating every import site.
+  Plus the existing test split (`generator.buildShuffledOptions.test.ts`
+  + `generator.generate.test.ts` + `generator.test.ts`) gives a clue
+  for the right seam.
+- Estimated reward: smaller component-island bundles, clearer
+  conceptual boundary, less surface for an exercise component to
+  accidentally reach schema-time code at runtime.
+
+**FW-3 — Shared `<Breadcrumb>` + `<ThemeCard.astro>` extractions**
+- Flagged by lens 2 (#3) and lens 4 (#3). Three near-identical
+  breadcrumbs across the `/go/*` routes, two near-identical
+  theme-card grids across the /go index and the per-module page.
+- Why deferred: low-risk but ~100 lines of routine extraction; the
+  `focus-ring` utility (just shipped) is the right primitive for
+  the breadcrumb anchors to use, so this should land next iteration
+  to capitalise on the freshly-clean focus styling.
+- Estimated reward: ~90 lines deleted from the route files; a
+  single place to evolve the breadcrumb shape (e.g. a future
+  "you are here" highlight).
+
 ## Notes for the next proposer cycle
 
 - Validation matters: across two rounds, every "small 1-2 days"
