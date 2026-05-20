@@ -58,7 +58,7 @@ glow, weak spots stay grey — without importing Duolingo's
 positive "drilled cleanly" variant in a future cycle — pair it
 with a concrete UX mockup before authoring code.
 
-### P2 — PaletteChip primitive + swatch grid (design-system lens)
+### P2 — PaletteChip primitive + swatch grid (design-system lens) ✅ SHIPPED 2026-05-20 (`5735ed5`)
 
 **Source:** The palette picker hides 22 named palettes behind
 text-only radio labels. The picker is the one place where palette
@@ -78,9 +78,18 @@ slot.
 Proposal is implementable as written; reuses existing cascade
 without new token vocabulary.
 
-**Recommendation:** Strong candidate for next cycle. Tight 3-5h
-scope, no schema changes, addresses a real cohesion gap. Worth
-revisiting before any of the other proposals.
+**Implementation deviation:** The original proposal relied on the
+existing `:root[data-palette="..."]` CSS cascade resolving at
+nested scopes. It doesn't — the 46 palette selectors are
+root-scoped only, and expanding them would touch every palette
+block. Shipped version uses inline styles driven by a small JS
+table (`PALETTE_CHIP_COLORS` in `src/components/ds/PaletteChip.tsx`)
+that duplicates 2 colours per palette per theme (88 hex literals
+total). A drift-guard vitest parses `global.css` and asserts every
+table entry agrees with the live CSS — drift fails the suite. The
+chip is therefore smaller in surface (background + accent dot, not
+the proposed 4-tile composition) but ships the "honest visual
+identity" win the proposal targeted.
 
 ### P3 — Modern Go shelf (voice & feedback lens)
 
@@ -156,15 +165,26 @@ attention surfaces. Concrete tasks:
 
 ## Synthesis & next steps
 
-- **Best candidate for next implementation cycle:** P2 (PaletteChip
-  swatch grid) — strongest concrete cohesion fix, smallest scope,
-  no validation gates outstanding.
-- **Second:** P4 (SR narration) in its **lighter** form (focus
-  management + role="region"), not the verbose version originally
-  proposed.
+- ✅ **P2 PaletteChip:** shipped 2026-05-20 in commit `5735ed5`.
+- **Best candidate for the NEXT cycle:** P4 (SR narration) in its
+  **lighter** form (focus management + `role="region"` on
+  RunResultPanel), not the verbose version originally proposed.
 - **Defer:** P1 (shaky-spots, needs reframe as positive "drilled
   cleanly" with a UX mockup first) and P3 (Modern Go shelf, needs
   ≥2 more Yaegi-limited slots to earn its cost).
+
+## Follow-up surfaced during P2 implementation
+
+**Nested-scope palette cascade.** The PaletteChip implementation
+duplicates two palette colours per theme in JS because the existing
+`:root[data-palette="..."]` rules don't resolve at nested scopes.
+A future cycle could expand all 46 palette selectors to also match
+nested `[data-palette]:not(:root)`, which would let PaletteChip
+(and any future scoped-palette surface) read the full token set
+from the cascade without duplication. Estimated scope: ~1 hour
+mechanical CSS edit + delete the JS table + delete the drift-guard
+test. Worth doing if a second consumer ever wants a scoped palette;
+not worth doing for just the chip.
 
 When picking back up, see also design-docs/23 §"Follow-ups" for
 the multi-input freeform grading roadmap item — that's a separate
