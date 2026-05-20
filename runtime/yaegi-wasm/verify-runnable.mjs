@@ -8,7 +8,13 @@
  * For freeform: run the canonical directly.
  *
  * Catches authoring drift before it hits a learner. Manual today via:
- *   pnpm runtime:verify
+ *   pnpm runtime:verify [--filter <substring>]
+ *
+ * --filter narrows the scan to paths containing the substring (case-
+ * sensitive). Per design-docs/20 proposer-cycle, this is the smaller
+ * win that supersedes a per-exercise CLI: HMR + a pinned tab already
+ * covers single-file iteration on the visual side; this flag covers
+ * the headless Yaegi-grading side.
  *
  * (Replaces the freeform-only verify-freeform.mjs.)
  */
@@ -21,6 +27,16 @@ import { bootstrapYaegi } from "./bootstrap.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
+
+/* --filter <substring>: narrow the scan to paths containing the
+ * substring. Minimal CLI parse — no flag library, no aliases; the
+ * script is meant to stay readable. */
+const filterIdx = process.argv.indexOf("--filter");
+const filter = filterIdx >= 0 ? process.argv[filterIdx + 1] : null;
+if (filterIdx >= 0 && !filter) {
+  console.error("--filter requires a substring argument");
+  process.exit(2);
+}
 
 const yaegiEval = await bootstrapYaegi();
 
@@ -47,10 +63,19 @@ function buildProgram(data) {
 
 const exercises = [];
 for await (const path of glob(join(root, "src/content/exercises/**/*.yaml"))) {
+  if (filter !== null && !path.includes(filter)) continue;
   const raw = await readFile(path, "utf8");
   const data = parse(raw);
   const program = buildProgram(data);
   if (program) exercises.push({ path, data, program });
+}
+
+if (filter !== null) {
+  console.log(`Filtered to "${filter}" — ${exercises.length} runnable exercise(s).\n`);
+  if (exercises.length === 0) {
+    console.log("No runnable exercises matched.");
+    process.exit(0);
+  }
 }
 
 let pass = 0;
