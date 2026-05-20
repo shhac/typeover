@@ -44,10 +44,42 @@ export function FillBlankWord(props: FillBlankWordProps) {
     onAnother: () => {
       another();
       setInputs({});
+      inputRefs.clear();
     },
     // tryAgain deliberately keeps partial inputs — the learner is
     // iterating, not restarting. Clear is its own explicit button.
   });
+
+  /* Refs to every BlankInput, keyed by slot index. Lets Enter on
+   * one input jump focus to the next empty one (or submit when
+   * all are filled). Populated via BlankInput's `ref` callback
+   * during the For render. */
+  const inputRefs = new Map<number, HTMLInputElement>();
+
+  /** Enter handler: if every blank is filled, submit (subject to
+   *  the phase's canSubmit gate). Otherwise jump focus to the
+   *  next empty blank in slot-order, wrapping past the current
+   *  position if needed. design-docs/26-ux-asks. */
+  function handleEnter(currentSlotIdx: number): void {
+    if (phase.canSubmit() && !phase.submitted()) {
+      phase.submit();
+      return;
+    }
+    /* Find the next empty blank, searching forward from the slot
+     * after the current one and wrapping. */
+    const positions = blankPositions();
+    if (positions.length === 0) return;
+    const orderedSlots = positions.map((p) => p.idx);
+    const currentRank = orderedSlots.indexOf(currentSlotIdx);
+    for (let i = 1; i <= orderedSlots.length; i++) {
+      const candidate = orderedSlots[(currentRank + i) % orderedSlots.length];
+      if (candidate === undefined) continue;
+      if (valueFor(candidate) === "") {
+        inputRefs.get(candidate)?.focus();
+        return;
+      }
+    }
+  }
 
   /* Per design-docs/12 P1: Clear empties inputs AND resets
    * submitted/revealed (returning the learner to the picking phase).
@@ -104,6 +136,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
                 revealed={phase.revealed()}
                 locked={phase.current() === "right"}
                 onInput={(value) => setInputs((prev) => ({ ...prev, [slotIdx]: value }))}
+                onEnter={() => handleEnter(slotIdx)}
+                ref={(el) => inputRefs.set(slotIdx, el)}
               />
             );
           }}

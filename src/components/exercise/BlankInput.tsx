@@ -61,11 +61,13 @@ interface BlankInputProps {
    *  edit and re-submit. */
   locked: boolean;
   onInput: (value: string) => void;
-  /** Fires on Enter / numpad-Enter. Used by FillBlankLineInput to
-   *  Run the substituted program without forcing the learner to
-   *  reach for the mouse. fill-word doesn't pass this; Enter in a
-   *  multi-input fill-word context has no obvious target. */
+  /** Fires on Enter / numpad-Enter. FillBlankLineInput uses it to
+   *  Run the substituted program; FillBlankWord uses it to focus
+   *  the next empty blank or submit when all are filled. */
   onEnter?: () => void;
+  /** Optional ref escape hatch so a parent can focus this input
+   *  (e.g. fill-word's "Enter jumps to the next empty blank"). */
+  ref?: (el: HTMLInputElement) => void;
 }
 
 export function BlankInput(props: BlankInputProps) {
@@ -78,6 +80,7 @@ export function BlankInput(props: BlankInputProps) {
     });
   return (
     <input
+      ref={props.ref}
       type="text"
       autocomplete="off"
       autocapitalize="off"

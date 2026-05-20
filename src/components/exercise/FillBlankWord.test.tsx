@@ -177,6 +177,38 @@ describe("<FillBlankWord> — same var twice", () => {
   });
 });
 
+describe("<FillBlankWord> — Enter behaviour (focus-next or submit)", () => {
+  it("Enter on a filled blank with another blank empty jumps focus to that empty blank", () => {
+    const { container } = renderFBW();
+    const [a, b] = inputs(container);
+    setVal(a!, "1");
+    a!.focus();
+    expect(document.activeElement).toBe(a);
+    fireEvent.keyDown(a!, { key: "Enter" });
+    expect(document.activeElement).toBe(b);
+  });
+
+  it("Enter when all blanks are filled triggers Submit", () => {
+    const { container } = renderFBW();
+    const [a, b] = inputs(container);
+    setVal(a!, "1");
+    setVal(b!, "2");
+    b!.focus();
+    fireEvent.keyDown(b!, { key: "Enter" });
+    expect(slot()?.instancesPassed).toBe(1);
+  });
+
+  it("Enter wraps backwards — focus jumps to an earlier empty blank when later are filled", () => {
+    const { container } = renderFBW();
+    const [a, b] = inputs(container);
+    setVal(b!, "2");
+    /* `a` is still empty. Enter from `b` should wrap to `a`. */
+    b!.focus();
+    fireEvent.keyDown(b!, { key: "Enter" });
+    expect(document.activeElement).toBe(a);
+  });
+});
+
 describe("<FillBlankWord> — vacuous-truth guard (blanks: [])", () => {
   it("a blanks-less exercise renders no inputs and Submit stays disabled", () => {
     /* Iter-4 fix pinned: allFilled returns false when there are zero

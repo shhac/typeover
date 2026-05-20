@@ -220,7 +220,7 @@ const PALETTE_LABELS: Record<PaletteId, { label: string; description: string }> 
   pelican: { label: "Pelican", description: "Penguin paperback orange spine." },
   sepia: { label: "Sepia", description: "Brown-everything; faded photograph." },
   almanac: { label: "Almanac", description: "Off-white + deep teal headings." },
-  "e-reader": { label: "E-Reader", description: "Kindle Paperwhite e-ink — cool grey on light, warm Night Mode + amber highlight on dark." },
+  "e-reader": { label: "E-Reader", description: "Modern e-ink — cool grey paper on light, warm night-mode + amber highlight on dark." },
   "aurora-amber": { label: "Aurora Amber", description: "Amber + TS-blue radial bloom." },
   "glacier-blue": { label: "Glacier Blue", description: "Cool cyan-to-ice bloom." },
   "lavender-mist": { label: "Lavender Mist", description: "Lilac + rose synthwave." },

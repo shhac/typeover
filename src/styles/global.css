@@ -780,9 +780,9 @@ body {
   --color-border-strong: #c4c0a8;
 }
 
-/* e-reader — Kindle Paperwhite / Kobo aesthetic. Cool e-ink panel
- * on the light variant; warm-dark e-ink Night Mode on dark. Amber
- * highlight accent mirrors a Paperwhite reading highlight. */
+/* e-reader — modern e-ink reader aesthetic. Cool grey e-ink panel
+ * on the light variant; warm-dark night-mode panel on dark. Amber
+ * highlight accent mirrors a passage-highlight pen. */
 :root[data-palette="e-reader"] {
   --color-bg-base: #18171a;
   --color-bg-panel: #211f24;
