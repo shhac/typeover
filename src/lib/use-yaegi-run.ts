@@ -53,6 +53,11 @@ export interface YaegiRunHandle {
   runtimeStatus: () => RuntimeStatus;
   /** Message when runtimeStatus === "error"; null otherwise. */
   bootError: () => string | null;
+  /** True when `runtimeStatus === "booting"` has persisted past
+   *  `BOOT_STALL_MS` (5s default) — surfaces a "Retry runtime"
+   *  affordance for learners on flaky networks. design-docs/26 P12.
+   *  Resets to false on any transition out of "booting". */
+  bootStalled: () => boolean;
   /** Assemble + send the program. Idempotent under racing clicks.
    *  Kicks off preflight if the runtime hasn't been booted yet. */
   run: () => Promise<void>;
@@ -75,11 +80,28 @@ interface UseYaegiRunArgs {
   buildProgram: () => string;
 }
 
+/** How long the runtime can sit in "booting" before we surface a
+ *  stall indicator. Calibrated against the ~1.9 MB brotli'd WASM
+ *  download — a healthy 3G connection lands well under 5s; past
+ *  that the user is on a flaky network / captive portal / hung
+ *  CDN, and the in-exercise badge "↳ Booting Go runtime…" with no
+ *  escape hatch is the wrong UX. */
+const BOOT_STALL_MS = 5000;
+
 export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
   const [runtimeStatus, setRuntimeStatus] = createSignal<RuntimeStatus>("uninit");
   const [bootError, setBootError] = createSignal<string | null>(null);
+  const [bootStalled, setBootStalled] = createSignal(false);
+  let stallTimer: ReturnType<typeof setTimeout> | null = null;
+  function clearStallTimer(): void {
+    if (stallTimer !== null) {
+      clearTimeout(stallTimer);
+      stallTimer = null;
+    }
+    setBootStalled(false);
+  }
 
   /* Monotonic counter — bumped on every reset() and clear(). run()
    * captures the value at start, then settlements compare against
@@ -99,15 +121,29 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     const bootGen = currentGen();
     setRuntimeStatus("booting");
     setBootError(null);
+    /* Arm the stall timer — if we're STILL booting at BOOT_STALL_MS,
+     * the bootStalled signal flips on so the UI can surface a
+     * "Retry runtime" affordance. The generation guard mirrors the
+     * one on the ready() callbacks: a reset() mid-boot bumps the
+     * generation, the timer's callback no-ops harmlessly. */
+    setBootStalled(false);
+    if (stallTimer !== null) clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => {
+      if (bootGen !== currentGen()) return;
+      if (runtimeStatus() !== "booting") return;
+      setBootStalled(true);
+    }, BOOT_STALL_MS);
     getRunner()
       .ready()
       .then(
         () => {
           if (bootGen !== currentGen()) return; /* reset happened mid-boot */
+          clearStallTimer();
           setRuntimeStatus("ready");
         },
         (e: unknown) => {
           if (bootGen !== currentGen()) return;
+          clearStallTimer();
           setRuntimeStatus("error");
           setBootError(e instanceof Error ? e.message : String(e));
         },
@@ -157,6 +193,7 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     bumpGen();
     terminateRunner();
     setRunning(false);
+    clearStallTimer();
     /* Runtime is gone — flip back to "uninit" so a subsequent
      * preflight() / run() triggers a fresh boot. Without this the
      * status would lie that the runtime is "ready" while the worker
@@ -179,5 +216,15 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     setRunResult(null);
   }
 
-  return { runResult, running, runtimeStatus, bootError, run, reset, clear, preflight };
+  return {
+    runResult,
+    running,
+    runtimeStatus,
+    bootError,
+    bootStalled,
+    run,
+    reset,
+    clear,
+    preflight,
+  };
 }

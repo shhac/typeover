@@ -192,6 +192,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
         onReset={yaegi.reset}
         runtimeStatus={yaegi.runtimeStatus()}
         bootError={yaegi.bootError()}
+        bootStalled={yaegi.bootStalled()}
       />
       {/* Run nudge surfaced only when the learner has typed but
        * hasn't run yet. Submit auto-Runs (design-docs/26 UX ask),

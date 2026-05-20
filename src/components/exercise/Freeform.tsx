@@ -101,6 +101,7 @@ export function Freeform(props: FreeformProps) {
         onReset={yaegi.reset}
         runtimeStatus={yaegi.runtimeStatus()}
         bootError={yaegi.bootError()}
+        bootStalled={yaegi.bootStalled()}
       />
       {/* Disabled-Submit explainer per design-docs/16 F-18.
        * Submit is gated on a prior Run; without this hint a

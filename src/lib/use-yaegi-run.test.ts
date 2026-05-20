@@ -320,6 +320,61 @@ describe("useYaegiRun — generation-tagged settlements", () => {
     expect(h.runtimeStatus()).toBe("uninit");
   });
 
+  it("bootStalled flips true after 5s when ready() never resolves; flips back on reset", async () => {
+    /* design-docs/26 P12 — when the WASM cold-start hangs, the
+     * "↳ Booting Go runtime…" badge must escalate to a "Retry
+     * runtime" affordance. Pin the timer-driven signal here at
+     * the hook layer so the toolbar's render-time gate is the
+     * only thing left to verify visually. */
+    vi.useFakeTimers();
+    let resolveReady!: () => void;
+    readyMock.mockReturnValueOnce(
+      new Promise<void>((res) => {
+        resolveReady = res;
+      }),
+    );
+    const h = setup();
+    h.preflight();
+    expect(h.runtimeStatus()).toBe("booting");
+    expect(h.bootStalled()).toBe(false);
+    /* Just shy of the threshold — still no escalation. */
+    vi.advanceTimersByTime(4999);
+    expect(h.bootStalled()).toBe(false);
+    /* Cross the threshold. */
+    vi.advanceTimersByTime(2);
+    expect(h.bootStalled()).toBe(true);
+    /* reset() must clear the stall flag AND the timer (so a fresh
+     * preflight starts cleanly). */
+    h.reset();
+    expect(h.bootStalled()).toBe(false);
+    expect(h.runtimeStatus()).toBe("uninit");
+    /* Resolve the stranded original ready() — the generation guard
+     * inside preflight's .then must drop the result; runtimeStatus
+     * must stay "uninit", not flip back to "ready". */
+    resolveReady();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("uninit");
+    vi.useRealTimers();
+  });
+
+  it("bootStalled stays false when ready() resolves before the threshold", async () => {
+    vi.useFakeTimers();
+    /* ready() resolves immediately on the first microtask. */
+    readyMock.mockResolvedValueOnce(undefined);
+    const h = setup();
+    h.preflight();
+    /* Let the .then callback run. */
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("ready");
+    /* Advance past the threshold; bootStalled stays false because
+     * the status transition cleared the timer. */
+    vi.advanceTimersByTime(6000);
+    expect(h.bootStalled()).toBe(false);
+    vi.useRealTimers();
+  });
+
   it("ignores a previous run's settlement after clear()", async () => {
     /* clear() also invalidates pending runs — same race shape as
      * reset() but a learner triggers it by editing the input

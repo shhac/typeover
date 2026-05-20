@@ -18,6 +18,10 @@ interface RunResetToolbarProps {
   runtimeStatus?: RuntimeStatus;
   /** Companion to `runtimeStatus`. Surfaces a boot failure message. */
   bootError?: string | null;
+  /** True when boot has been stuck on "booting" past the stall
+   *  threshold (5s). Escalates the badge copy and surfaces a
+   *  "Retry runtime" button. design-docs/26 P12. */
+  bootStalled?: boolean;
 }
 
 /*
@@ -53,10 +57,24 @@ export function RunResetToolbar(props: RunResetToolbarProps) {
           Stop / reset runtime
         </Button>
       </Show>
-      <Show when={booting()}>
+      <Show when={booting() && !props.bootStalled}>
         <Text tone="muted" size="xs" family="mono">
           ↳ Booting Go runtime… ~2 MB, one-time download
         </Text>
+      </Show>
+      <Show when={booting() && props.bootStalled}>
+        {/* Escalated badge after BOOT_STALL_MS — surfaces an
+         * actionable retry rather than letting the learner sit
+         * on a frozen "Booting…" indefinitely. The Retry button
+         * calls onReset, which terminates the worker + flips
+         * status back to "uninit"; a subsequent Run triggers a
+         * fresh preflight against a respawned worker. */}
+        <Text size="xs" family="mono" class="text-error">
+          ↳ Still downloading runtime — slow network?
+        </Text>
+        <Button variant="ghost" onClick={props.onReset}>
+          Retry runtime
+        </Button>
       </Show>
       <Show when={bootFailed()}>
         <Text size="xs" family="mono" class="text-error">
