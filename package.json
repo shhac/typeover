@@ -21,7 +21,8 @@
     "runtime:matrix": "node runtime/yaegi-wasm/matrix.mjs",
     "runtime:verify": "node runtime/yaegi-wasm/verify-runnable.mjs",
     "content:lint": "node scripts/content-lint.mjs",
-    "content:new": "node scripts/content-new-theme.mjs"
+    "content:new": "node scripts/content-new-theme.mjs",
+    "content:report": "node scripts/content-report.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
