@@ -1,4 +1,4 @@
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createEffect, createSignal, For, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -108,6 +108,22 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       yaegi.clear();
     },
     onTryAgain: () => yaegi.clear(),
+  });
+
+  /* Move focus to the RunResultPanel when a fresh result lands.
+   * Sighted keyboard users land on the parsed result instead of
+   * staying on the Run button; SR users hit a labelled region.
+   * Lighter variant of design-docs/24 P4. */
+  let runPanelRef: HTMLDivElement | undefined;
+  let lastResultId: object | null = null;
+  createEffect(() => {
+    const r = yaegi.runResult();
+    if (r !== null && r !== lastResultId) {
+      lastResultId = r;
+      queueMicrotask(() => runPanelRef?.focus());
+    } else if (r === null) {
+      lastResultId = null;
+    }
   });
 
   const toolbar = (
@@ -220,7 +236,15 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
         forceOpen={() => phase.revealed()}
       />
       <Show when={yaegi.runResult()}>
-        {(r) => <RunResultPanel result={r()} expectStdout={props.expectStdout} />}
+        {(r) => (
+          <RunResultPanel
+            result={r()}
+            expectStdout={props.expectStdout}
+            ref={(el) => {
+              runPanelRef = el;
+            }}
+          />
+        )}
       </Show>
     </ExerciseShell>
   );

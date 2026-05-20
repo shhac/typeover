@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onMount, Show } from "solid-js";
 import { MobileKeyBar, Text } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
@@ -76,6 +76,23 @@ export function Freeform(props: FreeformProps) {
     return r !== null && r.error === "" && r.stdout === props.expectStdout;
   };
   const canSubmit = () => yaegi.runResult() !== null && !yaegi.running();
+
+  /* Move focus to the RunResultPanel when a fresh result lands.
+   * Without this, sighted keyboard users stay on the Run button
+   * with no path to the panel; SR users miss the labelled region.
+   * Lighter variant of design-docs/24 P4 — focus management +
+   * role="region" rather than a verbose live-region announcement. */
+  let runPanelRef: HTMLDivElement | undefined;
+  let lastResultId: object | null = null;
+  createEffect(() => {
+    const r = yaegi.runResult();
+    if (r !== null && r !== lastResultId) {
+      lastResultId = r;
+      queueMicrotask(() => runPanelRef?.focus());
+    } else if (r === null) {
+      lastResultId = null;
+    }
+  });
 
   const phase = useExercisePhase({
     exerciseId: props.exerciseId,
@@ -184,7 +201,15 @@ export function Freeform(props: FreeformProps) {
         forceOpen={() => phase.revealed()}
       />
       <Show when={yaegi.runResult()}>
-        {(r) => <RunResultPanel result={r()} expectStdout={props.expectStdout} />}
+        {(r) => (
+          <RunResultPanel
+            result={r()}
+            expectStdout={props.expectStdout}
+            ref={(el) => {
+              runPanelRef = el;
+            }}
+          />
+        )}
       </Show>
     </ExerciseShell>
   );

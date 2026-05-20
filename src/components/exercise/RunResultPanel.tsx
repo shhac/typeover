@@ -9,6 +9,14 @@ interface RunResultPanelProps {
    *  decision itself lives in the consumer's `isCorrect` predicate;
    *  the panel only mirrors the comparison visually. */
   expectStdout: string;
+  /** Ref escape hatch so consumers (Freeform / FillBlankLineInput)
+   *  can move focus to the panel after a Run completes — sighted
+   *  keyboard users land on the result instead of losing focus to
+   *  <body>, and screen-reader users land inside a labelled region
+   *  rather than a generic <div>. The panel is `tabindex="-1"` so
+   *  it's programmatically focusable but not in the tab order.
+   *  Lighter variant of design-docs/24 P4. */
+  ref?: (el: HTMLDivElement) => void;
 }
 
 /*
@@ -38,7 +46,13 @@ export function RunResultPanel(props: RunResultPanelProps) {
     "bg-bg-inset p-3 rounded-sm border border-border-default/60 whitespace-pre-wrap";
 
   return (
-    <div class="flex flex-col gap-2 font-mono text-sm">
+    <div
+      ref={props.ref}
+      role="region"
+      aria-label="Run result"
+      tabindex="-1"
+      class="flex flex-col gap-2 font-mono text-sm focus:outline-2 focus:outline-accent-primary focus:outline-offset-2 rounded-sm"
+    >
       <Text tone="faint" size="xs" family="mono">
         {props.result.durationMs.toFixed(1)} ms
       </Text>
