@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Badge,
@@ -26,6 +27,17 @@ import TrackCard from "~/components/ds/TrackCard.astro";
  * TrackCard → future-language slot → footer. The DS inventory
  * has moved off this page — see /design-system.
  */
+
+/* design-docs/19 F-22 — the TrackCard dek used to say "54
+ * exercises across six themes" as static prose. Author 4 new
+ * exercises and the homepage silently lies until someone notices.
+ * Compute both numbers from the content collection at build time. */
+const [foundationsThemes, foundationsExercises] = await Promise.all([
+  getCollection("themes", (t) => t.data.moduleId === "foundations"),
+  getCollection("exercises", (ex) => ex.data.themeId.startsWith("foundations/")),
+]);
+const foundationsExerciseCount = foundationsExercises.length;
+const foundationsThemeCount = foundationsThemes.length;
 ---
 
 <BaseLayout
@@ -91,11 +103,10 @@ func greet(u User) string {
               <span class="text-accent-go">Go</span> for TypeScript devs
             </Heading>
             <Fragment slot="dek">
-              Module 1 (Foundations) ships 54 exercises across six
-              themes — variables, numeric primitives, strings, conditionals,
-              loops, functions and multi-return. Modules 2-7 cover
-              collections, types, interfaces, errors, concurrency, and
-              idioms.
+              Module 1 (Foundations) ships {foundationsExerciseCount} exercises
+              across {foundationsThemeCount} themes — variables, numeric primitives,
+              strings, conditionals, loops, functions and multi-return. Modules 2-7
+              cover collections, types, interfaces, errors, concurrency, and idioms.
             </Fragment>
             <Stack gap="xs" slot="modules">
               <Text tone="muted" size="sm" family="mono">
