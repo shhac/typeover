@@ -35,7 +35,7 @@ const { status = "available", class: className } = Astro.props;
 
 <article
   class:list={[
-    "border border-border-default p-6 sm:p-8 rounded-md flex flex-col gap-4",
+    "border border-border-default p-6 sm:p-8 rounded-sm flex flex-col gap-4",
     status === "soon" && "opacity-60",
     className,
   ]}
