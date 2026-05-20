@@ -89,24 +89,35 @@ function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
           <label
             class={
               "flex flex-col gap-1 p-3 border rounded-sm cursor-pointer transition-colors " +
+              "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-primary has-[:focus-visible]:outline-offset-2 " +
               (choice() === opt.value
                 ? "border-accent-primary bg-accent-primary/5"
                 : "border-border-default hover:border-border-strong")
             }
           >
             <div class="flex items-center gap-3">
+              {/* Native radio kept in the DOM for a11y (keyboard
+                * arrow-nav within the group, screen-reader
+                * announcement, aria-checked) but visually hidden —
+                * the card itself (border + tinted bg + swatch when
+                * present) conveys selection state. `:focus-visible`
+                * on the sr-only input projects an outline onto the
+                * label via `has-[:focus-visible]:` so keyboard
+                * users still see where focus lives. Pattern follows
+                * Headless UI / Tailwind UI RadioGroup-as-cards;
+                * cf. design-docs/26 radio research. */}
               <input
                 type="radio"
                 name={props.name}
                 value={opt.value}
                 checked={choice() === opt.value}
                 onChange={() => pick(opt.value)}
-                class="accent-accent-primary"
+                class="sr-only"
               />
               <Show when={opt.swatch}>{opt.swatch}</Show>
               <span class="font-sans text-sm text-fg-primary">{opt.label}</span>
             </div>
-            <span class="text-fg-muted text-xs ml-7">{opt.description}</span>
+            <span class="text-fg-muted text-xs">{opt.description}</span>
           </label>
         )}
       </For>
