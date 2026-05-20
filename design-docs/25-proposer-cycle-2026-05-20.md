@@ -18,7 +18,7 @@ surface what's next.
 
 ## Proposals (all four)
 
-### P5 — Hover/focus warm-prefetch of Yaegi WASM (performance lens)
+### P5 — Hover/focus warm-prefetch of Yaegi WASM (performance lens) ✅ SHIPPED 2026-05-20 (`aa5241b`)
 
 **Shape.** A tiny `prefetchYaegi()` helper that injects a
 `<link rel="prefetch" as="fetch" href="/yaegi/yaegi.wasm">` on
@@ -136,16 +136,17 @@ queued (see "Next steps" below).
 - ✅ **Privacy-page backup note** shipped this cycle as the export
   proposal's punt outcome — one paragraph on `privacy.astro`
   inviting learners to open a GitHub issue if they want a backup.
-- **Best ship-able candidates for the NEXT cycle (in priority order):**
-  1. **P5 Yaegi prefetch.** Validate first; ship the 30-line
-     smallest-first-cut. No strategic-timing risk, measurable
-     win, zero schema impact.
-  2. **`pnpm content:report` infra.** From the P8 devil's
+- ✅ **P5 Yaegi prefetch** shipped 2026-05-20 in commit `aa5241b`.
+  Smallest-first-cut: inline document-level listener on off-route
+  pages, gated by saveData + slow-2g + idempotence. 5 drift-guard
+  tests pin the load-bearing predicates.
+- **Next ship-able candidates (in priority order):**
+  1. **`pnpm content:report` infra.** From the P8 devil's
      advocate's recommendation. Parses every theme YAML + exercise
      YAML, emits a "what's left to write" table (themes with no
      exercises, themes below slot target, slots with TODO markers,
      authoring progress %). Pays back across Modules 3-7.
-  3. **Content-coverage meter on the curriculum page.** A live
+  2. **Content-coverage meter on the curriculum page.** A live
      visual derived from the same content-report data — surfaces
      pre-launch theme stubs visually rather than only in the lint
      output.
