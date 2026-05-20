@@ -1,5 +1,6 @@
 import type { JSX } from "solid-js";
-import { createSignal, For, onCleanup, onMount, Show, splitProps } from "solid-js";
+import { For, Show, splitProps } from "solid-js";
+import { useKeyboardInset } from "~/lib/use-keyboard-inset";
 import { cn } from "./_internal";
 
 /*
@@ -43,30 +44,6 @@ import { cn } from "./_internal";
  * still pending the launch-checklist mobile QA pass; the structural
  * logic + jsdom-safe no-op fallback are verified.
  */
-
-/** Reactive bottom-gap between layout viewport and visual
- *  viewport. 0 when there's no visual-viewport API (SSR, jsdom,
- *  older Safari) or when no keyboard is up. */
-function useKeyboardInset(): () => number {
-  const [inset, setInset] = createSignal(0);
-  onMount(() => {
-    if (typeof window === "undefined") return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const update = () => {
-      const gap = window.innerHeight - (vv.offsetTop + vv.height);
-      setInset(Math.max(0, Math.round(gap)));
-    };
-    update();
-    vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
-    onCleanup(() => {
-      vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
-    });
-  });
-  return inset;
-}
 
 export interface KeySpec {
   /** Visible label on the button. */
