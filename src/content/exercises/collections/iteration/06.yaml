@@ -1,0 +1,73 @@
+target: go
+themeId: collections/iteration
+type: mcq
+order: 6
+prompt: |
+  Go 1.22 added a new `range` form that lets you iterate over an
+  INTEGER directly — the modern, idiomatic count-up loop. Pick the
+  Go form that iterates `i` from `0` through `9`.
+
+  TypeScript:
+  ```ts
+  for (let i = 0; i < 10; i++) {
+    console.log(i);
+  }
+  ```
+generator:
+  kind: variant
+  variants:
+    - id: ten
+      ts: |-
+        for (let i = 0; i < 10; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range 10 { fmt.Println(i) }"
+      distractors:
+        - "for i := 0; i < range 10; i++ { fmt.Println(i) }"
+        - "for i in 10 { fmt.Println(i) }"
+        - "for i, _ := range 10 { fmt.Println(i) }"
+    - id: five
+      ts: |-
+        for (let i = 0; i < 5; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range 5 { fmt.Println(i) }"
+      distractors:
+        - "for i := 0; i < range 5; i++ { fmt.Println(i) }"
+        - "for i in 5 { fmt.Println(i) }"
+        - "for i, _ := range 5 { fmt.Println(i) }"
+    - id: hundred
+      ts: |-
+        for (let i = 0; i < 100; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range 100 { fmt.Println(i) }"
+      distractors:
+        - "for i := 0; i < range 100; i++ { fmt.Println(i) }"
+        - "for i in 100 { fmt.Println(i) }"
+        - "for i, _ := range 100 { fmt.Println(i) }"
+hints:
+  - "Go 1.22+ lets you range an integer directly — same `range` keyword you've been using on slices and maps. No upper-bound expression needed."
+  - "The one-value form emits the loop counter `0..N-1`. Same `range` keyword, third semantics — slot 5 warned this asymmetry was coming."
+  - "`for i := range N`."
+runtime: none
+notes: |
+  THE modern Go count-up loop. Go 1.22 (Feb 2024) added this form;
+  it's now the idiomatic way to write what TS would express with
+  the C-style `for (let i = 0; i < N; i++)`.
+
+  Distractors:
+    1. `for i := 0; i < range N; i++` — confuses `range` for an
+       expression (it's a keyword that pairs with `for`).
+    2. `for i in N` — Python-style keyword leak.
+    3. `for i, _ := range N` — the two-value form. Integer range
+       emits ONE value (the counter); writing `, _` is the same
+       mistake as slot 3's `i, _ := range items`.
+
+  Authoring note: this slot is MCQ (recognition) rather than fill-
+  line because typeover's Yaegi runtime doesn't yet support
+  Go 1.22's range-over-int. A learner who picks the right answer
+  here will SEE the modern form; a productive fill-line would
+  break on Yaegi without a successNote — and we keep the modern-
+  canonical disclosure for slots where the learner is meant to
+  PRODUCE the code, not just recognise it.

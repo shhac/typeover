@@ -1,0 +1,71 @@
+target: go
+themeId: collections/iteration
+type: mcq
+order: 4
+prompt: |
+  Range over a map produces TWO values per iteration: the key and
+  the value. Pick the idiomatic Go form for "for each entry of
+  `prices`, print key=value".
+
+  TypeScript:
+  ```ts
+  for (const [k, v] of Object.entries(prices)) {
+    console.log(k, v);
+  }
+  ```
+generator:
+  kind: variant
+  variants:
+    - id: prices
+      ts: |-
+        for (const [k, v] of Object.entries(prices)) {
+          console.log(k, v);
+        }
+      canonical: "for k, v := range prices { fmt.Println(k, v) }"
+      distractors:
+        - "for v, k := range prices { fmt.Println(k, v) }"
+        - "for k, v of prices.entries() { fmt.Println(k, v) }"
+        - "for k, v := range prices.entries() { fmt.Println(k, v) }"
+    - id: scores
+      ts: |-
+        for (const [name, score] of Object.entries(scores)) {
+          console.log(name, score);
+        }
+      canonical: "for name, score := range scores { fmt.Println(name, score) }"
+      distractors:
+        - "for score, name := range scores { fmt.Println(name, score) }"
+        - "for name, score of scores.entries() { fmt.Println(name, score) }"
+        - "for name, score := range scores.entries() { fmt.Println(name, score) }"
+    - id: cache
+      ts: |-
+        for (const [k, v] of Object.entries(cache)) {
+          console.log(k, v);
+        }
+      canonical: "for k, v := range cache { fmt.Println(k, v) }"
+      distractors:
+        - "for v, k := range cache { fmt.Println(k, v) }"
+        - "for k, v of cache.entries() { fmt.Println(k, v) }"
+        - "for k, v := range cache.entries() { fmt.Println(k, v) }"
+hints:
+  - "Maps are rangeable directly — no `.entries()` method call needed. The two-value form yields KEY first, then VALUE."
+  - "Shape: `for k, v := range m`. Same order discipline as slices (positional, left-to-right)."
+  - "`for k, v := range prices`."
+runtime: none
+notes: |
+  Distractors:
+    1. `for v, k := range prices` — order swap; the `.forEach((v,
+       k) => ...)` TS reflex.
+    2. `for k, v of prices.entries()` — JS `for-of` keyword leak +
+       method-call leak.
+    3. `for k, v := range prices.entries()` — partly correct, but
+       `.entries()` doesn't exist on Go maps. Maps are RANGEABLE
+       directly.
+
+  Important note for slot 5: map iteration order is RANDOMISED by
+  the Go runtime. We don't drill it here (this slot is about shape,
+  not order), but the freeform slots will print sorted to keep
+  expectStdout deterministic.
+
+  Audit beat: this is the LAST "shape recognition" MCQ for the
+  two-value pattern. Slot 5 introduces the one-value-on-map trap,
+  closing the cross-collection asymmetry.

@@ -1,0 +1,103 @@
+target: go
+themeId: collections/iteration
+type: fill-line
+order: 9
+prompt: |
+  Ranging over a STRING in Go gives you the BYTE INDEX and the
+  DECODED RUNE — yet a third meaning of `range`. The byte index
+  SKIPS over multi-byte runes (UTF-8 encoding), so an accented
+  character that's 2 bytes long causes the next index to jump by 2.
+
+  TypeScript:
+  ```ts
+  const s = "héllo";
+  for (let i = 0; i < s.length; i++) {
+    console.log(i, s.charCodeAt(i));  // visits every UTF-16 code unit
+  }
+  // 0 104, 1 233, 2 108, 3 108, 4 111
+  ```
+
+  Go: `for i, r := range s` yields `(byteIndex, rune)`. The `é` (2
+  bytes in UTF-8) makes the indices jump 0, 1, 3, 4, 5 — that's
+  the lesson.
+
+  Expected output:
+  ```
+  0:h
+  1:é
+  3:l
+  4:l
+  5:o
+  ```
+generator:
+  kind: template
+  vars:
+    line:
+      - 'for i, r := range s { fmt.Printf("%d:%c\n", i, r) }'
+  ts: |-
+    const s = "héllo";
+    for (let i = 0; i < s.length; i++) {
+      console.log(i, s.charCodeAt(i));
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	s := "héllo"
+    	${line}
+    }
+  distractors:
+    - match: 'for i, b := range []byte(s) { fmt.Printf("%d:%c\n", i, b) }'
+      explain: |-
+        Ranges over the BYTES (not runes) of the string. For
+        `"héllo"`, you'd see every byte including the two halves
+        of `é` separately — output would print garbage characters
+        for the `é` bytes. The whole point of string range is the
+        rune decode.
+    - match: 'for i := 0; i < len(s); i++ { fmt.Printf("%d:%c\n", i, s[i]) }'
+      explain: |-
+        `s[i]` on a string returns a BYTE (uint8), not a rune. For
+        ASCII strings it looks right; for `"héllo"` the `é` byte
+        sequence renders as mojibake. Use `range` to get proper
+        rune decoding.
+    - match: 'for r := range s { fmt.Printf("%d:%c\n", r, r) }'
+      explain: |-
+        Slot 2 trap returns — `r` is the BYTE INDEX, NOT the rune.
+        On a string you need the TWO-value form to get the rune.
+        The one-value form gives the byte index, same as it gives
+        index on a slice.
+expectStdout: |
+  0:h
+  1:é
+  3:l
+  4:l
+  5:o
+runtime: yaegi
+blanks: [line]
+hints:
+  - "String range yields TWO values: the BYTE INDEX (where the rune starts in the underlying UTF-8 bytes) and the RUNE itself (decoded code point as `int32`). Three different `range` semantics now — slice gives (i, value), map gives (key, value), string gives (byteIndex, rune)."
+  - "Use `for i, r := range s` to get byte-index and rune. Format with `%c` to print the rune as a character (or `%d` for its code point)."
+  - "`for i, r := range s { fmt.Printf(\"%d:%c\\n\", i, r) }`."
+notes: |
+  Slot's central beat: same `range` keyword, THIRD shape. Slice
+  emits (index, value); map emits (key, value); STRING emits
+  (byteIndex, rune). The byte-index gap (3 jumps to 4 because `é`
+  is 2 bytes) is the surprise that lands.
+
+  Distractors:
+    1. `[]byte(s)` — common reach for "I want the raw bytes". Wrong
+       lesson; rune decoding is what string range exists for.
+    2. C-style `s[i]` byte loop — works for ASCII, fails on UTF-8.
+    3. One-value form `for r := range s` — slot 2's index trap
+       returns. `r` here is `int` (byte index), not `rune`.
+
+  We use `"héllo"` (escaped) in the canonical to avoid any
+  UTF-8 transit issues through the YAML / Yaegi pipeline. A
+  learner can type either form and Yaegi will accept both — the
+  string compares as bytes.
+
+  Out of scope: the `utf8.RuneCountInString(s)` builtin (length-in-
+  runes vs length-in-bytes), `[]rune(s)` conversion, surrogate-pair
+  / combining-mark complexity. Slot 11 (reverser) lands on those.

@@ -1,0 +1,124 @@
+target: go
+themeId: collections/iteration
+type: fill-line
+order: 10
+prompt: |
+  Classic loop-variable closure puzzle. Build a slice of functions
+  that each capture a different loop value. In modern Go (1.22+),
+  each iteration of `range` produces a fresh `x` — closures
+  capture per-iteration values automatically. Pre-1.22, the loop
+  variable was REUSED, and every closure ended up holding the
+  same final value.
+
+  TypeScript with `let` (since ES6) already does the right thing
+  per-iteration. Go aligned with that in 1.22.
+
+  Expected output:
+  ```
+  1
+  2
+  3
+  ```
+
+  Type the line that creates a closure capturing the current `x`
+  and appends it to `fns`. typeover's Yaegi runtime simulates the
+  pre-1.22 loop-variable behaviour, so the standalone modern form
+  prints `3 3 3` instead — you'll see the historical workaround in
+  the canonical.
+generator:
+  kind: template
+  vars:
+    line:
+      - "x := x; fns = append(fns, func() int { return x })"
+  ts: |-
+    const xs = [1, 2, 3];
+    const fns: (() => number)[] = [];
+    for (const x of xs) {
+      fns.push(() => x);  // captures fresh `x` (let semantics)
+    }
+    for (const f of fns) console.log(f());
+    // 1, 2, 3
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	xs := []int{1, 2, 3}
+    	fns := []func() int{}
+    	for _, x := range xs {
+    		${line}
+    	}
+    	for _, f := range fns {
+    		fmt.Println(f())
+    	}
+    }
+  distractors:
+    - match: "fns := append(fns, func() int { return x })"
+      explain: |-
+        `:=` introduces a new `fns` shadowing the outer one. Each
+        iteration creates a brand-new `fns` slice with one entry,
+        which is then discarded when the for-block ends. Use `=`
+        (plain assignment) to update the outer slice.
+    - match: "fns.push(func() int { return x })"
+      explain: |-
+        TS-method leak. Slices don't have methods in Go;
+        `append` is the package-level builtin and you must
+        reassign the result.
+    - match: "fns[len(fns)] = func() int { return x }"
+      explain: |-
+        `fns` was created with `[]func() int{}` — that's len=0,
+        cap=0. Writing to `fns[0]` panics with "index out of
+        range". Slices don't auto-grow on index write; you need
+        `append`.
+    - match: "fns = append(fns, func() int { return xs[x] })"
+      explain: |-
+        Closes over `xs[x]` — but `x` is the VALUE (from the
+        two-value `range`), not the INDEX. So you're indexing
+        `xs` with values 1, 2, 3, which would give 2, 3, panic.
+        Just close over `x` directly.
+expectStdout: |
+  1
+  2
+  3
+runtime: yaegi
+alternateCanonicals:
+  - "fns = append(fns, func() int { return x })"
+successNote: |
+  Heads-up: Yaegi runs pre-Go-1.22 loop-variable semantics, so the
+  modern `fns = append(fns, func() int { return x })` (without the
+  `x := x` shadow) would print `3 3 3` here — that's the pre-1.22
+  bug the language fixed. We accept your answer because it's the
+  correct shape under Go 1.22+; in real production Go (1.22+) you
+  can drop the explicit shadow and write the cleaner form. Both
+  are still seen in shipped code.
+blanks: [line]
+hints:
+  - "Closures in Go capture variables by REFERENCE. Pre-1.22, the single loop variable `x` was REUSED, so every closure ended up returning whatever `x` was at the END of the loop. Modern Go (1.22+) gives each iteration its own fresh `x`."
+  - "Yaegi runs pre-1.22 semantics, so you'll need the explicit `x := x` shadow trick (declare a local `x` that shadows the loop var; closure captures THAT). Pattern: `x := x; fns = append(fns, func() int { return x })`."
+  - "`x := x; fns = append(fns, func() int { return x })`."
+notes: |
+  THE famous Go closure-capture bug — fixed in language version 1.22
+  (Feb 2024). Teaching it here for two reasons: (1) shipped Go
+  code from before 2024 still uses the `x := x` workaround
+  liberally, and learners WILL see it; (2) the asymmetry with TS
+  (where `let` already did the right thing) is a clean illustration
+  of how language fixes can land mid-life.
+
+  The Yaegi build typeover ships still has the pre-1.22 semantics,
+  so the slot's correctness-by-Yaegi path forces the historical
+  workaround. The modern form is accepted via alternateCanonicals
+  (same shape, no `x := x`) so a learner who DOES know 1.22+ isn't
+  punished. design-docs/23 + the successNote ramp.
+
+  Distractors carry forward earlier theme lessons:
+    1. `:=` reshadowing — slot 8 of theme 2.2's nil-map fix.
+    2. TS-method `.push()` — theme 2.1 slot 5's append lesson.
+    3. Indexed write on an empty slice — slot 5 of theme 2.1
+       (`append`, not subscript write).
+    4. `xs[x]` confusion — recapitulates the value-vs-index trap
+       from slot 2 of this theme.
+
+  Out of scope: closures over MAP iteration vars (same fix applies,
+  but maps are randomised order so the demo is awkward); pointer-
+  to-loop-var tricks; `range func` iterators.

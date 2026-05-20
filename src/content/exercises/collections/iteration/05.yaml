@@ -1,0 +1,81 @@
+target: go
+themeId: collections/iteration
+type: mcq
+order: 5
+prompt: |
+  Range over a MAP one-value-form: which one does Go emit, key or
+  value?
+
+  Compare with slots 2 and 3 (slice): `for x := range slice` gives
+  the INDEX. Now MAPs: `for x := range m` gives the KEY. The same
+  `range x` syntax means different things by collection type.
+
+  TypeScript:
+  ```ts
+  for (const k of Object.keys(cache)) {
+    console.log(k);
+  }
+  ```
+
+  Pick the Go form that prints just the keys.
+generator:
+  kind: variant
+  variants:
+    - id: cache
+      ts: |-
+        for (const k of Object.keys(cache)) {
+          console.log(k);
+        }
+      canonical: "for k := range cache { fmt.Println(k) }"
+      distractors:
+        - "for _, k := range cache { fmt.Println(k) }"
+        - "for k := range cache.keys() { fmt.Println(k) }"
+        - "for k of cache { fmt.Println(k) }"
+    - id: prices
+      ts: |-
+        for (const name of Object.keys(prices)) {
+          console.log(name);
+        }
+      canonical: "for name := range prices { fmt.Println(name) }"
+      distractors:
+        - "for _, name := range prices { fmt.Println(name) }"
+        - "for name := range prices.keys() { fmt.Println(name) }"
+        - "for name of prices { fmt.Println(name) }"
+    - id: counts
+      ts: |-
+        for (const w of Object.keys(counts)) {
+          console.log(w);
+        }
+      canonical: "for w := range counts { fmt.Println(w) }"
+      distractors:
+        - "for _, w := range counts { fmt.Println(w) }"
+        - "for w := range counts.keys() { fmt.Println(w) }"
+        - "for w of counts { fmt.Println(w) }"
+hints:
+  - "On a slice, one-value `range` gives the index. On a MAP, one-value `range` gives the KEY. Same syntax, different semantics — this is THE asymmetry of theme 2.3."
+  - "Shape: `for k := range m`. No `_` needed; the one-value form on a map is already key-only."
+  - "`for k := range cache`."
+runtime: none
+notes: |
+  Headline beat of theme 2.3 — the single most confusable cross-type
+  range asymmetry. Slot 2 trap was "I wrote `for n := range slice`
+  expecting the value, got the INDEX". Now: "I wrote `for k := range
+  map` expecting the value, got the KEY". Same syntax, opposite
+  defaults.
+
+  The why: Go's range form-rules are positional. The "primary"
+  emission is whichever value is most-uniquely-identifying for that
+  collection — for slices that's the index; for maps that's the
+  key. The value is the SECONDARY emission, gated behind the
+  two-value form.
+
+  Distractors:
+    1. `for _, k := range cache` — works (`k` IS the value here!),
+       but here the value is the value, not the key. Common
+       confusion: "If I want keys, I drop the value first" — the
+       opposite is true.
+    2. `for k := range cache.keys()` — TS method call leak.
+    3. `for k of cache` — JS keyword leak.
+
+  Audit: this is the trap that motivates slot 8's hint warning when
+  the same shape lands on a string (third semantics for `range`).
