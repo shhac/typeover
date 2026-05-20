@@ -200,22 +200,30 @@ or proposer cycle can pick them up cold.
   inline (it runs pre-paint and can't import from theme.ts). The
   existing `bootstrap.test.ts` guards drift between the two.
 
-**FW-2 — Split `generator.ts` into schema + runtime**
-- Flagged by lens 2 (#1). The file has an in-source
-  `/* ---------------- Runtime ---------------- */` divider at
-  line 172 separating Zod schemas (content-validation time) from
-  runtime instantiation. Component islands today pull the full
-  superRefine + zod-issue construction code via the barrel even
-  though they only use `generate()` and `buildBlankSegments`.
-- Why deferred: every component file imports from `~/lib/generator`;
-  splitting requires either a re-export barrel (no change to call
-  sites but new file to maintain) or updating every import site.
-  Plus the existing test split (`generator.buildShuffledOptions.test.ts`
-  + `generator.generate.test.ts` + `generator.test.ts`) gives a clue
-  for the right seam.
-- Estimated reward: smaller component-island bundles, clearer
-  conceptual boundary, less surface for an exercise component to
-  accidentally reach schema-time code at runtime.
+**FW-2 — Split `generator.ts` into schema + runtime** — **SHIPPED 2026-05-20 (round 5)**
+- Flagged by lens 2 (#1). Split at the in-source
+  `/* ---------------- Runtime ---------------- */` divider into:
+  - `src/lib/generator-schema.ts` — Zod schemas
+    (`DistractorEntrySpec`, `TemplateSpec`, `VariantSpec`,
+    `ProceduralSpec`, `GeneratorSchema`), their type infers
+    (`GeneratorSpec`, `TemplateGenerator`, `VariantGenerator`,
+    `DistractorEntry`), and the schema-shape-aware helpers
+    (`extractTemplateVars`, `distractorMatchText`,
+    `distractorExplain`).
+  - `src/lib/generator-runtime.ts` — `ExerciseInstance`,
+    `FillSegment`, `GenerateOptions`, `buildBlankSegments`,
+    `substitute`, `buildShuffledOptions`, `resolveTemplateValues`,
+    `generate`.
+  - `src/lib/generator.ts` — collapsed to a 2-line barrel re-export
+    so every existing consumer keeps working unchanged.
+- Then walked the canonical consumers to import from the more
+  specific file: `content-schema` + its test, `exercise-instance`,
+  `fill-blank`, `wrong-pattern`, and the four exercise components
+  + their tests. Generator's own three test files keep the barrel
+  import (zero gain from moving them — tests don't ship to
+  learners).
+- All 463 tests pass; typecheck clean; lint clean; build green.
+  No interface change visible to authors or learners.
 
 **FW-3 — Shared `<Breadcrumb>` + `<ThemeCard.astro>` extractions** — **SHIPPED 2026-05-20 (round 4)**
 - Flagged by lens 2 (#3) and lens 4 (#3). Three near-identical
