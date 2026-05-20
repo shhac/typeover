@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { ProgressChip } from "~/components/ds";
 import {
   invalidateProgressCache,
@@ -56,14 +56,19 @@ export function ThemeProgressChip(props: ThemeProgressChipProps) {
     });
   });
 
-  const hasProgress = () => {
+  /* Memo gates `<Show>` on the truthy summary; the function-child
+   * receives an accessor that re-runs when summary() updates.
+   * design-docs/20 lens-5 — the prior IIFE children pattern was
+   * non-reactive so the chip never re-rendered after a same-tab
+   * write. */
+  const visibleSummary = createMemo(() => {
     const s = summary();
-    return s !== null && (s.passed > 0 || s.themeComplete);
-  };
+    return s !== null && (s.passed > 0 || s.themeComplete) ? s : null;
+  });
 
   return (
     <Show
-      when={hasProgress()}
+      when={visibleSummary()}
       fallback={
         <Show
           when={summary() !== null && props.firstExerciseHref}
@@ -82,11 +87,7 @@ export function ThemeProgressChip(props: ThemeProgressChipProps) {
         </Show>
       }
     >
-      {(() => {
-        const s = summary();
-        if (s === null) return null;
-        return <ProgressChip kind="theme" passed={s.passed} total={s.total} minCh={10} />;
-      })()}
+      {(s) => <ProgressChip kind="theme" passed={s().passed} total={s().total} minCh={10} />}
     </Show>
   );
 }
