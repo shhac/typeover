@@ -10,6 +10,7 @@ interface McqProps {
   prompt: string;
   generator: GeneratorSpec;
   hints: readonly [string, string, string];
+  successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
 }
@@ -44,6 +45,7 @@ export function Mcq(props: McqProps) {
       hints={props.hints}
       hintValues={instance().values}
       phase={phase}
+      successNote={props.successNote}
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >

@@ -1,4 +1,5 @@
 import { distractorExplain, distractorMatchText, type DistractorEntry } from "./generator-schema";
+import { normaliseSubmission } from "./submission-normalise";
 
 /**
  * Match a learner's fill-line submission against the exercise's
@@ -15,26 +16,15 @@ import { distractorExplain, distractorMatchText, type DistractorEntry } from "./
  * design-docs/99 — targeted wrong-pattern feedback.
  */
 
-/** Collapse interior whitespace runs to a single space, trim
- *  edges, lowercase. Mirrors what authors visually consider "the
- *  same line"; case-folding catches the most common typo class
- *  learners pick up from TS habits (`Var doubled = …`,
- *  `User := …`). Authored distractor text is still surfaced verbatim
- *  in the explain message — this only loosens the *match* axis, not
- *  the correctness oracle. design-docs/19 F-16. */
-function normalise(s: string): string {
-  return s.replace(/\s+/g, " ").trim().toLowerCase();
-}
-
 export function matchWrongPattern(
   submission: string,
   distractors: readonly DistractorEntry[] | undefined,
 ): { explain: string } | null {
   if (!distractors || distractors.length === 0) return null;
-  const target = normalise(submission);
+  const target = normaliseSubmission(submission);
   if (target === "") return null;
   for (const entry of distractors) {
-    if (normalise(distractorMatchText(entry)) !== target) continue;
+    if (normaliseSubmission(distractorMatchText(entry)) !== target) continue;
     const explain = distractorExplain(entry);
     if (explain !== null) return { explain };
     /* The bare-string entries are matched (for completeness — a

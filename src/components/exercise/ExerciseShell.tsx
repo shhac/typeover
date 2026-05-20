@@ -66,6 +66,14 @@ interface ExerciseShellProps {
    *  input area. fill-line + freeform set this; MCQ does not. */
   ownsReveal?: boolean;
 
+  /** Optional disclosure rendered in the right-phase success area
+   *  alongside the standard correct-feedback. Used when the
+   *  graded canonical is intentionally a step behind the modern
+   *  idiom (e.g. typeover's Yaegi runtime can't run Go 1.21
+   *  generic-stdlib functions yet). Plain markdown-inline via
+   *  `formatInline`. Empty / undefined → no extra surface. */
+  successNote?: string;
+
   /** The answer region — radio fieldset, blank inputs, code editor. */
   children: JSX.Element;
 }
@@ -140,6 +148,13 @@ export function ExerciseShell(props: ExerciseShellProps) {
             {props.correctMessage ?? <span>Correct — and idiomatic.</span>}
           </Show>
         </Feedback>
+        <Show when={phase() === "right" && props.successNote}>
+          {(note) => (
+            <Text tone="secondary" size="sm">
+              <span innerHTML={formatInline(note())} />
+            </Text>
+          )}
+        </Show>
       </Show>
 
       <Stack direction="row" gap="sm" wrap>

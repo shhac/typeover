@@ -14,6 +14,7 @@ interface FillBlankWordProps {
   generator: GeneratorSpec;
   blanks: string[];
   hints: readonly [string, string, string];
+  successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
 }
@@ -75,6 +76,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
       hints={props.hints}
       hintValues={instance().values}
       phase={phase}
+      successNote={props.successNote}
       extraPickingActions={clearButton}
       extraWrongActions={clearButton}
       correctMessage={<span>Correct — every blank matches.</span>}

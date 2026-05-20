@@ -240,6 +240,70 @@ describe("<FillBlankLineInput> — Enter-to-Run", () => {
   });
 });
 
+describe("<FillBlankLineInput> — alternate canonical (Yaegi-unrunnable but perfect)", () => {
+  it("submission matches an authored alternate → graded correct even when Yaegi errors", async () => {
+    /* Simulate Yaegi failing to run the modern form (e.g.
+     * `slices.Sort` under our Yaegi build without generic stdlib
+     * support). Mock returns a non-empty error and mismatched
+     * stdout — the standard isCorrect path would FAIL. The
+     * alternate-canonical match should rescue it. */
+    evalMock.mockResolvedValueOnce({
+      stdout: "",
+      stderr: "undefined: slices.Sort",
+      error: "9:2: undefined selector: slices.Sort",
+    });
+    const { container, getAllByText, getByText } = render(() => (
+      <FillBlankLineInput
+        exerciseId={EX_ID}
+        prompt="Type the missing line."
+        generator={GEN}
+        blanks={["line"]}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="yaegi"
+        alternateCanonicals={["MODERN := count * 2"]}
+        successNote="Yaegi can't run this, but you typed the modern form — accepted."
+      />
+    ));
+    setVal(lineInput(container), "MODERN := count * 2");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(slot()?.instancesPassed).toBe(1);
+    expect(slot()?.instancesFailed).toBe(0);
+    /* successNote disclosure surfaces in the right-phase shell. */
+    expect(
+      getByText("Yaegi can't run this, but you typed the modern form — accepted."),
+    ).toBeTruthy();
+  });
+
+  it("submission that doesn't match any alternate AND Yaegi mismatches → still wrong", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: "garbage\n", stderr: "", error: "" });
+    const { container, getAllByText, getByText } = render(() => (
+      <FillBlankLineInput
+        exerciseId={EX_ID}
+        prompt="Type the missing line."
+        generator={GEN}
+        blanks={["line"]}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="yaegi"
+        alternateCanonicals={["MODERN := count * 2"]}
+      />
+    ));
+    setVal(lineInput(container), "neither := canonical");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(getByText("Try again")).toBeTruthy();
+    expect(slot()?.instancesPassed).toBe(0);
+  });
+});
+
 describe("<FillBlankLineInput> — Another resets state", () => {
   it("Another clears input AND runResult", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });

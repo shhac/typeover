@@ -20,6 +20,7 @@ interface FreeformProps {
    *  for the fallback path (Vercel function) — not implemented in
    *  v0; treated as an authoring error here until it lands. */
   runtime: "yaegi" | "server";
+  successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
 }
@@ -120,6 +121,7 @@ export function Freeform(props: FreeformProps) {
       hintValues={instance().values}
       phase={phase}
       ownsReveal
+      successNote={props.successNote}
       extraPickingActions={toolbar}
       extraWrongActions={toolbar}
       correctMessage={<span>Correct — your program prints the expected output.</span>}

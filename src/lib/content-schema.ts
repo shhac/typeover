@@ -47,6 +47,22 @@ const exerciseFields = {
    *  learner's `package main`. Also opts a fill-line exercise into
    *  the input+Yaegi UX (see validateFillLineMode below). */
   expectStdout: z.string().optional(),
+  /** Optional disclosure shown alongside the success message when
+   *  the runnable canonical is INTENTIONALLY a step behind the
+   *  modern idiom (e.g. typeover's Yaegi runtime can't yet run
+   *  Go 1.21 generic-stdlib functions like `slices.Sort`, so the
+   *  canonical uses `sort.Ints`). Keeps the learner honest about
+   *  what they'd write in production. Markdown-inline via
+   *  `formatInline`. */
+  successNote: z.string().optional(),
+  /** Fill-line only: alternative submission strings that grade as
+   *  correct even when Yaegi can't run them (e.g. Go 1.21+
+   *  generic-stdlib forms our Yaegi build doesn't support yet).
+   *  Whitespace-normalised match. When a learner's submission
+   *  matches one of these AND Yaegi's stdout check fails, the
+   *  grader still passes them — paired with `successNote` so the
+   *  UI explains why. */
+  alternateCanonicals: z.array(z.string()).optional(),
 } as const;
 
 type Exercise = z.infer<z.ZodObject<typeof exerciseFields>>;
@@ -198,10 +214,27 @@ function validateRunnableExpectStdout(ex: Exercise, ctx: Ctx): void {
   }
 }
 
+/** `alternateCanonicals` is graded by whitespace-normalised string
+ *  match against the learner's typed submission — that only makes
+ *  sense on fill-line, which renders ONE input line. MCQ/fill-word
+ *  use selection/per-blank grading; freeform compares whole-program
+ *  stdout. Reject elsewhere so an author doesn't add the field on
+ *  the wrong type and silently see no effect. */
+function validateAlternateCanonicalsScope(ex: Exercise, ctx: Ctx): void {
+  if (!ex.alternateCanonicals || ex.alternateCanonicals.length === 0) return;
+  if (ex.type === "fill-line") return;
+  ctx.addIssue({
+    code: "custom",
+    message: `\`alternateCanonicals\` is only valid for fill-line exercises; got type "${ex.type}".`,
+    path: ["alternateCanonicals"],
+  });
+}
+
 export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => {
   validateFillBlanks(ex, ctx);
   validateFillLineMode(ex, ctx);
   validateMcqDistractors(ex, ctx);
   validateBlanksOnlyForFill(ex, ctx);
   validateRunnableExpectStdout(ex, ctx);
+  validateAlternateCanonicalsScope(ex, ctx);
 });

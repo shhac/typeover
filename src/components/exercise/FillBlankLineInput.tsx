@@ -3,6 +3,7 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
+import { normaliseSubmission } from "~/lib/submission-normalise";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
@@ -26,6 +27,16 @@ interface FillBlankLineInputProps {
   expectStdout: string;
   /** Must be "yaegi" for the input+Yaegi grading mode (schema enforces). */
   runtime: "yaegi";
+  /** Alternate submission strings that grade correct even when
+   *  Yaegi can't run them (e.g. Go 1.21+ generic-stdlib forms our
+   *  Yaegi build doesn't support yet). Whitespace-normalised match.
+   *  Paired with `successNote` so the UI explains why a perfect
+   *  modern answer passed despite Yaegi's failure. */
+  alternateCanonicals?: readonly string[];
+  /** Disclosure shown alongside the correct-feedback. Surfaces the
+   *  modern canonical when the graded one is intentionally a step
+   *  behind for runtime-limitation reasons. */
+  successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
 }
@@ -58,9 +69,21 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
    * frozen Run button. design-docs/16 F-4. */
   onMount(() => yaegi.preflight());
 
+  /* Submission matches one of the authored alternate canonicals
+   * (whitespace-normalised). Used to grade a "perfect" modern answer
+   * correct when Yaegi can't run it — e.g. `slices.Sort` under a
+   * Yaegi build without generic-stdlib support. design-docs/23. */
+  const matchesAlternateCanonical = () => {
+    if (!props.alternateCanonicals || props.alternateCanonicals.length === 0) return false;
+    const target = normaliseSubmission(input());
+    if (target === "") return false;
+    return props.alternateCanonicals.some((alt) => normaliseSubmission(alt) === target);
+  };
   const isCorrect = () => {
     const r = yaegi.runResult();
-    return r !== null && r.error === "" && r.stdout === props.expectStdout;
+    if (r === null) return false;
+    if (r.error === "" && r.stdout === props.expectStdout) return true;
+    return matchesAlternateCanonical();
   };
   const canSubmit = () => yaegi.runResult() !== null && !yaegi.running() && input().trim() !== "";
 
@@ -116,6 +139,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       hintValues={instance().values}
       phase={phase}
       ownsReveal
+      successNote={props.successNote}
       extraPickingActions={toolbar}
       extraWrongActions={toolbar}
       correctMessage={<span>Correct — your line produces the expected output.</span>}

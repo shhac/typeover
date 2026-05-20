@@ -112,6 +112,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               prompt={ex.prompt}
               generator={ex.generator}
               hints={ex.hints}
+              successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />
@@ -124,6 +125,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               generator={ex.generator}
               blanks={ex.blanks ?? []}
               hints={ex.hints}
+              successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />
@@ -138,6 +140,8 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               expectStdout={ex.expectStdout}
               runtime={ex.runtime}
+              alternateCanonicals={ex.alternateCanonicals}
+              successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />
@@ -151,6 +155,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               expectStdout={ex.expectStdout}
               runtime={ex.runtime}
+              successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />
