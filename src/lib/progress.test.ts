@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getExerciseProgress,
   recordHintUsed,
@@ -126,6 +126,43 @@ describe("progress storage — corrupt-blob backup (task #37)", () => {
     delete (globalThis as { localStorage?: Storage }).localStorage;
     expect(() => getExerciseProgress("ex-1")).not.toThrow();
     /* no localStorage to inspect, but the recorder also must not throw */
+  });
+
+  it("reads share a single JSON.parse across one tick", () => {
+    /* design-docs/18 F-3 + design-docs/19 F-4. Before the cache
+     * landed, ModuleCompleteCard fired ~116 reads per render,
+     * each JSON.parse-ing + Zod-validating the same blob.
+     * Now the cache holds a single parse for the lifetime of a
+     * write(); 100 successive getExerciseProgress calls hit
+     * JSON.parse at most once. */
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        startedAt: "2026-01-01T00:00:00.000Z",
+        lastSeenAt: "2026-01-01T00:00:00.000Z",
+        exercises: {},
+      }),
+    );
+    const parseSpy = vi.spyOn(JSON, "parse");
+    const before = parseSpy.mock.calls.length;
+    for (let i = 0; i < 100; i += 1) getExerciseProgress(`ex-${i}`);
+    const parseCalls = parseSpy.mock.calls.length - before;
+    parseSpy.mockRestore();
+    expect(parseCalls).toBeLessThanOrEqual(1);
+  });
+
+  it("getExerciseProgress is pure (does not create persisted slots on read)", () => {
+    /* Before this fix `getExerciseProgress` went through
+     * exerciseSlot, which mutated the in-memory parsed Progress
+     * to insert a fresh slot. Now an un-touched id returns a
+     * fresh empty slot but the underlying Progress isn't
+     * mutated, so storage stays empty until a real recorder
+     * (recordInstanceSeen / etc.) writes. */
+    getExerciseProgress("never-touched");
+    const raw = localStorage.getItem(STORAGE_KEY);
+    /* No storage write happened — the key is still null. */
+    expect(raw).toBeNull();
   });
 
   it("backs up exactly once even across many reads of the same corrupt blob", () => {

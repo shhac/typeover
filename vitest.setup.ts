@@ -6,6 +6,7 @@
  * shim and reset it in beforeEach so progress-storage tests start clean.
  */
 import { beforeEach } from "vitest";
+import { __resetProgressCacheForTests } from "~/lib/progress";
 
 class LocalStorageShim implements Storage {
   private map = new Map<string, string>();
@@ -40,4 +41,9 @@ beforeEach(() => {
     writable: true,
     configurable: true,
   });
+  /* The progress module memoises read() at module scope (perf — a
+   * single completion-card render fires 100+ reads per page).
+   * Vitest resets localStorage above but the module cache persists
+   * across tests, so we have to clear it explicitly. */
+  __resetProgressCacheForTests();
 });

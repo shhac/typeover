@@ -70,11 +70,35 @@ function parseProgressResult(raw: string | null): ParseResult {
   return { ok: true, value: result.data };
 }
 
+/* Module-level cache. Every public reader (getExerciseProgress,
+ * summarizeTheme, the test helpers) goes through read(); a single
+ * ModuleCompleteCard render can call it 100+ times and each call
+ * was JSON.parse-ing + Zod-validating the same blob. The cache
+ * lives for the lifetime of a write() — every recorder bumps the
+ * cache after writing — so listeners see fresh data and same-render
+ * readers share one parse. design-docs/18 F-3 + design-docs/19 F-4. */
+let cachedProgress: Progress | null = null;
+
+/** Test-only escape hatch. Vitest resets localStorage between
+ *  tests via the global setup; this clears the module-level cache
+ *  so the next read() re-parses the new (empty) storage instead
+ *  of returning the previous test's snapshot. */
+export function __resetProgressCacheForTests(): void {
+  cachedProgress = null;
+}
+
 function read(): Progress {
-  if (typeof localStorage === "undefined") return empty();
+  if (cachedProgress !== null) return cachedProgress;
+  if (typeof localStorage === "undefined") {
+    cachedProgress = empty();
+    return cachedProgress;
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   const result = parseProgressResult(raw);
-  if (result.ok) return result.value;
+  if (result.ok) {
+    cachedProgress = result.value;
+    return cachedProgress;
+  }
   /* Back up any non-empty payload that failed validation so a future
    * migration / forensic pass can recover the learner's history.
    * design-docs/99 calls this out explicitly: do not silently destroy
@@ -90,28 +114,43 @@ function read(): Progress {
   if (result.reason !== "empty" && raw !== null) {
     localStorage.setItem(CORRUPT_KEY_PREFIX + now(), raw);
     write(empty());
+    return cachedProgress ?? empty();
   }
-  return empty();
+  cachedProgress = empty();
+  return cachedProgress;
 }
 
 /** Pure serializer. Caller is responsible for updating `p.lastSeenAt`
  *  before calling; write() doesn't touch timestamps. */
 function write(p: Progress) {
+  /* Refresh the cache to match what we just persisted so subsequent
+   * reads in the same tick see the new value without parsing again. */
+  cachedProgress = p;
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
 }
 
+/** Default slot shape — used when getExerciseProgress hits a slot
+ *  that doesn't exist yet. Previously exerciseSlot mutated `p` to
+ *  insert this; that hid a "create on read" footgun in a function
+ *  named `getExerciseProgress`. design-docs/18 F-3. */
+function emptySlot(): ExerciseProgress {
+  const t = now();
+  return {
+    firstSeenAt: t,
+    lastSeenAt: t,
+    instancesSeen: 0,
+    instancesPassed: 0,
+    instancesFailed: 0,
+    hintsUsedTotal: 0,
+  };
+}
+
+/** Mutating slot helper. Only called from `bumpExercise` (which
+ *  intends to mutate); other readers go through `emptySlot()`. */
 function exerciseSlot(p: Progress, id: string): ExerciseProgress {
   if (!p.exercises[id]) {
-    const t = now();
-    p.exercises[id] = {
-      firstSeenAt: t,
-      lastSeenAt: t,
-      instancesSeen: 0,
-      instancesPassed: 0,
-      instancesFailed: 0,
-      hintsUsedTotal: 0,
-    };
+    p.exercises[id] = emptySlot();
   }
   return p.exercises[id]!;
 }
@@ -152,7 +191,11 @@ export const recordHintUsed = (id: string) =>
   });
 
 export function getExerciseProgress(id: string): ExerciseProgress {
-  return exerciseSlot(read(), id);
+  /* Pure read — returns either the existing slot or a fresh empty
+   * slot. Does NOT mutate the cached Progress; create-on-write is
+   * the only path that adds slots to the persisted state (via
+   * `recordInstanceSeen` → `bumpExercise` → `exerciseSlot`). */
+  return read().exercises[id] ?? emptySlot();
 }
 
 /**

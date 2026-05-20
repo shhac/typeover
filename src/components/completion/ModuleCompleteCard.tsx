@@ -136,10 +136,14 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
         return;
       }
       setShareState("error");
-    } catch {
-      /* User cancelled the share sheet, or clipboard write was
-       * denied. Both are benign — reset to idle. */
-      setShareState("idle");
+    } catch (e) {
+      /* User cancelled the share sheet vs permission denied vs
+       * crashed share-sheet are three different cases. AbortError
+       * is the cancellation signal per the Web Share spec —
+       * benign, reset to idle. Anything else is a real failure;
+       * fall back to the manual-copy panel. design-docs/19 F-5. */
+      const isCancellation = e instanceof DOMException && e.name === "AbortError";
+      setShareState(isCancellation ? "idle" : "error");
     }
   }
 
@@ -220,6 +224,24 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
                 <StatBlock value={p().hintsUsedTotal} label="hints" tone="secondary" />
               </Show>
             </div>
+            {/* Share-payload preview — design-docs/16 F-7. People
+             * are careful about what they post; the Share button
+             * used to fire the OS share sheet without showing the
+             * payload first. Now the prose + URL are visible
+             * before the click so a cautious user can read them
+             * before invoking the share sheet (or the manual-copy
+             * fallback). */}
+            <div class="border-l-2 border-l-accent-amber/40 pl-3 flex flex-col gap-1">
+              <Text tone="muted" size="xs" family="mono">
+                will share:
+              </Text>
+              <Text tone="secondary" size="sm">
+                {shareText()}
+              </Text>
+              <Text tone="faint" size="xs" family="mono">
+                {shareUrl()}
+              </Text>
+            </div>
             <div class="flex flex-row gap-3 flex-wrap">
               <Button variant="primary" onClick={share}>
                 Share
@@ -239,10 +261,11 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
               </Text>
             </Show>
             <Show when={shareState() === "error"}>
-              <Text size="xs" family="mono" class="text-error">
-                Share unavailable. Copy this and paste it manually:{" "}
-                <code class="text-fg-primary">{shareText()}</code>
-              </Text>
+              <div class="flex flex-col gap-1">
+                <Text size="xs" family="mono" class="text-error">
+                  Share unavailable. Copy the text + URL above and paste them wherever you like.
+                </Text>
+              </div>
             </Show>
           </div>
         </Show>
