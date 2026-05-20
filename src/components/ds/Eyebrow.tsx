@@ -13,8 +13,15 @@ import { cn } from "./_internal";
  * tracked-out mono caption is enough.
  *
  * Tone follows the colour theme accents so a TS section can lean
- * blue, a Go section cyan, etc. — same identity as Badge but without
- * the pill chrome.
+ * blue, a Go section cyan, etc.
+ *
+ * Visual differentiation from outlined Badge — design-docs/17 F-5.
+ * Both primitives were `font-mono uppercase tracking-widest`; at a
+ * glance an `<Eyebrow tone="amber">` read as an outlined amber
+ * Badge. Eyebrow now leads with a short hairline glyph (`──`) that
+ * marks it as a SECTION CAPTION rather than a chip. Badge stays
+ * bordered. The split is structural: Eyebrow introduces what
+ * follows, Badge tags what's already there.
  */
 
 type Tone = "default" | "muted" | "amber" | "ts" | "go";
@@ -37,11 +44,15 @@ export function Eyebrow(props: ParentProps<EyebrowProps>) {
     <span
       {...rest}
       class={cn(
-        "font-mono text-xs uppercase tracking-widest",
+        "inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest",
         toneClass[local.tone ?? "default"],
         local.class,
       )}
     >
+      {/* Hairline marker that separates an Eyebrow caption from an
+       * outlined Badge chip at a glance. Decorative — aria-hidden
+       * so screen readers don't announce a dash. */}
+      <span aria-hidden="true" class="inline-block w-3 h-px bg-current opacity-50" />
       {local.children}
     </span>
   );

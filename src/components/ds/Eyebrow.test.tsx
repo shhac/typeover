@@ -33,6 +33,16 @@ describe("<Eyebrow>", () => {
     expect(container.querySelector("span")!.className).toContain("text-accent-ts");
   });
 
+  it("renders a decorative aria-hidden hairline marker before the label", () => {
+    /* design-docs/17 F-5. The hairline is what visually separates
+     * Eyebrow from an outlined Badge at a glance. aria-hidden so
+     * screen readers don't read it as a dash. */
+    const { container } = render(() => <Eyebrow>section</Eyebrow>);
+    const marker = container.querySelector('span[aria-hidden="true"]');
+    expect(marker).not.toBeNull();
+    expect(marker!.className).toContain("bg-current");
+  });
+
   it("forwards arbitrary HTML attrs (id, data-*) to the span", () => {
     const { container } = render(() => (
       <Eyebrow id="hero-eyebrow" data-section="hero">
