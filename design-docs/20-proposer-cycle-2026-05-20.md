@@ -93,15 +93,61 @@ is genuinely lower than expected post-launch, instrument it before
 proposing a fix (which itself requires the no-tracking commitment to
 loosen — a separate, larger decision).
 
+## Round 2 — `exercise:preview` CLI + service-worker precache validated
+
+The two un-picked proposals from round 1 were validated in the next
+loop iteration. Both took damage; the validators surfaced lighter
+alternatives that DID ship.
+
+### Authoring — `pnpm exercise:preview` — REPLACED with `--filter`
+
+- **Sanity**: ship-with-tweaks (needs `tsx` devDep, reuse
+  `bootstrapYaegi()` + `verify-runnable.mjs`'s `buildProgram`).
+- **DA**: kill — HMR + pinned tab is already the dev loop; the
+  Yaegi-grading check is a 5-line `--filter <substring>` on the
+  existing `runtime:verify` script; text-shaped CLI output lies
+  about the visual things authors actually need to verify (MCQ
+  option order, markdown rendering, mobile overflow); pre-launch
+  there's no velocity wall to solve yet.
+- **Shipped**: `pnpm runtime:verify --filter <substring>` (10 lines
+  added to `runtime/yaegi-wasm/verify-runnable.mjs`). Closes the
+  "verify-just-one-exercise" gap without a parallel renderer.
+
+### Performance — service-worker precache — REPLACED with preload + HTTP cache
+
+- **Sanity**: pause-and-rethink — proposed the lighter path of
+  hashed filenames + `Cache-Control: immutable` + `<link
+  rel="preload">`. No SW deployment-trap risk.
+- **DA**: defer-until-launch+30d — we can't measure the problem
+  (doc 07 forbids tracking), Vercel's static-asset defaults likely
+  already cache effectively, SW rollback story has the dead-SW-
+  intercepts-its-own-update deadlock, and pre-launch is uniquely
+  bad timing (no traffic = no stress test, sticky SW from day one).
+- **Shipped**:
+  - `<link rel="preload" href="/yaegi/yaegi.wasm" as="fetch">`
+    rendered conditionally on `/go/*` routes in `BaseLayout.astro`
+    so the ~1.9 MB brotli download runs in parallel with HTML
+    parsing instead of waiting for `getRunner()`.
+  - `vercel.json` with `Cache-Control: public, max-age=86400,
+    stale-while-revalidate=604800` for `/yaegi/(.*)` so a return
+    visit within 24h skips the network and the next 7 days
+    revalidate in background.
+  - Skipped the SW entirely. Skipped the filename-hashing
+    proposal — the unhashed path with a 1-day max-age is a smaller
+    cut that survives a Yaegi upgrade gracefully (no stale-forever
+    risk).
+
 ## Notes for the next proposer cycle
 
-- The two un-picked proposals (`exercise:preview` CLI + service-worker
-  precache) are both small-effort, both pass smell-tests, and address
-  real gaps. Default to revisiting them in the next round before
-  generating new proposals from cold.
-- Validation matters: both this round's picks failed validation in
-  ways the proposer didn't surface. Always run sanity + DA before
-  committing implementation effort.
-- "Reuse the existing X shell logic" was the load-bearing claim in
-  both KILLED/DEFERRED proposals. When a future proposer says that,
-  read the X file before accepting the estimate.
+- Validation matters: across two rounds, every "small 1-2 days"
+  proposal underestimated either coupling cost or the cleaner
+  alternative the codebase already supported. Always run sanity +
+  DA before committing implementation effort.
+- "Reuse the existing X shell logic" was the load-bearing claim
+  in multiple killed/replaced proposals. When a future proposer
+  says that, read the X file before accepting the estimate.
+- The lighter alternatives that DID ship (a `--filter` flag, a
+  `<link rel="preload">`, a `vercel.json` cache header) are
+  consistently 5-15 lines of code. Pre-launch, lean into the
+  smallest cut the validators agree on rather than the proposer's
+  named feature.
