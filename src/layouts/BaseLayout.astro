@@ -122,6 +122,41 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
     {isExerciseRoute && (
       <link rel="preload" href="/yaegi/yaegi.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
     )}
+    {/* Hover/focus prefetch of the Yaegi WASM from off-route pages
+      * (landing, /go index, privacy). On /go/* the <link rel="preload">
+      * above already covers it. design-docs/25 P5. */}
+    {!isExerciseRoute && (
+      <script is:inline>
+        {`(function () {
+          var fired = false;
+          function ok() {
+            var c = navigator.connection;
+            if (c && c.saveData) return false;
+            if (c && c.effectiveType === "slow-2g") return false;
+            return true;
+          }
+          function prefetch() {
+            if (fired) return;
+            if (!ok()) return;
+            fired = true;
+            var link = document.createElement("link");
+            link.rel = "prefetch";
+            link.as = "fetch";
+            link.href = "/yaegi/yaegi.wasm";
+            link.crossOrigin = "anonymous";
+            document.head.appendChild(link);
+          }
+          function handler(e) {
+            var t = e.target;
+            if (!t || typeof t.closest !== "function") return;
+            if (t.closest('a[href^="/go/"]')) prefetch();
+          }
+          document.addEventListener("pointerover", handler, { passive: true });
+          document.addEventListener("focusin", handler, { passive: true });
+          document.addEventListener("touchstart", handler, { passive: true });
+        })();`}
+      </script>
+    )}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

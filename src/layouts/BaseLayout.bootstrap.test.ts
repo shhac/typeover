@@ -65,3 +65,49 @@ describe("BaseLayout bootstrap — enum coverage", () => {
     }
   });
 });
+
+/*
+ * design-docs/25 P5 — hover/focus prefetch script. Inline because
+ * it has to fire before any JS bundle loads and it's tiny enough
+ * that a module import is more overhead than the script itself.
+ *
+ * Drift guards on the inline script's load-bearing predicates: if
+ * a future edit drops the saveData gate, the slow-2g gate, or the
+ * idempotence flag, the prefetch behaviour quietly degrades into
+ * a per-event link injection — sanity in the source, not at runtime.
+ */
+describe("BaseLayout hover/focus Yaegi prefetch", () => {
+  it("injects a <link rel=\"prefetch\"> with the right shape", async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/link\.rel\s*=\s*"prefetch"/);
+    expect(src).toMatch(/link\.href\s*=\s*"\/yaegi\/yaegi\.wasm"/);
+    expect(src).toMatch(/link\.crossOrigin\s*=\s*"anonymous"/);
+  });
+
+  it("respects saveData + effectiveType slow-2g network signals", async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/saveData/);
+    expect(src).toMatch(/slow-2g/);
+  });
+
+  it("is idempotent — fires at most once per page load", async () => {
+    /* The closure-local `fired` flag is the load-bearing guard. */
+    const src = await bootstrapSource();
+    expect(src).toMatch(/var fired = false/);
+    expect(src).toMatch(/if \(fired\) return/);
+  });
+
+  it("listens on pointerover, focusin, and touchstart", async () => {
+    /* Three signals cover desktop hover, keyboard focus, and the
+     * mobile tap-before-navigation moment. */
+    const src = await bootstrapSource();
+    expect(src).toMatch(/addEventListener\("pointerover"/);
+    expect(src).toMatch(/addEventListener\("focusin"/);
+    expect(src).toMatch(/addEventListener\("touchstart"/);
+  });
+
+  it("only fires on /go/* anchors", async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/'a\[href\^="\/go\/"\]'/);
+  });
+});
