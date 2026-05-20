@@ -46,7 +46,7 @@ is tracked in `localStorage`; nothing leaves your device.
 
 | # | Module | Themes | Status |
 |---|---|---|---|
-| 1 | **Foundations** | variables, numeric primitives, strings/bytes/runes, conditionals, loops, functions & multi-return | 9/9 each — complete |
+| 1 | **Foundations** | variables, numeric primitives, strings/bytes/runes, conditionals, loops, functions & multi-return | 58 exercises — complete |
 | 2 | Collections | arrays vs slices, maps, iteration | scaffolded |
 | 3 | Types & methods | structs, methods, pointers, nil & zero values | scaffolded |
 | 4 | Interfaces & generics | interfaces, generics | scaffolded |

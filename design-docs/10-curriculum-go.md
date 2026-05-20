@@ -140,8 +140,10 @@ this clicks, everything from Module 4 onward falls into place.
   `encoding/json` deep-dives.
 
 Total: **7 modules, 31 themes**. At 9 exercises per theme (default
-slot allocation), that's ~280 exercises end-to-end. Launch gate is
-Module 1 only: 6 themes × 9 = 54 exercises.
+slot allocation), that's ~280 exercises end-to-end — a theme may
+ship 10 when a slot is genuinely warranted (Foundations shipped
+that way for 4 of 6 themes). Launch gate is Module 1 only: 6 themes,
+58 exercises shipped.
 
 ## What Pass 3 looks like (still pending)
 
