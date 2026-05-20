@@ -84,17 +84,9 @@ export const PALETTE_CHIP_COLORS: Record<PaletteId, { dark: ChipColors; light: C
     dark: { bg: "#1a1612", accent: "#d89640" },
     light: { bg: "#faf6ef", accent: "#b06e1a" },
   },
-  vellum: {
-    dark: { bg: "#1c1610", accent: "#cf8a47" },
-    light: { bg: "#f3ead7", accent: "#8a4a14" },
-  },
   pelican: {
     dark: { bg: "#101010", accent: "#e87b3e" },
     light: { bg: "#f5ecd2", accent: "#b8421b" },
-  },
-  sepia: {
-    dark: { bg: "#1d140c", accent: "#c87a35" },
-    light: { bg: "#efe2cc", accent: "#7a3d0e" },
   },
   almanac: {
     dark: { bg: "#0f1414", accent: "#4ea69a" },
@@ -103,6 +95,10 @@ export const PALETTE_CHIP_COLORS: Record<PaletteId, { dark: ChipColors; light: C
   "e-reader": {
     dark: { bg: "#18171a", accent: "#d4a843" },
     light: { bg: "#e0dcd0", accent: "#8a4a14" },
+  },
+  "slate-rule": {
+    dark: { bg: "#14171a", accent: "#6ea8d0" },
+    light: { bg: "#f4f6f8", accent: "#2a5a85" },
   },
   "aurora-amber": {
     dark: { bg: "#0a0a0b", accent: "#ffa726" },

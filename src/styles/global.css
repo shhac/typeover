@@ -241,17 +241,19 @@
 /* ----- textbook ----- */
 :root[data-style="textbook"] {
   /* Chrome only. Serif everywhere (heading + body); narrow
-   * reading measure; amber left-rule via shadow chrome
-   * (`--color-accent-primary` resolves to whatever the active
-   * palette sets — desaturated ink under parchment-ink, deeper
-   * spine-orange under pelican, etc.). No box border — textbook
-   * uses the shadow-rule as the structural cue. */
+   * reading measure; drop-cap on first paragraph (see selector
+   * below). Originally shipped with an amber inset left-rule on
+   * every panel, but post-launch user feedback flagged that as
+   * the antique-parchment tell — modern textbook sites (Tufte,
+   * Gwern, Stripe Press, Pearson+) either drop the rule entirely
+   * or reserve it for semantic callouts. Removed here; if a
+   * callout primitive ever needs an accent-rule, it can opt in
+   * locally rather than every Panel inheriting it. */
   --font-heading: var(--font-serif);
   --font-body: var(--font-serif);
   --heading-weight-base: 700;
   --measure: 60ch;
   --color-border-default: transparent;
-  --shadow-panel: inset 4px 0 0 0 color-mix(in oklab, var(--color-accent-primary) 70%, transparent);
 }
 
 /* Textbook radius progression: heavy compression `0 / 0 / 2 / 4`.
@@ -664,35 +666,6 @@ body {
   --color-border-strong: #d8cfb8;
 }
 
-:root[data-palette="vellum"] {
-  --color-bg-base: #1c1610;
-  --color-bg-panel: #221b13;
-  --color-bg-elevated: #2c2317;
-  --color-bg-inset: #140f08;
-  --color-fg-primary: #e6d4b5;
-  --color-fg-secondary: #b59c78;
-  --color-fg-muted: #897355;
-  --color-fg-faint: #5a4a35;
-  --color-accent-primary: #cf8a47;
-  --color-accent-ts: #8fb0d8;
-  --color-accent-go: #62b8b0;
-  --color-border-strong: #3d2f1f;
-}
-:root[data-palette="vellum"][data-theme="light"] {
-  --color-bg-base: #f3ead7;
-  --color-bg-panel: #f7f0df;
-  --color-bg-elevated: #ebe0c6;
-  --color-bg-inset: #e6daba;
-  --color-fg-primary: #2a1d10;
-  --color-fg-secondary: #4a3826;
-  --color-fg-muted: #74604a;
-  --color-fg-faint: #9c886e;
-  --color-accent-primary: #8a4a14;
-  --color-accent-ts: #2b5d8f;
-  --color-accent-go: #1f6e6e;
-  --color-border-strong: #c9b893;
-}
-
 :root[data-palette="pelican"] {
   --color-bg-base: #101010;
   --color-bg-panel: #161616;
@@ -720,35 +693,6 @@ body {
   --color-accent-ts: #1f5fa8;
   --color-accent-go: #006680;
   --color-border-strong: #cbbf9a;
-}
-
-:root[data-palette="sepia"] {
-  --color-bg-base: #1d140c;
-  --color-bg-panel: #241910;
-  --color-bg-elevated: #2e2114;
-  --color-bg-inset: #150e07;
-  --color-fg-primary: #e8c9a1;
-  --color-fg-secondary: #b89a73;
-  --color-fg-muted: #8b7152;
-  --color-fg-faint: #5d4a36;
-  --color-accent-primary: #c87a35;
-  --color-accent-ts: #9fbdd6;
-  --color-accent-go: #74b8b0;
-  --color-border-strong: #3e2e1d;
-}
-:root[data-palette="sepia"][data-theme="light"] {
-  --color-bg-base: #efe2cc;
-  --color-bg-panel: #f3e8d6;
-  --color-bg-elevated: #e6d6b9;
-  --color-bg-inset: #dfcca8;
-  --color-fg-primary: #2d1a08;
-  --color-fg-secondary: #503a22;
-  --color-fg-muted: #7a6044;
-  --color-fg-faint: #a08768;
-  --color-accent-primary: #7a3d0e;
-  --color-accent-ts: #2e5680;
-  --color-accent-go: #1f6363;
-  --color-border-strong: #c3a878;
 }
 
 :root[data-palette="almanac"] {
@@ -810,6 +754,42 @@ body {
   --color-accent-ts: #2a5d9a;
   --color-accent-go: #006d8c;
   --color-border-strong: #b8b3a4;
+}
+
+/* slate-rule — Gwern-influenced modern textbook. Cool neutral
+ * ground, disciplined grayscale, single steel-blue accent
+ * replacing the warm parchment family's amber. The "modern
+ * academic" alternative to parchment-ink — same serif body
+ * (via the style axis) but a cool palette so a learner who
+ * wants the textbook feel without the parchment connotation
+ * has a clear pick. */
+:root[data-palette="slate-rule"] {
+  --color-bg-base: #14171a;
+  --color-bg-panel: #1c2026;
+  --color-bg-elevated: #252a31;
+  --color-bg-inset: #0f1216;
+  --color-fg-primary: #d0d5dc;
+  --color-fg-secondary: #9aa3ad;
+  --color-fg-muted: #6c7480;
+  --color-fg-faint: #4a5058;
+  --color-accent-primary: #6ea8d0;
+  --color-accent-ts: #93b8e3;
+  --color-accent-go: #5fc0c6;
+  --color-border-strong: #313842;
+}
+:root[data-palette="slate-rule"][data-theme="light"] {
+  --color-bg-base: #f4f6f8;
+  --color-bg-panel: #ffffff;
+  --color-bg-elevated: #ebeef2;
+  --color-bg-inset: #e8ebef;
+  --color-fg-primary: #1c1f24;
+  --color-fg-secondary: #3a4049;
+  --color-fg-muted: #5d6470;
+  --color-fg-faint: #8a909a;
+  --color-accent-primary: #2a5a85;
+  --color-accent-ts: #1f4a7a;
+  --color-accent-go: #006d8c;
+  --color-border-strong: #c8cdd4;
 }
 
 /* ===== GLASS palettes ===== */
