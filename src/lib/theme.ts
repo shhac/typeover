@@ -1,9 +1,22 @@
 /*
- * Appearance helpers — three independent axes per design-docs/13 + 14.
+ * Appearance helpers — four independent axes per design-docs/13 + 14.
  *
  *   1. Colour theme — `dark` | `light` (pin)  or `system` (follow OS).
  *   2. Density      — `compact` | `normal` | `airy`.
- *   3. Shape        — `sharp` | `normal` | `rounded`.
+ *   3. Shape        — `sharp` | `normal` | `rounded` | `pill`.
+ *   4. Style        — `terminal` | `cardboard` | `textbook` | `glass` | `islands`.
+ *
+ * NAMING NOTE — design-docs/18 F-1. The shape axis carries three
+ * surface names: "shape" (design-docs/13 + this comment), "Shape"
+ * (the settings UI label), and "radius" (every code symbol below:
+ * `RADII`, `RadiusId`, `currentRadius`, `setRadius`,
+ * `RADIUS_STORAGE_KEY`, the `typeover:radius` localStorage key,
+ * the `data-radius` DOM attribute, and the
+ * `:root[data-radius="…"]` CSS selectors). The code-side `radius`
+ * naming is kept because (a) it matches the CSS `border-radius`
+ * property the axis ultimately drives and (b) renaming the storage
+ * key and DOM attribute would break every pinned user's preference.
+ * If you grep for "shape", check `RADII` too; they're the same axis.
  *
  * Each axis follows the same pattern:
  *   - The DOM is the source of truth at runtime — the bootstrap script
@@ -12,9 +25,9 @@
  *   - The setter mutates BOTH the attribute (instant repaint) and the
  *     pin (persistence) in one call.
  *
- * Density and shape have no OS-level preference signal, so absent
- * pin → the explicit default below ("normal" for both). The colour
- * axis retains its `system` choice that re-derives from
+ * Density, shape, and style have no OS-level preference signal, so
+ * absent pin → the explicit default below ("normal" / "terminal").
+ * The colour axis retains its `system` choice that re-derives from
  * prefers-color-scheme.
  */
 

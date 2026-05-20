@@ -261,9 +261,9 @@ export function AppearancePicker() {
         />
       </div>
       <div class="flex flex-col gap-3">
-        <Eyebrow tone="muted">Corners</Eyebrow>
+        <Eyebrow tone="muted">Shape</Eyebrow>
         <RadioGroup<RadiusId>
-          legend="Corners"
+          legend="Shape"
           name="radius"
           options={RADIUS_OPTIONS}
           initial="normal"
