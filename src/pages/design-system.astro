@@ -22,6 +22,26 @@ import {
 } from "~/components/ds";
 import Accordion from "~/components/ds/Accordion.astro";
 import TrackCard from "~/components/ds/TrackCard.astro";
+import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
+import ThemeCard from "~/components/curriculum/ThemeCard.astro";
+import { getCollection } from "astro:content";
+
+/* Pull one real foundations theme + its first exercise for the
+ * ThemeCard sample below. design-docs/15 pattern 11 — inventory
+ * the curriculum-card surfaces alongside the DS primitives so a
+ * contributor browsing this page sees the components a real
+ * curriculum route would consume. */
+const themes = await getCollection("themes");
+const exercises = await getCollection("exercises");
+const sampleTheme = themes.find((t) => t.id === "foundations/variables");
+const sampleExerciseCount = sampleTheme
+  ? exercises.filter((ex) => ex.data.themeId === sampleTheme.id).length
+  : 0;
+const sampleFirstExercise = sampleTheme
+  ? exercises
+      .filter((ex) => ex.data.themeId === sampleTheme.id)
+      .sort((a, b) => a.data.order - b.data.order)[0]
+  : undefined;
 
 /*
  * Design-system inventory. Lives at /design-system per
@@ -241,6 +261,54 @@ func greet(u User) string {
               to see it; it overlays the Go symbol bank above the soft keyboard.
             </Text>
           </Stack>
+
+          <Stack gap="xs">
+            <Eyebrow tone="muted">breadcrumb</Eyebrow>
+            <Breadcrumb
+              crumbs={[
+                { label: "Curriculum", href: "/go" },
+                {
+                  label: "Foundations",
+                  href: "/go/foundations",
+                  ariaLabel: "Up to Foundations module overview",
+                },
+                {
+                  label: "Variables and declarations",
+                  href: "/go/foundations/variables",
+                  ariaLabel: "Up to theme overview (Variables and declarations)",
+                },
+                { label: "exercise 1 · mcq" },
+              ]}
+            />
+            <Text tone="muted" size="sm">
+              <code class="font-mono">&lt;Breadcrumb&gt;</code> takes a
+              <code class="font-mono">crumbs: Crumb[]</code> array; the last entry without
+              <code class="font-mono">href</code> renders as the active-leaf span. Used
+              across the <code class="font-mono">/go/*</code> routes.
+            </Text>
+          </Stack>
+
+          {sampleTheme && (
+            <Stack gap="xs">
+              <Eyebrow tone="muted">theme card</Eyebrow>
+              <div class="max-w-md">
+                <ThemeCard
+                  moduleOrder={1}
+                  theme={sampleTheme}
+                  firstExercise={sampleFirstExercise}
+                  exerciseCount={sampleExerciseCount}
+                />
+              </div>
+              <Text tone="muted" size="sm">
+                <code class="font-mono">&lt;ThemeCard&gt;</code> renders the
+                curriculum-grid card on <code class="font-mono">/go</code> and
+                <code class="font-mono">/go/[module]</code> — order tag, title link,
+                truncated intro, ready badge, overview + start anchors. Takes the
+                parent module's order, the theme collection entry, the first
+                exercise (optional), and the count.
+              </Text>
+            </Stack>
+          )}
         </Stack>
 
         <Divider />
