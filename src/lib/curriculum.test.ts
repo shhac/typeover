@@ -8,6 +8,7 @@ import {
   loadExerciseContext,
   loadThemeContext,
   paramsForExercise,
+  summariseCoverage,
   themeHref,
   truncateIntro,
 } from "./curriculum";
@@ -293,5 +294,59 @@ describe("loadExerciseContext", () => {
 
   it("returns null when the parent module is missing", () => {
     expect(loadExerciseContext(exA1, { modules: [], themes: [themeA1] })).toBeNull();
+  });
+});
+
+describe("summariseCoverage", () => {
+  /* Build trees inline rather than calling buildCurriculumTree so the
+   * test exercises the summary logic directly, not the tree builder. */
+  const node = (moduleId: string, themes: { id: string; exerciseCount: number }[]) => ({
+    module: { id: moduleId, data: { order: 1, title: moduleId } } as Parameters<
+      typeof summariseCoverage
+    >[0][number]["module"],
+    themes: themes.map((t) => ({
+      theme: { id: t.id, data: { order: 1, moduleId } } as Parameters<
+        typeof summariseCoverage
+      >[0][number]["themes"][number]["theme"],
+      firstExercise: undefined,
+      exerciseCount: t.exerciseCount,
+    })),
+  });
+
+  it("counts modules complete / partial / empty correctly", () => {
+    const tree = [
+      node("a", [{ id: "a/x", exerciseCount: 5 }, { id: "a/y", exerciseCount: 3 }]), // complete
+      node("b", [{ id: "b/x", exerciseCount: 0 }, { id: "b/y", exerciseCount: 4 }]), // partial
+      node("c", [{ id: "c/x", exerciseCount: 0 }, { id: "c/y", exerciseCount: 0 }]), // empty
+    ];
+    const s = summariseCoverage(tree);
+    expect(s.modulesComplete).toBe(1);
+    expect(s.modulesPartial).toBe(1);
+    expect(s.modulesEmpty).toBe(1);
+  });
+
+  it("counts themes covered (≥1 exercise) and total exercises", () => {
+    const tree = [
+      node("a", [{ id: "a/x", exerciseCount: 7 }, { id: "a/y", exerciseCount: 0 }]),
+      node("b", [{ id: "b/x", exerciseCount: 3 }]),
+    ];
+    const s = summariseCoverage(tree);
+    expect(s.totalThemes).toBe(3);
+    expect(s.themesCovered).toBe(2);
+    expect(s.totalExercises).toBe(10);
+  });
+
+  it("treats a module with zero themes as empty (not partial)", () => {
+    const tree = [node("a", [])];
+    const s = summariseCoverage(tree);
+    expect(s.totalThemes).toBe(0);
+    expect(s.modulesEmpty).toBe(1);
+    expect(s.modulesPartial).toBe(0);
+    expect(s.modulesComplete).toBe(0);
+  });
+
+  it("totalModules tracks tree length", () => {
+    const tree = [node("a", []), node("b", []), node("c", [])];
+    expect(summariseCoverage(tree).totalModules).toBe(3);
   });
 });

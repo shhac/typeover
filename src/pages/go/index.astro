@@ -15,7 +15,7 @@ import {
 } from "~/components/ds";
 import Accordion from "~/components/ds/Accordion.astro";
 import ThemeCard from "~/components/curriculum/ThemeCard.astro";
-import { buildCurriculumTree, exerciseHref } from "~/lib/curriculum";
+import { buildCurriculumTree, exerciseHref, summariseCoverage } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
 
 /**
@@ -31,6 +31,11 @@ const [modules, themes, exercises] = await Promise.all([
 ]);
 
 const tree = buildCurriculumTree(modules, themes, exercises);
+const coverage = summariseCoverage(tree);
+const coveragePct =
+  coverage.totalThemes === 0
+    ? 0
+    : Math.round((coverage.themesCovered / coverage.totalThemes) * 100);
 ---
 
 <BaseLayout
@@ -48,6 +53,31 @@ const tree = buildCurriculumTree(modules, themes, exercises);
             every theme is browsable. Themes without exercises yet are visible
             so you can see what's coming.
           </Text>
+          {/*
+            * Coverage chip — honest about how much is actually authored
+            * versus scaffolded. Sourced from the same content collection
+            * Astro builds against; cf. `pnpm content:report` for the CLI
+            * equivalent. design-docs/25.
+            */}
+          <div
+            class="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 font-mono text-xs text-fg-muted"
+            aria-label="Curriculum authoring progress"
+          >
+            <span>
+              <span class="text-fg-secondary">{coverage.modulesComplete}</span> modules
+              complete · <span class="text-fg-secondary">{coverage.modulesPartial}</span> partial
+              · <span class="text-fg-secondary">{coverage.modulesEmpty}</span> scaffolded
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>
+              <span class="text-fg-secondary">{coverage.themesCovered}</span>/{coverage.totalThemes}
+              themes authored ({coveragePct}%)
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>
+              <span class="text-fg-secondary">{coverage.totalExercises}</span> exercises
+            </span>
+          </div>
         </Stack>
 
         <Stack gap="sm">

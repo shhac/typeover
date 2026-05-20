@@ -84,6 +84,65 @@ export function buildCurriculumTree(
   });
 }
 
+/**
+ * Site-wide coverage rollup of the same tree the curriculum page
+ * renders. Used by the `<CurriculumCoverage>` overview chip on
+ * /go (design-docs/25 — promoted from `pnpm content:report`).
+ *
+ * Returns absolute counts, never percentages — let the caller
+ * format. `themesCovered` is themes with ≥1 authored exercise,
+ * mirroring the `pnpm content:report` rule.
+ */
+export interface CoverageSummary {
+  totalModules: number;
+  totalThemes: number;
+  themesCovered: number;
+  totalExercises: number;
+  /** Modules with every theme covered. Symmetric with the
+   *  `pnpm content:report` "complete" tier. */
+  modulesComplete: number;
+  /** Modules with at least one but not all themes covered. */
+  modulesPartial: number;
+  /** Modules with no themes covered at all (pre-launch stubs). */
+  modulesEmpty: number;
+}
+
+export function summariseCoverage(tree: readonly ModuleNode[]): CoverageSummary {
+  let totalThemes = 0;
+  let themesCovered = 0;
+  let totalExercises = 0;
+  let modulesComplete = 0;
+  let modulesPartial = 0;
+  let modulesEmpty = 0;
+  for (const { themes } of tree) {
+    if (themes.length === 0) {
+      modulesEmpty++;
+      continue;
+    }
+    let coveredInModule = 0;
+    for (const t of themes) {
+      totalThemes++;
+      totalExercises += t.exerciseCount;
+      if (t.exerciseCount > 0) {
+        themesCovered++;
+        coveredInModule++;
+      }
+    }
+    if (coveredInModule === 0) modulesEmpty++;
+    else if (coveredInModule === themes.length) modulesComplete++;
+    else modulesPartial++;
+  }
+  return {
+    totalModules: tree.length,
+    totalThemes,
+    themesCovered,
+    totalExercises,
+    modulesComplete,
+    modulesPartial,
+    modulesEmpty,
+  };
+}
+
 /** Exercise IDs are `<module>/<theme>/<index>`, which maps 1-to-1 to
  *  the /go/[module]/[theme]/[index] dynamic route. */
 export const exerciseHref = (exerciseId: string) => `/go/${exerciseId}`;
