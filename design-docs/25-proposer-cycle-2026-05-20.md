@@ -140,16 +140,17 @@ queued (see "Next steps" below).
   Smallest-first-cut: inline document-level listener on off-route
   pages, gated by saveData + slow-2g + idempotence. 5 drift-guard
   tests pin the load-bearing predicates.
-- **Next ship-able candidates (in priority order):**
-  1. **`pnpm content:report` infra.** From the P8 devil's
-     advocate's recommendation. Parses every theme YAML + exercise
-     YAML, emits a "what's left to write" table (themes with no
-     exercises, themes below slot target, slots with TODO markers,
-     authoring progress %). Pays back across Modules 3-7.
-  2. **Content-coverage meter on the curriculum page.** A live
+- ✅ **`pnpm content:report` infra** shipped 2026-05-20 in commit
+  `3099e14`. Per-module Markdown table + summary line; smoke test
+  pins output shape (counts intentionally NOT asserted). Current
+  snapshot: 90 exercises, 9/31 themes covered, 29% launch.
+- **Next ship-able candidate:**
+  1. **Content-coverage meter on the curriculum page.** A live
      visual derived from the same content-report data — surfaces
      pre-launch theme stubs visually rather than only in the lint
-     output.
+     / report output. Could be a small Solid island on `/go` that
+     reads the same content collection Astro builds against and
+     paints a progress chip per module.
 - **Deferred (need more signal first):**
   - **P6 onboarding banner.** Worth landing in prose-only form
     eventually, but a re-look once real visitors have arrived
