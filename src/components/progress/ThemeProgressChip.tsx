@@ -1,6 +1,11 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import { ProgressChip } from "~/components/ds";
-import { summarizeTheme } from "~/lib/progress";
+import {
+  invalidateProgressCache,
+  PROGRESS_CHANGED_EVENT,
+  STORAGE_KEY,
+  summarizeTheme,
+} from "~/lib/progress";
 
 /*
  * Theme-level progress chip island. Mounts via `client:only` in
@@ -18,6 +23,10 @@ import { summarizeTheme } from "~/lib/progress";
  * landing on a theme overview saw [exercises] [12 ready] with nothing
  * to anchor where to start). Pre-mount window still renders a
  * width-matched placeholder so the row doesn't visibly grow.
+ *
+ * Reacts to both cross-tab `storage` events and the same-tab
+ * PROGRESS_CHANGED_EVENT so the chip updates when an exercise on
+ * the same page is passed — design-docs/19 F-20.
  */
 
 interface ThemeProgressChipProps {
@@ -28,7 +37,24 @@ interface ThemeProgressChipProps {
 export function ThemeProgressChip(props: ThemeProgressChipProps) {
   const [summary, setSummary] = createSignal<ReturnType<typeof summarizeTheme> | null>(null);
 
-  onMount(() => setSummary(summarizeTheme(props.exerciseIds)));
+  const refresh = () => setSummary(summarizeTheme(props.exerciseIds));
+
+  onMount(() => {
+    refresh();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY || e.key === null) {
+        invalidateProgressCache();
+        refresh();
+      }
+    };
+    const onSameTab = () => refresh();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
+    onCleanup(() => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
+    });
+  });
 
   const hasProgress = () => {
     const s = summary();

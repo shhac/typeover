@@ -10,8 +10,15 @@ import { z } from "zod";
  * shape, expressed once via `bumpExercise`.
  */
 
-const STORAGE_KEY = "typeover:progress";
+export const STORAGE_KEY = "typeover:progress";
 const CORRUPT_KEY_PREFIX = "typeover:progress:corrupt-";
+
+/** Same-tab change-notification event. The cross-tab `storage` event
+ *  doesn't fire within the writing tab, so two islands on one page
+ *  (e.g. the chip + the exercise component) wouldn't see each other's
+ *  writes. Chips subscribe to both this event and the cross-tab
+ *  `storage` event for full coverage. design-docs/19 F-20. */
+export const PROGRESS_CHANGED_EVENT = "typeover:progress-changed";
 
 const ExerciseProgressSchema = z.object({
   firstSeenAt: z.string(),
@@ -87,6 +94,14 @@ export function __resetProgressCacheForTests(): void {
   cachedProgress = null;
 }
 
+/** Drop the in-memory progress cache so the next read() re-pulls
+ *  from localStorage. Used by chips after a cross-tab `storage`
+ *  event — without this they'd keep returning the stale snapshot
+ *  the module captured before the other tab's write. */
+export function invalidateProgressCache(): void {
+  cachedProgress = null;
+}
+
 function read(): Progress {
   if (cachedProgress !== null) return cachedProgress;
   if (typeof localStorage === "undefined") {
@@ -128,6 +143,13 @@ function write(p: Progress) {
   cachedProgress = p;
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  /* Notify same-tab listeners (chips on the same page). The native
+   * `storage` event only fires in OTHER tabs, so without this a
+   * theme overview wouldn't update its chips when an exercise on the
+   * same page is passed. design-docs/19 F-20. */
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(PROGRESS_CHANGED_EVENT));
+  }
 }
 
 /** Default slot shape — used when getExerciseProgress hits a slot
