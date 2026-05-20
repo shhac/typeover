@@ -1,0 +1,52 @@
+target: go
+themeId: foundations/conditionals
+type: freeform
+order: 10
+prompt: |
+  Use Go's **short-statement-if** form to scope a temporary to the
+  condition. The pattern looks like:
+
+      if x := compute(); x > 0 { ... }
+
+  Write a program where `pick()` is a function that returns `42`.
+  Inside `main`, use a short-statement-if to call `pick()`, bind the
+  result to a temporary `n`, and print `"answer:"` followed by `n`
+  on the same line — but only when `n > 0`. The expected output is
+  `answer: 42`.
+
+  This form is everywhere in idiomatic Go (especially with the
+  `(value, err)` shape that arrives in Module 5). Worth meeting it
+  before Module 5 needs it.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function pick(): number { return 42; }
+    {
+      const n = pick();
+      if (n > 0) console.log("answer:", n);
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func pick() int { return 42 }
+
+    func main() {
+    	if n := pick(); n > 0 {
+    		fmt.Println("answer:", n)
+    	}
+    }
+expectStdout: |
+  answer: 42
+runtime: yaegi
+hints:
+  - "The shape is `if <init>; <cond> { ... }`. The init is a normal short-decl (`name := value`), the cond is a boolean expression, and the temporary's scope ends at the closing brace."
+  - "`pick()` here just returns 42; the point is that you call it inside the if's init clause rather than declaring a separate `n :=` line above."
+  - "`if n := pick(); n > 0 { fmt.Println(\"answer:\", n) }`"
+notes: |
+  Second freeform of Theme 4. Drills the short-statement-if form —
+  the most-used distinctive Go conditional shape. The TS counterpart
+  fakes it with a block scope; Go's version is denser and idiomatic.
+  Crucial preparation for Module 5's `if err := work(); err != nil`.

@@ -3,43 +3,34 @@ themeId: foundations/conditionals
 type: fill-word
 order: 5
 prompt: |
-  Each branch of a Go switch is introduced by the same keyword.
-  Fill in both occurrences to complete the dispatch.
+  Theme 4 slot 2 covered the short-statement-if form. Now write
+  the comparison: fill in the operator and the nil literal that Go
+  uses for "result of this call is empty/not-found."
 generator:
   kind: template
   vars:
-    case_kw: [case]
+    fname: [openFile, lookup, parse, fetch]
+    arg: [path, id, s, url]
+    err: [err]
+    op: ["!="]
+    nil_lit: [nil]
   ts: |-
-    switch (kind) {
-      case "add": handleAdd(); break;
-      case "rm": handleRemove(); break;
-      default: unknown();
-    }
+    const ${err} = ${fname}(${arg});
+    if (${err} !== null) { return ${err}; }
   canonical: |-
-    switch kind {
-    ${case_kw} "add":
-        handleAdd()
-    ${case_kw} "rm":
-        handleRemove()
-    default:
-        unknown()
-    }
-blanks: [case_kw]
+    if ${err} := ${fname}(${arg}); ${err} ${op} ${nil_lit} { return ${err} }
+blanks: [op, nil_lit]
 hints:
-  - "One keyword, repeated for each match. It's not `when`, not `match`, not `=>`, and not anything TS-specific. Go borrows it directly from C."
-  - "The keyword is `case`. Both blanks fill to the same thing."
-  - "Fills: `case` (twice). The third dispatch arm uses `default`, which is already in place."
+  - "Two blanks. Go uses the same comparison operators as TS but without the strict-equality variants. The 'empty' / 'no value' marker also differs from TS — Go doesn't have null or undefined."
+  - "The operator is two characters, the same one TS uses for not-equal-loose-equality. The literal is four letters, lowercase, and Go's pre-declared name for the zero value of pointers/interfaces/maps/etc."
+  - "`!=` and `nil`. Canonical: `if err := f(arg); err != nil { return err }`."
 notes: |
-  Second Theme 4 fill-word. Drills the switch-case shape from
-  slot 3's MCQ via production. Uses the same-var-twice pattern
-  (`${case_kw}` appears twice in the canonical, producing two
-  independent input slots both expecting `case`).
+  First Theme 4 fill-word. Drills production of the short-
+  statement-if comparison shape — the canonical Go error check
+  that dominates real codebases. The learner saw it in the slot 2
+  MCQ; now they write the operator and nil literal themselves.
 
-  The TS source keeps the `break` statements to highlight the
-  contrast — the Go canonical drops them entirely, illustrated
-  by structure (two blank `case` lines, no `break` in sight).
-
-  `default` is hard-coded in the canonical to keep the learner
-  focused on the `case` keyword. Could be lifted to a third blank
-  in a future advanced exercise.
+  The setup half of the canonical (`if err := f(arg);`) is fully
+  filled in so the learner can focus on what slot 2 introduced
+  conceptually: `!= nil` instead of `!== null`.
 runtime: none

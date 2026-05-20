@@ -1,71 +1,45 @@
 target: go
 themeId: foundations/conditionals
-type: fill-line
+type: fill-word
 order: 6
 prompt: |
-  Type the Go line that uses the **short-statement-if** form to
-  declare `user` from `lookup(id)` AND check it isn't nil in one
-  statement, calling `greet(user)` when it's present. The program
-  should print `hi, Ada`.
+  Each branch of a Go switch is introduced by the same keyword.
+  Fill in both occurrences to complete the dispatch.
 generator:
   kind: template
   vars:
-    line:
-      - 'if user := lookup(id); user != nil { greet(user) }'
+    case_kw: [case]
   ts: |-
-    const user = lookup(id);
-    if (user !== null) { greet(user); }
+    switch (kind) {
+      case "add": handleAdd(); break;
+      case "rm": handleRemove(); break;
+      default: unknown();
+    }
   canonical: |-
-    package main
-
-    import "fmt"
-
-    func lookup(id int) *string {
-    	name := "Ada"
-    	return &name
+    switch kind {
+    ${case_kw} "add":
+        handleAdd()
+    ${case_kw} "rm":
+        handleRemove()
+    default:
+        unknown()
     }
-
-    func greet(u *string) {
-    	fmt.Println("hi,", *u)
-    }
-
-    func main() {
-    	id := 1
-    	_ = id
-    	${line}
-    }
-  distractors:
-    - match: 'user := lookup(id); if user != nil { greet(user) }'
-      explain: |-
-        That works, but it splits what Go bundles. The short-statement-if
-        form glues setup + condition: `if SETUP; CONDITION { … }`. The
-        `user` you declare is scoped to the if/else block too, which is
-        usually what you want.
-    - match: 'if (user := lookup(id)) != nil { greet(user) }'
-      explain: |-
-        Two Go-isms collide here. First, `if` doesn't take parens around
-        its condition. Second, you can't assign and compare in the same
-        expression — Go's short-statement-if separates the two halves
-        with a semicolon.
-    - match: 'if user, err := lookup(id); err == nil { greet(user) }'
-      explain: |-
-        That's the multi-return shape — right for an exercise where
-        `lookup` returns `(*User, error)`, wrong here. This `lookup`
-        returns one value (a pointer); compare against `nil` directly.
-    - match: 'let user = lookup(id); if user !== null { greet(user) }'
-      explain: |-
-        Three TS habits to swap: `let` → `:=`, the `=== null` triple-equal
-        → `!= nil`, and the two statements collapse into Go's
-        `if SETUP; CONDITION { … }` form.
-expectStdout: |
-  hi, Ada
-runtime: yaegi
-blanks: [line]
+blanks: [case_kw]
 hints:
-  - "Three Go-isms must all be right at once: the SETUP-then-CONDITION is glued together with a semicolon inside the if, the declaration uses `:=` not `=`, and `nil` (not `null`) is the comparison value."
-  - "The shape is `if SETUP; CONDITION { body }`. Setup goes first, semicolon, then the boolean check. The whole declaration is scoped to the if/else block."
-  - "Type `if user := lookup(id); user != nil { greet(user) }`."
+  - "One keyword, repeated for each match. It's not `when`, not `match`, not `=>`, and not anything TS-specific. Go borrows it directly from C."
+  - "The keyword is `case`. Both blanks fill to the same thing."
+  - "Fills: `case` (twice). The third dispatch arm uses `default`, which is already in place."
 notes: |
-  Migrated to input+Yaegi UX. Scaffold provides `lookup` returning
-  a non-nil `*string` and `greet` printing "hi, <name>". Distractors
-  kept as wrong-pattern bank.
+  Second Theme 4 fill-word. Drills the switch-case shape from
+  slot 3's MCQ via production. Uses the same-var-twice pattern
+  (`${case_kw}` appears twice in the canonical, producing two
+  independent input slots both expecting `case`).
+
+  The TS source keeps the `break` statements to highlight the
+  contrast — the Go canonical drops them entirely, illustrated
+  by structure (two blank `case` lines, no `break` in sight).
+
+  `default` is hard-coded in the canonical to keep the learner
+  focused on the `case` keyword. Could be lifted to a third blank
+  in a future advanced exercise.
+runtime: none

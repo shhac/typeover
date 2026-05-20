@@ -3,50 +3,55 @@ themeId: foundations/conditionals
 type: freeform
 order: 9
 prompt: |
-  Use Go's **short-statement-if** form to scope a temporary to the
-  condition. The pattern looks like:
+  Use Go's `switch` statement (no fallthrough by default) to print a
+  one-word description for an integer score:
 
-      if x := compute(); x > 0 { ... }
+  - 0 → `zero`
+  - positive → `positive`
+  - negative → `negative`
 
-  Write a program where `pick()` is a function that returns `42`.
-  Inside `main`, use a short-statement-if to call `pick()`, bind the
-  result to a temporary `n`, and print `"answer:"` followed by `n`
-  on the same line — but only when `n > 0`. The expected output is
-  `answer: 42`.
+  Hardcode `score := -7` and write the switch. The expected output is
+  a single line: `negative`.
 
-  This form is everywhere in idiomatic Go (especially with the
-  `(value, err)` shape that arrives in Module 5). Worth meeting it
-  before Module 5 needs it.
+  TypeScript's `switch` works similarly, but a Go programmer reaches
+  for the tag-less `switch { case ... }` form when the cases are
+  boolean expressions rather than equality checks on one value.
 generator:
   kind: template
   vars: {}
   ts: |-
-    function pick(): number { return 42; }
-    {
-      const n = pick();
-      if (n > 0) console.log("answer:", n);
+    let score = -7;
+    switch (true) {
+      case score === 0: console.log("zero"); break;
+      case score > 0:  console.log("positive"); break;
+      case score < 0:  console.log("negative"); break;
     }
   canonical: |-
     package main
 
     import "fmt"
 
-    func pick() int { return 42 }
-
     func main() {
-    	if n := pick(); n > 0 {
-    		fmt.Println("answer:", n)
+    	score := -7
+    	switch {
+    	case score == 0:
+    		fmt.Println("zero")
+    	case score > 0:
+    		fmt.Println("positive")
+    	case score < 0:
+    		fmt.Println("negative")
     	}
     }
 expectStdout: |
-  answer: 42
+  negative
 runtime: yaegi
 hints:
-  - "The shape is `if <init>; <cond> { ... }`. The init is a normal short-decl (`name := value`), the cond is a boolean expression, and the temporary's scope ends at the closing brace."
-  - "`pick()` here just returns 42; the point is that you call it inside the if's init clause rather than declaring a separate `n :=` line above."
-  - "`if n := pick(); n > 0 { fmt.Println(\"answer:\", n) }`"
+  - "Go's switch has no fallthrough by default — drop the `break` you'd write in JS/TS. Each `case` is the body of a single branch."
+  - "The tag-less form `switch { case <expr>: ... }` uses arbitrary boolean expressions as cases. It's the idiomatic shape when cases aren't equality checks on one value."
+  - "`switch { case score == 0: fmt.Println(\"zero\"); case score > 0: fmt.Println(\"positive\"); case score < 0: fmt.Println(\"negative\") }`"
 notes: |
-  Second freeform of Theme 4. Drills the short-statement-if form —
-  the most-used distinctive Go conditional shape. The TS counterpart
-  fakes it with a block scope; Go's version is denser and idiomatic.
-  Crucial preparation for Module 5's `if err := work(); err != nil`.
+  First freeform of Theme 4. Drills two things at once: (a) Go switch
+  has no implicit fallthrough, (b) the tag-less form for branching
+  on expressions. The TS counterpart uses `switch(true)` which is
+  the closest analogue — and a common TS pattern in the wild, so the
+  bridge is visible.

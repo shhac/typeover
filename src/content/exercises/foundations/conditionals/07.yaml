@@ -3,62 +3,69 @@ themeId: foundations/conditionals
 type: fill-line
 order: 7
 prompt: |
-  Type the Go line that uses a `switch` statement to call `handle()`
-  when `n` is either `1` or `2`. The program should print `matched`.
+  Type the Go line that uses the **short-statement-if** form to
+  declare `user` from `lookup(id)` AND check it isn't nil in one
+  statement, calling `greet(user)` when it's present. The program
+  should print `hi, Ada`.
 generator:
   kind: template
   vars:
     line:
-      - 'switch n { case 1, 2: handle() }'
+      - 'if user := lookup(id); user != nil { greet(user) }'
   ts: |-
-    switch (n) {
-      case 1:
-      case 2:
-        handle();
-        break;
-    }
+    const user = lookup(id);
+    if (user !== null) { greet(user); }
   canonical: |-
     package main
 
     import "fmt"
 
-    func handle() {
-    	fmt.Println("matched")
+    func lookup(id int) *string {
+    	name := "Ada"
+    	return &name
+    }
+
+    func greet(u *string) {
+    	fmt.Println("hi,", *u)
     }
 
     func main() {
-    	n := 1
+    	id := 1
+    	_ = id
     	${line}
     }
   distractors:
-    - match: 'switch n { case 1: case 2: handle() }'
+    - match: 'user := lookup(id); if user != nil { greet(user) }'
       explain: |-
-        Go's `case` doesn't fall through by default the way C / Java
-        / TS do. Empty `case 1:` matches `1` and does nothing —
-        `handle()` only runs for `case 2`. To match multiple values
-        with one body, list them comma-separated: `case 1, 2:`.
-    - match: 'switch n { case 1 | 2: handle() }'
+        That works, but it splits what Go bundles. The short-statement-if
+        form glues setup + condition: `if SETUP; CONDITION { … }`. The
+        `user` you declare is scoped to the if/else block too, which is
+        usually what you want.
+    - match: 'if (user := lookup(id)) != nil { greet(user) }'
       explain: |-
-        That's pipe-or pattern syntax from Rust / OCaml /
-        pattern-matching languages. Go uses commas: `case 1, 2:`.
-    - match: 'switch n { case [1, 2]: handle() }'
+        Two Go-isms collide here. First, `if` doesn't take parens around
+        its condition. Second, you can't assign and compare in the same
+        expression — Go's short-statement-if separates the two halves
+        with a semicolon.
+    - match: 'if user, err := lookup(id); err == nil { greet(user) }'
       explain: |-
-        That would compare `n` against a slice literal — Go would
-        reject it as a type mismatch. The `case` clause takes a list
-        of *expressions*, comma-separated, each compared to the
-        switch value: `case 1, 2:`.
-    - match: 'switch n { match 1, 2: handle() }'
+        That's the multi-return shape — right for an exercise where
+        `lookup` returns `(*User, error)`, wrong here. This `lookup`
+        returns one value (a pointer); compare against `nil` directly.
+    - match: 'let user = lookup(id); if user !== null { greet(user) }'
       explain: |-
-        Some languages use `match` (Rust) or `when` (Kotlin) — Go
-        sticks with `case`. The shape is `case VALUE, VALUE: …`.
+        Three TS habits to swap: `let` → `:=`, the `=== null` triple-equal
+        → `!= nil`, and the two statements collapse into Go's
+        `if SETUP; CONDITION { … }` form.
 expectStdout: |
-  matched
+  hi, Ada
 runtime: yaegi
 blanks: [line]
 hints:
-  - "Go's `case` clause accepts a comma-separated list of values; matching any of them runs the body. Other languages use `|`, arrays, or pattern syntaxes; Go just uses commas."
-  - "The shape is `case 1, 2:`. Each value listed; one body."
-  - "Type `switch n { case 1, 2: handle() }`."
+  - "Three Go-isms must all be right at once: the SETUP-then-CONDITION is glued together with a semicolon inside the if, the declaration uses `:=` not `=`, and `nil` (not `null`) is the comparison value."
+  - "The shape is `if SETUP; CONDITION { body }`. Setup goes first, semicolon, then the boolean check. The whole declaration is scoped to the if/else block."
+  - "Type `if user := lookup(id); user != nil { greet(user) }`."
 notes: |
-  Migrated to input+Yaegi UX. Scaffold defines `handle` that prints
-  "matched". Distractors kept as wrong-pattern bank.
+  Migrated to input+Yaegi UX. Scaffold provides `lookup` returning
+  a non-nil `*string` and `greet` printing "hi, <name>". Distractors
+  kept as wrong-pattern bank.
