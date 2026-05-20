@@ -16,9 +16,14 @@ import { distractorExplain, distractorMatchText, type DistractorEntry } from "./
  */
 
 /** Collapse interior whitespace runs to a single space, trim
- *  edges. Mirrors what authors visually consider "the same line". */
+ *  edges, lowercase. Mirrors what authors visually consider "the
+ *  same line"; case-folding catches the most common typo class
+ *  learners pick up from TS habits (`Var doubled = …`,
+ *  `User := …`). Authored distractor text is still surfaced verbatim
+ *  in the explain message — this only loosens the *match* axis, not
+ *  the correctness oracle. design-docs/19 F-16. */
 function normalise(s: string): string {
-  return s.replace(/\s+/g, " ").trim();
+  return s.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 export function matchWrongPattern(

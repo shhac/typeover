@@ -87,6 +87,18 @@ describe("matchWrongPattern", () => {
     });
   });
 
+  it("case-insensitive match — learner's TS-habit capitalisation still fires distractor", () => {
+    /* design-docs/19 F-16. A learner who types `Var doubled = count * 2`
+     * out of TS habit should still trip the authored distractor
+     * explainer; the Go compiler error they'd get otherwise isn't
+     * specific enough to be useful. Authored display stays exact. */
+    expect(
+      matchWrongPattern("Var doubled = count * 2", [
+        { match: "var doubled = count * 2", explain: "Use := inside a function." },
+      ]),
+    ).toEqual({ explain: "Use := inside a function." });
+  });
+
   it("first matching entry wins (authoring order matters)", () => {
     const result = matchWrongPattern("x", [
       { match: "x", explain: "first" },
