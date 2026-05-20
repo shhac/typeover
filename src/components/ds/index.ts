@@ -13,6 +13,7 @@ export { Kbd } from "./Kbd";
 export { LangCrumbs } from "./LangCrumbs";
 export { GO_KEYS, MobileKeyBar, type KeySpec } from "./MobileKeyBar";
 export { Panel } from "./Panel";
+export { PALETTE_CHIP_COLORS, PaletteChip } from "./PaletteChip";
 export { ProgressChip } from "./ProgressChip";
 export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";

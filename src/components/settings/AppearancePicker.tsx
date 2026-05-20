@@ -1,10 +1,11 @@
-import { createSignal, For, onMount } from "solid-js";
+import { createSignal, For, onMount, Show, type JSX } from "solid-js";
 import {
   Badge,
   Button,
   CodeBlock,
   Eyebrow,
   Kbd,
+  PaletteChip,
   Panel,
   ProgressChip,
   Stack,
@@ -56,6 +57,10 @@ interface RadioOption<T extends string> {
   value: T;
   label: string;
   description: string;
+  /** Optional visual affordance rendered before the radio input.
+   *  The palette picker uses this to surface palette identity via
+   *  PaletteChip; other axes leave it undefined. */
+  swatch?: JSX.Element;
 }
 
 interface RadioGroupProps<T extends string> {
@@ -98,6 +103,7 @@ function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
                 onChange={() => pick(opt.value)}
                 class="accent-accent-primary"
               />
+              <Show when={opt.swatch}>{opt.swatch}</Show>
               <span class="font-sans text-sm text-fg-primary">{opt.label}</span>
             </div>
             <span class="text-fg-muted text-xs ml-7">{opt.description}</span>
@@ -343,19 +349,24 @@ export function AppearancePicker() {
   }
 
   /* Filter the palette list by home style unless "Show all" is on.
-   * Default radio is always shown first. */
+   * Default radio is always shown first. Each option gets a
+   * PaletteChip swatch — for "Default" the chip shows the
+   * currently-resolved palette so the swatch updates as Style
+   * changes. design-docs/24 P2. */
   const paletteOptions = (): RadioOption<PaletteChoice>[] => {
     const defaultLabel = STYLE_DEFAULT_PALETTE[style()];
     const defaultOption: RadioOption<PaletteChoice> = {
       value: "default",
       label: `Default — ${PALETTE_LABELS[defaultLabel].label}`,
       description: `Follow the active style's default palette. Changes as you switch Style.`,
+      swatch: <PaletteChip palette={defaultLabel} />,
     };
     const filtered = (showAllPalettes() ? PALETTES : PALETTES.filter((p) => PALETTE_HOME_STYLE[p] === style())).map(
       (p): RadioOption<PaletteChoice> => ({
         value: p,
         label: PALETTE_LABELS[p].label,
         description: PALETTE_LABELS[p].description,
+        swatch: <PaletteChip palette={p} />,
       }),
     );
     return [defaultOption, ...filtered];
