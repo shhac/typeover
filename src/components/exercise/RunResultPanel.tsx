@@ -14,27 +14,68 @@ interface RunResultPanelProps {
 /*
  * Renders the {stdout, stderr, error, durationMs} produced by a
  * useYaegiRun.run() call. Shared between Freeform, FillBlankLineInput,
- * and the dev-only YaegiSmoke probe — used to be ~30 LOC of identical
- * <Show><pre>…</pre></Show> chains in each consumer.
+ * and the dev-only YaegiSmoke probe.
+ *
+ * Two design decisions worth knowing (both per design-docs/16 F-14
+ * + 18 F-11):
+ *
+ *   - "expected" and "actual" stdout render as parallel <pre>
+ *     blocks (not as a one-line JSON-stringified header). A learner
+ *     diffing N lines of output should see them in the same format.
+ *
+ *   - Empty stdout is a valid pane state, not a hidden one. When
+ *     the canonical exercise expects empty output (the
+ *     content:new-theme stubs all do), a successful run produces
+ *     empty stdout and we render a placeholder "(no output)" pane
+ *     so the learner gets visible confirmation, not silence.
  */
 export function RunResultPanel(props: RunResultPanelProps) {
+  const stdoutMatches = () => props.result.stdout === props.expectStdout;
+  const stdoutPaneClass = () =>
+    "bg-bg-inset p-3 rounded-sm border whitespace-pre-wrap " +
+    (stdoutMatches() ? "border-success/40" : "border-error/40");
+  const expectedPaneClass =
+    "bg-bg-inset p-3 rounded-sm border border-border-default/60 whitespace-pre-wrap";
+
   return (
     <div class="flex flex-col gap-2 font-mono text-sm">
       <Text tone="faint" size="xs" family="mono">
-        {props.result.durationMs.toFixed(1)} ms · expected{" "}
-        <code class="text-fg-primary">{JSON.stringify(props.expectStdout)}</code>
+        {props.result.durationMs.toFixed(1)} ms
       </Text>
-      <Show when={props.result.stdout !== ""}>
-        <pre
-          class={
-            "bg-bg-inset p-3 rounded-sm border whitespace-pre-wrap " +
-            (props.result.stdout === props.expectStdout ? "border-success/40" : "border-error/40")
-          }
-        >
-          <span class="text-fg-faint text-xs mr-2">stdout</span>
-          {props.result.stdout}
-        </pre>
-      </Show>
+
+      {/* Side-by-side stdout vs expected. Both render even when
+       * one is empty — the placeholder reads "(no output)" so a
+       * learner with empty expected stdout sees a green-bordered
+       * confirmation pane on a passing run. */}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <Text tone="faint" size="xs" family="mono" class="mb-1">
+            what you got
+          </Text>
+          <pre class={stdoutPaneClass()}>
+            <Show
+              when={props.result.stdout !== ""}
+              fallback={<span class="text-fg-faint italic">(no output)</span>}
+            >
+              {props.result.stdout}
+            </Show>
+          </pre>
+        </div>
+        <div>
+          <Text tone="faint" size="xs" family="mono" class="mb-1">
+            what we wanted
+          </Text>
+          <pre class={expectedPaneClass}>
+            <Show
+              when={props.expectStdout !== ""}
+              fallback={<span class="text-fg-faint italic">(no output)</span>}
+            >
+              {props.expectStdout}
+            </Show>
+          </pre>
+        </div>
+      </div>
+
       <Show when={props.result.stderr !== ""}>
         <pre class="bg-bg-inset p-3 rounded-sm border border-error/40 whitespace-pre-wrap">
           <span class="text-fg-faint text-xs mr-2">stderr</span>

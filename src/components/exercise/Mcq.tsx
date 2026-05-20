@@ -47,7 +47,18 @@ export function Mcq(props: McqProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <fieldset class="flex flex-col gap-2 m-0 p-0 border-0">
+      <fieldset
+        class="flex flex-col gap-2 m-0 p-0 border-0"
+        onKeyDown={(e) => {
+          /* Enter on a selected option submits — without this, a
+           * keyboard-only learner has to Tab past every option to
+           * reach Submit. design-docs/19 F-11. */
+          if (e.key === "Enter" && phase.canSubmit() && !phase.submitted()) {
+            e.preventDefault();
+            phase.submit();
+          }
+        }}
+      >
         <legend class="sr-only">Pick the idiomatic Go translation</legend>
         <For each={options()}>
           {(opt, idx) => (

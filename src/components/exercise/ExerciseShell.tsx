@@ -1,4 +1,4 @@
-import { Match, Show, Switch, type JSX } from "solid-js";
+import { createEffect, Match, Show, Switch, type JSX } from "solid-js";
 import { Button, ButtonLink } from "../ds/Button";
 import { CodeBlock } from "../ds/CodeBlock";
 import { Feedback } from "../ds/Feedback";
@@ -84,6 +84,23 @@ export function ExerciseShell(props: ExerciseShellProps) {
   // sites. Solid's reactivity is preserved as long as we keep it as
   // a function (don't destructure props.phase here).
   const phase = () => props.phase.current();
+
+  /* Focus management on phase transition. Without this, hitting
+   * Submit on a keyboard-only nav drops focus to <body> when the
+   * Submit button is removed from the toolbar — keyboard / screen-
+   * reader users lose their place. The Feedback panel is
+   * tabindex=-1 so it's programmatically focusable but not in the
+   * tab order; we focus it on transition so a Tab forward from
+   * there reaches the new primary action. design-docs/19 F-12. */
+  let feedbackRef: HTMLDivElement | undefined;
+  let lastPhase: string = "picking";
+  createEffect(() => {
+    const current = phase();
+    if ((current === "wrong" || current === "right") && current !== lastPhase) {
+      queueMicrotask(() => feedbackRef?.focus());
+    }
+    lastPhase = current;
+  });
   return (
     <Stack gap="lg">
       {/* Prompt stays visible while the learner works.
@@ -104,7 +121,12 @@ export function ExerciseShell(props: ExerciseShellProps) {
       {props.children}
 
       <Show when={phase() !== "picking"}>
-        <Feedback status={phase() === "right" ? "correct" : "incorrect"}>
+        <Feedback
+          status={phase() === "right" ? "correct" : "incorrect"}
+          ref={(el) => {
+            feedbackRef = el;
+          }}
+        >
           <Show
             when={phase() === "right"}
             fallback={
@@ -141,8 +163,17 @@ export function ExerciseShell(props: ExerciseShellProps) {
               Reshuffle this exercise
             </Button>
             <Show when={!props.phase.revealed()}>
-              <Button variant="ghost" onClick={() => props.phase.revealCorrect()}>
-                Reveal correct
+              {/* Reveal records the exercise as failed (per the
+               * canonical pedagogy contract in design-docs/12).
+               * Earlier copy was just "Reveal correct" with no
+               * disclosure — a learner clicking it for help got
+               * silently penalised. design-docs/16 F-6. */}
+              <Button
+                variant="ghost"
+                onClick={() => props.phase.revealCorrect()}
+                title="Reveals the answer and records this exercise as failed."
+              >
+                Reveal answer (counts as fail)
               </Button>
             </Show>
           </Match>

@@ -6,6 +6,11 @@ type Status = "idle" | "correct" | "incorrect" | "pending";
 
 interface FeedbackProps extends JSX.HTMLAttributes<HTMLDivElement> {
   status: Status;
+  /** Optional ref escape hatch so ExerciseShell can move focus to
+   *  the panel after a Submit (sighted keyboard users land on the
+   *  feedback message rather than losing focus to <body>; screen
+   *  readers still get the aria-live announcement on top). */
+  ref?: (el: HTMLDivElement) => void;
 }
 
 const statusClass: Record<Status, string> = {
@@ -27,14 +32,17 @@ const statusLabel: Record<Status, string> = {
  * announce status changes; visual style reflects state.
  */
 export function Feedback(props: ParentProps<FeedbackProps>) {
-  const [local, rest] = splitProps(props, ["status", "class", "children"]);
+  const [local, rest] = splitProps(props, ["status", "class", "children", "ref"]);
   return (
     <div
       {...rest}
+      ref={local.ref}
       role="status"
       aria-live="polite"
+      tabindex="-1"
       class={cn(
         "border rounded-sm px-4 py-3 font-mono text-sm",
+        "focus:outline-2 focus:outline-accent-amber focus:outline-offset-2",
         statusClass[local.status],
         local.class,
       )}

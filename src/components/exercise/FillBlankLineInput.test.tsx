@@ -185,7 +185,7 @@ describe("<FillBlankLineInput> — wrong path", () => {
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
     expect(getByText("Reshuffle this exercise")).toBeTruthy();
-    expect(getByText("Reveal correct")).toBeTruthy();
+    expect(getByText("Reveal answer (counts as fail)")).toBeTruthy();
     expect(slot()?.instancesPassed).toBe(0);
     expect(slot()?.instancesFailed).toBe(0);
   });
@@ -205,9 +205,9 @@ describe("<FillBlankLineInput> — reveal flow", () => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
     fireEvent.click(getByText("Submit"));
-    fireEvent.click(getByText("Reveal correct"));
+    fireEvent.click(getByText("Reveal answer (counts as fail)"));
     expect(slot()?.instancesFailed).toBe(1);
-    expect(queryByText("Reveal correct")).toBeNull();
+    expect(queryByText("Reveal answer (counts as fail)")).toBeNull();
     expect(slot()?.instancesPassed).toBe(0);
   });
 });

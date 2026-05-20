@@ -155,3 +155,63 @@ describe("useYaegiRun", () => {
     expect(evalMock).toHaveBeenNthCalledWith(2, "b");
   });
 });
+
+describe("useYaegiRun — generation-tagged settlements", () => {
+  it("ignores a previous run's late resolution after reset()", async () => {
+    /* design-docs/19 F-2 — reset-while-running race. The killed
+     * worker's pending Comlink call eventually settles; without
+     * generation tags it overwrites the "Runtime was reset"
+     * sentinel. */
+    let resolveEval!: (value: { stdout: string; stderr: string; error: string }) => void;
+    evalMock.mockReturnValueOnce(
+      new Promise((res) => {
+        resolveEval = res;
+      }),
+    );
+    const h = setup();
+    const inFlight = h.run();
+    h.reset();
+    expect(h.runResult()?.error).toMatch(/Runtime was reset/);
+    /* Simulate the dead worker's late resolution. */
+    resolveEval({ stdout: "stale", stderr: "", error: "" });
+    await inFlight;
+    /* Result must still be the reset sentinel, NOT "stale". */
+    expect(h.runResult()?.error).toMatch(/Runtime was reset/);
+    expect(h.runResult()?.stdout).toBe("");
+  });
+
+  it("ignores a previous run's late rejection after reset()", async () => {
+    let rejectEval!: (reason: unknown) => void;
+    evalMock.mockReturnValueOnce(
+      new Promise((_, rej) => {
+        rejectEval = rej;
+      }),
+    );
+    const h = setup();
+    const inFlight = h.run();
+    h.reset();
+    rejectEval(new Error("worker terminated"));
+    await inFlight;
+    expect(h.runResult()?.error).toMatch(/Runtime was reset/);
+  });
+
+  it("ignores a previous run's settlement after clear()", async () => {
+    /* clear() also invalidates pending runs — same race shape as
+     * reset() but a learner triggers it by editing the input
+     * mid-flight (FillBlankLineInput / Freeform onInput). */
+    let resolveEval!: (value: { stdout: string; stderr: string; error: string }) => void;
+    evalMock.mockReturnValueOnce(
+      new Promise((res) => {
+        resolveEval = res;
+      }),
+    );
+    const h = setup();
+    const inFlight = h.run();
+    h.clear();
+    expect(h.runResult()).toBeNull();
+    resolveEval({ stdout: "stale", stderr: "", error: "" });
+    await inFlight;
+    /* runResult stays cleared — the stale settlement was discarded. */
+    expect(h.runResult()).toBeNull();
+  });
+});

@@ -1,0 +1,43 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { ButtonLink, Container, Eyebrow, Heading, Stack, Text } from "~/components/ds";
+
+/**
+ * 404 page. design-docs/16 F-16. Without this, host-default 404s
+ * leak whatever brand the deploy target uses (Vercel / Netlify),
+ * dropping the learner out of the typeover experience entirely.
+ *
+ * Kept terse: brand, what happened in one line, two CTAs (back to
+ * curriculum + back to home). No "did you mean…" search — curriculum
+ * is small enough that the index page is the right next stop.
+ */
+---
+
+<BaseLayout
+  title="Not found — typeover"
+  description="The page you're looking for doesn't exist on typeover."
+>
+  <main class="py-16 sm:py-24">
+    <Container width="default">
+      <Stack gap="lg">
+        <Stack gap="sm">
+          <Eyebrow tone="muted">404 · not found</Eyebrow>
+          <Heading level={1}>This page doesn't exist.</Heading>
+          <Text tone="secondary" size="lg">
+            Either you followed a stale link or typed a URL that doesn't map to
+            anything in the curriculum. The whole site is browseable from the
+            curriculum index — that's probably the right next stop.
+          </Text>
+        </Stack>
+        <Stack direction="row" gap="sm" wrap>
+          <ButtonLink href="/go" variant="primary">
+            Browse curriculum
+          </ButtonLink>
+          <ButtonLink href="/" variant="secondary">
+            Back to home
+          </ButtonLink>
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

@@ -114,7 +114,7 @@ describe("<Mcq> — wrong path", () => {
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
     expect(getByText("Reshuffle this exercise")).toBeTruthy();
-    expect(getByText("Reveal correct")).toBeTruthy();
+    expect(getByText("Reveal answer (counts as fail)")).toBeTruthy();
     /* Failure is only counted via explicit reveal — wrong submit
      * alone does not penalise. */
     expect(slot()?.instancesFailed).toBe(0);
@@ -126,7 +126,7 @@ describe("<Mcq> — wrong path", () => {
     fireEvent.click(getByText("Submit"));
     fireEvent.click(getByText("Try again"));
     expect(getByText("Submit")).toBeTruthy();
-    expect(queryByText("Reveal correct")).toBeNull();
+    expect(queryByText("Reveal answer (counts as fail)")).toBeNull();
     expect(slot()?.instancesFailed).toBe(0);
     expect(slot()?.instancesPassed).toBe(0);
   });
@@ -151,9 +151,9 @@ describe("<Mcq> — reveal flow", () => {
     const { container, getByText, queryByText } = renderMcq();
     fireEvent.click(wrongOption(container));
     fireEvent.click(getByText("Submit"));
-    fireEvent.click(getByText("Reveal correct"));
+    fireEvent.click(getByText("Reveal answer (counts as fail)"));
     expect(slot()?.instancesFailed).toBe(1);
-    expect(queryByText("Reveal correct")).toBeNull();
+    expect(queryByText("Reveal answer (counts as fail)")).toBeNull();
     /* Reveal does NOT count as a pass. */
     expect(slot()?.instancesPassed).toBe(0);
   });

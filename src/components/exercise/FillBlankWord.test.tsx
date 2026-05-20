@@ -109,7 +109,7 @@ describe("<FillBlankWord> — wrong path", () => {
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
     expect(getByText("Reshuffle this exercise")).toBeTruthy();
-    expect(getByText("Reveal correct")).toBeTruthy();
+    expect(getByText("Reveal answer (counts as fail)")).toBeTruthy();
     /* Clear shows in both picking and wrong phases when there's
      * any input — the extraWrongActions slot mounts it here. */
     expect(getByText("Clear")).toBeTruthy();
@@ -140,7 +140,7 @@ describe("<FillBlankWord> — wrong path", () => {
     expect(a!.value).toBe("");
     expect(b!.value).toBe("");
     /* Back to picking — wrong-phase actions gone. */
-    expect(queryByText("Reveal correct")).toBeNull();
+    expect(queryByText("Reveal answer (counts as fail)")).toBeNull();
     expect(getByText("Submit")).toBeTruthy();
   });
 });
@@ -152,9 +152,9 @@ describe("<FillBlankWord> — reveal flow", () => {
     setVal(a!, "1");
     setVal(b!, "wrong");
     fireEvent.click(getByText("Submit"));
-    fireEvent.click(getByText("Reveal correct"));
+    fireEvent.click(getByText("Reveal answer (counts as fail)"));
     expect(slot()?.instancesFailed).toBe(1);
-    expect(queryByText("Reveal correct")).toBeNull();
+    expect(queryByText("Reveal answer (counts as fail)")).toBeNull();
     expect(slot()?.instancesPassed).toBe(0);
   });
 });
