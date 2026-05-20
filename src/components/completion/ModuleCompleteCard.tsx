@@ -86,6 +86,21 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
     return p !== null && p.exercisesPassed === p.totalExercises && p.totalExercises > 0;
   });
 
+  /* For the almost-there branch — find the first exercise the
+   * learner hasn't passed yet, so the page has a Continue CTA
+   * pointing at it. Without this, a partial-progress visitor
+   * (direct-link or stale share) sees what's left but no path
+   * forward. design-docs/16 F-8. */
+  const nextUnfinishedHref = createMemo(() => {
+    for (const theme of props.themes) {
+      for (const exId of theme.exerciseIds) {
+        const slot = getExerciseProgress(exId);
+        if (slot.instancesPassed === 0) return `/go/${exId}`;
+      }
+    }
+    return null;
+  });
+
   const shareText = () => {
     const p = progress();
     return props.shareTemplate
@@ -175,6 +190,19 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
                   );
                 }}
               </For>
+              {/* Continue CTA — the celebration branch has one;
+               * before this fix the almost-there branch did not,
+               * leaving a partial-progress visitor with no path
+               * forward. design-docs/16 F-8. */}
+              <Show when={nextUnfinishedHref()}>
+                {(href) => (
+                  <div class="mt-4">
+                    <ButtonLink href={href()} variant="primary">
+                      Continue where you left off →
+                    </ButtonLink>
+                  </div>
+                )}
+              </Show>
             </div>
           }
         >

@@ -115,45 +115,53 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
   const keys = () => local.keys ?? GO_KEYS;
   const inset = useKeyboardInset();
 
+  /* In-flow spacer matches the bar's height so the fixed bar
+   * doesn't overlap the page's natural bottom edge (Submit
+   * button, RunResultPanel, …). lg:hidden — desktop doesn't
+   * see the bar and doesn't need the spacer either.
+   * design-docs/19 F-13. */
   return (
-    <div
-      {...rest}
-      role="toolbar"
-      aria-label="Code symbols"
-      class={cn(
-        "fixed left-0 right-0 z-50 lg:hidden",
-        "bg-bg-elevated border-t border-border-strong overflow-x-auto",
-        local.class,
-      )}
-      style={{ bottom: `${inset()}px` }}
-      data-mobile-key-bar
-    >
-      <div class="flex flex-row min-h-11">
-        <For each={keys()}>
-          {(k) => (
+    <>
+      <div aria-hidden="true" class="lg:hidden h-11" />
+      <div
+        {...rest}
+        role="toolbar"
+        aria-label="Code symbols"
+        class={cn(
+          "fixed left-0 right-0 z-50 lg:hidden",
+          "bg-bg-elevated border-t border-border-strong overflow-x-auto",
+          local.class,
+        )}
+        style={{ bottom: `${inset()}px` }}
+        data-mobile-key-bar
+      >
+        <div class="flex flex-row min-h-11">
+          <For each={keys()}>
+            {(k) => (
+              <button
+                type="button"
+                aria-label={k.ariaLabel ?? k.label}
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={() => local.onInsert(k.insert)}
+                class="font-mono text-sm text-fg-primary min-w-11 min-h-11 px-3 hover:bg-bg-panel transition-colors border-r border-border-default last:border-r-0 flex items-center justify-center"
+              >
+                {k.label}
+              </button>
+            )}
+          </For>
+          <Show when={local.onRun}>
             <button
               type="button"
-              aria-label={k.ariaLabel ?? k.label}
+              aria-label="Run"
               onPointerDown={(e) => e.preventDefault()}
-              onClick={() => local.onInsert(k.insert)}
-              class="font-mono text-sm text-fg-primary min-w-11 min-h-11 px-3 hover:bg-bg-panel transition-colors border-r border-border-default last:border-r-0 flex items-center justify-center"
+              onClick={() => local.onRun?.()}
+              class="font-mono text-sm font-medium text-bg-base bg-accent-amber min-w-11 min-h-11 px-4 ml-auto flex items-center justify-center hover:bg-accent-amber/90 transition-colors"
             >
-              {k.label}
+              Run
             </button>
-          )}
-        </For>
-        <Show when={local.onRun}>
-          <button
-            type="button"
-            aria-label="Run"
-            onPointerDown={(e) => e.preventDefault()}
-            onClick={() => local.onRun?.()}
-            class="font-mono text-sm font-medium text-bg-base bg-accent-amber min-w-11 min-h-11 px-4 ml-auto flex items-center justify-center hover:bg-accent-amber/90 transition-colors"
-          >
-            Run
-          </button>
-        </Show>
+          </Show>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

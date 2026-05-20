@@ -1,0 +1,185 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Container,
+  Divider,
+  Eyebrow,
+  Heading,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+import { buildCurriculumTree, byOrder, exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
+import { formatBlock } from "~/lib/format-block";
+import { formatInline } from "~/lib/format-inline";
+
+/**
+ * Module overview — `/go/<module>`.
+ *
+ * Closes the design-docs/16 UX-F2 "breadcrumb badge lies"
+ * finding. Before this route shipped, the breadcrumb's
+ * "Foundations" link landed on `/go` (the entire curriculum
+ * index), not a module-specific page. Now the badge's
+ * destination matches its label.
+ *
+ * Layout: hero with the module title + summary, then a card
+ * grid of themes. Same theme-card shape as /go's accordion-
+ * expanded body so the visual rhythm matches when a learner
+ * arrives from there.
+ */
+
+type Module = CollectionEntry<"modules">;
+
+export async function getStaticPaths() {
+  const modules = await getCollection("modules");
+  return modules.map((entry) => ({
+    params: { module: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: Module;
+}
+
+const { entry } = Astro.props;
+const moduleData = entry.data;
+
+const [allModules, allThemes, allExercises] = await Promise.all([
+  getCollection("modules"),
+  getCollection("themes"),
+  getCollection("exercises"),
+]);
+
+const tree = buildCurriculumTree(allModules, allThemes, allExercises);
+const node = tree.find((n) => n.module.id === entry.id);
+if (!node) {
+  throw new Error(`Module ${entry.id} not found in tree (curriculum data drift?)`);
+}
+
+/* Compute next-module link for the "what's next" footer hint. */
+const sorted = tree.slice().sort((a, b) => byOrder(a.module, b.module));
+const idx = sorted.findIndex((n) => n.module.id === entry.id);
+const prevModule = sorted[idx - 1]?.module;
+const nextModule = sorted[idx + 1]?.module;
+---
+
+<BaseLayout
+  title={`${moduleData.title} — typeover`}
+  description={moduleData.summary}
+>
+  <main class="py-12 sm:py-20">
+    <Container width="wide">
+      <Stack gap="xl">
+        {/* Breadcrumb */}
+        <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
+          <a
+            href="/go"
+            class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          >
+            Curriculum
+          </a>
+          <span aria-hidden="true">›</span>
+          <span class="text-fg-primary">{moduleData.title}</span>
+        </Text>
+
+        {/* Module hero */}
+        <Stack gap="sm">
+          <Eyebrow tone="muted">module {moduleData.order} of {sorted.length}</Eyebrow>
+          <Heading level={1}>{moduleData.title}</Heading>
+          <Text tone="secondary" size="lg" as="div" class="ds-prose">
+            <Fragment set:html={formatBlock(moduleData.summary)} />
+          </Text>
+        </Stack>
+
+        <Divider />
+
+        {/* Themes */}
+        <Stack gap="md">
+          <Eyebrow>themes</Eyebrow>
+          {node.themes.length === 0 ? (
+            <Text tone="muted" size="sm" family="mono">
+              No themes drafted for this module yet.
+            </Text>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {node.themes.map(({ theme, firstExercise, exerciseCount }) => {
+                const overviewHref = themeHref(theme.id);
+                const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
+                return (
+                  <Panel padding="default" tone="default">
+                    <Stack gap="sm">
+                      <Stack direction="row" gap="sm" align="baseline" wrap>
+                        <Text tone="faint" size="xs" family="mono">
+                          {moduleData.order}.{theme.data.order}
+                        </Text>
+                        <Heading level={3} class="!text-lg">
+                          <a
+                            href={overviewHref}
+                            class="hover:text-accent-amber transition-colors"
+                          >
+                            {theme.data.title}
+                          </a>
+                        </Heading>
+                      </Stack>
+                      <Text tone="muted" size="sm">
+                        <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
+                      </Text>
+                      <Stack direction="row" gap="sm" align="center" wrap>
+                        <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
+                          {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
+                        </Badge>
+                        <a
+                          href={overviewHref}
+                          class="text-fg-muted hover:text-fg-primary font-mono text-sm"
+                        >
+                          overview
+                        </a>
+                        {startHref && (
+                          <a
+                            href={startHref}
+                            class="text-accent-amber hover:underline font-mono text-sm"
+                          >
+                            start →
+                          </a>
+                        )}
+                      </Stack>
+                    </Stack>
+                  </Panel>
+                );
+              })}
+            </div>
+          )}
+        </Stack>
+
+        <Divider />
+
+        {/* Module nav */}
+        <Stack direction="row" justify="between" align="center" wrap>
+          {prevModule ? (
+            <a
+              href={`/go/${prevModule.id}`}
+              class="text-fg-muted hover:text-fg-primary font-mono text-sm"
+            >
+              ← {prevModule.data.title}
+            </a>
+          ) : (
+            <a href="/go" class="text-fg-muted hover:text-fg-primary font-mono text-sm">
+              ← back to curriculum
+            </a>
+          )}
+          {nextModule && (
+            <a
+              href={`/go/${nextModule.id}`}
+              class="text-accent-amber hover:underline font-mono text-sm"
+            >
+              {nextModule.data.title} →
+            </a>
+          )}
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

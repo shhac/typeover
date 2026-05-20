@@ -10,13 +10,10 @@ import { recordHintUsed } from "~/lib/progress";
 import { formatInline } from "~/lib/format-inline";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
 
-/* Anchor styled to match Button's primary variant + md size. Inlined
- * here rather than via a polymorphic Button to keep the scope of the
- * Next-exercise nav small; if a third site needs an anchor-button,
- * extract a ButtonLink. */
 /* Right-phase nav anchors use <ButtonLink> from the DS. Earlier
  * versions hand-rolled the primary-anchor class string here;
- * ButtonLink consolidates the spec into one place. */
+ * ButtonLink consolidates the spec into one place
+ * (design-docs/17 F-1). */
 
 interface ExerciseShellProps {
   /** For progress recording from the Hint button. */
@@ -89,10 +86,16 @@ export function ExerciseShell(props: ExerciseShellProps) {
   const phase = () => props.phase.current();
   return (
     <Stack gap="lg">
-      <Stack gap="sm">
+      {/* Prompt stays visible while the learner works.
+       * `sticky top-0` with a backdrop-blurred surface so the
+       * prompt rides above the page as they scroll into the
+       * answer region. design-docs/16 F-21. */}
+      <div class="sticky top-0 z-10 -mx-2 px-2 py-2 bg-bg-base/85 backdrop-blur-sm border-b border-border-default/60">
         <Text tone="secondary" size="sm" family="mono">
           <span innerHTML={formatInline(props.prompt)} />
         </Text>
+      </div>
+      <Stack gap="sm">
         <CodeBlock lang="ts" filename="typescript">
           {props.ts}
         </CodeBlock>
@@ -135,7 +138,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
             </Button>
             {props.extraWrongActions}
             <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
-              Different exercise
+              Reshuffle this exercise
             </Button>
             <Show when={!props.phase.revealed()}>
               <Button variant="ghost" onClick={() => props.phase.revealCorrect()}>
@@ -163,7 +166,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
               )}
             </Show>
             <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
-              Try again with a different instance
+              Try a fresh variant
             </Button>
           </Match>
         </Switch>

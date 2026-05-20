@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { MobileKeyBar } from "~/components/ds";
+import { MobileKeyBar, Text } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -80,12 +80,23 @@ export function Freeform(props: FreeformProps) {
   });
 
   const toolbar = (
-    <RunResetToolbar
-      running={yaegi.running()}
-      canRun={props.runtime === "yaegi"}
-      onRun={yaegi.run}
-      onReset={yaegi.reset}
-    />
+    <div class="flex flex-row gap-3 items-center flex-wrap">
+      <RunResetToolbar
+        running={yaegi.running()}
+        canRun={props.runtime === "yaegi"}
+        onRun={yaegi.run}
+        onReset={yaegi.reset}
+      />
+      {/* Disabled-Submit explainer per design-docs/16 F-18.
+       * Submit is gated on a prior Run; without this hint a
+       * learner who types a correct answer and clicks Submit
+       * sees nothing and assumes the button is broken. */}
+      <Show when={yaegi.runResult() === null && code().trim() !== ""}>
+        <Text tone="muted" size="xs" family="mono">
+          ↳ Run your code first to enable Submit
+        </Text>
+      </Show>
+    </div>
   );
 
   return (

@@ -94,7 +94,14 @@ const parentThemeHref = themeHref(themeEntry.id);
             <a
               href="/go"
               class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
-              aria-label={`Up to curriculum (${moduleEntry.data.title})`}
+            >
+              Curriculum
+            </a>
+            <span aria-hidden="true">›</span>
+            <a
+              href={`/go/${moduleEntry.id}`}
+              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              aria-label={`Up to ${moduleEntry.data.title} module overview`}
             >
               {moduleEntry.data.title}
             </a>

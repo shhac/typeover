@@ -184,7 +184,7 @@ describe("<FillBlankLineInput> — wrong path", () => {
     });
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
-    expect(getByText("Different exercise")).toBeTruthy();
+    expect(getByText("Reshuffle this exercise")).toBeTruthy();
     expect(getByText("Reveal correct")).toBeTruthy();
     expect(slot()?.instancesPassed).toBe(0);
     expect(slot()?.instancesFailed).toBe(0);
@@ -249,9 +249,9 @@ describe("<FillBlankLineInput> — Another resets state", () => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
     fireEvent.click(getByText("Submit"));
-    /* In the right phase: "Try again with a different instance" is the
+    /* In the right phase: "Try a fresh variant" is the
      * shell's Another button. */
-    fireEvent.click(getByText("Try again with a different instance"));
+    fireEvent.click(getByText("Try a fresh variant"));
     /* Input is cleared and the run-result panel (which renders the
      * stdout) is gone. */
     expect(lineInput(container).value).toBe("");

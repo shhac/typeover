@@ -8,6 +8,7 @@ import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { CodeBlock } from "../ds/CodeBlock";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
+import { Text } from "../ds/Text";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -81,12 +82,20 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   });
 
   const toolbar = (
-    <RunResetToolbar
-      running={yaegi.running()}
-      canRun={input().trim() !== ""}
-      onRun={yaegi.run}
-      onReset={yaegi.reset}
-    />
+    <div class="flex flex-row gap-3 items-center flex-wrap">
+      <RunResetToolbar
+        running={yaegi.running()}
+        canRun={input().trim() !== ""}
+        onRun={yaegi.run}
+        onReset={yaegi.reset}
+      />
+      {/* Disabled-Submit explainer per design-docs/16 F-18. */}
+      <Show when={yaegi.runResult() === null && input().trim() !== ""}>
+        <Text tone="muted" size="xs" family="mono">
+          ↳ Run your line first to enable Submit
+        </Text>
+      </Show>
+    </div>
   );
 
   return (

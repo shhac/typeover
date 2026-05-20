@@ -92,6 +92,10 @@ export const exerciseHref = (exerciseId: string) => `/go/${exerciseId}`;
  *  /go/[module]/[theme] overview route. */
 export const themeHref = (themeId: string) => `/go/${themeId}`;
 
+/** Module-overview route. Single-module narrower view of /go —
+ *  used by breadcrumbs that used to lie about their destination. */
+export const moduleHref = (moduleId: string) => `/go/${moduleId}`;
+
 /** Module-completion celebration page. Linked from the last
  *  exercise of the last theme in a module via the `nextExerciseHref`
  *  the route file computes. */

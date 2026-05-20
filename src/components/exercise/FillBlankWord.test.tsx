@@ -108,7 +108,7 @@ describe("<FillBlankWord> — wrong path", () => {
     setVal(b!, "wrong");
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
-    expect(getByText("Different exercise")).toBeTruthy();
+    expect(getByText("Reshuffle this exercise")).toBeTruthy();
     expect(getByText("Reveal correct")).toBeTruthy();
     /* Clear shows in both picking and wrong phases when there's
      * any input — the extraWrongActions slot mounts it here. */

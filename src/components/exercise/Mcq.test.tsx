@@ -90,8 +90,8 @@ describe("<Mcq> — happy path", () => {
     expect(slot()?.instancesPassed).toBe(1);
     /* No failure recorded — the asymmetry from design-docs/12. */
     expect(slot()?.instancesFailed).toBe(0);
-    /* Right-phase shell: "Try again with a different instance" appears. */
-    expect(getByText("Try again with a different instance")).toBeTruthy();
+    /* Right-phase shell: "Try a fresh variant" appears. */
+    expect(getByText("Try a fresh variant")).toBeTruthy();
   });
 
   it("Another after right resets phase and bumps instancesSeen", () => {
@@ -99,7 +99,7 @@ describe("<Mcq> — happy path", () => {
     fireEvent.click(findOptionByText(container, CANONICAL_TEXT));
     fireEvent.click(getByText("Submit"));
     const seenBeforeAnother = slot()?.instancesSeen;
-    fireEvent.click(getByText("Try again with a different instance"));
+    fireEvent.click(getByText("Try a fresh variant"));
     /* Back to picking: Submit button visible. */
     expect(getByText("Submit")).toBeTruthy();
     /* useExerciseInstance's createEffect fires on seed change. */
@@ -113,7 +113,7 @@ describe("<Mcq> — wrong path", () => {
     fireEvent.click(wrongOption(container));
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
-    expect(getByText("Different exercise")).toBeTruthy();
+    expect(getByText("Reshuffle this exercise")).toBeTruthy();
     expect(getByText("Reveal correct")).toBeTruthy();
     /* Failure is only counted via explicit reveal — wrong submit
      * alone does not penalise. */

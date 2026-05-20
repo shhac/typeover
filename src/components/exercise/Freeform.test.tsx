@@ -151,7 +151,7 @@ describe("<Freeform> — wrong path", () => {
     });
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
-    expect(getByText("Different exercise")).toBeTruthy();
+    expect(getByText("Reshuffle this exercise")).toBeTruthy();
     expect(getByText("Reveal correct")).toBeTruthy();
     expect(slot()?.instancesPassed).toBe(0);
     expect(slot()?.instancesFailed).toBe(0);
@@ -196,7 +196,7 @@ describe("<Freeform> — Another resets scaffold + runResult", () => {
       expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
     });
     fireEvent.click(getByText("Submit"));
-    fireEvent.click(getByText("Try again with a different instance"));
+    fireEvent.click(getByText("Try a fresh variant"));
     /* Scaffold restored: the marker comment is back, and the prior
      * user submission isn't. */
     expect(ta.value).toContain("implement here");
