@@ -213,26 +213,100 @@ themes**, matching the design-docs/99 entry on Module 2 velocity.
 - Notes / metadata. Author-facing distractor rationale per
   `foundations/variables/01.yaml`'s pattern.
 
-## Open questions for the authoring session
+## Decisions (locked with Paul, 2026-05-20)
 
-1. **Slot count overrun** — both 2.1 and 2.3 propose 10 slots;
-   2.2 too. The default is 9 per `02-pedagogy.md`. Three themes
-   at 10 each is 30 exercises vs 27 — fine if the +1 in each
-   genuinely earns its keep (the briefs argue yes: 2.1's
-   `slices.Contains` capstone is distinct from the `append` loop;
-   2.2's reference-semantics freeform sets up Module 3; 2.3's
-   rune-reverser hidden-test enforces the headline). Confirm or
-   trim before authoring.
-2. **`range over int`** (Go 1.22) — fits cleanly in 2.3 (one
-   more MCQ for "no-collection range"). Defer to Module 1.5
-   follow-up, or land here?
-3. **`slices.Sort` / `slices.Index`** — punted to comment-only
-   mention in 2.1 slot 10. Should they get their own MCQ /
-   fill-word slot, or stay a footnote for now?
-4. **Pre-authoring distractor pass** — Module 1 used the
-   `{match, explain}` distractor shape for fill-line. Module 2
-   should adopt it from day 1 (vs back-fill later). Confirm.
+1. **Slot count** — overrun is fine when content earns it.
+   Three themes at 10 slots = 30 exercises (vs the 27 default);
+   each +1 has been justified. Trigger for splitting a theme
+   into theme + theme-advanced: roughly **2x the target**
+   (≥18 slots). All three Module 2 themes stay well under that.
+2. **`range over int`** (Go 1.22 `for i := range 10`) — **add
+   to theme 2.3**. Best Go practice treats it as a natural part
+   of the iteration vocabulary alongside slice/map/string range.
+   Lands as a new MCQ slot — see updated 2.3 below (now 11
+   slots).
+3. **`slices.Sort` and `slices.Index`** — **own slot**, added
+   to theme 2.1 (now 11 slots). The `slices` package is the
+   ecosystem's pivot from methods to package functions; one
+   capstone slot per primary operation drives the pattern home.
+4. **Distractor shape** — use `{match, explain}` from day 1 on
+   every fill-line slot. Best practice; module 1's back-fill
+   experience proved the explainer copy is the load-bearing
+   teaching beat (per design-docs/99 wrong-pattern entries).
 
-Once these are settled and Paul is ready, the recommended next
-action is `pnpm content:new theme collections/arrays-and-slices`
-followed by a paired slot-by-slot authoring session.
+Updated slot counts:
+
+| theme | original | locked |
+|---|---|---|
+| 2.1 arrays-and-slices | 10 | **11** (added `slices.Sort` / `Index` slot) |
+| 2.2 maps              | 10 | **10** |
+| 2.3 iteration         | 10 | **11** (added `range over int`) |
+
+Module 2 total: **32 exercises** across 3 themes.
+
+## Slot additions from decisions #2 and #3
+
+### Theme 2.1 — add slot 11 (fill-line or freeform): `slices.Sort` + `slices.Index`
+
+- **Concept:** The two next most-common `slices.*` operations after
+  `Contains`. Sort in place, find an index.
+- **TS:** `xs.sort((a,b) => a-b); xs.indexOf(7);`
+- **Go canonical:**
+  ```go
+  xs := []int{3, 1, 7, 4, 1}
+  slices.Sort(xs)
+  i := slices.Index(xs, 7)
+  fmt.Println(xs, i)
+  ```
+- **Expected stdout:** `[1 1 3 4 7] 4`
+- **Key teaching beat:** `slices.Sort` mutates in place (returns
+  nothing); `slices.Index` returns `-1` if not present — mirrors
+  the TS `indexOf` contract, which is friendly.
+- **Distractors:** `xs = slices.Sort(xs)` (Sort returns nothing —
+  this assigns the empty value); `slices.Sort(xs, less)` (Sort is
+  built-in-comparable; only `SortFunc` takes a comparator);
+  `slices.IndexOf` (TS-style name).
+
+### Theme 2.3 — add slot 6 (MCQ): `range` over an integer
+
+- **Concept:** `for i := range 10` iterates `0..9`. Go 1.22+
+  feature; the modern way to write a count-up loop.
+- **TS:** `for (let i = 0; i < 10; i++) { ... }`
+- **Go canonical:** `for i := range 10 { ... }`
+- **Distractors:** `for i := 0; i < range 10; i++` (range as
+  expression); `for i in 10 { ... }` (Python); `for i, _ := range
+  10 { ... }` (two-value form — int range emits one value).
+- **Hints:** (1) Modern Go (1.22+) lets you range an integer
+  directly — no upper-bound expression needed. (2) Same `range`
+  keyword, one-value form, emits the loop counter `0..N-1`.
+  (3) `for i := range 10`.
+
+The renumbering for theme 2.3 shifts every subsequent slot by 1
+(old slot 6 becomes slot 7, etc.). Net: 11 slots, headline
+divergences unchanged.
+
+## Authoring plan (updated)
+
+The infra is ready (no change):
+- `pnpm content:new theme collections/<theme>`
+- `pnpm content:lint`
+- `pnpm runtime:verify --filter collections/<theme>`
+- Zod schema rejects malformed YAML at build
+
+Recommended sequence (per `02-pedagogy.md`):
+
+1. **Theme 2.1 first** (11 slots, ~5-7h focused).
+2. **Theme 2.2 second** (10 slots, ~4-6h).
+3. **Theme 2.3 last** (11 slots, ~5-7h, includes string-rune
+   freeform capstone).
+
+**Estimated total: ~15-30 focused authoring hours**.
+
+Per-slot workflow remains: draft prompt + TS side → write Go
+canonical → `runtime:verify` confirms → 3 distinctly-failing
+distractors with `{match, explain}` shape on fill-line → 3-layer
+hints → optional author notes.
+
+Once Paul is ready, the recommended next action is
+`pnpm content:new theme collections/arrays-and-slices` followed by
+a paired slot-by-slot authoring session.
