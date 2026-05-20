@@ -212,17 +212,19 @@ or proposer cycle can pick them up cold.
   conceptual boundary, less surface for an exercise component to
   accidentally reach schema-time code at runtime.
 
-**FW-3 — Shared `<Breadcrumb>` + `<ThemeCard.astro>` extractions**
+**FW-3 — Shared `<Breadcrumb>` + `<ThemeCard.astro>` extractions** — **SHIPPED 2026-05-20 (round 4)**
 - Flagged by lens 2 (#3) and lens 4 (#3). Three near-identical
   breadcrumbs across the `/go/*` routes, two near-identical
   theme-card grids across the /go index and the per-module page.
-- Why deferred: low-risk but ~100 lines of routine extraction; the
-  `focus-ring` utility (just shipped) is the right primitive for
-  the breadcrumb anchors to use, so this should land next iteration
-  to capitalise on the freshly-clean focus styling.
-- Estimated reward: ~90 lines deleted from the route files; a
-  single place to evolve the breadcrumb shape (e.g. a future
-  "you are here" highlight).
+- Shipped as `src/components/curriculum/Breadcrumb.astro` (3
+  route sites consolidated; takes a `crumbs: Crumb[]` array with
+  optional `ariaLabel`s; last crumb without `href` renders as the
+  active-leaf span) and `src/components/curriculum/ThemeCard.astro`
+  (2 sites consolidated; takes `moduleOrder`, `theme`,
+  `firstExercise?`, `exerciseCount`). Both anchor surfaces use the
+  shipped `focus-ring` utility. Net diff: ~+180 lines (the two new
+  components) / ~−165 lines (sweep removes the inline duplications)
+  + 2 file imports tightened up.
 
 ## Notes for the next proposer cycle
 
