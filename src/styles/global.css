@@ -780,6 +780,38 @@ body {
   --color-border-strong: #c4c0a8;
 }
 
+/* e-reader — Kindle Paperwhite / Kobo aesthetic. Cool e-ink panel
+ * on the light variant; warm-dark e-ink Night Mode on dark. Amber
+ * highlight accent mirrors a Paperwhite reading highlight. */
+:root[data-palette="e-reader"] {
+  --color-bg-base: #18171a;
+  --color-bg-panel: #211f24;
+  --color-bg-elevated: #2a282f;
+  --color-bg-inset: #131216;
+  --color-fg-primary: #d8d2c4;
+  --color-fg-secondary: #a8a397;
+  --color-fg-muted: #7a766b;
+  --color-fg-faint: #54514a;
+  --color-accent-primary: #d4a843;
+  --color-accent-ts: #7eb6ff;
+  --color-accent-go: #4dcfee;
+  --color-border-strong: #3a373f;
+}
+:root[data-palette="e-reader"][data-theme="light"] {
+  --color-bg-base: #e0dcd0;
+  --color-bg-panel: #e9e5d8;
+  --color-bg-elevated: #d4cfc0;
+  --color-bg-inset: #d8d4c6;
+  --color-fg-primary: #1c1c1f;
+  --color-fg-secondary: #3a3a3e;
+  --color-fg-muted: #5e5e62;
+  --color-fg-faint: #8a8a8f;
+  --color-accent-primary: #8a4a14;
+  --color-accent-ts: #2a5d9a;
+  --color-accent-go: #006d8c;
+  --color-border-strong: #b8b3a4;
+}
+
 /* ===== GLASS palettes ===== */
 
 /* Glass palettes also set --body-gradient (the radial bloom that

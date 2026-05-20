@@ -100,6 +100,10 @@ export const PALETTE_CHIP_COLORS: Record<PaletteId, { dark: ChipColors; light: C
     dark: { bg: "#0f1414", accent: "#4ea69a" },
     light: { bg: "#f4f1e8", accent: "#0d5e55" },
   },
+  "e-reader": {
+    dark: { bg: "#18171a", accent: "#d4a843" },
+    light: { bg: "#e0dcd0", accent: "#8a4a14" },
+  },
   "aurora-amber": {
     dark: { bg: "#0a0a0b", accent: "#ffa726" },
     light: { bg: "#fafafa", accent: "#b06e1a" },

@@ -220,6 +220,7 @@ export const PALETTES = [
   "pelican",
   "sepia",
   "almanac",
+  "e-reader",
   /* glass */
   "aurora-amber",
   "glacier-blue",
@@ -272,6 +273,7 @@ export const PALETTE_HOME_STYLE: Record<PaletteId, StyleId> = {
   pelican: "textbook",
   sepia: "textbook",
   almanac: "textbook",
+  "e-reader": "textbook",
   "aurora-amber": "glass",
   "glacier-blue": "glass",
   "lavender-mist": "glass",
