@@ -1,0 +1,35 @@
+target: go
+themeId: collections/arrays-and-slices
+type: fill-word
+order: 5
+prompt: |
+  Translate `${name}.push(${value})` to idiomatic Go. The built-in
+  is a free-standing function — not a method on the slice — and
+  it RETURNS a new slice header that you must assign back.
+generator:
+  kind: template
+  vars:
+    name: [xs, scores, items, lines, counts]
+    value: ["4", "score", "n", "line", "1"]
+    fn: [append]
+  ts: |-
+    ${name}.push(${value});
+  canonical: |-
+    ${name} = ${fn}(${name}, ${value})
+blanks: [fn]
+hints:
+  - "Go's slice operations are top-level functions, not methods. The function takes the slice and the new element(s)."
+  - "The built-in is six characters long; same family as `len`, `make`, `copy`, `delete`."
+  - "`append`."
+runtime: none
+notes: |
+  Blank is just `fn` (the name of the built-in). The bigger teaching
+  beat — `${name} = append(...)` must assign back — is in the
+  canonical's reveal. The reassignment matters because `append` may
+  REALLOCATE: if capacity is exhausted, it returns a NEW backing
+  array, and dropping the return leaves your variable pointing at
+  the old (short) one.
+
+  Why fill-word, not MCQ: by slot 5 the learner has seen the slice
+  shape three times. The novelty here is the assignment-back idiom,
+  which is more memorable when typed than picked.

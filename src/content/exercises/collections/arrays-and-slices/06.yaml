@@ -1,0 +1,39 @@
+target: go
+themeId: collections/arrays-and-slices
+type: fill-word
+order: 6
+prompt: |
+  Translate `xs.slice(0, 3)` and `xs.slice(3)` to idiomatic Go.
+  Both endpoints in Go's slice expression are optional — omit them
+  to default to `0` and `len(xs)`.
+generator:
+  kind: template
+  vars:
+    src: [xs, items, scores, lines, prices]
+    n: ["3", "5", "2", "4", "10"]
+    low: [""]
+    sep: [":"]
+  ts: |-
+    const head = ${src}.slice(0, ${n});
+    const tail = ${src}.slice(${n});
+  canonical: |-
+    head := ${src}[${low}:${n}]
+    tail := ${src}[${n}${sep}]
+blanks: [low, sep]
+hints:
+  - "Slice expressions are `s[low:high]`. Both endpoints can be omitted — leaving the `low` blank defaults to `0`, leaving the `high` blank defaults to `len(s)`."
+  - "Head is `s[:n]` (no low). Tail is `s[n:]` (no high). The colon stays in both."
+  - "The blanks are empty string (no low) and `:` (the separator stays)."
+runtime: none
+notes: |
+  Two blanks: the missing `low` endpoint of `head` (defaults to 0)
+  and the trailing `:` of `tail`. The template's `low: [""]` pool
+  is a deliberate one-element empty-string pool — the blank renders
+  as nothing visible, but it's still a *blank the learner must
+  identify* (the omitted endpoint).
+
+  The TS slicing surface matches `s[a:b]` in Go syntactically; the
+  trap that slot 7 punishes is that Go's slice expression returns
+  a VIEW (aliased backing array), not an independent copy. We
+  deliberately keep that landmine for the next slot rather than
+  flagging it here.

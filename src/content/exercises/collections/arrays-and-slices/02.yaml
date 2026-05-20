@@ -1,0 +1,53 @@
+target: go
+themeId: collections/arrays-and-slices
+type: mcq
+order: 2
+prompt: |
+  TypeScript tuples lock the length into the type. Pick the Go form
+  that does the same — a fixed-size array of zeros, ready to fill.
+generator:
+  kind: variant
+  variants:
+    - id: md5-digest
+      ts: |-
+        const digest: [number, number, number, number, number,
+                       number, number, number, number, number,
+                       number, number, number, number, number,
+                       number] = new Array(16).fill(0) as any;
+      canonical: 'var digest [16]int'
+      distractors:
+        - 'var digest []int'
+        - 'digest := [16]int'
+        - 'var digest [16]int{}'
+    - id: rgba-pixel
+      ts: 'const rgba: [number, number, number, number] = [0, 0, 0, 0];'
+      canonical: 'var rgba [4]int'
+      distractors:
+        - 'var rgba []int'
+        - 'rgba := [4]int'
+        - 'var rgba [4]int{0, 0, 0, 0}'
+    - id: chess-rank
+      ts: 'const rank: [number, number, number, number, number, number, number, number] = [0, 0, 0, 0, 0, 0, 0, 0];'
+      canonical: 'var rank [8]int'
+      distractors:
+        - 'var rank []int'
+        - 'rank := [8]int'
+        - 'rank: [8]int'
+hints:
+  - "When the length is part of the contract — exactly N slots, no growth — the *array* shape carries that in the type."
+  - "`var name [N]T` declares an N-element array. No initializer needed; the zero value of the element type fills every slot."
+  - "Two parts: `var` + name + `[N]T`."
+runtime: none
+notes: |
+  Distractors:
+    1. `var name []int` — the SLICE shape. Its zero value is `nil`,
+       not a buffer of N zeros. This is the contrast slot.
+    2. `name := [N]int` — uses `:=` but supplies a TYPE, not a
+       value. Won't compile.
+    3. `var name [N]int{}` / `[N]int{0,0,0,0}` — mixes `var`-syntax
+       with brace-init. To use a literal you'd write
+       `name := [N]int{}` or `name := [N]int{0, 0, 0, 0}`.
+
+  This slot earns its keep by setting up nil-slice-vs-zeroed-array
+  as a contrast that returns in slot 3 (where `make([]T, n)` shows
+  the slice-side equivalent).
