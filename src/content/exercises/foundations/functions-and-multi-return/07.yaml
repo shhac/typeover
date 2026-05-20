@@ -3,19 +3,20 @@ themeId: foundations/functions-and-multi-return
 type: fill-line
 order: 7
 prompt: |
-  Type the Go line that performs the `if err != nil` error check
-  after a call returns `(n, err)`. On error it should call
-  `handleError(err)` and return. The program forces an error and
-  prints `caught: oops`.
+  Type the Go line that, on empty input, returns the zero value of
+  `int` alongside an error built from `"empty input"`. The program
+  calls `parse("")` and prints the error. It should print
+  `empty input`.
 generator:
   kind: template
   vars:
     line:
-      - 'if err != nil { handleError(err); return }'
+      - 'return 0, errors.New("empty input")'
   ts: |-
-    const result = parse(s);
-    if (result.err) { handleError(result.err); return; }
-    process(result.value);
+    function parse(s) {
+      if (!s) return { value: 0, err: new Error("empty input") };
+      return { value: parseValid(s), err: null };
+    }
   canonical: |-
     package main
 
@@ -24,52 +25,51 @@ generator:
     	"fmt"
     )
 
+    func parseValid(s string) int { return 42 }
+
     func parse(s string) (int, error) {
-    	return 0, errors.New("oops")
-    }
-
-    func handleError(e error) {
-    	fmt.Println("caught:", e)
-    }
-
-    func process(n int) {
-    	fmt.Println("got", n)
+    	if s == "" {
+    		${line}
+    	}
+    	return parseValid(s), nil
     }
 
     func main() {
-    	n, err := parse("")
-    	${line}
-    	process(n)
+    	_, err := parse("")
+    	fmt.Println(err)
     }
   distractors:
-    - match: 'if (err) { handleError(err); return }'
+    - match: 'return null, "empty input"'
       explain: |-
-        Two TS habits: Go doesn't take parens around `if` conditions,
-        and there are no truthy-tests on errors — `error` isn't a
-        bool. Compare against `nil` explicitly: `if err != nil`.
-    - match: 'if err { handleError(err); return }'
+        Two TS habits at once. Go doesn't have `null` — the zero value
+        for `int` is `0`. And the second return is an `error`, not a
+        bare string — wrap the message with `errors.New(...)`.
+    - match: 'return (0, "empty input")'
       explain: |-
-        Go has no truthy / falsy. An `error` value is either `nil`
-        or non-nil — say so directly: `if err != nil { ... }`.
-    - match: 'if err === null { handleError(err); return }'
+        Go's multi-return isn't a tuple — no parens, no array. The
+        values are bare, comma-separated. (Parens around the return
+        VALUES; parens around the return TYPES in the function
+        signature — different thing.)
+    - match: 'return errors.New("empty input")'
       explain: |-
-        Two things: triple-equals is JS / TS, and Go's empty-marker
-        is `nil`, not `null`. The idiom is `if err != nil` — note
-        also the comparison is `!=` (we want the error-PRESENT
-        branch).
-    - match: 'if err == null { handleError(err); return }'
+        The function signature is `(int, error)`. You have to return
+        both — the value AND the error. The zero value `0` goes first;
+        the error goes second.
+    - match: 'return nil, errors.New("empty input")'
       explain: |-
-        Two corrections at once. Go uses `nil` not `null`, AND you
-        want the `!= nil` branch (this body runs on error). The
-        idiom is `if err != nil { ... }`.
+        `nil` is Go's null-ish for pointers, interfaces, maps, slices,
+        and channels. Not for `int` — its zero value is `0`. Use `0`
+        as the first return.
 expectStdout: |
-  caught: oops
+  empty input
 runtime: yaegi
 blanks: [line]
 hints:
-  - "Four reflexes at once: no parens around the condition (Theme 4), `nil` not `null` (Theme 3), explicit `!= nil` comparison (Go has no truthy-tests on errors), and braces required around the body (Theme 4)."
-  - 'Go''s idiom: `if err != nil { ... }`. Plain `if err { ... }` doesn''t compile because `error` isn''t a bool.'
-  - 'Type `if err != nil { handleError(err); return }`.'
+  - "Two things have to be right. The first is the zero value for the value type — for `int`, that's `0` (not `null`, not `nil`, not omitted). The second is how Go constructs an error from a string — there's a function in the `errors` package for this."
+  - 'Shape: `return ZERO_VALUE, errors.New("msg")`. Bare commas — no array, no tuple parens. The value comes first, the error comes second.'
+  - 'Type `return 0, errors.New("empty input")`.'
 notes: |
-  Migrated to input+Yaegi UX. Scaffold's parse always errors, so
-  the right line short-circuits before process. Distractors kept.
+  Migrated to input+Yaegi UX. Scaffold provides parse with a
+  successful branch (parseValid → 42) and the failing branch the
+  learner fills. main prints the error; the Error() method's value
+  surfaces as the line's expected output. Distractors kept.

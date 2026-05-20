@@ -1,75 +1,41 @@
 target: go
 themeId: foundations/functions-and-multi-return
-type: fill-line
+type: fill-word
 order: 6
 prompt: |
-  Type the Go line that, on empty input, returns the zero value of
-  `int` alongside an error built from `"empty input"`. The program
-  calls `parse("")` and prints the error. It should print
-  `empty input`.
+  Slot 3 covered the `(T, error)` return-tuple convention by
+  recognition. Now produce it: fill in the value type and the error
+  type that complete the tuple.
 generator:
   kind: template
   vars:
-    line:
-      - 'return 0, errors.New("empty input")'
+    name: [parse, lookup, fetch, decode, validate]
+    arg: [s, id, url, data, value]
+    arg_type: [string]
+    value_type: [int]
+    err_type: [error]
   ts: |-
-    function parse(s) {
-      if (!s) return { value: 0, err: new Error("empty input") };
-      return { value: parseValid(s), err: null };
-    }
+    function ${name}(${arg}): { value: number; err: Error | null } { ... }
   canonical: |-
-    package main
-
-    import (
-    	"errors"
-    	"fmt"
-    )
-
-    func parseValid(s string) int { return 42 }
-
-    func parse(s string) (int, error) {
-    	if s == "" {
-    		${line}
-    	}
-    	return parseValid(s), nil
-    }
-
-    func main() {
-    	_, err := parse("")
-    	fmt.Println(err)
-    }
-  distractors:
-    - match: 'return null, "empty input"'
-      explain: |-
-        Two TS habits at once. Go doesn't have `null` — the zero value
-        for `int` is `0`. And the second return is an `error`, not a
-        bare string — wrap the message with `errors.New(...)`.
-    - match: 'return (0, "empty input")'
-      explain: |-
-        Go's multi-return isn't a tuple — no parens, no array. The
-        values are bare, comma-separated. (Parens around the return
-        VALUES; parens around the return TYPES in the function
-        signature — different thing.)
-    - match: 'return errors.New("empty input")'
-      explain: |-
-        The function signature is `(int, error)`. You have to return
-        both — the value AND the error. The zero value `0` goes first;
-        the error goes second.
-    - match: 'return nil, errors.New("empty input")'
-      explain: |-
-        `nil` is Go's null-ish for pointers, interfaces, maps, slices,
-        and channels. Not for `int` — its zero value is `0`. Use `0`
-        as the first return.
-expectStdout: |
-  empty input
-runtime: yaegi
-blanks: [line]
+    func ${name}(${arg} ${arg_type}) (${value_type}, ${err_type}) { ... }
+blanks: [value_type, err_type]
 hints:
-  - "Two things have to be right. The first is the zero value for the value type — for `int`, that's `0` (not `null`, not `nil`, not omitted). The second is how Go constructs an error from a string — there's a function in the `errors` package for this."
-  - 'Shape: `return ZERO_VALUE, errors.New("msg")`. Bare commas — no array, no tuple parens. The value comes first, the error comes second.'
-  - 'Type `return 0, errors.New("empty input")`.'
+  - "Two blanks inside the return tuple. The first is the type of the value the function produces on success — for a numeric parse, the same default integer type Theme 2 covered. The second is Go's pre-declared error interface, written in lowercase."
+  - "Value type: `int`. Error type: `error` (lowercase — it's Go's built-in error interface, not a class name)."
+  - "Canonical: `func parse(s string) (int, error) { ... }`."
 notes: |
-  Migrated to input+Yaegi UX. Scaffold provides parse with a
-  successful branch (parseValid → 42) and the failing branch the
-  learner fills. main prints the error; the Error() method's value
-  surfaces as the line's expected output. Distractors kept.
+  Second Theme 6 fill-word. Drills the `(T, error)` return-tuple
+  shape that slot 3 introduced as MCQ. Two blanks: the *value*
+  type and the *error* type.
+
+  Important subtlety: Go's pre-declared `error` is **lowercase**.
+  Capital `Error` would be a user-defined type or a TS-leak. The
+  hint walks the learner there explicitly because this is the kind
+  of small reflex that bites silently — a learner who types
+  `Error` would get a compile error pointing at an undefined
+  identifier.
+
+  Pattern uses single-element literal pools for `arg_type`,
+  `value_type`, `err_type` — same idiom as previous themes,
+  parked against task #38.
+runtime: none

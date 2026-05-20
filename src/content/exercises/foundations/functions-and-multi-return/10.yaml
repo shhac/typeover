@@ -1,0 +1,58 @@
+target: go
+themeId: foundations/functions-and-multi-return
+type: freeform
+order: 10
+prompt: |
+  Preview the `(result, error)` shape that becomes the canonical Go
+  failure convention from Module 5 onward. Write a function
+  `safeDiv(a, b int) (int, error)` that:
+
+  - Returns `(a / b, nil)` when `b != 0`.
+  - Returns `(0, errors.New("divide by zero"))` when `b == 0`.
+
+  In `main`, call `safeDiv(10, 0)` and print the result on one line
+  via `fmt.Println(q, err)`. The expected output is `0 divide by zero`
+  — Go's `Println` calls the error's `Error()` method automatically,
+  so you don't have to format it explicitly.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function safeDiv(a: number, b: number): [number, Error | null] {
+      if (b === 0) return [0, new Error("divide by zero")];
+      return [Math.trunc(a / b), null];
+    }
+    const [q, err] = safeDiv(10, 0);
+    console.log(q, err?.message ?? null);
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    func safeDiv(a, b int) (int, error) {
+    	if b == 0 {
+    		return 0, errors.New("divide by zero")
+    	}
+    	return a / b, nil
+    }
+
+    func main() {
+    	q, err := safeDiv(10, 0)
+    	fmt.Println(q, err)
+    }
+expectStdout: |
+  0 divide by zero
+runtime: yaegi
+hints:
+  - "Return signature is `(int, error)`. On the failure branch, return `0, errors.New(\"divide by zero\")`; on the success branch, return the quotient and `nil` for the error."
+  - "`errors.New(msg)` is the simplest way to construct an error from a string. The full picture (sentinel errors, `errors.Is`, wrapping) waits for Module 5."
+  - "`if b == 0 { return 0, errors.New(\"divide by zero\") } return a / b, nil` — and in main, `q, err := safeDiv(10, 0); fmt.Println(q, err)`."
+notes: |
+  Second freeform of Theme 6 — and the bridge into Module 5. Drills
+  the `(T, error)` return shape with the simplest possible failure
+  case. `fmt.Println` calling Error() automatically is the practical
+  payoff: errors are values, not exceptions, and they print nicely
+  out of the box.
