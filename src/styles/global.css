@@ -35,8 +35,8 @@
    * to #4a9eff (passes ~7.2:1).
    * accent-go #00add8 already passes ~7.5:1.
    */
-  --color-accent-amber: #ffa726;
-  --color-accent-amber-dim: #b87a1c;
+  --color-accent-primary: #ffa726;
+  --color-accent-primary-dim: #b87a1c;
   --color-accent-ts: #4a9eff;
   --color-accent-ts-dim: #2a6fbf;
   --color-accent-go: #00add8;
@@ -215,7 +215,7 @@
   --border-style: dashed;
   --color-bg-panel: #1a1612;
   --color-bg-elevated: #221c17;
-  --color-border-default: color-mix(in oklab, var(--color-accent-amber) 35%, transparent);
+  --color-border-default: color-mix(in oklab, var(--color-accent-primary) 35%, transparent);
   --surface-pattern: radial-gradient(
     circle at 1px 1px,
     color-mix(in oklab, var(--color-fg-faint) 35%, transparent) 1px,
@@ -252,7 +252,7 @@
   --heading-weight-base: 700;
   --measure: 60ch;
   --color-border-default: transparent;
-  --shadow-panel: inset 4px 0 0 0 color-mix(in oklab, var(--color-accent-amber) 70%, transparent);
+  --shadow-panel: inset 4px 0 0 0 color-mix(in oklab, var(--color-accent-primary) 70%, transparent);
 }
 
 :root[data-style="textbook"][data-theme="light"],
@@ -262,7 +262,7 @@
   --color-bg-base: #faf6ef;
   --color-bg-panel: #fbf8f3;
   --color-bg-elevated: #f4eee2;
-  --color-accent-amber: #b06e1a;
+  --color-accent-primary: #b06e1a;
 }
 
 :root[data-style="textbook"][data-theme="dark"] {
@@ -311,7 +311,7 @@
   background-image:
     radial-gradient(
       ellipse 1200px 600px at 80% -10%,
-      color-mix(in oklab, var(--color-accent-amber) 18%, transparent),
+      color-mix(in oklab, var(--color-accent-primary) 18%, transparent),
       transparent 60%
     ),
     radial-gradient(
@@ -394,8 +394,8 @@
    * white — fails AA) to #a06400 (≈ 5.2:1 — passes AA). The fix is
    * load-bearing because primary buttons render white text on amber
    * in light theme. */
-  --color-accent-amber: #a06400;
-  --color-accent-amber-dim: #6f4400;
+  --color-accent-primary: #a06400;
+  --color-accent-primary-dim: #6f4400;
   --color-accent-ts: #2057b8;
   --color-accent-ts-dim: #143a7e;
   --color-accent-go: #006d8e;
@@ -408,7 +408,7 @@
 
 /* design-docs/20 follow-up — Tailwind 4 `@utility` directive. The
  * focus-visible outline was hand-pasted at 17 call sites
- * (`focus-visible:outline-2 focus-visible:outline-accent-amber
+ * (`focus-visible:outline-2 focus-visible:outline-accent-primary
  * rounded-sm`); one place to widen the ring or recolour it now.
  *
  * Bakes in both the always-on `border-radius` (so the focus ring
@@ -418,7 +418,7 @@
 @utility focus-ring {
   border-radius: var(--radius-sm);
   &:focus-visible {
-    outline: 2px solid var(--color-accent-amber);
+    outline: 2px solid var(--color-accent-primary);
     outline-offset: 0;
   }
 }
@@ -441,7 +441,7 @@
   }
 
   ::selection {
-    background-color: var(--color-accent-amber);
+    background-color: var(--color-accent-primary);
     color: var(--color-bg-base);
   }
 
@@ -502,7 +502,7 @@
   /* Visible focus on all interactives. We never strip the ring without
      replacing it. */
   *:focus-visible {
-    outline: 2px solid var(--color-accent-amber);
+    outline: 2px solid var(--color-accent-primary);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }

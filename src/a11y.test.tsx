@@ -101,7 +101,7 @@ describe("design system — a11y (WCAG 2.2 AA, JSDOM)", () => {
       <Stack direction="row" gap="sm">
         <Badge variant="ts">TS</Badge>
         <Badge variant="go">GO</Badge>
-        <Badge variant="amber">Foundations</Badge>
+        <Badge variant="primary">Foundations</Badge>
       </Stack>
     ));
     const v = await runAxe(container);
@@ -263,7 +263,7 @@ describe("design system — a11y (WCAG 2.2 AA, JSDOM)", () => {
     const { container } = render(() => (
       <Stack gap="xs">
         <Eyebrow>default</Eyebrow>
-        <Eyebrow tone="amber">amber</Eyebrow>
+        <Eyebrow tone="primary">amber</Eyebrow>
         <Eyebrow tone="ts">typescript</Eyebrow>
         <Eyebrow tone="go">golang</Eyebrow>
       </Stack>
@@ -321,7 +321,7 @@ describe("composite a11y — typical page chrome", () => {
       <Container>
         <Stack gap="sm">
           <Stack direction="row" gap="sm" align="center" wrap>
-            <Badge variant="amber">Foundations</Badge>
+            <Badge variant="primary">Foundations</Badge>
             <Text tone="muted" size="sm" family="mono">
               →
             </Text>
@@ -382,7 +382,7 @@ describe("style-axis a11y matrix (design-docs/21)", () => {
                   and reading measure. axe verifies structural a11y survives.
                 </Text>
                 <Stack direction="row" gap="sm" wrap>
-                  <Badge variant="amber">style:{style}</Badge>
+                  <Badge variant="primary">style:{style}</Badge>
                   <Badge variant="ts" outline>
                     typescript
                   </Badge>

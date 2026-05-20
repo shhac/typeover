@@ -133,7 +133,7 @@ export function Freeform(props: FreeformProps) {
       themeHref={props.themeHref}
     >
       <textarea
-        class="font-mono text-sm bg-bg-inset text-fg-primary p-3 rounded-sm border border-border-default min-h-[200px] outline-none focus:border-accent-amber"
+        class="font-mono text-sm bg-bg-inset text-fg-primary p-3 rounded-sm border border-border-default min-h-[200px] outline-none focus:border-accent-primary"
         spellcheck={false}
         autocomplete="off"
         autocapitalize="off"

@@ -19,9 +19,9 @@ interface ButtonLinkProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement>, B
 }
 
 const variantClass: Record<Variant, string> = {
-  primary: "bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber",
+  primary: "bg-accent-primary text-bg-base hover:bg-accent-primary/90 border border-accent-primary",
   secondary:
-    "bg-bg-elevated text-fg-primary border border-border-strong hover:border-accent-amber/60 hover:text-accent-amber",
+    "bg-bg-elevated text-fg-primary border border-border-strong hover:border-accent-primary/60 hover:text-accent-primary",
   ghost:
     "bg-transparent text-fg-secondary border border-transparent hover:text-fg-primary hover:border-border-default",
   danger: "bg-transparent text-error border border-error/60 hover:bg-error/10",

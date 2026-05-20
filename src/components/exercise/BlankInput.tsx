@@ -30,7 +30,7 @@ const inputClass: Record<InputState, string> = {
   incorrectRevealed: "border-error/60 bg-error/5 text-error",
   correctSubmitted: "border-success/60 bg-success/5",
   incorrectSubmitted: "border-error/60 bg-error/5",
-  neutral: "border-border-strong focus-within:border-accent-amber",
+  neutral: "border-border-strong focus-within:border-accent-primary",
 };
 
 export function inputCellState(args: {

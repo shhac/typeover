@@ -71,7 +71,7 @@ export function HintButton(props: HintButtonProps) {
       </Show>
       <Show when={revealed() > 0}>
         <ul
-          class="flex flex-col gap-2 text-sm text-fg-secondary border-l-2 border-accent-amber/40 pl-4"
+          class="flex flex-col gap-2 text-sm text-fg-secondary border-l-2 border-accent-primary/40 pl-4"
           aria-live="polite"
         >
           <For each={visible()}>

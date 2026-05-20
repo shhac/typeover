@@ -162,7 +162,7 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
               tabindex={-1}
               onPointerDown={(e) => e.preventDefault()}
               onClick={() => local.onRun?.()}
-              class="font-mono text-sm font-medium text-bg-base bg-accent-amber min-w-11 min-h-11 px-4 ml-auto flex items-center justify-center hover:bg-accent-amber/90 transition-colors"
+              class="font-mono text-sm font-medium text-bg-base bg-accent-primary min-w-11 min-h-11 px-4 ml-auto flex items-center justify-center hover:bg-accent-primary/90 transition-colors"
             >
               Run
             </button>

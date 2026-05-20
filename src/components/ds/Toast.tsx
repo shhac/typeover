@@ -117,7 +117,7 @@ function ToastBody(props: ToastBodyProps): JSX.Element {
               undo()();
               props.onDismiss();
             }}
-            class="text-accent-amber hover:underline focus-ring uppercase tracking-widest"
+            class="text-accent-primary hover:underline focus-ring uppercase tracking-widest"
           >
             undo
           </button>

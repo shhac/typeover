@@ -31,7 +31,7 @@ type CellState = "showCorrect" | "showIncorrect" | "selected" | "neutral";
 const cellClass: Record<CellState, string> = {
   showCorrect: "border-l-success/80 bg-success/5",
   showIncorrect: "border-l-error/80 bg-error/5",
-  selected: "border-l-accent-amber bg-accent-amber/5",
+  selected: "border-l-accent-primary bg-accent-primary/5",
   neutral: "border-l-transparent hover:border-l-border-default",
 };
 
@@ -83,7 +83,7 @@ export function McqOption(props: McqOptionProps) {
         checked={props.selected}
         disabled={props.submitted}
         onChange={props.onSelect}
-        class="mt-1.5 accent-accent-amber"
+        class="mt-1.5 accent-accent-primary"
         aria-describedby={`opt-${props.groupName}-${props.index}-text`}
       />
       <pre

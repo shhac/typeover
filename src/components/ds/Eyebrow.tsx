@@ -17,14 +17,14 @@ import { cn } from "./_internal";
  *
  * Visual differentiation from outlined Badge — design-docs/17 F-5.
  * Both primitives were `font-mono uppercase tracking-widest`; at a
- * glance an `<Eyebrow tone="amber">` read as an outlined amber
+ * glance an `<Eyebrow tone="primary">` read as an outlined amber
  * Badge. Eyebrow now leads with a short hairline glyph (`──`) that
  * marks it as a SECTION CAPTION rather than a chip. Badge stays
  * bordered. The split is structural: Eyebrow introduces what
  * follows, Badge tags what's already there.
  */
 
-type Tone = "default" | "muted" | "amber" | "ts" | "go";
+type Tone = "default" | "muted" | "primary" | "ts" | "go";
 
 interface EyebrowProps extends JSX.HTMLAttributes<HTMLSpanElement> {
   tone?: Tone;
@@ -33,7 +33,7 @@ interface EyebrowProps extends JSX.HTMLAttributes<HTMLSpanElement> {
 const toneClass: Record<Tone, string> = {
   default: "text-fg-secondary",
   muted: "text-fg-muted",
-  amber: "text-accent-amber",
+  primary: "text-accent-primary",
   ts: "text-accent-ts",
   go: "text-accent-go",
 };

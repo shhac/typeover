@@ -77,7 +77,7 @@ function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
             class={
               "flex flex-col gap-1 p-3 border rounded-sm cursor-pointer transition-colors " +
               (choice() === opt.value
-                ? "border-accent-amber bg-accent-amber/5"
+                ? "border-accent-primary bg-accent-primary/5"
                 : "border-border-default hover:border-border-strong")
             }
           >
@@ -88,7 +88,7 @@ function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
                 value={opt.value}
                 checked={choice() === opt.value}
                 onChange={() => pick(opt.value)}
-                class="accent-accent-amber"
+                class="accent-accent-primary"
               />
               <span class="font-sans text-sm text-fg-primary">{opt.label}</span>
             </div>
@@ -221,7 +221,7 @@ function PreviewSample() {
         <Stack direction="row" gap="sm" align="center" wrap>
           <Badge variant="ts">typescript</Badge>
           <Badge variant="go">golang</Badge>
-          <Badge variant="amber">focus</Badge>
+          <Badge variant="primary">focus</Badge>
           <ProgressChip kind="theme" passed={4} total={9} />
         </Stack>
         <CodeBlock lang="go" filename="preview.go">{`package main

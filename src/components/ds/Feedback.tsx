@@ -42,7 +42,7 @@ export function Feedback(props: ParentProps<FeedbackProps>) {
       tabindex="-1"
       class={cn(
         "border rounded-sm px-4 py-3 font-mono text-sm",
-        "focus:outline-2 focus:outline-accent-amber focus:outline-offset-2",
+        "focus:outline-2 focus:outline-accent-primary focus:outline-offset-2",
         statusClass[local.status],
         local.class,
       )}

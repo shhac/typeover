@@ -199,7 +199,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
           }
         >
           <div class="flex flex-col gap-6">
-            <Eyebrow tone="amber">typeover · module complete</Eyebrow>
+            <Eyebrow tone="primary">typeover · module complete</Eyebrow>
             <Heading level={2} size="3xl">
               {props.moduleTitle}
             </Heading>
@@ -217,7 +217,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
              * before the click so a cautious user can read them
              * before invoking the share sheet (or the manual-copy
              * fallback). */}
-            <div class="border-l-2 border-l-accent-amber/40 pl-3 flex flex-col gap-1">
+            <div class="border-l-2 border-l-accent-primary/40 pl-3 flex flex-col gap-1">
               <Text tone="muted" size="xs" family="mono">
                 will share:
               </Text>

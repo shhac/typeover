@@ -30,14 +30,14 @@ const langLabel: Record<Lang, string> = {
 const langAccent: Record<Lang, string> = {
   ts: "text-accent-ts border-accent-ts/40",
   go: "text-accent-go border-accent-go/40",
-  shell: "text-accent-amber border-accent-amber/40",
+  shell: "text-accent-primary border-accent-primary/40",
   plain: "text-fg-muted border-border-default",
 };
 
 const langBarBg: Record<Lang, string> = {
   ts: "bg-accent-ts/5",
   go: "bg-accent-go/5",
-  shell: "bg-accent-amber/5",
+  shell: "bg-accent-primary/5",
   plain: "bg-bg-inset",
 };
 

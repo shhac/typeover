@@ -20,7 +20,7 @@ interface HeadingProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
    *  the DS-bypass pattern. */
   size?: Size;
   as?: keyof JSX.HTMLElementTags;
-  accent?: "amber" | "ts" | "go";
+  accent?: "primary" | "ts" | "go";
 }
 
 /* Size = font-size + tracking only. Weight comes from the heading-
@@ -47,7 +47,7 @@ const defaultSize: Record<Level, Size> = {
 };
 
 const accentClass = {
-  amber: "text-accent-amber",
+  primary: "text-accent-primary",
   ts: "text-accent-ts",
   go: "text-accent-go",
 } as const;

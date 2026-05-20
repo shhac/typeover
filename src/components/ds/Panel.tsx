@@ -3,7 +3,7 @@ import { splitProps, Show } from "solid-js";
 import { cn } from "./_internal";
 
 type Tone = "default" | "inset" | "elevated";
-type LangAccent = "amber" | "ts" | "go" | "none";
+type LangAccent = "primary" | "ts" | "go" | "none";
 type Padding = "tight" | "default" | "airy";
 
 interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
@@ -34,7 +34,7 @@ const toneBgVar: Record<Tone, string> = {
 };
 
 const accentClass: Record<LangAccent, string> = {
-  amber: "border-accent-amber/60 text-accent-amber",
+  primary: "border-accent-primary/60 text-accent-primary",
   ts: "border-accent-ts/60 text-accent-ts",
   go: "border-accent-go/60 text-accent-go",
   none: "border-border-default text-fg-secondary",
