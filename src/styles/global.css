@@ -152,13 +152,29 @@
  */
 :root[data-style="cardboard"] {
   /* Warm-paper grain via a tiny radial-gradient stipple. Subtle
-   * inset shadow reads as folded-paper edge depth. */
+   * inset shadow reads as folded-paper edge depth. Stipple opacity
+   * was 18% — too low to register on dark theme where fg-faint is
+   * a low-luminance grey. Bumped to 35% and warmed the panel
+   * surface so the choice reads visually rather than vanishing
+   * into terminal. design-docs/17 F-11. */
+  --color-bg-panel: #1a1612;
+  --color-bg-elevated: #221c17;
   --surface-pattern: radial-gradient(
     circle at 1px 1px,
-    color-mix(in oklab, var(--color-fg-faint) 18%, transparent) 1px,
+    color-mix(in oklab, var(--color-fg-faint) 35%, transparent) 1px,
     transparent 1.5px
   );
   --shadow-panel: inset 0 0 0 1px color-mix(in oklab, var(--color-bg-elevated) 80%, transparent);
+}
+
+:root[data-style="cardboard"][data-theme="light"],
+:root[data-style="cardboard"][data-theme="system"] {
+  /* Light theme keeps the original near-white panel surfaces; the
+   * cardboard tilt above is the warm-dark-paper variant for dark
+   * themes. On light, the stipple over an off-white surface reads
+   * as paper grain without needing a colour shift. */
+  --color-bg-panel: #f5f0e8;
+  --color-bg-elevated: #ebe4d6;
 }
 
 :root[data-style="textbook"] {
@@ -171,20 +187,43 @@
 :root[data-style="glass"] {
   /* Translucent panels with backdrop blur where supported. The
    * @supports guard in @layer base below keeps the opaque
-   * fallback honest. */
+   * fallback honest. Body gets a soft amber radial gradient so the
+   * blur has something to actually blur — a flat-coloured backdrop
+   * makes the filter a no-op (design-docs/17 F-12). */
   --panel-backdrop-filter: blur(10px) saturate(140%);
   --shadow-panel:
     0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 4%, transparent),
     0 6px 24px -10px color-mix(in oklab, #000 35%, transparent);
 }
 
+:root[data-style="glass"] body {
+  background-image:
+    radial-gradient(
+      ellipse 1200px 600px at 80% -10%,
+      color-mix(in oklab, var(--color-accent-amber) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 900px 500px at 0% 110%,
+      color-mix(in oklab, var(--color-accent-ts) 10%, transparent),
+      transparent 55%
+    );
+  background-attachment: fixed;
+}
+
 :root[data-style="islands"] {
   /* Strong drop shadow so panels physically separate from the
-   * page. Reads modern-app rather than terminal. */
+   * page. Reads modern-app rather than terminal. The dark theme
+   * also gets a 1px inner-top highlight so the lift is legible
+   * against the near-black page background — black-on-near-black
+   * shadows vanish without it (design-docs/17 F-11). */
   --shadow-panel:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 8%, transparent),
     0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
     0 2px 4px -1px color-mix(in oklab, #000 30%, transparent);
-  --shadow-island: 0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
+  --shadow-island:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 10%, transparent),
+    0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
 }
 
 :root[data-theme="light"] {
