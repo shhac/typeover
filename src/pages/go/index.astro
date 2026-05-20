@@ -53,6 +53,15 @@ const coveragePct =
             every theme is browsable. Themes without exercises yet are visible
             so you can see what's coming.
           </Text>
+          {/* Static affordance: progress is per-exercise + local-only,
+            * so a learner can come back to any URL and pick up where
+            * they were. Cheap teach without a JS resume widget;
+            * design-docs/27 — the "ship the prose hint" recommendation
+            * from the Resume CTA devil's advocate. */}
+          <Text tone="muted" size="sm">
+            Progress saves per exercise — re-open any one to continue where you
+            left off. Nothing leaves your browser.
+          </Text>
           {/*
             * Coverage chip — honest about how much is actually authored
             * versus scaffolded. Sourced from the same content collection
