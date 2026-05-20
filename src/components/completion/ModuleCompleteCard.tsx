@@ -147,13 +147,29 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
     }
   }
 
+  /* SSR + hydration-failure fallback. Renders on the server (because
+   * the page now passes `client:load`) and stays put if the JS chunk
+   * fails to hydrate. Without this the Panel was visibly empty — a
+   * learner with a flaky connection landed on a blank congratulations
+   * screen. design-docs/19 F-15 + design-docs/16 F-10. */
   return (
     <Show
       when={progress()}
       fallback={
-        <Text tone="faint" size="sm" family="mono">
-          Loading your progress…
-        </Text>
+        <div class="flex flex-col gap-4">
+          <Eyebrow tone="muted">typeover · module</Eyebrow>
+          <Heading level={2} size="2xl">
+            {props.moduleTitle}
+          </Heading>
+          <Text tone="muted" size="sm" family="mono">
+            Loading your progress…
+          </Text>
+          <div>
+            <ButtonLink href={props.continueHref} variant="secondary">
+              {props.continueLabel}
+            </ButtonLink>
+          </div>
+        </div>
       }
     >
       {(p) => (

@@ -92,8 +92,13 @@ const shareTemplate =
           </Text>
         </Stack>
         <Panel padding="airy" tone="default">
+          {/* client:load (not client:only) so the SSR pass renders a
+            * fallback with moduleTitle + Continue button. If the JS
+            * chunk fails to hydrate the learner still sees something
+            * meaningful instead of an empty Panel. design-docs/19
+            * F-15. */}
           <ModuleCompleteCard
-            client:only="solid-js"
+            client:load
             moduleId={moduleId}
             moduleTitle={moduleData.title}
             themes={themes}
