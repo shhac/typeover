@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, Show, type JSX } from "solid-js";
+import { createEffect, createSignal, onCleanup, Show, type JSX } from "solid-js";
 import { cn } from "./_internal";
 
 /*
@@ -58,7 +58,20 @@ function ToastBody(props: ToastBodyProps): JSX.Element {
     if (timer !== null) clearTimeout(timer);
     timer = setTimeout(props.onDismiss, ms);
   };
-  scheduleDismiss(remaining);
+
+  /* Reset the auto-dismiss timer on every re-emit. Without this, a
+   * second emit while the first toast is on screen would inherit the
+   * first toast's remaining time — a learner who flipped theme →
+   * density → shape in two seconds would see the third toast for
+   * ~2 s instead of the full duration. design-docs/20 lens-5 finding. */
+  createEffect(() => {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-expressions */
+    props.state;
+    remaining = props.duration;
+    startedAt = performance.now();
+    setPaused(false);
+    scheduleDismiss(remaining);
+  });
 
   const pause = () => {
     if (paused()) return;

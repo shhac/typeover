@@ -90,6 +90,36 @@ describe("<Toast>", () => {
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
 
+  it("re-emit while a toast is visible resets the auto-dismiss to a full duration", () => {
+    /* design-docs/20 lens-5 finding. Without the createEffect reset
+     * inside ToastBody, the second emit inherits the first toast's
+     * remaining time — a learner cycling settings sees the third
+     * toast for a fraction of the intended duration. */
+    const dismiss = vi.fn();
+    const [state, setState] = createSignal<ToastState | null>({ message: "first" });
+    renderToast(state, dismiss);
+    vi.advanceTimersByTime(2000);
+    setState({ message: "second" });
+    vi.advanceTimersByTime(3999); /* total ~5999ms — original timer would have dismissed */
+    expect(dismiss).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(2);
+    expect(dismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("manual dismiss-before-timer does not double-fire onDismiss", () => {
+    /* When the parent flips state to null mid-timer (e.g. via the
+     * undo flow), Show unmounts ToastBody and onCleanup clears the
+     * pending timeout — onDismiss must not fire a second time at
+     * the original deadline. */
+    const dismiss = vi.fn();
+    const [state, setState] = createSignal<ToastState | null>({ message: "x" });
+    renderToast(state, dismiss);
+    vi.advanceTimersByTime(2000);
+    setState(null); /* parent dismissed manually */
+    vi.advanceTimersByTime(5000); /* would have crossed the original 4s deadline */
+    expect(dismiss).not.toHaveBeenCalled();
+  });
+
   it("dismiss button calls onDismiss", () => {
     const dismiss = vi.fn();
     const [state] = createSignal<ToastState | null>({ message: "x" });
