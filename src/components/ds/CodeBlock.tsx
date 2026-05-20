@@ -6,8 +6,16 @@ type Lang = "ts" | "go" | "shell" | "plain";
 
 interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
   lang?: Lang;
-  /** Optional filename / context shown in the header. */
+  /** Optional filename shown in the header. Use for real filenames
+   *  (`users.ts`, `main.go`) — anything that would round-trip
+   *  through a copy-to-clipboard "filename" path. */
   filename?: string;
+  /** Optional non-filename label for the header (e.g. "your turn —
+   *  type the line"). Renders in the same slot as filename when
+   *  filename is absent. design-docs/17 F-10 split the slot so
+   *  filename and prose-label can't pretend to be the same thing
+   *  to downstream tooling. */
+  label?: string;
   /** Show the language label in the corner. */
   showLang?: boolean;
 }
@@ -34,19 +42,31 @@ const langBarBg: Record<Lang, string> = {
 };
 
 export function CodeBlock(props: ParentProps<CodeBlockProps>) {
-  const [local, rest] = splitProps(props, ["lang", "filename", "showLang", "class", "children"]);
+  const [local, rest] = splitProps(props, [
+    "lang",
+    "filename",
+    "label",
+    "showLang",
+    "class",
+    "children",
+  ]);
   const lang = local.lang ?? "plain";
   const showLang = local.showLang ?? true;
+  /* Prefer filename; fall back to label. Both render in the same
+   * mono-muted slot but stay typed as separate props so consumers
+   * don't conflate filenames (real file paths) with prose
+   * instructions. */
+  const headerText = () => local.filename ?? local.label;
   return (
     <div class={cn("border border-border-default rounded-sm overflow-hidden", local.class)}>
-      <Show when={local.filename || showLang}>
+      <Show when={headerText() !== undefined || showLang}>
         <div
           class={cn(
             "flex items-center justify-between px-3 py-1.5 border-b border-border-default",
             langBarBg[lang],
           )}
         >
-          <span class="font-mono text-[11px] text-fg-muted">{local.filename}</span>
+          <span class="font-mono text-[11px] text-fg-muted">{headerText()}</span>
           <Show when={showLang && langLabel[lang]}>
             <span
               class={cn(

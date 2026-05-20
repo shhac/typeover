@@ -113,7 +113,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
         </Text>
       </div>
       <Stack gap="sm">
-        <CodeBlock lang="ts" filename="typescript">
+        <CodeBlock lang="ts" label="source">
           {props.ts}
         </CodeBlock>
       </Stack>
