@@ -1,0 +1,51 @@
+---
+import { Text } from "~/components/ds";
+
+/*
+ * Plain-text breadcrumb used across the /go/* routes. design-docs/17
+ * F-9 demoted the earlier filled-amber + outlined badge dialects;
+ * one chevron separator + fg-muted ancestors + fg-primary active
+ * leaf is the canonical shape. Pulled out of three near-identical
+ * sites (/go/[module], /go/[module]/[theme], /go/[module]/[theme]/
+ * [index]) per design-docs/20 FW-3.
+ *
+ * Active leaf = the last crumb with no `href` (always rendered as a
+ * non-linked span). Ancestor crumbs carry an optional `ariaLabel`
+ * so the screen-reader announcement can disambiguate ("Up to
+ * Foundations module overview") even when the visible label is
+ * shorter.
+ */
+
+export interface Crumb {
+  label: string;
+  /** When present, the crumb renders as an anchor. When absent, it
+   *  renders as the active-leaf span (last crumb in the chain). */
+  href?: string;
+  ariaLabel?: string;
+}
+
+interface Props {
+  crumbs: Crumb[];
+}
+
+const { crumbs } = Astro.props;
+---
+
+<Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
+  {crumbs.map((crumb, i) => (
+    <Fragment>
+      {crumb.href ? (
+        <a
+          href={crumb.href}
+          class="hover:text-fg-primary transition-colors focus-ring"
+          aria-label={crumb.ariaLabel}
+        >
+          {crumb.label}
+        </a>
+      ) : (
+        <span class="text-fg-primary">{crumb.label}</span>
+      )}
+      {i < crumbs.length - 1 && <span aria-hidden="true">›</span>}
+    </Fragment>
+  ))}
+</Text>

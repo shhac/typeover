@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
+import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
 import { ExerciseProgressChip } from "~/components/progress/ExerciseProgressChip";
 import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
 import {
@@ -62,27 +63,17 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
     <Container width="default">
       <Stack gap="xl">
         <Stack gap="sm">
-          {/* Plain-text breadcrumb — design-docs/17 demoted the
-            * filled-amber + outlined badges. Single chevron
-            * separator throughout the site. */}
-          <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
-            <a
-              href="/go"
-              class="hover:text-fg-primary transition-colors focus-ring"
-            >
-              Curriculum
-            </a>
-            <span aria-hidden="true">›</span>
-            <a
-              href={`/go/${moduleEntry.id}`}
-              class="hover:text-fg-primary transition-colors focus-ring"
-              aria-label={`Up to ${moduleEntry.data.title} module overview`}
-            >
-              {moduleEntry.data.title}
-            </a>
-            <span aria-hidden="true">›</span>
-            <span class="text-fg-primary">{theme.data.title}</span>
-          </Text>
+          <Breadcrumb
+            crumbs={[
+              { label: "Curriculum", href: "/go" },
+              {
+                label: moduleEntry.data.title,
+                href: `/go/${moduleEntry.id}`,
+                ariaLabel: `Up to ${moduleEntry.data.title} module overview`,
+              },
+              { label: theme.data.title },
+            ]}
+          />
           <Heading level={1}>{theme.data.title}</Heading>
         </Stack>
 

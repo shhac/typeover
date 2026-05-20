@@ -10,6 +10,7 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
+import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
 import { Mcq } from "~/components/exercise/Mcq";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 import { FillBlankLineInput } from "~/components/exercise/FillBlankLineInput";
@@ -85,37 +86,22 @@ const parentThemeHref = themeHref(themeEntry.id);
     <Container width="default">
       <Stack gap="xl">
         <Stack gap="sm">
-          {/* Plain-text breadcrumb — design-docs/17 demoted the
-            * filled+outlined badge pair. One chevron separator
-            * across the site; the active page (this exercise's
-            * theme) reads in fg-primary; ancestors fade to
-            * fg-muted. */}
-          <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
-            <a
-              href="/go"
-              class="hover:text-fg-primary transition-colors focus-ring"
-            >
-              Curriculum
-            </a>
-            <span aria-hidden="true">›</span>
-            <a
-              href={`/go/${moduleEntry.id}`}
-              class="hover:text-fg-primary transition-colors focus-ring"
-              aria-label={`Up to ${moduleEntry.data.title} module overview`}
-            >
-              {moduleEntry.data.title}
-            </a>
-            <span aria-hidden="true">›</span>
-            <a
-              href={parentThemeHref}
-              class="hover:text-fg-primary transition-colors focus-ring"
-              aria-label={`Up to theme overview (${themeEntry.data.title})`}
-            >
-              {themeEntry.data.title}
-            </a>
-            <span aria-hidden="true">›</span>
-            <span class="text-fg-primary">exercise {ex.order} · {ex.type}</span>
-          </Text>
+          <Breadcrumb
+            crumbs={[
+              { label: "Curriculum", href: "/go" },
+              {
+                label: moduleEntry.data.title,
+                href: `/go/${moduleEntry.id}`,
+                ariaLabel: `Up to ${moduleEntry.data.title} module overview`,
+              },
+              {
+                label: themeEntry.data.title,
+                href: parentThemeHref,
+                ariaLabel: `Up to theme overview (${themeEntry.data.title})`,
+              },
+              { label: `exercise ${ex.order} · ${ex.type}` },
+            ]}
+          />
           <Heading level={1}>{themeEntry.data.title}</Heading>
         </Stack>
 

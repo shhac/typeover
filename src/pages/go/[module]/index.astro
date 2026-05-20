@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from "~/components/ds";
+import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
 import { buildCurriculumTree, byOrder, exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
 import { formatBlock } from "~/lib/format-block";
 import { formatInline } from "~/lib/format-inline";
@@ -73,17 +74,12 @@ const nextModule = sorted[idx + 1]?.module;
   <main class="py-12 sm:py-20">
     <Container width="wide">
       <Stack gap="xl">
-        {/* Breadcrumb */}
-        <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
-          <a
-            href="/go"
-            class="hover:text-fg-primary transition-colors focus-ring"
-          >
-            Curriculum
-          </a>
-          <span aria-hidden="true">›</span>
-          <span class="text-fg-primary">{moduleData.title}</span>
-        </Text>
+        <Breadcrumb
+          crumbs={[
+            { label: "Curriculum", href: "/go" },
+            { label: moduleData.title },
+          ]}
+        />
 
         {/* Module hero */}
         <Stack gap="sm">
