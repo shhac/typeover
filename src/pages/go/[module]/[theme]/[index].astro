@@ -85,27 +85,30 @@ const parentThemeHref = themeHref(themeEntry.id);
     <Container width="default">
       <Stack gap="xl">
         <Stack gap="sm">
-          <Stack direction="row" gap="sm" align="center" wrap>
+          {/* Plain-text breadcrumb — design-docs/17 demoted the
+            * filled+outlined badge pair. One chevron separator
+            * across the site; the active page (this exercise's
+            * theme) reads in fg-primary; ancestors fade to
+            * fg-muted. */}
+          <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
             <a
               href="/go"
-              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
               aria-label={`Up to curriculum (${moduleEntry.data.title})`}
             >
-              <Badge variant="amber">{moduleEntry.data.title}</Badge>
+              {moduleEntry.data.title}
             </a>
-            <Text tone="muted" size="sm" family="mono">→</Text>
+            <span aria-hidden="true">›</span>
             <a
               href={parentThemeHref}
-              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
               aria-label={`Up to theme overview (${themeEntry.data.title})`}
             >
-              <Badge variant="default" outline>{themeEntry.data.title}</Badge>
+              {themeEntry.data.title}
             </a>
-            <Text tone="muted" size="sm" family="mono">·</Text>
-            <Text tone="muted" size="sm" family="mono">
-              exercise {ex.order} · {ex.type}
-            </Text>
-          </Stack>
+            <span aria-hidden="true">›</span>
+            <span class="text-fg-primary">exercise {ex.order} · {ex.type}</span>
+          </Text>
           <Heading level={1}>{themeEntry.data.title}</Heading>
         </Stack>
 

@@ -62,17 +62,20 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
     <Container width="default">
       <Stack gap="xl">
         <Stack gap="sm">
-          <Stack direction="row" gap="sm" align="center" wrap>
+          {/* Plain-text breadcrumb — design-docs/17 demoted the
+            * filled-amber + outlined badges. Single chevron
+            * separator throughout the site. */}
+          <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
             <a
               href="/go"
-              class="inline-flex hover:opacity-80 rounded-sm focus-visible:outline-2 focus-visible:outline-accent-amber"
+              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
               aria-label={`Up to curriculum (${moduleEntry.data.title})`}
             >
-              <Badge variant="amber">{moduleEntry.data.title}</Badge>
+              {moduleEntry.data.title}
             </a>
-            <Text tone="muted" size="sm" family="mono">→</Text>
-            <Badge variant="default" outline>{theme.data.title}</Badge>
-          </Stack>
+            <span aria-hidden="true">›</span>
+            <span class="text-fg-primary">{theme.data.title}</span>
+          </Text>
           <Heading level={1}>{theme.data.title}</Heading>
         </Stack>
 

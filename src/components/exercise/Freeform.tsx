@@ -117,7 +117,13 @@ export function Freeform(props: FreeformProps) {
         autocapitalize="off"
         autocorrect="off"
         value={code()}
-        onInput={(e) => setCode(e.currentTarget.value)}
+        onInput={(e) => {
+          setCode(e.currentTarget.value);
+          /* Editing invalidates the last Run's grade. Without
+           * clearing, Submit could grade fresh garbage against
+           * the previous Run's stdout (design-docs/19 F-3). */
+          yaegi.clear();
+        }}
         onKeyDown={(e) => {
           /* Auto-indent: Enter on an indented line opens the next
            * line at the same indent. Shift+Enter (and other modified

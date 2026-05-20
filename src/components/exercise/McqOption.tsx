@@ -20,11 +20,19 @@ import { cn } from "../ds/_internal";
  */
 type CellState = "showCorrect" | "showIncorrect" | "selected" | "neutral";
 
+/* Demoted 2026-05-20 per design-docs/17 — the MCQ option used to
+ * render as a bordered pill card (full `border rounded-sm`). The
+ * theme review flagged it as one of the worst pillification
+ * offenders: stacked options read as five identical chips with
+ * colour the only differentiator. The new shape is a left-rule
+ * accent (a stripe of state colour) + a subtle background tint —
+ * the row reads as a list item, not a card. Same state palette,
+ * less chrome. */
 const cellClass: Record<CellState, string> = {
-  showCorrect: "border-success/60 bg-success/5",
-  showIncorrect: "border-error/60 bg-error/5",
-  selected: "border-accent-amber bg-accent-amber/5",
-  neutral: "border-border-default hover:border-border-strong",
+  showCorrect: "border-l-success/80 bg-success/5",
+  showIncorrect: "border-l-error/80 bg-error/5",
+  selected: "border-l-accent-amber bg-accent-amber/5",
+  neutral: "border-l-transparent hover:border-l-border-default",
 };
 
 export function optionCellState(args: {
@@ -63,7 +71,8 @@ export function McqOption(props: McqOptionProps) {
   return (
     <label
       class={cn(
-        "flex items-start gap-3 p-3 border rounded-sm cursor-pointer transition-colors",
+        "flex items-start gap-3 py-3 pl-3 pr-2 cursor-pointer transition-colors",
+        "border-l-4 border-l-transparent",
         cellClass[state()],
       )}
     >

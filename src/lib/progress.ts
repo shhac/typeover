@@ -78,9 +78,18 @@ function read(): Progress {
   /* Back up any non-empty payload that failed validation so a future
    * migration / forensic pass can recover the learner's history.
    * design-docs/99 calls this out explicitly: do not silently destroy
-   * progress on a parse failure. */
+   * progress on a parse failure.
+   *
+   * Critical: after the backup, IMMEDIATELY overwrite the main key
+   * with an empty Progress. Without this, every subsequent read()
+   * in the same session would re-trigger the backup branch (the
+   * corrupt blob is still in storage), spawning one new
+   * `typeover:progress:corrupt-<iso>` key per call — and a single
+   * ModuleCompleteCard render fires 100+ reads. design-docs/19 F-1
+   * documented the unbounded-leak shape this fix closes. */
   if (result.reason !== "empty" && raw !== null) {
     localStorage.setItem(CORRUPT_KEY_PREFIX + now(), raw);
+    write(empty());
   }
   return empty();
 }

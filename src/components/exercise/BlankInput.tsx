@@ -95,16 +95,10 @@ export function BlankInput(props: BlankInputProps) {
       }}
       class={cn(
         "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-[13px]",
-        "border rounded-sm outline-none align-baseline min-w-[5ch]",
+        "border rounded-sm outline-none align-baseline",
+        "w-[14ch] max-w-full",
         inputClass[state()],
       )}
-      style={{
-        /* border-box + ~14px of padding+border means width-in-ch
-         * underreads the content area by ~2ch. Buffer of 4 keeps the
-         * text from clipping even for the longest expected value in
-         * the pool. min-w-[5ch] guards tiny one-char expecteds. */
-        width: `${Math.max(props.expected.length + 4, 5)}ch`,
-      }}
     />
   );
 }

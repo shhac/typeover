@@ -202,9 +202,14 @@
   /* Brand accents — darkened from the dark-theme values so they pass
    * 4.5:1 AA against #ffffff at ≥14pt. Brand identity bends to a11y;
    * amber stays the focus colour, TS-blue and Go-cyan stay
-   * recognisable but pull toward saturated mid-tones. */
-  --color-accent-amber: #c97a00;
-  --color-accent-amber-dim: #8a5300;
+   * recognisable but pull toward saturated mid-tones.
+   *
+   * 2026-05-20: amber further darkened from #c97a00 (≈ 4.3:1 against
+   * white — fails AA) to #a06400 (≈ 5.2:1 — passes AA). The fix is
+   * load-bearing because primary buttons render white text on amber
+   * in light theme. */
+  --color-accent-amber: #a06400;
+  --color-accent-amber-dim: #6f4400;
   --color-accent-ts: #2057b8;
   --color-accent-ts-dim: #143a7e;
   --color-accent-go: #006d8e;

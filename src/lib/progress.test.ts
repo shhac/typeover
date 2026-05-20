@@ -127,6 +127,24 @@ describe("progress storage — corrupt-blob backup (task #37)", () => {
     expect(() => getExerciseProgress("ex-1")).not.toThrow();
     /* no localStorage to inspect, but the recorder also must not throw */
   });
+
+  it("backs up exactly once even across many reads of the same corrupt blob", () => {
+    /* design-docs/19 F-1 — the unbounded-leak fix. A corrupt blob
+     * triggers ONE backup, then the main key is overwritten with an
+     * empty Progress, so subsequent reads return cleanly with no
+     * more backup writes. Without this, ModuleCompleteCard's
+     * O(themes × exercises) reads would mint 100+ backup keys per
+     * page load. */
+    localStorage.setItem(STORAGE_KEY, "{not json");
+    for (let i = 0; i < 50; i += 1) getExerciseProgress(`ex-${i}`);
+    expect(backupKeys()).toHaveLength(1);
+    /* And the main key is now an empty Progress, not the corrupt
+     * blob. */
+    const main = localStorage.getItem(STORAGE_KEY);
+    expect(main).not.toBeNull();
+    expect(main).not.toContain("not json");
+    expect(JSON.parse(main!).version).toBe(1);
+  });
 });
 
 describe("progress storage — recorder semantics", () => {

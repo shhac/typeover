@@ -1,5 +1,5 @@
 import { Match, Show, Switch, type JSX } from "solid-js";
-import { Button } from "../ds/Button";
+import { Button, ButtonLink } from "../ds/Button";
 import { CodeBlock } from "../ds/CodeBlock";
 import { Feedback } from "../ds/Feedback";
 import { HintButton } from "../ds/HintButton";
@@ -14,10 +14,9 @@ import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
  * here rather than via a polymorphic Button to keep the scope of the
  * Next-exercise nav small; if a third site needs an anchor-button,
  * extract a ButtonLink. */
-const primaryLinkClass =
-  "inline-flex items-center justify-center gap-2 rounded-sm transition-colors " +
-  "h-11 px-4 text-sm font-sans font-medium " +
-  "bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber";
+/* Right-phase nav anchors use <ButtonLink> from the DS. Earlier
+ * versions hand-rolled the primary-anchor class string here;
+ * ButtonLink consolidates the spec into one place. */
 
 interface ExerciseShellProps {
   /** For progress recording from the Hint button. */
@@ -149,15 +148,19 @@ export function ExerciseShell(props: ExerciseShellProps) {
               when={props.nextExerciseHref}
               fallback={
                 <Show when={props.themeHref}>
-                  <a href={props.themeHref!} class={primaryLinkClass}>
-                    Back to theme overview
-                  </a>
+                  {(href) => (
+                    <ButtonLink href={href()} variant="primary">
+                      Back to theme overview
+                    </ButtonLink>
+                  )}
                 </Show>
               }
             >
-              <a href={props.nextExerciseHref!} class={primaryLinkClass}>
-                Next exercise →
-              </a>
+              {(href) => (
+                <ButtonLink href={href()} variant="primary">
+                  Next exercise →
+                </ButtonLink>
+              )}
             </Show>
             <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
               Try again with a different instance

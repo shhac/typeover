@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import { Button, ButtonLink } from "~/components/ds";
 import { getExerciseProgress, summarizeTheme } from "~/lib/progress";
 
 interface ThemeSummary {
@@ -203,19 +204,12 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
               </Show>
             </div>
             <div class="flex flex-row gap-3 flex-wrap">
-              <button
-                type="button"
-                onClick={share}
-                class="inline-flex items-center justify-center h-11 px-4 rounded-sm text-sm font-sans font-medium bg-accent-amber text-bg-base hover:bg-accent-amber/90 border border-accent-amber transition-colors"
-              >
+              <Button variant="primary" onClick={share}>
                 Share
-              </button>
-              <a
-                href={props.continueHref}
-                class="inline-flex items-center justify-center h-11 px-4 rounded-sm text-sm font-sans font-medium bg-bg-elevated text-fg-primary border border-border-strong hover:border-accent-amber/60 hover:text-accent-amber transition-colors"
-              >
+              </Button>
+              <ButtonLink href={props.continueHref} variant="secondary">
                 {props.continueLabel}
-              </a>
+              </ButtonLink>
             </div>
             <Show when={shareState() === "copied"}>
               <div class="text-fg-muted text-xs font-mono">

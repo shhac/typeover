@@ -125,6 +125,26 @@ describe("<FillBlankLineInput> — submit gate", () => {
   });
 });
 
+describe("<FillBlankLineInput> — stale-runResult invalidation", () => {
+  it("editing the input after a successful Run clears runResult and disables Submit", async () => {
+    /* design-docs/19 F-3 pin: a learner who Runs valid code,
+     * then edits the input to garbage, must NOT be able to
+     * Submit the previous Run's grade against the new input.
+     * Clearing runResult on edit drops canSubmit back to false. */
+    evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container, getAllByText, getByText } = renderFBL();
+    const input = lineInput(container);
+    setVal(input, "doubled := count * 2");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    /* Edit to garbage — Submit must lock again. */
+    setVal(input, "asdf");
+    expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(true);
+  });
+});
+
 describe("<FillBlankLineInput> — happy path", () => {
   it("type → Run → stdout match → Submit records pass once + locks input", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });

@@ -136,7 +136,16 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
                    * Feedback panel carries the correctness signal. */
                   revealed={false}
                   locked={phase.current() === "right"}
-                  onInput={(value) => setInput(value)}
+                  onInput={(value) => {
+                    setInput(value);
+                    /* Editing the input invalidates the last Run's
+                     * grade — otherwise Submit could grade fresh
+                     * garbage against the previous Run's stdout
+                     * (design-docs/19 F-3). Clearing runResult
+                     * also drops canSubmit back to false so the
+                     * learner has to Run again. */
+                    yaegi.clear();
+                  }}
                   onEnter={() => {
                     if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
                   }}

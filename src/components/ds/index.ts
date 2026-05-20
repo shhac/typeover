@@ -1,6 +1,6 @@
 export { Adaptive } from "./Adaptive";
 export { Badge } from "./Badge";
-export { Button } from "./Button";
+export { Button, ButtonLink } from "./Button";
 export { CodeBlock } from "./CodeBlock";
 export { Compare } from "./Compare";
 export { Container } from "./Container";
