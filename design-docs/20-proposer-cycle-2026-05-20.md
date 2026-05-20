@@ -239,6 +239,75 @@ or proposer cycle can pick them up cold.
   components) / ~−165 lines (sweep removes the inline duplications)
   + 2 file imports tightened up.
 
+## Round 6 — second proposer cycle (mobile / resilience / build-in-public / Module 2)
+
+Four fresh design goals (distinct from round 1's pedagogy/onboarding/
+authoring/perf):
+
+| Goal              | Proposal                                                | Status      |
+|-------------------|---------------------------------------------------------|-------------|
+| Mobile UX         | Long-press repeat + slide-to-glide on MobileKeyBar      | **Killed**  |
+| Error resilience  | Resilient progress writer + StorageHealthBanner         | Not-picked  |
+| Build-in-public   | `/log` page rendered from `git log main`                | **Killed**  |
+| Module 2 content  | Author `collections/arrays-and-slices` 10-slot theme    | Not-picked  |
+
+### Picked for validation, then killed
+
+**Mobile keybar long-press + slide-to-glide** — sanity said
+ship-with-tweaks (drop slide; narrow repeat to Tab/space/newline only).
+DA said defer-until-launch+30d:
+- Contract break — the bar's 16 plain `<button>`s currently match every
+  other DS button; layering hold-to-repeat + slide-to-glide turns it
+  into a stateful input mode with three gestures on the same hit-rect.
+  No DS precedent; modes are where bugs and a11y regressions live.
+- Slide gesture fights the bar's existing `overflow-x-auto` — the bar
+  was designed to be horizontally scrollable. Pointer-slide and
+  scroll-to-find-symbol are ambiguous on the same hit-rects.
+- jsdom has no PointerEvent constructor; the project has no Playwright.
+  Load-bearing gesture logic would ship without automated coverage.
+- Freeform is a minority slice of the Foundations curriculum; the
+  per-key one-tap contract already solved doc 08's primary mobile
+  complaint ("symbols 2-3 taps deep on stock keyboards"). Optimising
+  speed-of-symbol-entry further is premature.
+- doc 08 §"Mobile support" enshrines tap + 44×44; slide gestures
+  appear nowhere. Shipping them would be a unilateral contract change.
+
+**`/log` build-time changelog page** — sanity said ship-with-tweaks
+(parser handle bare `type:` and `content[...]` prefixes, drop author
+names, prebuild via npm script). DA said kill:
+- Doc 07 explicitly forbids marketing chrome and active marketing. A
+  curated on-site changelog is exactly that soft-sell posture even if
+  it's introspective; "build-in-public" is already discharged by the
+  github link in the footer.
+- The recent 50 commits are dominated by `refactor[focus-ring]`,
+  `refactor[ds-tokens]`, `docs[proposer-cycle]` — internal grooming
+  a learner cannot parse and a recruiter will skim past. Grouping by
+  week clusters the noise without making it a story.
+- GitHub renders the log with better filters, blame, and diffs.
+  Mirroring on-site is a duplicative surface with build-step + CI
+  fetch-depth + styling + a11y + mobile maintenance cost.
+- The footer is already 5 anchors; 6 is chrome bloat doc 07 resists.
+- Pre-launch the named checklist (mobile, Lighthouse, README rewrite,
+  domains) takes priority over post-launch artefacts.
+
+### Not picked for validation
+
+Two proposals were generated but not validated this round:
+
+**Error resilience — resilient progress writer + StorageHealthBanner**.
+Touches the load-bearing `write()` in `progress.ts` (every recorder
+funnels through it). Real failure modes (QuotaExceededError, private-
+browsing SecurityError) but a misfire could break working storage.
+Defer to a future round with more design upfront. Could revisit when
+a quota issue actually manifests post-launch.
+
+**Module 2 authoring — `collections/arrays-and-slices` end-to-end**.
+10 exercises × ~30 min each = real pedagogical-judgement work, not a
+Claude task. Author distractors, calibrate difficulty across the
+MCQ/fill-word/fill-line/freeform mix, write hints that scale from
+conceptual to near-answer. Generating stubs is automatable; the
+authoring quality bar isn't. Defer to Paul.
+
 ## Notes for the next proposer cycle
 
 - Validation matters: across two rounds, every "small 1-2 days"
