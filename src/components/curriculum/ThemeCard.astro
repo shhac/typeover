@@ -1,0 +1,72 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Badge, Heading, Panel, Stack, Text } from "~/components/ds";
+import { exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
+import { formatInline } from "~/lib/format-inline";
+
+/*
+ * Theme overview card used in the curriculum grid on /go and
+ * /go/<module>. Pulled out of two near-identical hand-rolled
+ * Panel-Stack-Stack-Badge blocks (design-docs/20 FW-3) so the
+ * card's shape — title link, intro snippet, ready badge,
+ * overview + start anchors — lives in one place.
+ *
+ * The two routes diverged only on which "module.order" they read
+ * (module.data.order vs moduleData.order, identical value); both
+ * call sites now pass the parent module's order as a prop.
+ */
+
+interface Props {
+  /** The parent module's order (the "1" in "1.2"). */
+  moduleOrder: number;
+  theme: CollectionEntry<"themes">;
+  /** First exercise in this theme, when authored. Absent for
+   *  scaffolded themes — the "start →" anchor hides in that case. */
+  firstExercise: CollectionEntry<"exercises"> | undefined;
+  exerciseCount: number;
+}
+
+const { moduleOrder, theme, firstExercise, exerciseCount } = Astro.props;
+const overviewHref = themeHref(theme.id);
+const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
+---
+
+<Panel padding="default" tone="default">
+  <Stack gap="sm">
+    <Stack direction="row" gap="sm" align="baseline" wrap>
+      <Text tone="faint" size="xs" family="mono">
+        {moduleOrder}.{theme.data.order}
+      </Text>
+      <Heading level={3} size="lg">
+        <a
+          href={overviewHref}
+          class="hover:text-accent-amber transition-colors"
+        >
+          {theme.data.title}
+        </a>
+      </Heading>
+    </Stack>
+    <Text tone="muted" size="sm">
+      <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
+    </Text>
+    <Stack direction="row" gap="sm" align="center" wrap>
+      <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
+        {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
+      </Badge>
+      <a
+        href={overviewHref}
+        class="text-fg-muted hover:text-fg-primary font-mono text-sm"
+      >
+        overview
+      </a>
+      {startHref && (
+        <a
+          href={startHref}
+          class="text-accent-amber hover:underline font-mono text-sm"
+        >
+          start →
+        </a>
+      )}
+    </Stack>
+  </Stack>
+</Panel>

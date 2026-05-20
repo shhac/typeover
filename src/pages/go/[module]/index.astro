@@ -2,19 +2,17 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
-  Badge,
   Container,
   Divider,
   Eyebrow,
   Heading,
-  Panel,
   Stack,
   Text,
 } from "~/components/ds";
 import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
-import { buildCurriculumTree, byOrder, exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
+import ThemeCard from "~/components/curriculum/ThemeCard.astro";
+import { buildCurriculumTree, byOrder } from "~/lib/curriculum";
 import { formatBlock } from "~/lib/format-block";
-import { formatInline } from "~/lib/format-inline";
 
 /**
  * Module overview — `/go/<module>`.
@@ -101,51 +99,14 @@ const nextModule = sorted[idx + 1]?.module;
             </Text>
           ) : (
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {node.themes.map(({ theme, firstExercise, exerciseCount }) => {
-                const overviewHref = themeHref(theme.id);
-                const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
-                return (
-                  <Panel padding="default" tone="default">
-                    <Stack gap="sm">
-                      <Stack direction="row" gap="sm" align="baseline" wrap>
-                        <Text tone="faint" size="xs" family="mono">
-                          {moduleData.order}.{theme.data.order}
-                        </Text>
-                        <Heading level={3} size="lg">
-                          <a
-                            href={overviewHref}
-                            class="hover:text-accent-amber transition-colors"
-                          >
-                            {theme.data.title}
-                          </a>
-                        </Heading>
-                      </Stack>
-                      <Text tone="muted" size="sm">
-                        <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
-                      </Text>
-                      <Stack direction="row" gap="sm" align="center" wrap>
-                        <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
-                          {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
-                        </Badge>
-                        <a
-                          href={overviewHref}
-                          class="text-fg-muted hover:text-fg-primary font-mono text-sm"
-                        >
-                          overview
-                        </a>
-                        {startHref && (
-                          <a
-                            href={startHref}
-                            class="text-accent-amber hover:underline font-mono text-sm"
-                          >
-                            start →
-                          </a>
-                        )}
-                      </Stack>
-                    </Stack>
-                  </Panel>
-                );
-              })}
+              {node.themes.map(({ theme, firstExercise, exerciseCount }) => (
+                <ThemeCard
+                  moduleOrder={moduleData.order}
+                  theme={theme}
+                  firstExercise={firstExercise}
+                  exerciseCount={exerciseCount}
+                />
+              ))}
             </div>
           )}
         </Stack>

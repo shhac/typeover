@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
-  Badge,
   ButtonLink,
   CodeBlock,
   Compare,
@@ -11,17 +10,12 @@ import {
   Eyebrow,
   Heading,
   LangCrumbs,
-  Panel,
   Stack,
   Text,
 } from "~/components/ds";
 import Accordion from "~/components/ds/Accordion.astro";
-import {
-  buildCurriculumTree,
-  exerciseHref,
-  themeHref,
-  truncateIntro,
-} from "~/lib/curriculum";
+import ThemeCard from "~/components/curriculum/ThemeCard.astro";
+import { buildCurriculumTree, exerciseHref } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
 
 /**
@@ -120,51 +114,14 @@ func double(n int) int {
               )}
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {themes.map(({ theme, firstExercise, exerciseCount }) => {
-                  const overviewHref = themeHref(theme.id);
-                  const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
-                  return (
-                    <Panel padding="default" tone="default">
-                      <Stack gap="sm">
-                        <Stack direction="row" gap="sm" align="baseline" wrap>
-                          <Text tone="faint" size="xs" family="mono">
-                            {module.data.order}.{theme.data.order}
-                          </Text>
-                          <Heading level={3} size="lg">
-                            <a
-                              href={overviewHref}
-                              class="hover:text-accent-amber transition-colors"
-                            >
-                              {theme.data.title}
-                            </a>
-                          </Heading>
-                        </Stack>
-                        <Text tone="muted" size="sm">
-                          <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
-                        </Text>
-                        <Stack direction="row" gap="sm" align="center" wrap>
-                          <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
-                            {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
-                          </Badge>
-                          <a
-                            href={overviewHref}
-                            class="text-fg-muted hover:text-fg-primary font-mono text-sm"
-                          >
-                            overview
-                          </a>
-                          {startHref && (
-                            <a
-                              href={startHref}
-                              class="text-accent-amber hover:underline font-mono text-sm"
-                            >
-                              start →
-                            </a>
-                          )}
-                        </Stack>
-                      </Stack>
-                    </Panel>
-                  );
-                })}
+                {themes.map(({ theme, firstExercise, exerciseCount }) => (
+                  <ThemeCard
+                    moduleOrder={module.data.order}
+                    theme={theme}
+                    firstExercise={firstExercise}
+                    exerciseCount={exerciseCount}
+                  />
+                ))}
                 {themes.length === 0 && (
                   <Text tone="faint" size="sm" family="mono">
                     themes for this module are not yet drafted
