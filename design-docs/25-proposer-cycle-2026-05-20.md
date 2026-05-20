@@ -144,13 +144,23 @@ queued (see "Next steps" below).
   `3099e14`. Per-module Markdown table + summary line; smoke test
   pins output shape (counts intentionally NOT asserted). Current
   snapshot: 90 exercises, 9/31 themes covered, 29% launch.
-- **Next ship-able candidate:**
-  1. **Content-coverage meter on the curriculum page.** A live
-     visual derived from the same content-report data — surfaces
-     pre-launch theme stubs visually rather than only in the lint
-     / report output. Could be a small Solid island on `/go` that
-     reads the same content collection Astro builds against and
-     paints a progress chip per module.
+- ✅ **Curriculum coverage chip** shipped 2026-05-20 in commit
+  `99e3ade`. Pure Astro (no Solid island needed — data is
+  build-time-static). `summariseCoverage(tree)` rolls
+  buildCurriculumTree's output into modules-complete/partial/empty
+  + themes-covered + total-exercises; the chip renders in the
+  curriculum H1 area. 4 unit tests pin the classification rules.
+
+Cycle 3's queue is now empty. Next /loop tick should open cycle 4
+with a fresh proposer round on new design-goal lenses (cycle 2
+covered pedagogy/design-system/voice/a11y; cycle 3 covered
+performance/onboarding/persistence/curriculum-coverage). Open
+lenses for cycle 4 could include: content-authoring DX
+(`pnpm content:new` ergonomics, the deferred `--types` flag),
+release readiness (deploy checks, SEO, OG share cards depth),
+mobile-specific UX (the Yaegi cold-start chip, the soft-keyboard
+edit loop), and recovery / error states (Yaegi failure messaging,
+network-disconnect signals).
 - **Deferred (need more signal first):**
   - **P6 onboarding banner.** Worth landing in prose-only form
     eventually, but a re-look once real visitors have arrived
