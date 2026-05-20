@@ -176,9 +176,12 @@ each style rebinds.
 1. **Shape axis on terminal + textbook** — neither fully refuses;
    compressed progression instead. Terminal: `0 / 2 / 4 / 8`.
    Textbook: `0 / 0 / 2 / 4`. See table above.
-2. **Palette as a first-class axis** — yes, but as a follow-up
-   pass after this rebind ships. See "Follow-up: palette as a
-   first-class axis" below.
+2. **Palette as a first-class axis** — yes, as a follow-up pass.
+   Full RFC at [design-docs/22-palette-axis-rfc-2026-05-20.md](22-palette-axis-rfc-2026-05-20.md).
+   Ships 22 named palettes (4-5 per style) with dark+light
+   variants each; `default` magic value follows the active
+   style's default palette; a specific palette ID persists
+   across style switches.
 3. **Heading weight** — style sets the **base weight** + per-level
    scalar. New tokens: `--heading-weight-base` (the style's
    default) + per-level scalars `--heading-scale-h1/h2/h3/h4`

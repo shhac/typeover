@@ -677,26 +677,24 @@ Warm cream desk + pale pine islands; morning cabin.
 9. **Privacy page** — `typeover:palette` joins the
    localStorage-keys list.
 
-## Open questions
+## Decisions (locked with Paul, 2026-05-20)
 
-1. **Cross-style application via the UI** — should we expose the
-   "Show all palettes" toggle in v0, or default to per-style-home
-   only and add the toggle if needed? Default: per-style for v0.
-2. **`monochrome` under non-glass styles** — its body gradient is
-   nearly invisible; under terminal it's a no-op. Fine. Under
-   cardboard, the stipple grain still reads — works.
-3. **`manila` + `studio-grey`** route the CTA through a non-amber
-   colour (blue / indigo). The token is still `--color-accent-
-   amber` (role-named). Worth renaming the token to `--color-
-   accent-primary` in a follow-up? Or live with the name drift?
-4. **High-contrast palettes** (`hc-dark`, `hc-light` from
-   design-docs/13) — these belong here too. Add them as 23rd /
-   24th palettes (with no style "home"), or defer to a separate
-   a11y pass? Recommend defer.
-5. **Custom user-defined palette** (the user's "or pick from a
-   predefined set... or custom choices" phrasing). A bring-your-
-   own-tokens UI is a much bigger surface. Defer to a follow-up;
-   v0 ships the 22 named palettes only.
+1. **Cross-style "Show all palettes" toggle** — build from day 1,
+   default off. The settings UI shows palettes grouped by home
+   style with a "Show all" toggle that reveals the full
+   catalogue. Power-users can mix any palette with any style.
+2. **`monochrome` under non-glass styles** — confirmed fine. No
+   action.
+3. **Rename `--color-accent-amber` → `--color-accent-primary`** —
+   adopted. The token is role-named (primary CTA + focus ring),
+   not hue-named; the rename matches the truth. Sweep covers
+   `--color-accent-amber`, `--color-accent-amber-dim`, and every
+   `text-accent-amber` / `bg-accent-amber/...` / `border-accent-
+   amber/...` Tailwind utility derived from the same token.
+4. **High-contrast palettes** — deferred. Track as a follow-up
+   when the accessibility-audit pass lands.
+5. **Custom user-defined palette UI** — deferred. v0 ships the 22
+   named palettes only.
 
 ## Source material
 
