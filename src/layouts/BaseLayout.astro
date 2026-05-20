@@ -118,6 +118,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
         }
       })();
     </script>
+    <link rel="canonical" href={pageUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {isExerciseRoute && (
       <link rel="preload" href="/yaegi/yaegi.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />

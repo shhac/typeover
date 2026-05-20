@@ -1,0 +1,11 @@
+# typeover — public crawl policy. The site is intentionally
+# indexable; carve-outs are internal dev tools (/design-system is
+# the DS primitive gallery, /runtime-smoke is the Yaegi smoke
+# probe) — neither is a learner-facing page.
+
+User-agent: *
+Allow: /
+Disallow: /design-system
+Disallow: /runtime-smoke
+
+Sitemap: https://typeover.paulie.app/sitemap-index.xml
