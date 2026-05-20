@@ -245,3 +245,48 @@ export function summarizeTheme(exerciseIds: readonly string[]): {
   const passed = exerciseIds.filter((id) => getExerciseProgress(id).instancesPassed > 0).length;
   return { passed, total, themeComplete: total > 0 && passed === total };
 }
+
+/** Module-level aggregation used by the completion card. Pure —
+ *  takes the theme structure directly so the result is testable
+ *  without a Solid render harness. design-docs/20 lens-1 + lens-3
+ *  finding (extracts a four-`let` loop body from ModuleCompleteCard). */
+export interface ModuleProgressSummary {
+  exercisesPassed: number;
+  totalExercises: number;
+  themesComplete: number;
+  hintsUsedTotal: number;
+}
+
+export function aggregateModuleProgress(
+  themes: readonly { exerciseIds: readonly string[] }[],
+): ModuleProgressSummary {
+  let exercisesPassed = 0;
+  let totalExercises = 0;
+  let themesComplete = 0;
+  let hintsUsedTotal = 0;
+  for (const theme of themes) {
+    const summary = summarizeTheme(theme.exerciseIds);
+    exercisesPassed += summary.passed;
+    totalExercises += summary.total;
+    if (summary.themeComplete) themesComplete += 1;
+    for (const id of theme.exerciseIds) {
+      hintsUsedTotal += getExerciseProgress(id).hintsUsedTotal;
+    }
+  }
+  return { exercisesPassed, totalExercises, themesComplete, hintsUsedTotal };
+}
+
+/** First exercise across the module's themes that the learner hasn't
+ *  passed yet. Used by the almost-there branch of the completion
+ *  card to offer a Continue CTA. design-docs/16 F-8 + design-docs/20
+ *  lens-1 finding. */
+export function findNextUnfinishedExerciseId(
+  themes: readonly { exerciseIds: readonly string[] }[],
+): string | null {
+  for (const theme of themes) {
+    for (const exId of theme.exerciseIds) {
+      if (getExerciseProgress(exId).instancesPassed === 0) return exId;
+    }
+  }
+  return null;
+}

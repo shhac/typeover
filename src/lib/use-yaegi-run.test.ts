@@ -187,6 +187,35 @@ describe("useYaegiRun", () => {
     expect(h.bootError()).toBe("wasm fetch failed");
   });
 
+  it("preflight() after a boot error is a no-op until reset() flips status back to uninit", async () => {
+    /* Pin the recovery contract: a boot error is sticky. Callers
+     * must `reset()` to re-arm; otherwise repeated `preflight()` is
+     * a silent no-op and the UI shows the stale error. If a future
+     * refactor adds auto-retry-on-error, this test fails first and
+     * the change is deliberate. design-docs/20 lens-5 finding. */
+    readyMock.mockReset();
+    readyMock.mockRejectedValueOnce(new Error("first boot failed"));
+    readyMock.mockResolvedValueOnce(undefined);
+    const h = setup();
+    h.preflight();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("error");
+    expect(readyMock).toHaveBeenCalledTimes(1);
+    /* Repeated preflight calls don't retry. */
+    h.preflight();
+    h.preflight();
+    expect(readyMock).toHaveBeenCalledTimes(1);
+    /* reset() flips back to uninit and the next preflight DOES boot. */
+    h.reset();
+    expect(h.runtimeStatus()).toBe("uninit");
+    h.preflight();
+    expect(readyMock).toHaveBeenCalledTimes(2);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(h.runtimeStatus()).toBe("ready");
+  });
+
   it("reset() flips runtimeStatus back to 'uninit' so the next preflight re-boots", async () => {
     /* Without this, the status would lie that the runtime is "ready"
      * after a terminated worker; the next Run would await ready() on

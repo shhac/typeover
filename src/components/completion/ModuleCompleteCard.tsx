@@ -1,6 +1,11 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { Button, ButtonLink, Eyebrow, Heading, StatBlock, Text } from "~/components/ds";
-import { getExerciseProgress, summarizeTheme } from "~/lib/progress";
+import {
+  aggregateModuleProgress,
+  findNextUnfinishedExerciseId,
+  type ModuleProgressSummary,
+  summarizeTheme,
+} from "~/lib/progress";
 
 interface ThemeSummary {
   id: string;
@@ -24,13 +29,6 @@ interface ModuleCompleteCardProps {
   siteOrigin: string;
 }
 
-interface RealProgress {
-  exercisesPassed: number;
-  totalExercises: number;
-  themesComplete: number;
-  hintsUsedTotal: number;
-}
-
 /*
  * Module-completion celebration card. design-docs/11 specifies the
  * shape: "typeover · MODULE COMPLETE" header + summary stats +
@@ -51,54 +49,26 @@ interface RealProgress {
  * case would be deceitful; this branch is the honest path.
  */
 export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
-  const [progress, setProgress] = createSignal<RealProgress | null>(null);
+  const [progress, setProgress] = createSignal<ModuleProgressSummary | null>(null);
   const [shareState, setShareState] = createSignal<"idle" | "shared" | "copied" | "error">("idle");
 
-  onMount(() => {
-    let passed = 0;
-    let total = 0;
-    let themesComplete = 0;
-    let hints = 0;
-    /* Per-theme aggregation delegates the "all exercises passed?"
-     * predicate to summarizeTheme so this card and ProgressChip's
-     * theme-overview tally read the same source of truth. The hint
-     * total is collected here because the helper doesn't carry
-     * hint stats (a chip never displays them). */
-    for (const theme of props.themes) {
-      const summary = summarizeTheme(theme.exerciseIds);
-      passed += summary.passed;
-      total += summary.total;
-      if (summary.themeComplete) themesComplete++;
-      for (const id of theme.exerciseIds) {
-        hints += getExerciseProgress(id).hintsUsedTotal;
-      }
-    }
-    setProgress({
-      exercisesPassed: passed,
-      totalExercises: total,
-      themesComplete,
-      hintsUsedTotal: hints,
-    });
-  });
+  /* Per-theme aggregation delegates to `aggregateModuleProgress` in
+   * progress.ts so this card and ProgressChip's tally read the same
+   * source of truth. design-docs/20 lens-1 + lens-3 extracted the
+   * inline loop into a pure helper for testability. */
+  onMount(() => setProgress(aggregateModuleProgress(props.themes)));
 
   const isComplete = createMemo(() => {
     const p = progress();
     return p !== null && p.exercisesPassed === p.totalExercises && p.totalExercises > 0;
   });
 
-  /* For the almost-there branch — find the first exercise the
-   * learner hasn't passed yet, so the page has a Continue CTA
-   * pointing at it. Without this, a partial-progress visitor
-   * (direct-link or stale share) sees what's left but no path
-   * forward. design-docs/16 F-8. */
+  /* Almost-there branch — Continue CTA points at the first
+   * unfinished exercise. design-docs/16 F-8. Pure helper lives in
+   * progress.ts. */
   const nextUnfinishedHref = createMemo(() => {
-    for (const theme of props.themes) {
-      for (const exId of theme.exerciseIds) {
-        const slot = getExerciseProgress(exId);
-        if (slot.instancesPassed === 0) return `/go/${exId}`;
-      }
-    }
-    return null;
+    const exId = findNextUnfinishedExerciseId(props.themes);
+    return exId === null ? null : `/go/${exId}`;
   });
 
   const shareText = () => {

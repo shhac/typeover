@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  aggregateModuleProgress,
+  findNextUnfinishedExerciseId,
   getExerciseProgress,
   recordHintUsed,
   recordInstanceFailed,
@@ -314,5 +316,79 @@ describe("progress storage — read-existing-blob round-trip", () => {
     recordInstanceSeen("ex-1");
     const raw = readRaw() as RawProgress;
     expect(raw.lastSeenAt > "2026-01-02T00:00:00.000Z").toBe(true);
+  });
+});
+
+describe("aggregateModuleProgress", () => {
+  /* Pure module-level aggregate used by ModuleCompleteCard. Lives
+   * here so the four-let onMount loop in the card can be replaced
+   * with a one-liner that's testable without a Solid render harness.
+   * design-docs/20 lens-1 + lens-3. */
+
+  const THEMES = [
+    { exerciseIds: ["m/t1/01", "m/t1/02"] },
+    { exerciseIds: ["m/t2/01", "m/t2/02", "m/t2/03"] },
+  ];
+
+  it("returns all-zero for a fresh blob", () => {
+    const result = aggregateModuleProgress(THEMES);
+    expect(result).toEqual({
+      exercisesPassed: 0,
+      totalExercises: 5,
+      themesComplete: 0,
+      hintsUsedTotal: 0,
+    });
+  });
+
+  it("counts passed across themes, hints across exercises, themesComplete only when ALL theme exercises pass", () => {
+    recordInstancePassed("m/t1/01");
+    recordInstancePassed("m/t1/02"); /* theme 1 fully passed */
+    recordInstancePassed("m/t2/01"); /* theme 2 partially passed */
+    recordHintUsed("m/t1/01");
+    recordHintUsed("m/t1/01");
+    recordHintUsed("m/t2/03");
+    expect(aggregateModuleProgress(THEMES)).toEqual({
+      exercisesPassed: 3,
+      totalExercises: 5,
+      themesComplete: 1,
+      hintsUsedTotal: 3,
+    });
+  });
+
+  it("an empty theme is NOT counted complete (no false-credit for stubs)", () => {
+    /* Mirrors summarizeTheme's contract — see design-docs/19 F-23
+     * and the helper's own comment. */
+    expect(aggregateModuleProgress([{ exerciseIds: [] }])).toEqual({
+      exercisesPassed: 0,
+      totalExercises: 0,
+      themesComplete: 0,
+      hintsUsedTotal: 0,
+    });
+  });
+});
+
+describe("findNextUnfinishedExerciseId", () => {
+  const THEMES = [
+    { exerciseIds: ["m/t1/01", "m/t1/02"] },
+    { exerciseIds: ["m/t2/01", "m/t2/02"] },
+  ];
+
+  it("returns the first id when nothing is passed", () => {
+    expect(findNextUnfinishedExerciseId(THEMES)).toBe("m/t1/01");
+  });
+
+  it("skips passed exercises and returns the next unfinished, traversing themes in order", () => {
+    recordInstancePassed("m/t1/01");
+    expect(findNextUnfinishedExerciseId(THEMES)).toBe("m/t1/02");
+    recordInstancePassed("m/t1/02");
+    expect(findNextUnfinishedExerciseId(THEMES)).toBe("m/t2/01");
+  });
+
+  it("returns null when every exercise across every theme is passed", () => {
+    recordInstancePassed("m/t1/01");
+    recordInstancePassed("m/t1/02");
+    recordInstancePassed("m/t2/01");
+    recordInstancePassed("m/t2/02");
+    expect(findNextUnfinishedExerciseId(THEMES)).toBeNull();
   });
 });
