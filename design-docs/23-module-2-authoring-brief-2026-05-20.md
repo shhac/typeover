@@ -310,3 +310,51 @@ hints → optional author notes.
 Once Paul is ready, the recommended next action is
 `pnpm content:new theme collections/arrays-and-slices` followed by
 a paired slot-by-slot authoring session.
+
+## Authoring complete (2026-05-20)
+
+All three themes authored and shipped:
+- 2.1 `collections/arrays-and-slices` — 11 slots (commit `b1134e9`
+  series).
+- 2.2 `collections/maps` — 10 slots (commit `5c466db`).
+- 2.3 `collections/iteration` — 11 slots (commit `35adb5b`).
+
+Total: 32 exercises, 11 runnable canonicals Yaegi-verified, content
+lint + build green.
+
+### New infra landed during authoring
+
+- **`successNote` + `alternateCanonicals`** (commit `d2084ac`) —
+  schema fields and component plumbing so the grader can accept the
+  modern canonical even when Yaegi can't run it, paired with a
+  disclosure surface for the learner. First production use: theme
+  2.1 slot 11 (`slices.Sort` modern accepted) and theme 2.3 slot 10
+  (Go 1.22+ loop-var fix accepted while Yaegi runs pre-1.22).
+
+### Follow-ups / roadmap items surfaced
+
+1. **Multi-input freeform grading.** Theme 2.3 slot 11 (rune-aware
+   reverser) wants hidden-test grading against `"héllo"`, `"日本語"`,
+   `""`, and single-rune inputs. v0 grader is single-stdout-match,
+   so the slot lands with just `"héllo"`. The byte-reverse trap is
+   still caught by the `é` mojibake, but the test set could enforce
+   it more rigorously. Would need a structured grader (list of
+   `(input, expectedStdout)` pairs) in `content-schema.ts` and
+   verification loop. Defer to a Module 3+ authoring cycle when
+   higher-value freeform exercises appear.
+2. **Yaegi upgrade tracking.** `successNote` is a workaround for
+   the specific limitations of typeover's vendored Yaegi build
+   (no generic stdlib, pre-1.22 loop-var semantics, no `range
+   int`). When Yaegi catches up, the `successNote` text in slots
+   that use the alternateCanonicals path can be retired and the
+   canonical swapped to the modern form. Slots currently flagged:
+   `arrays-and-slices/11`, `iteration/10`. Slot `iteration/06`
+   stays MCQ (recognition) regardless.
+3. **`pnpm content:new` exercise-type defaults.** Stamping
+   `iteration` produced 6 stub types that didn't match the brief's
+   slot type mix (6 MCQs + 2 fill-words + 2 fill-lines + 1
+   freeform vs the script's default 3+2+2+2). Authors currently
+   overwrite the `type:` field in each YAML. Cheap improvement:
+   the script could accept a `--types mcq:5,fill-word:2,fill-
+   line:2,freeform:1` flag to mint stubs matching the brief's
+   shape. Defer to next authoring cycle when the pain is fresh.
