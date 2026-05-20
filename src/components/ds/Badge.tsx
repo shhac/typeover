@@ -35,7 +35,7 @@ export function Badge(props: ParentProps<BadgeProps>) {
       {...rest}
       class={cn(
         "inline-flex items-center gap-1 px-1.5 py-0.5 border rounded-sm",
-        "font-mono text-[10px] uppercase tracking-widest",
+        "font-mono text-micro uppercase tracking-widest",
         local.outline ? outlineClass[variant] : filledClass[variant],
         local.class,
       )}

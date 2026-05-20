@@ -66,11 +66,11 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
             langBarBg[lang],
           )}
         >
-          <span class="font-mono text-[11px] text-fg-muted">{headerText()}</span>
+          <span class="font-mono text-micro text-fg-muted">{headerText()}</span>
           <Show when={showLang && langLabel[lang]}>
             <span
               class={cn(
-                "font-mono text-[10px] uppercase tracking-widest px-1.5 py-0.5 border rounded-sm",
+                "font-mono text-micro uppercase tracking-widest px-1.5 py-0.5 border rounded-sm",
                 langAccent[lang],
               )}
             >
@@ -81,7 +81,7 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
       </Show>
       <pre
         {...rest}
-        class="px-4 py-3 overflow-x-auto bg-bg-inset text-fg-primary font-mono text-[13px] leading-relaxed"
+        class="px-4 py-3 overflow-x-auto bg-bg-inset text-fg-primary font-mono text-code leading-relaxed"
       >
         <code>{local.children}</code>
       </pre>

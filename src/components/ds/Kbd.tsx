@@ -15,7 +15,7 @@ export function Kbd(props: ParentProps<KbdProps>) {
         /* Use bg-inset for the "physical key sits above darker recess"
          * shadow so the colour participates in theme swaps. Hardcoded
          * #000 used to live here; it broke under a light theme. */
-        "font-mono text-[11px] rounded-sm shadow-[0_1px_0_0_var(--color-bg-inset)]",
+        "font-mono text-micro rounded-sm shadow-[0_1px_0_0_var(--color-bg-inset)]",
         local.class,
       )}
     >

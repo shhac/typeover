@@ -239,7 +239,7 @@ export function AppearancePicker() {
     <div class="flex flex-col gap-8">
       <PreviewSample />
       <div class="flex flex-col gap-3">
-        <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">Theme</div>
+        <Eyebrow tone="muted">Theme</Eyebrow>
         <RadioGroup<ThemeChoice>
           legend="Theme"
           name="theme"
@@ -250,7 +250,7 @@ export function AppearancePicker() {
         />
       </div>
       <div class="flex flex-col gap-3">
-        <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">Density</div>
+        <Eyebrow tone="muted">Density</Eyebrow>
         <RadioGroup<DensityId>
           legend="Density"
           name="density"
@@ -261,7 +261,7 @@ export function AppearancePicker() {
         />
       </div>
       <div class="flex flex-col gap-3">
-        <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">Corners</div>
+        <Eyebrow tone="muted">Corners</Eyebrow>
         <RadioGroup<RadiusId>
           legend="Corners"
           name="radius"
@@ -272,7 +272,7 @@ export function AppearancePicker() {
         />
       </div>
       <div class="flex flex-col gap-3">
-        <div class="font-mono text-xs uppercase tracking-widest text-fg-muted">Style</div>
+        <Eyebrow tone="muted">Style</Eyebrow>
         <RadioGroup<StyleId>
           legend="Style"
           name="style"

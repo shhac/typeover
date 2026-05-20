@@ -94,7 +94,7 @@ export function BlankInput(props: BlankInputProps) {
         }
       }}
       class={cn(
-        "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-[13px]",
+        "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-code",
         "border rounded-sm outline-none align-baseline",
         "w-[14ch] max-w-full",
         inputClass[state()],

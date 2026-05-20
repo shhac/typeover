@@ -54,6 +54,16 @@
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 
+  /* === Micro-mono sizes ===
+   * Two named tokens replace the scattered text-[10px] / text-[11px] /
+   * text-[13px] arbitrary values across the DS (design-docs/17 F-6).
+   * `--text-micro` is for chip/badge/header strip text; `--text-code`
+   * is for the body of CodeBlock and BlankInput so code reads at the
+   * same size everywhere. Anything that grows past the readable floor
+   * climbs to Tailwind's standard `text-xs` / `text-sm`. */
+  --text-micro: 11px;
+  --text-code: 13px;
+
   /* === Radii ===
    * Sharp. The terminal aesthetic doesn't get rounded corners — but it
    * doesn't get knife-edge either. 3-4px max. Rebound by the shape
