@@ -102,6 +102,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
               <ThemeProgressChip
                 client:only="solid-js"
                 exerciseIds={themeExercises.map((ex) => ex.id)}
+                firstExerciseHref={exerciseHref(themeExercises[0]!.id)}
               />
             )}
           </Stack>

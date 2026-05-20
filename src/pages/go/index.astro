@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Badge,
+  ButtonLink,
   CodeBlock,
   Compare,
   Container,
@@ -90,6 +91,11 @@ func double(n int) int {
               (n, { exerciseCount }) => n + exerciseCount,
               0,
             );
+            /* Module-level "start here" CTA — design-docs/16 F-10.
+             * Without this a fresh /go visitor sees a flat tree with
+             * no recommended path; the open Module 1 accordion needs
+             * a dominant action above the theme grid. */
+            const moduleFirstExercise = themes.find((t) => t.firstExercise)?.firstExercise;
             return (
               <Accordion defaultOpen={isShippedModule}>
                 <Heading level={2} size="2xl" slot="summary">
@@ -104,6 +110,14 @@ func double(n int) int {
               <Text tone="secondary" size="md" class="mb-4">
                 <Fragment set:html={formatInline(module.data.summary)} />
               </Text>
+
+              {isShippedModule && moduleFirstExercise && (
+                <div class="mb-5">
+                  <ButtonLink href={exerciseHref(moduleFirstExercise.id)} variant="primary">
+                    Start the first exercise →
+                  </ButtonLink>
+                </div>
+              )}
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {themes.map(({ theme, firstExercise, exerciseCount }) => {

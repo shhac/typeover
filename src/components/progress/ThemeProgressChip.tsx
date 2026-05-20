@@ -12,14 +12,17 @@ import { summarizeTheme } from "~/lib/progress";
  * design-docs/11 calls this out explicitly: "Theme overview:
  * '8 of 9 exercises passed at least once.'"
  *
- * Returns null on the all-zero state so first-time visitors see the
- * page identical to today; layout-shift mitigation is the `min-w`
- * placeholder rendered during the pre-mount window (matches
- * roughly the chip's settled width so the row doesn't visibly grow).
+ * When no progress exists AND `firstExerciseHref` is provided, the
+ * fallback renders a prominent "Start exercise 01 →" link instead of
+ * an invisible placeholder — design-docs/16 F-10 (a fresh learner
+ * landing on a theme overview saw [exercises] [12 ready] with nothing
+ * to anchor where to start). Pre-mount window still renders a
+ * width-matched placeholder so the row doesn't visibly grow.
  */
 
 interface ThemeProgressChipProps {
   exerciseIds: string[];
+  firstExerciseHref?: string;
 }
 
 export function ThemeProgressChip(props: ThemeProgressChipProps) {
@@ -27,13 +30,31 @@ export function ThemeProgressChip(props: ThemeProgressChipProps) {
 
   onMount(() => setSummary(summarizeTheme(props.exerciseIds)));
 
+  const hasProgress = () => {
+    const s = summary();
+    return s !== null && (s.passed > 0 || s.themeComplete);
+  };
+
   return (
     <Show
-      when={(() => {
-        const s = summary();
-        return s !== null && (s.passed > 0 || s.themeComplete);
-      })()}
-      fallback={<span class="inline-block" style={{ "min-width": "10ch" }} aria-hidden="true" />}
+      when={hasProgress()}
+      fallback={
+        <Show
+          when={summary() !== null && props.firstExerciseHref}
+          fallback={
+            <span class="inline-block" style={{ "min-width": "10ch" }} aria-hidden="true" />
+          }
+        >
+          {(href) => (
+            <a
+              href={href()}
+              class="text-accent-amber hover:underline font-mono text-sm focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+            >
+              start exercise 01 →
+            </a>
+          )}
+        </Show>
+      }
     >
       {(() => {
         const s = summary();
