@@ -68,14 +68,14 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
           <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
             <a
               href="/go"
-              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="hover:text-fg-primary transition-colors focus-ring"
             >
               Curriculum
             </a>
             <span aria-hidden="true">›</span>
             <a
               href={`/go/${moduleEntry.id}`}
-              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="hover:text-fg-primary transition-colors focus-ring"
               aria-label={`Up to ${moduleEntry.data.title} module overview`}
             >
               {moduleEntry.data.title}
@@ -116,7 +116,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
               {themeExercises.map((ex) => (
                 <a
                   href={exerciseHref(ex.id)}
-                  class="block group focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+                  class="block group focus-ring"
                 >
                   <Panel
                     padding="default"

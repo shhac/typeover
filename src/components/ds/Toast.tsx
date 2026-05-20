@@ -104,7 +104,7 @@ function ToastBody(props: ToastBodyProps): JSX.Element {
               undo()();
               props.onDismiss();
             }}
-            class="text-accent-amber hover:underline focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm uppercase tracking-widest"
+            class="text-accent-amber hover:underline focus-ring uppercase tracking-widest"
           >
             undo
           </button>
@@ -114,7 +114,7 @@ function ToastBody(props: ToastBodyProps): JSX.Element {
         type="button"
         onClick={props.onDismiss}
         aria-label="Dismiss"
-        class="text-fg-muted hover:text-fg-primary focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm w-4 h-4 flex items-center justify-center leading-none"
+        class="text-fg-muted hover:text-fg-primary focus-ring w-4 h-4 flex items-center justify-center leading-none"
       >
         ×
       </button>

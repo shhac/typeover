@@ -130,7 +130,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
         <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center">
           <a
             href="/"
-            class="text-fg-secondary hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+            class="text-fg-secondary hover:text-fg-primary transition-colors focus-ring"
             aria-label="typeover — back to home"
           >
             <span class="text-accent-ts">type</span><span class="text-accent-amber">over</span>
@@ -138,7 +138,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
           {Astro.url.pathname !== "/go" && (
             <a
               href="/go"
-              class="text-fg-muted hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring"
             >
               curriculum →
             </a>
@@ -163,25 +163,25 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
       <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl flex flex-row gap-6 flex-wrap">
         <a
           href="/"
-          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          class="hover:text-fg-secondary transition-colors focus-ring"
         >
           typeover
         </a>
         <a
           href="/go"
-          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          class="hover:text-fg-secondary transition-colors focus-ring"
         >
           curriculum
         </a>
         <a
           href="/settings"
-          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          class="hover:text-fg-secondary transition-colors focus-ring"
         >
           settings
         </a>
         <a
           href="/privacy"
-          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          class="hover:text-fg-secondary transition-colors focus-ring"
         >
           privacy
         </a>
@@ -189,7 +189,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
           href="https://github.com/paulsomers/typeover"
           target="_blank"
           rel="noopener noreferrer"
-          class="hover:text-fg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+          class="hover:text-fg-secondary transition-colors focus-ring"
         >
           github ↗
         </a>

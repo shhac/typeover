@@ -28,7 +28,7 @@ const { defaultOpen = false, class: className } = Astro.props;
 
 <details open={defaultOpen} class:list={["group", className]}>
   <summary
-    class="list-none cursor-pointer flex flex-row items-baseline gap-3 py-2 focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+    class="list-none cursor-pointer flex flex-row items-baseline gap-3 py-2 focus-ring"
   >
     {/*
      * Caret rotates on open via CSS — `group-open:rotate-90`

@@ -93,14 +93,14 @@ const parentThemeHref = themeHref(themeEntry.id);
           <Text tone="muted" size="sm" family="mono" class="flex flex-row gap-2 items-center flex-wrap">
             <a
               href="/go"
-              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="hover:text-fg-primary transition-colors focus-ring"
             >
               Curriculum
             </a>
             <span aria-hidden="true">›</span>
             <a
               href={`/go/${moduleEntry.id}`}
-              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="hover:text-fg-primary transition-colors focus-ring"
               aria-label={`Up to ${moduleEntry.data.title} module overview`}
             >
               {moduleEntry.data.title}
@@ -108,7 +108,7 @@ const parentThemeHref = themeHref(themeEntry.id);
             <span aria-hidden="true">›</span>
             <a
               href={parentThemeHref}
-              class="hover:text-fg-primary transition-colors focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="hover:text-fg-primary transition-colors focus-ring"
               aria-label={`Up to theme overview (${themeEntry.data.title})`}
             >
               {themeEntry.data.title}

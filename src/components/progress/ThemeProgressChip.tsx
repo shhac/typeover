@@ -74,7 +74,7 @@ export function ThemeProgressChip(props: ThemeProgressChipProps) {
           {(href) => (
             <a
               href={href()}
-              class="text-accent-amber hover:underline font-mono text-sm focus-visible:outline-2 focus-visible:outline-accent-amber rounded-sm"
+              class="text-accent-amber hover:underline font-mono text-sm focus-ring"
             >
               start exercise 01 →
             </a>

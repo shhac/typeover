@@ -269,6 +269,23 @@
   --color-error: #b91c1c;
 }
 
+/* design-docs/20 follow-up — Tailwind 4 `@utility` directive. The
+ * focus-visible outline was hand-pasted at 17 call sites
+ * (`focus-visible:outline-2 focus-visible:outline-accent-amber
+ * rounded-sm`); one place to widen the ring or recolour it now.
+ *
+ * Bakes in both the always-on `border-radius` (so the focus ring
+ * matches its element's corners under any shape axis) and the
+ * focus-visible outline. Keeps the original "always-rounded +
+ * outlined-on-focus" semantics as one class. */
+@utility focus-ring {
+  border-radius: var(--radius-sm);
+  &:focus-visible {
+    outline: 2px solid var(--color-accent-amber);
+    outline-offset: 0;
+  }
+}
+
 @layer base {
   html {
     background-color: var(--color-bg-base);
