@@ -192,15 +192,25 @@ each style rebinds.
    `width="default"` consult `--measure` when the token is set;
    styles that don't override `--measure` get today's behaviour.
    No new prop. Less DS surface, same expressiveness.
-5. **Drop-caps in textbook** — drop. (A "drop-cap" is the
-   oversized first letter on the first paragraph of a section —
-   the giant illuminated 'O' in old novels. Done in CSS via
-   `p:first-of-type::first-letter { float: left; font-size:
-   3em; line-height: 0.85; padding-right: 0.1em }`.) It's a
-   real magazine signal but it requires every paragraph to be
-   semantically the "first" of its container — fragile on a site
-   where Panels wrap arbitrary content. Defer to a later
-   editorial polish pass.
+5. **Drop-cap-lite in textbook** — adopted at half strength
+   (Paul's compromise: skip the `float`). A traditional drop-cap
+   wraps multiple lines around the giant first letter via
+   `float: left`; that requires the containing element to be a
+   clean paragraph stream, which Panels don't guarantee. The
+   compromise: scale the first letter ~1.5×, bump weight, keep
+   `line-height: 1`. The line containing the bigger letter
+   grows vertically; subsequent lines flow normally. Worst case
+   the selector matches no `<p>` and the rule is a no-op.
+   Scoped to `[data-style="textbook"]` only.
+
+   ```css
+   :root[data-style="textbook"] .ds-panel > p:first-of-type::first-letter,
+   :root[data-style="textbook"] .ds-prose > p:first-of-type::first-letter {
+     font-size: 1.5em;
+     font-weight: 600;
+     line-height: 1;
+   }
+   ```
 
 ## Follow-up: palette as a first-class axis
 
