@@ -42,6 +42,12 @@ const sampleFirstExercise = sampleTheme
       .filter((ex) => ex.data.themeId === sampleTheme.id)
       .sort((a, b) => a.data.order - b.data.order)[0]
   : undefined;
+const sampleExerciseIds = sampleTheme
+  ? exercises
+      .filter((ex) => ex.data.themeId === sampleTheme.id)
+      .sort((a, b) => a.data.order - b.data.order)
+      .map((ex) => ex.id)
+  : [];
 
 /*
  * Design-system inventory. Lives at /design-system per
@@ -297,6 +303,7 @@ func greet(u User) string {
                   theme={sampleTheme}
                   firstExercise={sampleFirstExercise}
                   exerciseCount={sampleExerciseCount}
+                  exerciseIds={sampleExerciseIds}
                 />
               </div>
               <Text tone="muted" size="sm">

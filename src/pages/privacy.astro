@@ -113,6 +113,26 @@ import { Container, Heading, Stack, Text } from "~/components/ds";
           </Text>
         </Stack>
 
+        <Stack gap="md">
+          <Heading level={2} size="xl">Auditing what's stored</Heading>
+          <Text>
+            If you want to see exactly what typeover has saved in your
+            browser, open DevTools (<code class="font-mono text-sm">⌥⌘I</code>
+            on Mac, <code class="font-mono text-sm">F12</code> on Windows /
+            Linux) and run the snippet below in the Console tab. It lists
+            every key typeover writes — progress, appearance pins, and
+            any corruption backups — without leaving your browser.
+          </Text>
+          <pre class="bg-bg-inset border border-border-default rounded-sm p-3 font-mono text-xs overflow-x-auto whitespace-pre-wrap">{`Object.fromEntries(
+  Object.entries(localStorage).filter(([k]) => k.startsWith("typeover:"))
+)`}</pre>
+          <Text tone="muted" size="sm">
+            You can also delete any single key from the Application →
+            Local Storage tab in DevTools — same surface, no special UI
+            needed.
+          </Text>
+        </Stack>
+
         <Stack gap="sm">
           <Text tone="muted" size="sm">
             Questions? Open an issue on

@@ -153,12 +153,13 @@ func double(n int) int {
               )}
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {themes.map(({ theme, firstExercise, exerciseCount }) => (
+                {themes.map(({ theme, firstExercise, exerciseCount, exerciseIds }) => (
                   <ThemeCard
                     moduleOrder={module.data.order}
                     theme={theme}
                     firstExercise={firstExercise}
                     exerciseCount={exerciseCount}
+                    exerciseIds={exerciseIds}
                   />
                 ))}
                 {themes.length === 0 && (

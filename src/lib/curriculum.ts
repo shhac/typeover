@@ -36,6 +36,10 @@ type ThemeNode = {
   theme: Theme;
   firstExercise: Exercise | undefined;
   exerciseCount: number;
+  /** All exercise IDs in this theme, sorted by `order`. Consumers
+   *  that need to subscribe to per-exercise progress (e.g. the
+   *  curriculum-grid theme card) feed this into `summarizeTheme`. */
+  exerciseIds: string[];
 };
 
 type ModuleNode = {
@@ -78,6 +82,7 @@ export function buildCurriculumTree(
           theme,
           firstExercise: themeExercises[0],
           exerciseCount: themeExercises.length,
+          exerciseIds: themeExercises.map((e) => e.id),
         };
       }),
     };

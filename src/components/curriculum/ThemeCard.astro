@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { Badge, Heading, Panel, Stack, Text } from "~/components/ds";
+import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
 import { exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
 
@@ -14,6 +15,12 @@ import { formatInline } from "~/lib/format-inline";
  * The two routes diverged only on which "module.order" they read
  * (module.data.order vs moduleData.order, identical value); both
  * call sites now pass the parent module's order as a prop.
+ *
+ * `ThemeProgressChip` (reused from the theme-overview page) is
+ * mounted inline when the parent has authored exercises. Renders
+ * nothing when passed=0, so anonymous visitors see the unstarted
+ * card unchanged; returning learners see a "3 / 9 passed" chip
+ * appear next to the "ready" badge. design-docs/28 P15.
  */
 
 interface Props {
@@ -24,9 +31,14 @@ interface Props {
    *  scaffolded themes — the "start →" anchor hides in that case. */
   firstExercise: CollectionEntry<"exercises"> | undefined;
   exerciseCount: number;
+  /** All exercise IDs in this theme, sorted by order. Forwarded
+   *  to ThemeProgressChip so a returning learner sees their
+   *  passed-count on the grid card itself. Empty array on
+   *  scaffolded themes — the chip then renders nothing. */
+  exerciseIds: string[];
 }
 
-const { moduleOrder, theme, firstExercise, exerciseCount } = Astro.props;
+const { moduleOrder, theme, firstExercise, exerciseCount, exerciseIds } = Astro.props;
 const overviewHref = themeHref(theme.id);
 const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
 ---
@@ -53,6 +65,9 @@ const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
       <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
         {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
       </Badge>
+      {exerciseIds.length > 0 && (
+        <ThemeProgressChip client:only="solid-js" exerciseIds={exerciseIds} />
+      )}
       <a
         href={overviewHref}
         class="text-fg-muted hover:text-fg-primary font-mono text-sm"

@@ -99,12 +99,13 @@ const nextModule = sorted[idx + 1]?.module;
             </Text>
           ) : (
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {node.themes.map(({ theme, firstExercise, exerciseCount }) => (
+              {node.themes.map(({ theme, firstExercise, exerciseCount, exerciseIds }) => (
                 <ThemeCard
                   moduleOrder={moduleData.order}
                   theme={theme}
                   firstExercise={firstExercise}
                   exerciseCount={exerciseCount}
+                  exerciseIds={exerciseIds}
                 />
               ))}
             </div>

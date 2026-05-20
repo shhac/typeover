@@ -310,6 +310,7 @@ describe("summariseCoverage", () => {
       >[0][number]["themes"][number]["theme"],
       firstExercise: undefined,
       exerciseCount: t.exerciseCount,
+      exerciseIds: [],
     })),
   });
 
