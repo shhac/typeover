@@ -3,34 +3,34 @@ themeId: foundations/strings-bytes-runes
 type: fill-word
 order: 5
 prompt: |
-  TypeScript's `split` cuts a string into pieces, called as a method
-  with the separator as the argument. Go's equivalent lives in the
-  `strings` package and takes the string as the first argument.
+  TypeScript calls string methods on the string itself
+  (`name.toUpperCase()`). Go inverts this — string operations live
+  in the `strings` package and take the string as the first argument.
   Fill in the package and function name.
 generator:
   kind: template
   vars:
-    s: [phrase, line, csv, words, tokens]
+    name: [name, greeting, message, label, title]
     pkg: [strings]
-    fn: [Split]
-    sep: ["\" \"", "\",\"", "\":\""]
+    fn: [ToUpper]
   ts: |-
-    let parts = ${s}.split(${sep});
+    let upper = ${name}.toUpperCase();
   canonical: |-
-    parts := ${pkg}.${fn}(${s}, ${sep})
+    upper := ${pkg}.${fn}(${name})
 blanks: [pkg, fn]
 hints:
-  - "Same package as slot 4, different function. The Go function takes two arguments — the string to split (first) and the separator (second). The TS form has these reversed: the string is the receiver, the separator is the only argument."
-  - "Package is `strings` (same as slot 4). Function name is one word, capital first. Think of what the operation *does* to the string — it splits it."
-  - "Fills: `strings` and `Split`. Canonical: `strings.Split(phrase, \" \")`."
+  - "Two reflexive shifts. (1) The function lives in a package — not on the string itself. The package is named after what it operates on. (2) Go method-name conventions: MixedCaps, capital-first to export, no `to`/`from` prefixes in the name."
+  - "Package is `strings` (lowercase, plural). Function name is one word — the *result* of the operation, with the first letter capitalised. `toUpperCase()` becomes a single Pascal-cased word."
+  - "Fills: `strings` and `ToUpper`. Canonical: `strings.ToUpper(name)`."
 notes: |
-  Second Theme 3 fill-word. Same package, different function, but
-  also introduces a subtle reflex: arg order. TS `s.split(sep)`
-  becomes Go `strings.Split(s, sep)` — the *thing being operated
-  on* moves from receiver to first argument.
+  First Theme 3 fill-word. Introduces the most-pervasive pattern
+  shift in Go's string handling: TS method-on-string vs Go
+  function-in-package. Sets up the Go-naming reflex (`ToUpper`,
+  not `toUpperCase` or `to_upper`).
 
-  Variant pool for `sep` covers three realistic separators (space,
-  comma, colon) so the rendered TS feels natural for each variable
-  name. Generator quotes are escaped via `\"` in the YAML so the
-  rendered output keeps the literal quotes.
+  Var pool for `name` provides realistic variable names; `pkg` and
+  `fn` are single-pool literal blanks (the same idiom as Theme 2's
+  `kw: [var]` / `cast: [float64]`). Still on the task #38 watchlist
+  for a proper `literals:` schema field — now 9 fill-word exercises
+  use this pattern across three themes.
 runtime: none

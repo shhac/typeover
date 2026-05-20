@@ -1,46 +1,61 @@
 target: go
 themeId: foundations/strings-bytes-runes
-type: freeform
+type: fill-line
 order: 8
 prompt: |
-  TypeScript template literals have no direct Go analogue — `fmt.Sprintf`
-  is the idiomatic substitute. Write a program that:
-
-  1. Declares `name := "world"` and `count := 3`.
-  2. Builds the string `"hello world, 3 times"` via `fmt.Sprintf` with
-     two `%s`/`%d` placeholders, stores it in a variable, then prints
-     it via `fmt.Println`.
-
-  The expected output is a single line: `hello world, 3 times`.
+  TypeScript joins arrays with `array.join(separator)`. Go's
+  equivalent is in the `strings` package with the arg order swapped.
+  Type the line that builds `path` from `parts` joined by `"/"`. The
+  program should print `home/user/docs`.
 generator:
   kind: template
-  vars: {}
+  vars:
+    line:
+      - 'path := strings.Join(parts, "/")'
   ts: |-
-    let name = "world";
-    let count = 3;
-    let msg = "hello " + name + ", " + count + " times";
-    console.log(msg);
+    let path = parts.join("/");
+    console.log(path);
   canonical: |-
     package main
 
-    import "fmt"
+    import (
+    	"fmt"
+    	"strings"
+    )
 
     func main() {
-    	name := "world"
-    	count := 3
-    	msg := fmt.Sprintf("hello %s, %d times", name, count)
-    	fmt.Println(msg)
+    	parts := []string{"home", "user", "docs"}
+    	${line}
+    	fmt.Println(path)
     }
+  distractors:
+    - match: 'path := parts.join("/")'
+      explain: |-
+        Slices don't have methods in Go — there's no
+        `Array.prototype.join` equivalent on the value itself. The
+        operation lives in the `strings` package as a function.
+    - match: 'path := parts.Join("/")'
+      explain: |-
+        Same problem with capitalisation flipped — slices still
+        don't have methods. Call `strings.Join(parts, "/")` instead.
+    - match: 'path := strings.Join("/", parts)'
+      explain: |-
+        Right function, args swapped. The Go signature is
+        `Join(elems []string, sep string)` — slice first, separator
+        second. Opposite of TS's `parts.join("/")` where the slice
+        is the receiver.
+    - match: 'path := strings.JoinWith(parts, "/")'
+      explain: |-
+        `JoinWith` doesn't exist. Go names are usually concise — the
+        function is just `Join`. Look up the `strings` package for
+        the actual API.
 expectStdout: |
-  hello world, 3 times
+  home/user/docs
 runtime: yaegi
+blanks: [line]
 hints:
-  - "`fmt.Sprintf` is the template-literal analogue: it returns the formatted string instead of writing it. Take the result, then print it."
-  - "Verb cheatsheet: `%s` for strings, `%d` for ints, `%f` for floats, `%v` as a catch-all when you don't care."
-  - "`name := \"world\"; count := 3; msg := fmt.Sprintf(\"hello %s, %d times\", name, count); fmt.Println(msg)` — placeholders left-to-right match args left-to-right."
+  - 'The Go shape is `strings.Join(slice, separator)`. Slice first, separator second — opposite of the TS method form where the slice is the receiver.'
+  - 'Order matters: `strings.Join(parts, "/")` builds the path; `strings.Join("/", parts)` doesn''t typecheck.'
+  - 'Type `path := strings.Join(parts, "/")`.'
 notes: |
-  First freeform of Theme 3. Drills `fmt.Sprintf` as the
-  template-literal replacement. Composing the string into a variable
-  before printing (rather than using `fmt.Printf` directly) is
-  intentional — it surfaces the "Sprintf returns, Printf prints"
-  distinction that bites TS devs reaching for an inline template.
+  Migrated to input+Yaegi UX. Distractors kept as wrong-pattern bank.

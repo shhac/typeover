@@ -1,36 +1,82 @@
 target: go
 themeId: foundations/strings-bytes-runes
-type: fill-word
+type: mcq
 order: 4
 prompt: |
-  TypeScript calls string methods on the string itself
-  (`name.toUpperCase()`). Go inverts this — string operations live
-  in the `strings` package and take the string as the first argument.
-  Fill in the package and function name.
+  TypeScript strings carry their methods (`String.prototype.toUpperCase`,
+  `.split`, `.replace`, …). Go strings are bytes — operations live as
+  plain functions in the `strings` package. Pick the idiomatic Go form.
 generator:
-  kind: template
-  vars:
-    name: [name, greeting, message, label, title]
-    pkg: [strings]
-    fn: [ToUpper]
-  ts: |-
-    let upper = ${name}.toUpperCase();
-  canonical: |-
-    upper := ${pkg}.${fn}(${name})
-blanks: [pkg, fn]
+  kind: variant
+  variants:
+    - id: to-upper
+      ts: |
+        let shout = name.toUpperCase();
+      canonical: 'shout := strings.ToUpper(name)'
+      distractors:
+        - 'shout := name.ToUpper()'
+        - 'shout := name.toUpperCase()'
+        - 'shout := toUpper(name)'
+        - 'shout := strings.toUpperCase(name)'
+    - id: contains
+      ts: |
+        let ok = text.includes("error");
+      canonical: 'ok := strings.Contains(text, "error")'
+      distractors:
+        - 'ok := text.Contains("error")'
+        - 'ok := text.includes("error")'
+        - 'ok := contains(text, "error")'
+        - 'ok := strings.Includes(text, "error")'
+    - id: replace-all
+      ts: |
+        let cleaned = src.replaceAll("a", "A");
+      canonical: 'cleaned := strings.ReplaceAll(src, "a", "A")'
+      distractors:
+        - 'cleaned := src.ReplaceAll("a", "A")'
+        - 'cleaned := src.replaceAll("a", "A")'
+        - 'cleaned := strings.replaceAll(src, "a", "A")'
+        - 'cleaned := replace(src, "a", "A")'
 hints:
-  - "Two reflexive shifts. (1) The function lives in a package — not on the string itself. The package is named after what it operates on. (2) Go method-name conventions: MixedCaps, capital-first to export, no `to`/`from` prefixes in the name."
-  - "Package is `strings` (lowercase, plural). Function name is one word — the *result* of the operation, with the first letter capitalised. `toUpperCase()` becomes a single Pascal-cased word."
-  - "Fills: `strings` and `ToUpper`. Canonical: `strings.ToUpper(name)`."
+  - |-
+    Two shifts at once. (1) Operations move from `s.fn(args)` to
+    `strings.Fn(s, args)` — the string becomes the FIRST argument,
+    not the receiver. (2) Go's exported names start with a capital,
+    so the JS `toUpperCase` becomes `ToUpper`, `includes` becomes
+    `Contains`, etc. — the operation is also often *renamed*, not
+    just re-cased.
+  - |-
+    Shape: `strings.FunctionName(s, ...args)`. Lowercase package
+    name, capital function name, string as first arg. The next
+    couple of exercises drill this directly.
+  - |-
+    The canonical for each variant: `strings.ToUpper(name)`,
+    `strings.Contains(text, "error")`, `strings.ReplaceAll(src,
+    "a", "A")`.
 notes: |
-  First Theme 3 fill-word. Introduces the most-pervasive pattern
-  shift in Go's string handling: TS method-on-string vs Go
-  function-in-package. Sets up the Go-naming reflex (`ToUpper`,
-  not `toUpperCase` or `to_upper`).
+  Introduced 2026-05-20 to fix a design-docs/02 MCQ-first
+  violation flagged by the foundations theme audit. The previous
+  slot 4 fill-word jumped straight into producing
+  `strings.<Function>(s, ...)` shapes with no MCQ recognition
+  beforehand. This MCQ is the recognition slot; slots 5-6
+  (fill-words) and 7-8 (fill-lines) drill production.
 
-  Var pool for `name` provides realistic variable names; `pkg` and
-  `fn` are single-pool literal blanks (the same idiom as Theme 2's
-  `kw: [var]` / `cast: [float64]`). Still on the task #38 watchlist
-  for a proper `literals:` schema field — now 9 fill-word exercises
-  use this pattern across three themes.
+  Three variants cover three operations a TS dev definitely
+  reaches for: `.toUpperCase`, `.includes`, `.replaceAll`. Each
+  variant's distractor bank names a distinct wrong habit:
+  method-on-receiver (TS-style), camelCase JS function names,
+  unqualified function calls, wrong package-function name
+  (`Includes` vs `Contains`).
+
+  The TS verb-to-Go-name table the learner is implicitly
+  internalising here:
+    .toUpperCase  → strings.ToUpper       (renamed)
+    .toLowerCase  → strings.ToLower       (renamed)
+    .includes     → strings.Contains      (renamed)
+    .startsWith   → strings.HasPrefix     (renamed)
+    .endsWith     → strings.HasSuffix     (renamed)
+    .replaceAll   → strings.ReplaceAll    (capitalised)
+    .split        → strings.Split         (capitalised)
+    .trim         → strings.TrimSpace     (renamed; takes no args)
+    .indexOf      → strings.Index         (renamed)
+  Subsequent slots use a subset of these in production.
 runtime: none

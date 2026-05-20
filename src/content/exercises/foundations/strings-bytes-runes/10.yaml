@@ -1,0 +1,48 @@
+target: go
+themeId: foundations/strings-bytes-runes
+type: freeform
+order: 10
+prompt: |
+  Write a program that iterates over the string `"héllo"` using
+  `range` and prints each codepoint (rune) on its own line as a
+  string. The expected output is five lines: `h`, `é`, `l`, `l`, `o`.
+
+  The point is that `range string` yields runes (Unicode codepoints),
+  not bytes — even though `é` is two bytes in UTF-8. TypeScript devs
+  used to `for (const c of str)` get the closest thing Go offers.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const s = "héllo";
+    for (const c of s) console.log(c);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	s := "héllo"
+    	for _, r := range s {
+    		fmt.Println(string(r))
+    	}
+    }
+expectStdout: |
+  h
+  é
+  l
+  l
+  o
+runtime: yaegi
+hints:
+  - "`for i, r := range s` over a string gives you index and rune (not byte). The `_` blank identifier discards the index when you don't need it."
+  - "A `rune` is an `int32`. To print it as a single character, convert: `string(r)`. Without the conversion, `fmt.Println(r)` prints the numeric codepoint."
+  - "`s := \"héllo\"; for _, r := range s { fmt.Println(string(r)) }`"
+notes: |
+  Second freeform of Theme 3. Drills the range-over-string-yields-runes
+  contract that distinguishes Go strings from a raw byte sequence.
+  The `é` is two UTF-8 bytes; if we ranged over `[]byte(s)` instead
+  we'd see five iterations giving five "characters" — except the
+  second and third would be the byte halves of `é` rendered as
+  garbled characters. The string-rune dance is what makes the output
+  correct.
