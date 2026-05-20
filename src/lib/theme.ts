@@ -283,26 +283,38 @@ export const PALETTE_HOME_STYLE: Record<PaletteId, StyleId> = {
   "sunlit-pine": "islands",
 };
 
-const paletteValueSet: ReadonlySet<string> = new Set(PALETTES);
-const isPalette = (s: string | null | undefined): s is PaletteId =>
-  typeof s === "string" && paletteValueSet.has(s);
+/* Palette uses the same axis factory as density/radius/style.
+ * Colour-axis precedent: the `"system"` magic value gets bespoke
+ * handling around a shared factory, here the `"default"` magic
+ * value does the same. The factory owns the DOM attribute +
+ * storage I/O + value validation; the wrappers handle resolution
+ * from `"default"` to the active style's default palette. */
+const paletteAxis = defineAppearanceAxis<PaletteId>({
+  values: PALETTES,
+  storageKey: PALETTE_STORAGE_KEY,
+  datasetKey: "palette",
+  /* SSR fallback. The live `currentPalette` overrides via the
+   * style-default-resolver below; this default only matters when
+   * the DOM attribute is absent (server-render). */
+  default: STYLE_DEFAULT_PALETTE.terminal,
+});
 
 /** The current pin, or "default" if none. The settings UI renders
  *  "Default" as a distinct radio option. */
 export function currentPaletteChoice(): PaletteChoice {
   if (typeof localStorage === "undefined") return "default";
   const raw = localStorage.getItem(PALETTE_STORAGE_KEY);
-  return isPalette(raw) ? raw : "default";
+  return paletteAxis.isValue(raw) ? raw : "default";
 }
 
-/** The current EFFECTIVE palette — what's actually painted. Reads the
- *  resolved DOM attribute the bootstrap set pre-paint. */
+/** The current EFFECTIVE palette — what's actually painted. Reads
+ *  the resolved DOM attribute the bootstrap set pre-paint; SSR
+ *  fallback derives from the active style's default. */
 export function currentPalette(): PaletteId {
   if (typeof document !== "undefined") {
     const attr = document.documentElement.dataset.palette;
-    if (isPalette(attr)) return attr;
+    if (paletteAxis.isValue(attr)) return attr;
   }
-  /* SSR fallback — resolve from style default. */
   return STYLE_DEFAULT_PALETTE[currentStyle()];
 }
 
@@ -316,8 +328,7 @@ export function setPalette(choice: PaletteChoice): void {
     document.documentElement.dataset.palette = STYLE_DEFAULT_PALETTE[currentStyle()];
     return;
   }
-  if (typeof localStorage !== "undefined") localStorage.setItem(PALETTE_STORAGE_KEY, choice);
-  document.documentElement.dataset.palette = choice;
+  paletteAxis.set(choice);
 }
 
 /** When the user changes Style and HAS NOT pinned a palette, the

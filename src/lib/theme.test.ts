@@ -2,16 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   currentChoice,
   currentDensity,
+  currentPalette,
+  currentPaletteChoice,
   currentRadius,
   currentStyle,
   currentTheme,
   DENSITY_STORAGE_KEY,
+  PALETTE_HOME_STYLE,
+  PALETTE_STORAGE_KEY,
+  PALETTES,
   RADIUS_STORAGE_KEY,
+  reapplyDefaultPaletteForCurrentStyle,
   setDensity,
+  setPalette,
   setRadius,
   setStyle,
   setTheme,
   STORAGE_KEY,
+  STYLE_DEFAULT_PALETTE,
   STYLE_STORAGE_KEY,
 } from "./theme";
 
@@ -45,6 +53,7 @@ beforeEach(() => {
   delete document.documentElement.dataset.density;
   delete document.documentElement.dataset.radius;
   delete document.documentElement.dataset.style;
+  delete document.documentElement.dataset.palette;
   vi.stubGlobal("matchMedia", matchMediaStub(false));
   /* matchMedia lives on window, not just globalThis */
   Object.defineProperty(window, "matchMedia", {
@@ -194,6 +203,76 @@ describe("style axis", () => {
       setStyle(s);
       expect(currentStyle()).toBe(s);
     }
+  });
+});
+
+describe("palette axis", () => {
+  /* design-docs/22. Palette has the same factory-axis shape as
+   * density/radius/style for storage + DOM I/O, plus a bespoke
+   * "default" magic value (the colour axis's "system" is the
+   * precedent). Pin every contract the settings UI depends on. */
+
+  it('currentPaletteChoice defaults to "default" when no localStorage pin', () => {
+    expect(currentPaletteChoice()).toBe("default");
+  });
+
+  it('currentPaletteChoice returns "default" for an unknown pin', () => {
+    localStorage.setItem(PALETTE_STORAGE_KEY, "neon-mango");
+    expect(currentPaletteChoice()).toBe("default");
+  });
+
+  it("currentPaletteChoice surfaces a valid pinned ID verbatim", () => {
+    localStorage.setItem(PALETTE_STORAGE_KEY, "manila");
+    expect(currentPaletteChoice()).toBe("manila");
+  });
+
+  it('setPalette("default") clears the pin AND resolves DOM to active style\'s default', () => {
+    setStyle("textbook");
+    localStorage.setItem(PALETTE_STORAGE_KEY, "manila");
+    setPalette("default");
+    expect(localStorage.getItem(PALETTE_STORAGE_KEY)).toBeNull();
+    expect(document.documentElement.dataset.palette).toBe(STYLE_DEFAULT_PALETTE.textbook);
+  });
+
+  it("setPalette(<id>) writes both the pin and the DOM attribute", () => {
+    setPalette("manila");
+    expect(localStorage.getItem(PALETTE_STORAGE_KEY)).toBe("manila");
+    expect(document.documentElement.dataset.palette).toBe("manila");
+    expect(currentPalette()).toBe("manila");
+  });
+
+  it("reapplyDefaultPaletteForCurrentStyle re-resolves DOM when on Default", () => {
+    /* the "leaving Default selected and changing Style means the
+     * palette changes too" contract. */
+    setStyle("terminal");
+    setPalette("default");
+    expect(document.documentElement.dataset.palette).toBe(STYLE_DEFAULT_PALETTE.terminal);
+    setStyle("glass");
+    reapplyDefaultPaletteForCurrentStyle();
+    expect(document.documentElement.dataset.palette).toBe(STYLE_DEFAULT_PALETTE.glass);
+  });
+
+  it("reapplyDefaultPaletteForCurrentStyle is a NO-OP when a custom palette is pinned", () => {
+    /* the "custom pin persists across style switches" contract. */
+    setPalette("manila");
+    setStyle("textbook");
+    reapplyDefaultPaletteForCurrentStyle();
+    expect(document.documentElement.dataset.palette).toBe("manila");
+  });
+
+  it("PALETTE_HOME_STYLE maps every palette — drift guard", () => {
+    /* If a future commit adds an ID to PALETTES but forgets the
+     * PALETTE_HOME_STYLE entry, the settings UI's per-style
+     * grouping silently breaks. This catches it. */
+    expect(Object.keys(PALETTE_HOME_STYLE).sort()).toEqual([...PALETTES].sort());
+  });
+
+  it("currentPalette SSR fallback resolves through current style", () => {
+    /* No DOM palette attribute set; currentPalette should fall
+     * back to the active style's default rather than throwing or
+     * returning undefined. */
+    setStyle("islands");
+    expect(currentPalette()).toBe(STYLE_DEFAULT_PALETTE.islands);
   });
 });
 
