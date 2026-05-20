@@ -116,7 +116,7 @@ Yaegi build is upgraded and the existing 3 retire (which would
 also empty the shelf — the contract is self-retiring, so the
 feature retires with it).
 
-### P4 — SR narration of Run results (a11y lens)
+### P4 — SR narration of Run results (a11y lens) ✅ SHIPPED 2026-05-20 (`b3d924f`, lighter variant)
 
 **Source:** `RunResultPanel` renders fresh stdout/stderr/error
 with no `role` / `aria-live`. VoiceOver users hear silence when
@@ -166,12 +166,17 @@ attention surfaces. Concrete tasks:
 ## Synthesis & next steps
 
 - ✅ **P2 PaletteChip:** shipped 2026-05-20 in commit `5735ed5`.
-- **Best candidate for the NEXT cycle:** P4 (SR narration) in its
-  **lighter** form (focus management + `role="region"` on
-  RunResultPanel), not the verbose version originally proposed.
+- ✅ **P4 SR narration (lighter variant):** shipped 2026-05-20 in
+  commit `b3d924f`. Region landmark + focus-on-result-mount; no
+  verbose narration string (deferred per devil's-advocate notes).
 - **Defer:** P1 (shaky-spots, needs reframe as positive "drilled
   cleanly" with a UX mockup first) and P3 (Modern Go shelf, needs
   ≥2 more Yaegi-limited slots to earn its cost).
+
+This cycle's two ship-able candidates are now both landed. The
+next /loop tick should drop back to step 4 (improve-code-structure
+on the new surface, or a fresh proposer round if the structure is
+clean).
 
 ## Follow-up surfaced during P2 implementation
 
