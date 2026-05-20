@@ -215,10 +215,15 @@
   /* Style block carries chrome only — typography, border-style,
    * stipple grain, shadow chrome, radius progression. Colour
    * identity (panel tilt, accent hue) lives in palette blocks
-   * (design-docs/22). */
+   * (design-docs/22). The dashed border colour is derived from
+   * whatever palette is active — `color-mix` reads the live
+   * `--color-accent-primary` so every cardboard-home palette
+   * gets a self-consistent accent-tinted stitch without
+   * redeclaring it per-palette. */
   --font-heading: var(--font-serif);
   --heading-weight-base: 700;
   --border-style: dashed;
+  --color-border-default: color-mix(in oklab, var(--color-accent-primary) 35%, transparent);
   --surface-pattern: radial-gradient(
     circle at 1px 1px,
     color-mix(in oklab, var(--color-fg-faint) 35%, transparent) 1px,
@@ -239,11 +244,13 @@
    * reading measure; amber left-rule via shadow chrome
    * (`--color-accent-primary` resolves to whatever the active
    * palette sets — desaturated ink under parchment-ink, deeper
-   * spine-orange under pelican, etc.). */
+   * spine-orange under pelican, etc.). No box border — textbook
+   * uses the shadow-rule as the structural cue. */
   --font-heading: var(--font-serif);
   --font-body: var(--font-serif);
   --heading-weight-base: 700;
   --measure: 60ch;
+  --color-border-default: transparent;
   --shadow-panel: inset 4px 0 0 0 color-mix(in oklab, var(--color-accent-primary) 70%, transparent);
 }
 
@@ -268,12 +275,14 @@
 /* ----- glass ----- */
 :root[data-style="glass"] {
   /* Chrome only. Light heading, 60% panel transparency, strong
-   * blur. The actual body gradient is a palette token
+   * blur, transparent borders (lift via the gradient hairline
+   * + shadow chrome). The body gradient is a palette token
    * (`--body-gradient`) since palette identity determines the
    * bloom colours. design-docs/22. */
   --heading-weight-base: 300;
   --measure: 80ch;
   --panel-bg-mix: 60%;
+  --color-border-default: transparent;
   --panel-backdrop-filter: blur(20px) saturate(180%);
   --shadow-panel:
     inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 14%, transparent),
@@ -299,11 +308,14 @@ body {
 
 /* ----- islands ----- */
 :root[data-style="islands"] {
-  /* Chrome only. Bold sans, layered shadow stack. The page-vs-
-   * panel contrast lives in the palette's bg-base + bg-panel
-   * values — islands-home palettes (desk-felt, app-store, etc.)
-   * authored that delta into their token values. */
+  /* Chrome only. Bold sans, layered shadow stack, transparent
+   * borders (lift via shadow + page-vs-panel contrast). The
+   * page-vs-panel contrast lives in the palette's bg-base +
+   * bg-panel values — islands-home palettes (desk-felt,
+   * app-store, etc.) authored that delta into their token
+   * values. */
   --heading-weight-base: 700;
+  --color-border-default: transparent;
   --shadow-panel:
     inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 8%, transparent),
     0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
@@ -483,7 +495,6 @@ body {
   --color-accent-primary: #ffa726;
   --color-accent-ts: #4a9eff;
   --color-accent-go: #00add8;
-  --color-border-default: color-mix(in oklab, #ffa726 35%, transparent);
   --color-border-strong: #3a3a40;
 }
 :root[data-palette="warm-paper"][data-theme="light"] {
@@ -498,7 +509,6 @@ body {
   --color-accent-primary: #a06400;
   --color-accent-ts: #2057b8;
   --color-accent-go: #006d8e;
-  --color-border-default: color-mix(in oklab, #a06400 35%, transparent);
   --color-border-strong: #c4c9d2;
 }
 
@@ -514,7 +524,6 @@ body {
   --color-accent-primary: #f4a437;
   --color-accent-ts: #7ab5ff;
   --color-accent-go: #4dc7e6;
-  --color-border-default: color-mix(in oklab, #f4a437 35%, transparent);
   --color-border-strong: #5a4a36;
 }
 :root[data-palette="kraft"][data-theme="light"] {
@@ -529,7 +538,6 @@ body {
   --color-accent-primary: #7a3f00;
   --color-accent-ts: #1a3f8a;
   --color-accent-go: #005066;
-  --color-border-default: color-mix(in oklab, #7a3f00 35%, transparent);
   --color-border-strong: #9a7c52;
 }
 
@@ -545,7 +553,6 @@ body {
   --color-accent-primary: #5fa8ff;
   --color-accent-ts: #4a9eff;
   --color-accent-go: #00add8;
-  --color-border-default: color-mix(in oklab, #5fa8ff 35%, transparent);
   --color-border-strong: #4a4332;
 }
 :root[data-palette="manila"][data-theme="light"] {
@@ -560,7 +567,6 @@ body {
   --color-accent-primary: #0f3d8c;
   --color-accent-ts: #1a3f8a;
   --color-accent-go: #005066;
-  --color-border-default: color-mix(in oklab, #0f3d8c 40%, transparent);
   --color-border-strong: #9a8b62;
 }
 
@@ -576,7 +582,6 @@ body {
   --color-accent-primary: #e85a3c;
   --color-accent-ts: #6fa8e6;
   --color-accent-go: #3fb0c4;
-  --color-border-default: color-mix(in oklab, #e85a3c 35%, transparent);
   --color-border-strong: #3e3c38;
 }
 :root[data-palette="newsprint"][data-theme="light"] {
@@ -591,7 +596,6 @@ body {
   --color-accent-primary: #9a2410;
   --color-accent-ts: #1c3f7a;
   --color-accent-go: #00566e;
-  --color-border-default: color-mix(in oklab, #9a2410 40%, transparent);
   --color-border-strong: #a89e8a;
 }
 
@@ -607,7 +611,6 @@ body {
   --color-accent-primary: #d68a3a;
   --color-accent-ts: #7aa8e0;
   --color-accent-go: #4ab8c8;
-  --color-border-default: color-mix(in oklab, #d68a3a 30%, transparent);
   --color-border-strong: #4e4434;
 }
 :root[data-palette="calfskin"][data-theme="light"] {
@@ -622,7 +625,6 @@ body {
   --color-accent-primary: #7a4a08;
   --color-accent-ts: #1f3f7c;
   --color-accent-go: #005062;
-  --color-border-default: color-mix(in oklab, #7a4a08 35%, transparent);
   --color-border-strong: #a89464;
 }
 
@@ -645,7 +647,6 @@ body {
   --color-accent-primary: #d89640;
   --color-accent-ts: #7eb6ff;
   --color-accent-go: #4dcfee;
-  --color-border-default: transparent;
   --color-border-strong: #3a3225;
 }
 :root[data-palette="parchment-ink"][data-theme="light"] {
@@ -660,7 +661,6 @@ body {
   --color-accent-primary: #b06e1a;
   --color-accent-ts: #2a6fbf;
   --color-accent-go: #007a99;
-  --color-border-default: transparent;
   --color-border-strong: #d8cfb8;
 }
 
@@ -676,7 +676,6 @@ body {
   --color-accent-primary: #cf8a47;
   --color-accent-ts: #8fb0d8;
   --color-accent-go: #62b8b0;
-  --color-border-default: transparent;
   --color-border-strong: #3d2f1f;
 }
 :root[data-palette="vellum"][data-theme="light"] {
@@ -691,7 +690,6 @@ body {
   --color-accent-primary: #8a4a14;
   --color-accent-ts: #2b5d8f;
   --color-accent-go: #1f6e6e;
-  --color-border-default: transparent;
   --color-border-strong: #c9b893;
 }
 
@@ -707,7 +705,6 @@ body {
   --color-accent-primary: #e87b3e;
   --color-accent-ts: #7eb6ff;
   --color-accent-go: #4dcfee;
-  --color-border-default: transparent;
   --color-border-strong: #2e2e2e;
 }
 :root[data-palette="pelican"][data-theme="light"] {
@@ -722,7 +719,6 @@ body {
   --color-accent-primary: #b8421b;
   --color-accent-ts: #1f5fa8;
   --color-accent-go: #006680;
-  --color-border-default: transparent;
   --color-border-strong: #cbbf9a;
 }
 
@@ -738,7 +734,6 @@ body {
   --color-accent-primary: #c87a35;
   --color-accent-ts: #9fbdd6;
   --color-accent-go: #74b8b0;
-  --color-border-default: transparent;
   --color-border-strong: #3e2e1d;
 }
 :root[data-palette="sepia"][data-theme="light"] {
@@ -753,7 +748,6 @@ body {
   --color-accent-primary: #7a3d0e;
   --color-accent-ts: #2e5680;
   --color-accent-go: #1f6363;
-  --color-border-default: transparent;
   --color-border-strong: #c3a878;
 }
 
@@ -769,7 +763,6 @@ body {
   --color-accent-primary: #4ea69a;
   --color-accent-ts: #7eb6ff;
   --color-accent-go: #d4a64a;
-  --color-border-default: transparent;
   --color-border-strong: #2a3635;
 }
 :root[data-palette="almanac"][data-theme="light"] {
@@ -784,7 +777,6 @@ body {
   --color-accent-primary: #0d5e55;
   --color-accent-ts: #1f5fa8;
   --color-accent-go: #8a6010;
-  --color-border-default: transparent;
   --color-border-strong: #c4c0a8;
 }
 
@@ -805,7 +797,6 @@ body {
   --color-accent-primary: #ffa726;
   --color-accent-ts: #4a9eff;
   --color-accent-go: #00add8;
-  --color-border-default: transparent;
   --color-border-strong: #3a3a40;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -825,7 +816,6 @@ body {
   --color-accent-primary: #b06e1a;
   --color-accent-ts: #2563eb;
   --color-accent-go: #0891b2;
-  --color-border-default: transparent;
   --color-border-strong: #d4d4d8;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -846,7 +836,6 @@ body {
   --color-accent-primary: #7dd3fc;
   --color-accent-ts: #60a5fa;
   --color-accent-go: #22d3ee;
-  --color-border-default: transparent;
   --color-border-strong: #2a3d52;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -866,7 +855,6 @@ body {
   --color-accent-primary: #0369a1;
   --color-accent-ts: #1d4ed8;
   --color-accent-go: #0e7490;
-  --color-border-default: transparent;
   --color-border-strong: #b8cee0;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -887,7 +875,6 @@ body {
   --color-accent-primary: #c4b5fd;
   --color-accent-ts: #a78bfa;
   --color-accent-go: #f472b6;
-  --color-border-default: transparent;
   --color-border-strong: #3a2b50;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -907,7 +894,6 @@ body {
   --color-accent-primary: #7c3aed;
   --color-accent-ts: #6d28d9;
   --color-accent-go: #be185d;
-  --color-border-default: transparent;
   --color-border-strong: #d4c7ed;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -928,7 +914,6 @@ body {
   --color-accent-primary: #ffffff;
   --color-accent-ts: #d4d4d8;
   --color-accent-go: #a1a1aa;
-  --color-border-default: transparent;
   --color-border-strong: #3a3a40;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -948,7 +933,6 @@ body {
   --color-accent-primary: #000000;
   --color-accent-ts: #18181b;
   --color-accent-go: #52525b;
-  --color-border-default: transparent;
   --color-border-strong: #c4c4c8;
   --body-gradient:
     radial-gradient(ellipse 1200px 600px at 80% -10%,
@@ -975,7 +959,6 @@ body {
   --color-accent-primary: #ffa726;
   --color-accent-ts: #4a9eff;
   --color-accent-go: #00add8;
-  --color-border-default: transparent;
   --color-border-strong: #3a3a40;
 }
 :root[data-palette="desk-felt"][data-theme="light"] {
@@ -990,7 +973,6 @@ body {
   --color-accent-primary: #b06e1a;
   --color-accent-ts: #1d6fd9;
   --color-accent-go: #00788f;
-  --color-border-default: transparent;
   --color-border-strong: #d4d4d8;
 }
 
@@ -1006,7 +988,6 @@ body {
   --color-accent-primary: #0a84ff;
   --color-accent-ts: #0a84ff;
   --color-accent-go: #64d2ff;
-  --color-border-default: transparent;
   --color-border-strong: #38383c;
 }
 :root[data-palette="app-store"][data-theme="light"] {
@@ -1021,7 +1002,6 @@ body {
   --color-accent-primary: #0066cc;
   --color-accent-ts: #0066cc;
   --color-accent-go: #006a85;
-  --color-border-default: transparent;
   --color-border-strong: #d2d2d7;
 }
 
@@ -1037,7 +1017,6 @@ body {
   --color-accent-primary: #e8a23b;
   --color-accent-ts: #6ab0ff;
   --color-accent-go: #5fc8e0;
-  --color-border-default: transparent;
   --color-border-strong: #4a3422;
 }
 :root[data-palette="dark-wood"][data-theme="light"] {
@@ -1052,7 +1031,6 @@ body {
   --color-accent-primary: #8a4d0a;
   --color-accent-ts: #1f5db8;
   --color-accent-go: #006478;
-  --color-border-default: transparent;
   --color-border-strong: #d9c39a;
 }
 
@@ -1068,7 +1046,6 @@ body {
   --color-accent-primary: #7c8cff;
   --color-accent-ts: #7c8cff;
   --color-accent-go: #2dd4bf;
-  --color-border-default: transparent;
   --color-border-strong: #383c44;
 }
 :root[data-palette="studio-grey"][data-theme="light"] {
@@ -1083,7 +1060,6 @@ body {
   --color-accent-primary: #4f46e5;
   --color-accent-ts: #4f46e5;
   --color-accent-go: #0d7d72;
-  --color-border-default: transparent;
   --color-border-strong: #c4c7cf;
 }
 
@@ -1099,7 +1075,6 @@ body {
   --color-accent-primary: #f0a838;
   --color-accent-ts: #6cb4ff;
   --color-accent-go: #4ec9b0;
-  --color-border-default: transparent;
   --color-border-strong: #4a3e28;
 }
 :root[data-palette="sunlit-pine"][data-theme="light"] {
@@ -1114,7 +1089,6 @@ body {
   --color-accent-primary: #9e5a0a;
   --color-accent-ts: #2563b0;
   --color-accent-go: #006a72;
-  --color-border-default: transparent;
   --color-border-strong: #d6c8aa;
 }
 
