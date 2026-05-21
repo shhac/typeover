@@ -103,6 +103,28 @@ Re-probed today to make sure nothing has slipped:
 - **interface-wraps-nil-pointer trap** ✓ (re-probed
   2026-05-21 — `(*MyErr)(nil)` returned through `Error`
   interface compares `e == nil → false`, matches real Go)
+- **goroutines** ✓ (`go func(){...}()` with buffered/
+  unbuffered channels)
+- **channels** ✓ (send `<-`, receive `<-`, `close`,
+  `range`, buffered cap)
+- **`select`** ✓ (multi-case wait with `default`)
+- **`sync` package** ✓ (probed 2026-05-21 — vendored as part
+  of Module 6 prep): `sync.WaitGroup`, `sync.Mutex`,
+  `sync.Once`, `sync.RWMutex`, `sync.Map` all import-and-use
+  cleanly. NOT in the original vendored set; added today.
+
+### sync package vendored 2026-05-21
+
+`runtime/yaegi-wasm/symbols/sync.go` copied from
+`yaegi v0.16.1/stdlib/go1_22_sync.go`, package clause
+rewritten `stdlib` → `symbols`. Verified via 5-case probe
+(goroutines, buffered range, select, WaitGroup, Mutex) —
+all pass. Added to build.sh's stdlib-list comment for
+visibility. WASM size unchanged at 10 MB raw.
+
+This unlocks Module 6 (concurrency) themes: 6.1 goroutines,
+6.2 channels, 6.3 select, 6.4 sync — all four can have
+runnable canonicals.
 
 ### User-defined generics ✓ (probed 2026-05-21)
 
