@@ -16,11 +16,18 @@ import { z } from "zod";
  * fill-blank, wrong-pattern — keep working with no change.
  */
 
-const PLACEHOLDER_RE = /\$\{(\w+)\}/g;
+/** `${name}` placeholders. Negative lookbehind `(?<!\\)` excludes
+ *  ESCAPED placeholders (`\${name}`) from matching — authors can use
+ *  the escape when they want to show a literal `${name}` in `ts:` /
+ *  `canonical:` fields (commonly: TypeScript template literals like
+ *  `` `got ${got}` ``). The runtime substitute pass strips the
+ *  leading `\` from the rendered output. */
+export const PLACEHOLDER_RE = /(?<!\\)\$\{(\w+)\}/g;
 
 /** Extract `${name}` references from a template string. Shared between
  *  the runtime substitution path and the build-time schema refinements
- *  so the placeholder grammar lives in one place. */
+ *  so the placeholder grammar lives in one place. Escaped `\${name}`
+ *  occurrences are skipped. */
 export function extractTemplateVars(tmpl: string): string[] {
   return Array.from(tmpl.matchAll(PLACEHOLDER_RE), (m) => m[1]!);
 }

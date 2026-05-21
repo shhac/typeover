@@ -87,4 +87,29 @@ describe("substitute", () => {
   it("returns the input unchanged when there are no placeholders", () => {
     expect(substitute("plain text", {})).toBe("plain text");
   });
+
+  /* Backslash escape — `\${name}` is left literal in output (with
+   * the leading `\` stripped). Lets authors show TypeScript template
+   * literals like `` `got ${got}` `` in `ts:` fields without
+   * tripping the schema's `${ref}` refinement. */
+  describe("backslash-escape opt-out", () => {
+    it("leaves `\\${name}` as a literal `${name}` in the output", () => {
+      expect(substitute("hello \\${name} world", { name: "ignored" })).toBe(
+        "hello ${name} world",
+      );
+    });
+
+    it("does not throw on an escaped reference to an undeclared var", () => {
+      expect(() => substitute("got \\${got}, want \\${want}", {})).not.toThrow();
+      expect(substitute("got \\${got}, want \\${want}", {})).toBe(
+        "got ${got}, want ${want}",
+      );
+    });
+
+    it("mixes substituted and escaped occurrences correctly", () => {
+      expect(substitute("real=${x}, literal=\\${x}", { x: "42" })).toBe(
+        "real=42, literal=${x}",
+      );
+    });
+  });
 });

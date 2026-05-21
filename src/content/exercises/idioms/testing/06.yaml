@@ -21,7 +21,7 @@ generator:
     line:
       - 'if got != want { t.Errorf("got %d, want %d", got, want) }'
   ts: |-
-    // TS: if (got !== want) console.error("got", got, "want", want);
+    // TS: if (got !== want) console.error(`got \${got}, want \${want}`);
   canonical: |-
     package main
 

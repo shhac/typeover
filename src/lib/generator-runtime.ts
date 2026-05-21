@@ -1,6 +1,7 @@
 import { pickFrom, rngFromSeed, shuffle } from "./seed";
 import {
   distractorMatchText,
+  PLACEHOLDER_RE,
   type GeneratorSpec,
   type TemplateGenerator,
   type VariantGenerator,
@@ -62,14 +63,25 @@ export type GenerateOptions = {
   blanks?: string[];
 };
 
+/** Strip the escape backslash from literal `\${name}` sequences in
+ *  rendered text. Pairs with PLACEHOLDER_RE's negative lookbehind:
+ *  the parser skips matching, this pass removes the escape so the
+ *  display shows the intended `${name}`. */
+function unescapePlaceholders(s: string): string {
+  return s.replace(/\\(\$\{)/g, "$1");
+}
+
 /**
  * Walk the canonical template, emitting segments. Vars listed in
  * `blanks` become input slots with their expected value; everything
- * else is substituted into text.
+ * else is substituted into text. Escaped `\${name}` is left alone
+ * by the matcher and unescaped to literal `${name}` in the text
+ * segments emitted.
  *
  * The single source of truth for `${var}` parsing — `substitute` is
  * defined in terms of this so the placeholder grammar and the
- * unknown-var error live in one place.
+ * unknown-var error live in one place. PLACEHOLDER_RE is re-imported
+ * from generator-schema so the regex is genuinely shared.
  */
 export function buildBlankSegments(
   canonical: string,
@@ -78,11 +90,14 @@ export function buildBlankSegments(
 ): FillSegment[] {
   const blankSet = new Set(blanks);
   const segments: FillSegment[] = [];
+  const pushText = (text: string) => {
+    if (text !== "") segments.push({ kind: "text", text: unescapePlaceholders(text) });
+  };
   let cursor = 0;
-  for (const match of canonical.matchAll(/\$\{(\w+)\}/g)) {
+  for (const match of canonical.matchAll(PLACEHOLDER_RE)) {
     const [full, name] = match;
     if (match.index > cursor) {
-      segments.push({ kind: "text", text: canonical.slice(cursor, match.index) });
+      pushText(canonical.slice(cursor, match.index));
     }
     const value = values[name];
     if (value === undefined) {
@@ -96,7 +111,7 @@ export function buildBlankSegments(
     cursor = match.index + full.length;
   }
   if (cursor < canonical.length) {
-    segments.push({ kind: "text", text: canonical.slice(cursor) });
+    pushText(canonical.slice(cursor));
   }
   return segments;
 }
