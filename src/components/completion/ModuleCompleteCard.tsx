@@ -13,6 +13,53 @@ interface ThemeSummary {
   exerciseIds: string[];
 }
 
+type ShareOutcome = "shared" | "copied" | "error" | "idle";
+
+/**
+ * Pure decision logic for the Web Share / Clipboard fallback
+ * cascade. Extracted from the component's `share()` so the
+ * Navigator-API feature detection + AbortError disambiguation can
+ * be tested without standing up a Solid render or the full
+ * ModuleCompleteCard surface. design-docs/16 F-7 + design-docs/19
+ * F-5 + structural-review function-decomp lens.
+ *
+ * Returns the next ShareState the caller should set:
+ *   - "shared" — Web Share success
+ *   - "copied" — clipboard fallback success
+ *   - "idle"   — user cancelled the share sheet (AbortError per
+ *                the Web Share spec; benign, reset to idle)
+ *   - "error"  — Navigator is undefined, both APIs missing, OR a
+ *                non-cancellation throw
+ */
+export async function tryShare(text: string, url: string): Promise<ShareOutcome> {
+  if (typeof navigator === "undefined") return "error";
+  /* lib.dom declares `share` and `clipboard` as required on
+   * Navigator, so an `"x" in nav` guard narrows the false branch
+   * to `never`. Treat the live object as Partial<Navigator> — on
+   * non-supporting browsers either property may genuinely be
+   * undefined at runtime. */
+  const nav: Partial<Navigator> = navigator;
+  try {
+    if (nav.share) {
+      await nav.share({ title: "typeover", text, url });
+      return "shared";
+    }
+    if (nav.clipboard) {
+      await nav.clipboard.writeText(`${text}\n${url}`);
+      return "copied";
+    }
+    return "error";
+  } catch (e) {
+    /* User cancelled the share sheet vs permission denied vs
+     * crashed share-sheet are three different cases. AbortError
+     * is the cancellation signal per the Web Share spec —
+     * benign, reset to idle. Anything else is a real failure;
+     * fall back to the manual-copy panel. design-docs/19 F-5. */
+    const isCancellation = e instanceof DOMException && e.name === "AbortError";
+    return isCancellation ? "idle" : "error";
+  }
+}
+
 interface ModuleCompleteCardProps {
   moduleId: string;
   moduleTitle: string;
@@ -90,39 +137,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
   const shareUrl = () => `${props.siteOrigin}/go/${props.moduleId}/complete`;
 
   async function share() {
-    const text = shareText();
-    const url = shareUrl();
-    if (typeof navigator === "undefined") {
-      setShareState("error");
-      return;
-    }
-    /* lib.dom declares `share` and `clipboard` as required on
-     * Navigator, so an `"x" in nav` guard narrows the false branch
-     * to `never`. Treat the live object as Partial<Navigator> — on
-     * non-supporting browsers either property may genuinely be
-     * undefined at runtime. */
-    const nav: Partial<Navigator> = navigator;
-    try {
-      if (nav.share) {
-        await nav.share({ title: "typeover", text, url });
-        setShareState("shared");
-        return;
-      }
-      if (nav.clipboard) {
-        await nav.clipboard.writeText(`${text}\n${url}`);
-        setShareState("copied");
-        return;
-      }
-      setShareState("error");
-    } catch (e) {
-      /* User cancelled the share sheet vs permission denied vs
-       * crashed share-sheet are three different cases. AbortError
-       * is the cancellation signal per the Web Share spec —
-       * benign, reset to idle. Anything else is a real failure;
-       * fall back to the manual-copy panel. design-docs/19 F-5. */
-      const isCancellation = e instanceof DOMException && e.name === "AbortError";
-      setShareState(isCancellation ? "idle" : "error");
-    }
+    setShareState(await tryShare(shareText(), shareUrl()));
   }
 
   /* SSR + hydration-failure fallback. Renders on the server (because
