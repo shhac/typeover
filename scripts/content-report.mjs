@@ -17,7 +17,7 @@
  */
 
 import { glob, readFile } from "node:fs/promises";
-import { basename, dirname, join, relative, sep } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 

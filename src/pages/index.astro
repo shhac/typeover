@@ -32,12 +32,16 @@ import TrackCard from "~/components/ds/TrackCard.astro";
  * exercises across six themes" as static prose. Author 4 new
  * exercises and the homepage silently lies until someone notices.
  * Compute both numbers from the content collection at build time. */
-const [foundationsThemes, foundationsExercises] = await Promise.all([
+const [foundationsThemes, foundationsExercises, zigThemes, zigExercises] = await Promise.all([
   getCollection("themes", (t) => t.data.moduleId === "go/foundations"),
   getCollection("exercises", (ex) => ex.data.themeId.startsWith("go/foundations/")),
+  getCollection("themes", (t) => t.data.target === "zig"),
+  getCollection("exercises", (ex) => ex.data.target === "zig"),
 ]);
 const foundationsExerciseCount = foundationsExercises.length;
 const foundationsThemeCount = foundationsThemes.length;
+const zigExerciseCount = zigExercises.length;
+const zigThemeCount = zigThemes.length;
 ---
 
 <BaseLayout
@@ -131,6 +135,33 @@ func greet(u User) string {
             </a>
           </TrackCard>
 
+          <TrackCard status="available">
+            <Heading level={2} size="2xl" slot="title">
+              <span class="text-accent-zig">Zig</span> for TypeScript devs
+            </Heading>
+            <Fragment slot="dek">
+              Preview track — {zigExerciseCount} exercises across
+              {zigThemeCount} {zigThemeCount === 1 ? "theme" : "themes"} so far,
+              graded by the real self-hosted Zig compiler running in a Web Worker.
+              Modules ramp from basics → types → memory → errors → comptime →
+              stdlib → idioms.
+            </Fragment>
+            <Stack gap="xs" slot="modules">
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-zig">1.</span> Basics · preview (hello + output)
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>2–7.</span> Types, memory, errors, comptime, stdlib, idioms · soon
+              </Text>
+            </Stack>
+            <a href="/zig/basics/hello-and-output/01" class="inline-flex">
+              <Button variant="primary" size="md">Try the preview</Button>
+            </a>
+            <a href="/zig" class="inline-flex">
+              <Button variant="secondary" size="md">Browse the curriculum</Button>
+            </a>
+          </TrackCard>
+
           <TrackCard status="soon">
             <Heading level={2} size="2xl" slot="title">
               <span class="text-fg-secondary">Rust</span> for TypeScript devs
@@ -139,10 +170,12 @@ func greet(u User) string {
               A future track. Same bilingual progression — same
               recognition → fill-in → freeform shape — for the
               ownership / borrowing / lifetime moves Rust asks of you.
+              (Status: no embeddable Rust interpreter exists yet, so a
+              client-side runtime is on hold.)
             </Fragment>
             <Stack gap="xs" slot="modules">
               <Text tone="faint" size="sm" family="mono">
-                proposed; not yet authored
+                proposed; blocked on runtime feasibility
               </Text>
             </Stack>
             <Button variant="ghost" size="md" disabled>Coming later</Button>
@@ -156,7 +189,7 @@ func greet(u User) string {
             typeover · 2026 · built with astro + solid + tailwind
           </Text>
           <Text tone="faint" size="xs" family="mono">
-            yaegi runtime · in browser
+            yaegi + zig runtimes · in browser
           </Text>
         </Stack>
       </Stack>
