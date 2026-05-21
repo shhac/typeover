@@ -11,7 +11,8 @@ import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { Text } from "../ds/Text";
 import { ExerciseShell } from "./ExerciseShell";
-import { CodeMirrorFillLine } from "./CodeMirrorFillLine";
+import { BlankInput } from "./BlankInput";
+import { CodeMirrorFillBlanks } from "./CodeMirrorFillBlanks";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
 import { RunResultPanel } from "./RunResultPanel";
@@ -240,28 +241,36 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
         Type the line →
       </div>
-      <CodeMirrorFillLine
+      <CodeMirrorFillBlanks
         segments={instance().blankSegments ?? []}
-        value={input}
-        onValueChange={(value) => {
-          setInput(value);
-          /* Editing the input invalidates the last Run's grade —
-           * otherwise Submit could grade fresh garbage against the
-           * previous Run's stdout (design-docs/19 F-3). Clearing
-           * runResult also drops canSubmit back to false so the
-           * learner has to Run again. */
-          yaegi.clear();
-        }}
-        submitted={phase.submitted}
-        /* Reveal flow re-uses BlankInput's revealed styling but our
-         * oracle is stdout, not string match — so styling-by-match
-         * would mislead. Pass false; the Feedback panel carries the
-         * correctness signal. */
-        revealed={() => false}
-        locked={() => phase.current() === "right"}
-        onEnter={() => {
-          if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
-        }}
+        ariaLabel="Fill-the-line Go snippet"
+        renderBlank={(slotIdx, varName, expected) => (
+          <BlankInput
+            slotIdx={slotIdx}
+            varName={varName}
+            expected={expected}
+            value={input()}
+            submitted={phase.submitted()}
+            /* Reveal flow re-uses BlankInput's revealed styling
+             * but our oracle is stdout, not string match — so
+             * styling-by-match would mislead. Pass false; the
+             * Feedback panel carries the correctness signal. */
+            revealed={false}
+            locked={phase.current() === "right"}
+            onInput={(value) => {
+              setInput(value);
+              /* Editing the input invalidates the last Run's grade
+               * — otherwise Submit could grade fresh garbage
+               * against the previous Run's stdout (design-docs/19
+               * F-3). Clearing runResult also drops canSubmit back
+               * to false so the learner has to Run again. */
+              yaegi.clear();
+            }}
+            onEnter={() => {
+              if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
+            }}
+          />
+        )}
       />
       {/* Mobile-only Go-symbol bar — same primitive as Freeform.
        * Targets `document.activeElement` (the focused BlankInput)

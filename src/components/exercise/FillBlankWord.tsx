@@ -1,12 +1,12 @@
-import { createMemo, createSignal, For, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { Button } from "../ds/Button";
-import { CodeBlock } from "../ds/CodeBlock";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { evaluateBlanks, extractBlankPositions } from "~/lib/fill-blank";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
+import { CodeMirrorFillBlanks } from "./CodeMirrorFillBlanks";
 
 interface FillBlankWordProps {
   exerciseId: string;
@@ -126,28 +126,24 @@ export function FillBlankWord(props: FillBlankWordProps) {
       <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
         Fill the blanks →
       </div>
-      <CodeBlock lang="go">
-        <For each={segments()}>
-          {(seg, idx) => {
-            if (seg.kind === "text") return <span>{seg.text}</span>;
-            const slotIdx = idx();
-            return (
-              <BlankInput
-                slotIdx={slotIdx}
-                varName={seg.varName}
-                expected={seg.expected}
-                value={valueFor(slotIdx)}
-                submitted={phase.submitted()}
-                revealed={phase.revealed()}
-                locked={phase.current() === "right"}
-                onInput={(value) => setInputs((prev) => ({ ...prev, [slotIdx]: value }))}
-                onEnter={() => handleEnter(slotIdx)}
-                ref={(el) => inputRefs.set(slotIdx, el)}
-              />
-            );
-          }}
-        </For>
-      </CodeBlock>
+      <CodeMirrorFillBlanks
+        segments={segments()}
+        ariaLabel="Fill-the-blanks Go snippet"
+        renderBlank={(slotIdx, varName, expected) => (
+          <BlankInput
+            slotIdx={slotIdx}
+            varName={varName}
+            expected={expected}
+            value={valueFor(slotIdx)}
+            submitted={phase.submitted()}
+            revealed={phase.revealed()}
+            locked={phase.current() === "right"}
+            onInput={(value) => setInputs((prev) => ({ ...prev, [slotIdx]: value }))}
+            onEnter={() => handleEnter(slotIdx)}
+            ref={(el) => inputRefs.set(slotIdx, el)}
+          />
+        )}
+      />
     </ExerciseShell>
   );
 }
