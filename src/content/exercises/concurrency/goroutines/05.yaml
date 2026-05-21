@@ -1,0 +1,41 @@
+target: go
+themeId: concurrency/goroutines
+type: fill-word
+order: 5
+prompt: |
+  The `${word}` keyword can also be used with anonymous
+  functions — the most common pattern when you want to capture
+  variables from the enclosing scope. Type the keyword.
+generator:
+  kind: template
+  vars:
+    word:
+      - "go"
+  ts: |-
+    // TS: setTimeout(() => { ... }, 0) is the closest analog.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	done := make(chan bool)
+    	${word} func() {
+    		fmt.Println("anon goroutine")
+    		done <- true
+    	}()
+    	<-done
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Same keyword as slot 4."
+  - "`go`."
+  - "`go`."
+notes: |
+  The `go func() { ... }()` pattern is overwhelmingly the most
+  common goroutine shape in real code — it lets you launch a
+  closure that captures locals (the `done` channel here).
+
+  Runtime: none — pinning the keyword again. The next slot
+  (06) verifies the FULL working program with a sync channel.

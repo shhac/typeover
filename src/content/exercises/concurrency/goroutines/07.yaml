@@ -1,0 +1,79 @@
+target: go
+themeId: concurrency/goroutines
+type: fill-line
+order: 7
+prompt: |
+  Write the `wg.Done()` call inside the worker goroutine. The
+  surrounding scaffold already sets up `sync.WaitGroup`, calls
+  `wg.Add(1)`, and waits with `wg.Wait()`. You're filling in
+  the line that signals completion.
+
+  Convention: `defer wg.Done()` is the idiom — defer ensures
+  the call happens even if the function panics or returns early.
+
+  Expected output: `worker finished`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "defer wg.Done()"
+  ts: |-
+    // TS: no direct equivalent — Promise.resolve() in a try/finally is
+    // the closest "always signal completion".
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	wg.Add(1)
+    	go func() {
+    		${line}
+    		fmt.Println("worker finished")
+    	}()
+    	wg.Wait()
+    }
+  distractors:
+    - match: "wg.Done()"
+      explain: |-
+        Works in this trivial case, but loses the panic-safety
+        of `defer`. Convention is `defer wg.Done()` AT THE TOP
+        of the goroutine body so that even on early return or
+        panic, the WaitGroup is decremented and `wg.Wait()`
+        doesn't hang forever.
+    - match: "wg.Add(-1)"
+      explain: |-
+        Subtle: `Add(-1)` IS what `Done()` does internally, but
+        the named method is conventional + readable. Anyone
+        reading the code expects to see `Done()` paired with
+        `Add(1)`.
+    - match: "defer wg.Wait()"
+      explain: |-
+        Wrong method — `Wait` BLOCKS until the counter hits
+        zero. Calling it from inside the goroutine would
+        deadlock (it'd wait for itself). `Wait()` belongs in
+        the caller (main); `Done()` belongs in the workers.
+expectStdout: |
+  worker finished
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Defer the call so panic-safety is guaranteed. Pattern: `defer <object>.<method>()`. Object is the WaitGroup `wg`, method is the one paired with `Add`."
+  - "`defer wg.Done()`."
+  - "`defer wg.Done()`."
+notes: |
+  Introduces `sync.WaitGroup` early — full theme coverage is
+  6.4, but it's the natural coordination primitive for "wait
+  for N goroutines to finish."
+
+  Distractor #1 (bare `wg.Done()`) is the most common
+  beginner shape; it works for happy-path but the deferred
+  form is the universally-recommended idiom (per the stdlib
+  docs of WaitGroup itself).
+
+  `sync` package available per the 2026-05-21 yaegi rebuild
+  documented in design-docs/30.

@@ -1,0 +1,51 @@
+target: go
+themeId: concurrency/goroutines
+type: mcq
+order: 1
+prompt: |
+  Pick the line that starts `worker()` running concurrently with
+  the caller (in its own goroutine).
+
+  TypeScript: `worker()` calls synchronously; `Promise.resolve()
+  .then(worker)` defers but still runs on the same event loop
+  thread. Go has true concurrency baked into the language with
+  one keyword.
+generator:
+  kind: variant
+  variants:
+    - id: go-keyword
+      ts: |-
+        // TS: setTimeout(worker, 0) or queueMicrotask(worker) —
+        // single-threaded scheduler, no true parallelism.
+        // Go: `go worker()` — true concurrent execution.
+      canonical: "go worker()"
+      distractors:
+        - "async worker()"
+        - "spawn worker()"
+        - "goroutine { worker() }"
+hints:
+  - "Two tokens: a keyword, then a function call. Same call syntax as a normal call — just one keyword before it."
+  - "Keyword is `go` (two letters, lowercase). After it, the regular function call."
+  - "`go worker()`."
+runtime: none
+notes: |
+  Theme 6.1 opener. The `go` keyword is the simplest concurrency
+  primitive Go offers — one word to launch a function in its
+  own goroutine. Compare:
+
+    worker()        // sequential call
+    go worker()     // concurrent call
+
+  The runtime multiplexes goroutines over OS threads via the
+  M:N scheduler; you can have millions of goroutines on a
+  single program.
+
+  Distractors:
+    1. `async worker()` — JavaScript/TypeScript / C# /
+       Python idiom; Go doesn't have an `async` keyword.
+    2. `spawn worker()` — Erlang / Elixir / some other
+       languages use `spawn`; Go's choice was deliberately
+       a single short verb.
+    3. `goroutine { worker() }` — block syntax with the
+       resource name; Go's syntax is statement-level, no
+       enclosing block.

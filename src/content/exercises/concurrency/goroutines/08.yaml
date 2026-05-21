@@ -1,0 +1,60 @@
+target: go
+themeId: concurrency/goroutines
+type: freeform
+order: 8
+prompt: |
+  Build a small program demonstrating goroutine + done-channel
+  synchronisation:
+
+  1. Make `done := make(chan bool)`.
+  2. Launch an anonymous goroutine (`go func() { ... }()`) that:
+     - Prints `"step 1"`.
+     - Sends `true` on the `done` channel.
+  3. In `main`, receive from `done` (`<-done`) to wait.
+  4. After the receive, print `"step 2"`.
+
+  Expected output:
+  ```
+  step 1
+  step 2
+  ```
+
+  The `<-done` is what creates the happens-before relationship:
+  the goroutine's send is guaranteed to be observed by the
+  receiver, so `"step 2"` always prints AFTER `"step 1"`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS analog: new Promise(r => { console.log("step 1"); r(); }).then(() => console.log("step 2"));
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	done := make(chan bool)
+    	go func() {
+    		fmt.Println("step 1")
+    		done <- true
+    	}()
+    	<-done
+    	fmt.Println("step 2")
+    }
+expectStdout: |
+  step 1
+  step 2
+hints:
+  - "Three pieces: `done := make(chan bool)`, `go func() { fmt.Println(\"step 1\"); done <- true }()`, then `<-done` + `fmt.Println(\"step 2\")` in main."
+  - "The `<-done` line evaluates to a value but you discard it; the SIDE EFFECT is the blocking receive."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  First freeform of the theme. Drills the done-channel idiom
+  — `chan bool` is purely a signal; the boolean value is
+  ignored. Some authors use `chan struct{}` (zero-size signal)
+  to make the "value doesn't matter" explicit; `chan bool` is
+  more beginner-friendly.
+
+  Pairs with slot 6 (single send/receive rendezvous) and
+  prepares for theme 6.2's channel deep-dive.
