@@ -139,7 +139,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
             fallback={
               props.wrongMessage ?? (
                 <span>
-                  Not quite. Try again, grab a different exercise, or reveal the canonical answer.
+                  Not quite. Try again, reshuffle this exercise, or reveal the answer.
                 </span>
               )
             }

@@ -114,8 +114,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
       correctMessage={<span>Correct — every blank matches.</span>}
       wrongMessage={
         <span>
-          One or more blanks are off. Try again, clear and start over, grab a different exercise, or
-          reveal the canonical answer.
+          One or more blanks are off. Try again, clear and start over, reshuffle this exercise, or
+          reveal the answer.
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}

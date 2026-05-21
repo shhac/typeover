@@ -132,7 +132,7 @@ export function Freeform(props: FreeformProps) {
       wrongMessage={
         <span>
           Stdout doesn't match yet. Inspect the result below, edit, Run again, or reveal the
-          canonical answer.
+          answer.
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}

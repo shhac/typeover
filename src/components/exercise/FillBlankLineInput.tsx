@@ -225,8 +225,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
           when={wrongExplain()}
           fallback={
             <span>
-              Not the expected output yet. Edit, Run again, try a different exercise, or reveal the
-              canonical answer.
+              Not the expected output yet. Edit, Run again, reshuffle this exercise, or reveal the
+              answer.
             </span>
           }
         >
