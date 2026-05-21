@@ -1,18 +1,12 @@
-import { createSignal, For, onMount, Show, type JSX } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import {
-  Badge,
-  Button,
-  CodeBlock,
-  Eyebrow,
-  Kbd,
   PaletteChip,
-  Panel,
-  ProgressChip,
-  Stack,
-  Text,
+  RadioGroup,
+  type RadioOption,
   Toast,
   useToast,
 } from "~/components/ds";
+import { PreviewSample } from "./PreviewSample";
 import {
   currentChoice,
   currentDensity,
@@ -37,93 +31,20 @@ import {
 } from "~/lib/theme";
 
 /*
- * Three radio groups, one per appearance axis. design-docs/14
- * proposes them stacked rather than tabbed — they're related
- * concerns and the page is short.
+ * Five radio groups, one per appearance axis (theme, density,
+ * shape, style, palette). design-docs/14 proposes them stacked
+ * rather than tabbed — related concerns, short page.
  *
- * The radio-group shape is identical across the three axes (label +
- * description per option, single selection, click both updates the
- * DOM via the setter AND repaints the chosen-pill state). Rather
- * than write the markup three times, the component is parameterised
- * over the option list, the current-value accessor, and the setter.
+ * The radio-group itself is now a DS primitive (`<RadioGroup<T>>`)
+ * — this file orchestrates the five axes around it, owns the
+ * change-undo Toast wiring, and renders the live preview pane
+ * via the sibling `<PreviewSample>` component.
  *
  * `onMount` for each accessor: SSR can't read localStorage, and
  * the bootstrap script in BaseLayout has already set the DOM
  * attribute by the time Solid hydrates — so the first paint shows
  * the right radio without a hydration flicker.
  */
-
-interface RadioOption<T extends string> {
-  value: T;
-  label: string;
-  description: string;
-  /** Optional visual affordance rendered before the radio input.
-   *  The palette picker uses this to surface palette identity via
-   *  PaletteChip; other axes leave it undefined. */
-  swatch?: JSX.Element;
-}
-
-interface RadioGroupProps<T extends string> {
-  legend: string;
-  options: readonly RadioOption<T>[];
-  initial: T;
-  read: () => T;
-  write: (value: T) => void;
-  name: string;
-}
-
-function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
-  const [choice, setChoice] = createSignal<T>(props.initial);
-  onMount(() => setChoice(() => props.read()));
-
-  const pick = (next: T) => {
-    setChoice(() => next);
-    props.write(next);
-  };
-
-  return (
-    <fieldset class="flex flex-col gap-3 m-0 p-0 border-0">
-      <legend class="sr-only">{props.legend}</legend>
-      <For each={props.options}>
-        {(opt) => (
-          <label
-            class={
-              "flex flex-col gap-1 p-3 border rounded-sm cursor-pointer transition-colors " +
-              "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-primary has-[:focus-visible]:outline-offset-2 " +
-              (choice() === opt.value
-                ? "border-accent-primary bg-accent-primary/5"
-                : "border-border-default hover:border-border-strong")
-            }
-          >
-            <div class="flex items-center gap-3">
-              {/* Native radio kept in the DOM for a11y (keyboard
-                * arrow-nav within the group, screen-reader
-                * announcement, aria-checked) but visually hidden —
-                * the card itself (border + tinted bg + swatch when
-                * present) conveys selection state. `:focus-visible`
-                * on the sr-only input projects an outline onto the
-                * label via `has-[:focus-visible]:` so keyboard
-                * users still see where focus lives. Pattern follows
-                * Headless UI / Tailwind UI RadioGroup-as-cards;
-                * cf. design-docs/26 radio research. */}
-              <input
-                type="radio"
-                name={props.name}
-                value={opt.value}
-                checked={choice() === opt.value}
-                onChange={() => pick(opt.value)}
-                class="sr-only"
-              />
-              <Show when={opt.swatch}>{opt.swatch}</Show>
-              <span class="font-sans text-sm text-fg-primary">{opt.label}</span>
-            </div>
-            <span class="text-fg-muted text-xs">{opt.description}</span>
-          </label>
-        )}
-      </For>
-    </fieldset>
-  );
-}
 
 const THEME_OPTIONS: RadioOption<ThemeChoice>[] = [
   {
@@ -211,55 +132,6 @@ const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
     description: "Generously curved — 8–24px. Small elements pill out.",
   },
 ];
-
-/* Focused mini-canvas showing the visual elements every axis
- * touches: surface colours (theme), padding/gap (density), corner
- * radii (radius). Pure DS composition — no localStorage reads, no
- * Solid signals; the CSS cascade fans the picker's mutations
- * through every primitive at once. Per design-docs/14 step 6.
- *
- * Composed inline rather than as its own file because no other
- * surface needs it; if a second consumer ever appears we extract.
- */
-function PreviewSample() {
-  return (
-    <Panel padding="default" tone="default">
-      <Stack gap="md">
-        <Stack gap="xs">
-          <Eyebrow>preview</Eyebrow>
-          <Text tone="muted" size="xs" family="mono">
-            A miniature of the site — every change above flows through here.
-          </Text>
-        </Stack>
-        <Stack direction="row" gap="sm" align="center" wrap>
-          <Button variant="primary" size="sm">
-            Submit
-          </Button>
-          <Button variant="secondary" size="sm">
-            Run
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Kbd>↵</Kbd>
-            <span>enter</span>
-          </Button>
-        </Stack>
-        <Stack direction="row" gap="sm" align="center" wrap>
-          <Badge variant="ts">typescript</Badge>
-          <Badge variant="go">golang</Badge>
-          <Badge variant="primary">focus</Badge>
-          <ProgressChip kind="theme" passed={4} total={9} />
-        </Stack>
-        <CodeBlock lang="go" filename="preview.go">{`package main
-
-import "fmt"
-
-func main() {
-\tfmt.Println("hello")
-}`}</CodeBlock>
-      </Stack>
-    </Panel>
-  );
-}
 
 /** Find an option's user-facing label for a given enum value, falling
  *  back to the raw value if the option list is out of date. Used by

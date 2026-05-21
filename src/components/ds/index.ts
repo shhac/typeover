@@ -17,6 +17,7 @@ export { NavLink, NAV_LINK_CLASS } from "./NavLink";
 export { Panel } from "./Panel";
 export { PALETTE_CHIP_COLORS, PaletteChip } from "./PaletteChip";
 export { ProgressChip } from "./ProgressChip";
+export { RadioGroup, type RadioOption } from "./RadioGroup";
 export { RevealButton } from "./RevealButton";
 export { Stack } from "./Stack";
 export { StatBlock } from "./StatBlock";
