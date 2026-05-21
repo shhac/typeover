@@ -51,9 +51,8 @@ interface ExerciseShellProps {
   wrongMessage?: JSX.Element;
 
   /** URL of the next exercise in this theme. When present, ExerciseShell
-   *  shows a "Next exercise →" button in the right-phase toolbar (and a
-   *  secondary "skip ahead" link in the picking-phase footer). When
-   *  absent (last exercise in theme), the right-phase Falls back to a
+   *  shows a "Next exercise →" button in the right-phase toolbar. When
+   *  absent (last exercise in theme), the right-phase falls back to a
    *  "back to theme" link. */
   nextExerciseHref?: string;
   /** URL of the parent theme's overview page. Always passed by the

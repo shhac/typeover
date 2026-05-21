@@ -13,10 +13,10 @@ export type ExerciseType = Exercise["data"]["type"];
  * workarounds.
  */
 export const EXERCISE_TYPE_LABELS: Record<ExerciseType, string> = {
-  mcq: "multiple choice",
-  "fill-word": "fill word",
-  "fill-line": "fill line",
-  freeform: "freeform",
+  mcq: "pick one",
+  "fill-word": "fill blanks",
+  "fill-line": "type one line",
+  freeform: "write a program",
 };
 
 /** Stable sort by `data.order`. Tiebreaker is original array order. */
