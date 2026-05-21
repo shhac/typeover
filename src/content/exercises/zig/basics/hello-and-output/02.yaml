@@ -1,0 +1,42 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: fill-word
+order: 2
+prompt: |
+  Fill the missing token. The program imports the Zig standard
+  library and writes a string to stdout; without the right
+  builtin, the import line doesn't compile.
+generator:
+  kind: template
+  vars:
+    builtin:
+      - "@import"
+  ts: |-
+    import * as std from "std";
+  canonical: |-
+    const std = ${builtin}("std");
+
+    pub fn main(init: std.process.Init) !void {
+        try std.Io.File.stdout().writeStreamingAll(init.io, "hello\n");
+    }
+  distractors:
+    - "import"
+    - "require"
+    - "@include"
+blanks: [builtin]
+hints:
+  - "Imports in Zig go through a compiler builtin. Builtins all start with the same character."
+  - "It's a builtin function call: `<builtin>(\"std\")`. The character `@` is the giveaway."
+  - "`@import`"
+runtime: none
+notes: |
+  Drill on the `@` builtin prefix. The blank intentionally isolates
+  the builtin name itself rather than the full statement — the
+  learner's reflex to type a keyword (`import`, `require`) hits a
+  visible wrong-shape result, the right answer ties the `@` prefix
+  to "compiler builtin" once and for all.
+
+  Distractors are the three most likely wrong reflexes:
+   - `import` — TS / JS / Python reflex
+   - `require` — Node / CommonJS reflex
+   - `@include` — a plausible-but-fake builtin

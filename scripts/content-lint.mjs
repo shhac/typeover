@@ -86,13 +86,22 @@ for await (const path of glob(join(contentRoot, "exercises", "**/*.yaml"))) {
 
 /* ──────────────────────────── checks ─────────────────────────── */
 
-/** Module orders are unique. */
+/** Module orders are unique WITHIN A LANGUAGE. The order field
+ *  determines render position in the per-language curriculum index,
+ *  so go/foundations:1 and zig/basics:1 are both valid — they live
+ *  on different pages. */
 {
-  const seen = new Map();
+  const seenPerLang = new Map();
   for (const [slug, { data, path }] of modules) {
+    const lang = data.target;
+    if (!seenPerLang.has(lang)) seenPerLang.set(lang, new Map());
+    const seen = seenPerLang.get(lang);
     const prior = seen.get(data.order);
-    if (prior) err(path, `module order ${data.order} collides with module "${prior}".`);
-    else seen.set(data.order, slug);
+    if (prior) {
+      err(path, `module order ${data.order} collides with module "${prior}" in language "${lang}".`);
+    } else {
+      seen.set(data.order, slug);
+    }
   }
 }
 

@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: mcq
+order: 1
+prompt: |
+  TypeScript pulls in a module with the `import` keyword. Zig has no
+  `import` keyword — imports go through a compiler builtin instead.
+  Pick the idiomatic Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: stdlib
+      ts: 'import * as std from "std";'
+      canonical: 'const std = @import("std");'
+      distractors:
+        - 'import std from "std";'
+        - 'use std;'
+        - 'const std = require("std");'
+    - id: as-binding
+      ts: 'import * as fs from "fs";'
+      canonical: 'const fs = @import("fs");'
+      distractors:
+        - 'import fs;'
+        - 'const fs := @import("fs");'
+        - '@import("fs") as fs;'
+hints:
+  - "Three differences from TS: it's a `const` binding (everything's a binding in Zig, not a keyword incantation), the right-hand side is the builtin `@import(...)`, and the package name goes inside as a string literal."
+  - "The shape is `const <name> = @import(\"<package>\");`. Note: `@import` starts with `@` because it's a builtin function, not a keyword."
+  - "`const std = @import(\"std\");`"
+runtime: none
+notes: |
+  First Zig exercise. Establishes:
+   - Zig imports go through `@import(...)` — a builtin, not a keyword.
+   - The result is bound with `const`, not magic.
+   - Compiler builtins all start with `@` — recognise the pattern,
+     don't memorise the list.
+
+  Distractor patterns mirror the cross-language traps we'll keep
+  using:
+   - TS / JS leakage (`import x from "..."`, `require(...)`)
+   - Rust leakage (`use x;`)
+   - Near-misses with Go (`:=` declaration instead of `=`)
+   - Made-up syntax (`@import(...) as x`)
+
+  Variant form because the two examples (`std` and `fs`) demonstrate
+  the SAME shape, not different shapes — variant keeps the per-
+  example body coherent.

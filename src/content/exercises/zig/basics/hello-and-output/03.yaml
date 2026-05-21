@@ -1,0 +1,63 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: fill-line
+order: 3
+prompt: |
+  Type the Zig line that writes `hello from zig` followed by a
+  newline to stdout. The program imports `std` and uses the modern
+  entry-point signature `pub fn main(init: std.process.Init) !void`
+  — your line is the body. With the right call, running the
+  program prints `hello from zig` on one line.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'try std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");'
+  ts: |-
+    console.log("hello from zig");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+    }
+  distractors:
+    - match: 'std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");'
+      explain: |-
+        The call itself looks right, but the `writeStreamingAll` can
+        fail — that's what the `!` in `!void` is for. Prefix the
+        statement with `try` so a failed write propagates instead of
+        being silently dropped.
+    - match: 'console.log("hello from zig");'
+      explain: |-
+        Zig has no `console`. Use `std.Io.File.stdout()` to get the
+        stdout handle, then call its writer methods.
+    - match: 'std.debug.print("hello from zig\n", .{});'
+      explain: |-
+        `std.debug.print` writes to STDERR, not stdout, and the
+        playground compiler's stdlib doesn't always link it through
+        cleanly. Use the stdout File handle: `std.Io.File.stdout().writeStreamingAll(...)`.
+expectStdout: |
+  hello from zig
+runtime: zig
+blanks: [line]
+hints:
+  - "Three things to get right: (1) call `std.Io.File.stdout()` to get the writer, (2) the method is `writeStreamingAll(init.io, <bytes>)` — it needs the I/O capability `init.io` as the first arg, and (3) prefix with `try` because the write can fail."
+  - "The shape is `try std.Io.File.stdout().writeStreamingAll(init.io, \"<your string>\");`. Don't forget the newline `\\n` inside the string — `expectStdout` wants `hello from zig\\n`."
+  - 'Type `try std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");`'
+notes: |
+  First runnable Zig exercise. Graded by stdout match through the
+  Zig WASM worker.
+
+  The canonical is anchored to the smoke-test-validated API shape
+  (`std.Io.File.stdout().writeStreamingAll(init.io, ...)` +
+  `pub fn main(init: std.process.Init) !void`) — verified to compile
+  + run under the zigtools/playground patched Zig 0.16 compiler.
+
+  Distractors call out the three most likely wrong approaches:
+   - Missing `try` (compiles to an error-discard warning but
+     silently drops failed writes)
+   - `console.log` (TS leakage)
+   - `std.debug.print` (writes to stderr and our compiler may not
+     link it cleanly — surfacing the gotcha here lets the learner
+     hit it once with an explanation instead of debugging it later)

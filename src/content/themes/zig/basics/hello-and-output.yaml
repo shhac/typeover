@@ -1,0 +1,29 @@
+target: zig
+moduleId: zig/basics
+title: Hello and output
+order: 1
+prerequisites: []
+intro: |
+  Two reflexes Zig wants you to internalise on day one.
+
+  - **Imports use a builtin, not a keyword.** `const std = @import("std");`
+    binds the standard library to a name. There's no `import` keyword and
+    no `use` keyword. `@import` is one of dozens of compiler builtins
+    (everything starting with `@`) — you don't need the full list, just
+    the muscle memory.
+  - **`main` takes an `init: std.process.Init`.** Zig's entry point used
+    to be parameterless; modern Zig threads I/O capabilities (and
+    soon, allocator handles) through an `Init` value the runtime
+    constructs for you. You hand `init.io` to anything that touches
+    files / stdout / stderr. The signature is
+    `pub fn main(init: std.process.Init) !void` — the `!void` says
+    "may fail with an error".
+
+  Writing to stdout therefore reads as: get the stdout `File` handle,
+  ask it to stream a slice of bytes through `init.io`.
+
+      try std.Io.File.stdout().writeStreamingAll(init.io, "hello\n");
+
+  `try` propagates the error if the write fails; `!void` in the main
+  signature is what allows it. We'll come back to error unions
+  properly in the errors module.

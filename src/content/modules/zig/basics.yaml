@@ -1,0 +1,9 @@
+target: zig
+title: Basics
+order: 1
+summary: |
+  The "you already know this, just spelled differently" module for
+  Zig. Imports, entry points, variables, control flow, functions, the
+  string-is-a-slice convention, and optionals. By the end, you trust
+  that typeover's translation pattern works for Zig too, and writing
+  a hello-world Zig program feels familiar.
