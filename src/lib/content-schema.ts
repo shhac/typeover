@@ -10,7 +10,8 @@ import { GeneratorSchema } from "./generator-schema";
  * exercise / theme / module shape. Edit here, never elsewhere.
  */
 
-export const targetSchema = z.literal("go"); // future: z.enum(["go", "rust", ...])
+export const targetSchema = z.enum(["go", "zig"]);
+export type Target = z.infer<typeof targetSchema>;
 
 export const moduleSchema = z.object({
   target: targetSchema,
@@ -41,7 +42,7 @@ const exerciseFields = {
    *  types via the cross-field refinements below. */
   blanks: z.array(z.string()).optional(),
   hints: z.tuple([z.string(), z.string(), z.string()]),
-  runtime: z.enum(["yaegi", "server", "none"]).default("none"),
+  runtime: z.enum(["yaegi", "zig", "server", "none"]).default("none"),
   notes: z.string().optional(),
   /** Freeform exercises: the exact stdout we expect from running the
    *  learner's `package main`. Also opts a fill-line exercise into
@@ -114,15 +115,16 @@ function validateFillBlanks(ex: Exercise, ctx: Ctx): void {
 }
 
 /** fill-line is graded by running the substituted canonical through
- *  Yaegi and comparing stdout. Same shape as freeform but with one
- *  blank line of user input embedded in the scaffold.
+ *  a client-side runtime and comparing stdout. Same shape as freeform
+ *  but with one blank line of user input embedded in the scaffold.
  *
- *  Requires `expectStdout` (the oracle) and `runtime: "yaegi"`
- *  (server fallback isn't wired yet). The legacy MCQ-as-tiles UX
- *  was retired once all 12 fill-line exercises migrated to the
- *  input+Yaegi UX; the distractors field is kept on the generator
- *  schema as a known-wrong-pattern bank for targeted feedback in
- *  a later iteration. */
+ *  Requires `expectStdout` (the oracle) and a client-side runtime
+ *  (today: `"yaegi"` for Go, `"zig"` for Zig). The legacy MCQ-as-
+ *  tiles UX was retired once all fill-line exercises migrated to the
+ *  input+runtime UX; the distractors field is kept on the generator
+ *  schema as a known-wrong-pattern bank for targeted feedback in a
+ *  later iteration. */
+const FILL_LINE_RUNTIMES = ["yaegi", "zig"] as const;
 function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
   if (ex.type !== "fill-line" || ex.generator.kind !== "template") return;
   if (ex.expectStdout === undefined) {
@@ -133,10 +135,10 @@ function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
     });
     return;
   }
-  if (ex.runtime !== "yaegi") {
+  if (!FILL_LINE_RUNTIMES.includes(ex.runtime as (typeof FILL_LINE_RUNTIMES)[number])) {
     ctx.addIssue({
       code: "custom",
-      message: 'fill-line exercises require `runtime: "yaegi"`.',
+      message: `fill-line exercises require a client-side runtime (one of: ${FILL_LINE_RUNTIMES.map((r) => `"${r}"`).join(", ")}).`,
       path: ["runtime"],
     });
   }
@@ -200,7 +202,7 @@ function validateRunnableExpectStdout(ex: Exercise, ctx: Ctx): void {
     if (ex.runtime === "none") {
       ctx.addIssue({
         code: "custom",
-        message: 'Freeform exercises need `runtime: "yaegi"` or `runtime: "server"`.',
+        message: 'Freeform exercises need a non-"none" runtime (e.g. `"yaegi"`, `"zig"`, or `"server"`).',
         path: ["runtime"],
       });
     }

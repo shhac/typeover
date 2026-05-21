@@ -17,10 +17,11 @@ interface FreeformProps {
   generator: GeneratorSpec;
   hints: readonly [string, string, string];
   expectStdout: string;
-  /** "yaegi" routes to the in-browser worker. "server" is reserved
-   *  for the fallback path (Vercel function) — not implemented in
-   *  v0; treated as an authoring error here until it lands. */
-  runtime: "yaegi" | "server";
+  /** Which runtime to grade against. "yaegi" routes to the in-browser
+   *  Go worker; "zig" to the Zig worker (gated by the runtime hook
+   *  refactor in Step 5 — today this component only runs Yaegi). "server"
+   *  is reserved for the future fallback path (Vercel function). */
+  runtime: "yaegi" | "zig" | "server";
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
