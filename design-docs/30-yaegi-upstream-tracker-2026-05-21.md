@@ -122,6 +122,35 @@ Probes that passed:
   `func Min[T Ordered](a, b T) T { ... }` — custom
   constraint package shape
 
+#### Quirk surfaced 2026-05-21 (Module 4.2 authoring)
+
+Yaegi's type inference for type-set-constrained generics
+DOESN'T propagate from untyped constants the way real `go build`
+does. Concrete repro:
+
+```go
+type Ordered interface { ~int | ~float64 | ~string }
+func Min[T Ordered](a, b T) T { if a < b { return a }; return b }
+func main() {
+    fmt.Println(Min(2.1, 1.5))           // FAILS: "untyped float does not implement main.Ordered"
+    fmt.Println(Min[float64](2.1, 1.5))  // WORKS
+}
+```
+
+Real Go 1.21+ infers `T = float64` from the untyped float
+literals; Yaegi requires the explicit type argument.
+
+**Workaround:** when authoring a generic exercise that uses a
+constrained type parameter AND passes untyped constants, write
+the call with the explicit type argument (`Min[float64]` rather
+than bare `Min`). Captured in `interfaces/generics/09.yaml`'s
+notes. No alternateCanonicals needed — the explicit form is
+valid Go too.
+
+**What retires when fixed:** the explicit-type-arg form on slot
+9 of `interfaces/generics` can re-inline to bare `Min(2.1,
+1.5)`. Single-character edit per call site.
+
 Practical impact: Module 4.2 (`interfaces/generics`) can be
 authored end-to-end with runnable canonicals — same fill-line +
 freeform shape as the rest of the curriculum, no
