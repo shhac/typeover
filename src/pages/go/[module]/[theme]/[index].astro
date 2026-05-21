@@ -93,6 +93,8 @@ const parentThemeHref = themeHref(themeEntry.id);
 <BaseLayout
   title={`${themeEntry.data.title} — typeover`}
   description={`Practice ${themeEntry.data.title} for TypeScript developers learning Go.`}
+  prevExerciseHref={prevExerciseHref}
+  nextExerciseHref={nextExerciseHref}
 >
   <main class="py-12 sm:py-20">
     <Container width="prose">
@@ -127,7 +129,6 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
-              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -141,7 +142,6 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
-              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -158,7 +158,6 @@ const parentThemeHref = themeHref(themeEntry.id);
               alternateCanonicals={ex.alternateCanonicals}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
-              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -173,7 +172,6 @@ const parentThemeHref = themeHref(themeEntry.id);
               runtime={ex.runtime}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
-              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}

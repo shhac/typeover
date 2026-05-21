@@ -12,7 +12,6 @@ interface McqProps {
   hints: readonly [string, string, string];
   successNote?: string;
   nextExerciseHref?: string;
-  prevExerciseHref?: string;
   themeHref?: string;
 }
 
@@ -48,7 +47,6 @@ export function Mcq(props: McqProps) {
       phase={phase}
       successNote={props.successNote}
       nextExerciseHref={props.nextExerciseHref}
-      prevExerciseHref={props.prevExerciseHref}
       themeHref={props.themeHref}
     >
       <fieldset

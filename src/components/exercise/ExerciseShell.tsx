@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  Match,
-  onCleanup,
-  onMount,
-  Show,
-  Switch,
-  type JSX,
-} from "solid-js";
+import { createEffect, Match, Show, Switch, type JSX } from "solid-js";
 import { Button, ButtonLink } from "../ds/Button";
 import { Feedback } from "../ds/Feedback";
 import { HintButton } from "../ds/HintButton";
@@ -15,13 +6,7 @@ import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
 import { CodeMirrorEditor } from "./CodeMirrorEditor";
-import {
-  getExerciseProgress,
-  invalidateProgressCache,
-  PROGRESS_CHANGED_EVENT,
-  recordHintUsed,
-  STORAGE_KEY,
-} from "~/lib/progress";
+import { recordHintUsed } from "~/lib/progress";
 import { formatInline } from "~/lib/format-inline";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
 
@@ -68,18 +53,10 @@ interface ExerciseShellProps {
   /** URL of the next exercise in this theme. When present, ExerciseShell
    *  shows a "Next exercise →" button in the right-phase toolbar. When
    *  absent (last exercise in theme), the right-phase falls back to a
-   *  "back to theme" link.
-   *
-   *  Also drives the picking-phase "Skip ahead →" button, which only
-   *  appears when (a) this exercise has been previously passed AND
-   *  (b) a next href exists. Lets a returning learner skip past an
-   *  exercise they've already solved without re-submitting. */
+   *  "back to theme" link. Cross-exercise nav for the picking + wrong
+   *  phases lives in the header (BaseLayout's ← / → arrows) rather
+   *  than the toolbar — the toolbar focuses on the active workflow. */
   nextExerciseHref?: string;
-  /** URL of the previous exercise — symmetric to nextExerciseHref.
-   *  Renders a "← Previous" ghost link in every phase so a learner who
-   *  isn't ready to move on can back up. Omitted when this is the
-   *  first exercise in the curriculum. */
-  prevExerciseHref?: string;
   /** URL of the parent theme's overview page. Always passed by the
    *  route; used as the right-phase fallback when nextExerciseHref is
    *  absent. */
@@ -134,31 +111,6 @@ export function ExerciseShell(props: ExerciseShellProps) {
     lastPhase = current;
   });
 
-  /* Track whether this exercise has been previously passed (across
-   * sessions / re-visits). When true AND a next href exists, the
-   * picking phase surfaces a "Skip ahead →" button so a returning
-   * learner can jump past an exercise they've already solved
-   * without re-submitting. User-asked feature 2026-05-21. */
-  const [previouslyPassed, setPreviouslyPassed] = createSignal(false);
-  const refreshPreviouslyPassed = () => {
-    setPreviouslyPassed(getExerciseProgress(props.exerciseId).instancesPassed > 0);
-  };
-  onMount(() => {
-    refreshPreviouslyPassed();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === null) {
-        invalidateProgressCache();
-        refreshPreviouslyPassed();
-      }
-    };
-    const onSameTab = () => refreshPreviouslyPassed();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    onCleanup(() => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    });
-  });
   return (
     <Stack gap="lg">
       {/* Prompt stays visible while the learner works.
@@ -218,19 +170,12 @@ export function ExerciseShell(props: ExerciseShellProps) {
       </Show>
 
       <Stack direction="row" gap="sm" wrap>
-        {/* "← Previous" lives in every phase as a quiet ghost link.
-         * A learner who lost their thread can back up without
-         * committing to anything; the Submit / Try-again / Next
-         * primary actions stay where they were. Omitted when this
-         * is the first exercise in the curriculum
-         * (prevExerciseHref is undefined). User-asked 2026-05-21. */}
-        <Show when={props.prevExerciseHref}>
-          {(href) => (
-            <ButtonLink href={href()} variant="ghost">
-              ← Previous
-            </ButtonLink>
-          )}
-        </Show>
+        {/* Cross-exercise navigation (Previous + Skip-ahead) used
+         * to live here as toolbar buttons; moved to the header's
+         * ← / → arrow chrome (BaseLayout) per the 2026-05-21
+         * screenshot review — the toolbar is now reserved for the
+         * active workflow (Submit / Run / Try-again / Reveal /
+         * Next-exercise) and never holds cross-exercise nav. */}
         <Switch>
           <Match when={phase() === "picking"}>
             <Button
@@ -241,20 +186,6 @@ export function ExerciseShell(props: ExerciseShellProps) {
               Submit
             </Button>
             {props.extraPickingActions}
-            {/* "Skip ahead →" — only when the learner has previously
-             * passed this exercise. Lets a returning visitor jump
-             * past solved exercises without re-submitting. The
-             * action is intentionally a secondary button (not
-             * primary) so a first-time visitor sees a clean
-             * Submit-led toolbar; only the previously-passed state
-             * surfaces the extra control. */}
-            <Show when={previouslyPassed() && props.nextExerciseHref}>
-              {(href) => (
-                <ButtonLink href={href()} variant="secondary">
-                  Skip ahead →
-                </ButtonLink>
-              )}
-            </Show>
           </Match>
           <Match when={phase() === "wrong"}>
             <Button variant="secondary" onClick={() => props.phase.tryAgain()}>

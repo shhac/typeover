@@ -16,7 +16,6 @@ interface FillBlankWordProps {
   hints: readonly [string, string, string];
   successNote?: string;
   nextExerciseHref?: string;
-  prevExerciseHref?: string;
   themeHref?: string;
 }
 
@@ -120,7 +119,6 @@ export function FillBlankWord(props: FillBlankWordProps) {
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}
-      prevExerciseHref={props.prevExerciseHref}
       themeHref={props.themeHref}
     >
       <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">

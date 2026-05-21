@@ -5,9 +5,15 @@ import { ResumeLink } from "~/components/header/ResumeLink";
 interface Props {
   title: string;
   description?: string;
+  /** When set, the header renders compact `←` / `→` chrome links
+   *  next to ResumeLink so the learner can step between adjacent
+   *  exercises without re-finding the toolbar. Used by the
+   *  exercise route; other pages omit. */
+  prevExerciseHref?: string;
+  nextExerciseHref?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, prevExerciseHref, nextExerciseHref } = Astro.props;
 
 /* Canonical URL for the deploy. Used for og:url + the absolute
  * og:image URL — some social platforms (notably LinkedIn and
@@ -199,7 +205,32 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
           >
             <span class="text-accent-ts">type</span><span class="text-accent-primary">over</span>
           </a>
-          <ResumeLink client:only="solid-js" />
+          {/* Exercise nav arrows + resume link, grouped so they read
+            * as one chrome-strip rather than three independent
+            * widgets. On non-exercise routes the arrows are absent;
+            * the resume link still surfaces if the learner has
+            * recorded progress somewhere. */}
+          <div class="flex flex-row items-center gap-2">
+            {prevExerciseHref && (
+              <a
+                href={prevExerciseHref}
+                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1"
+                aria-label="Previous exercise"
+              >
+                ←
+              </a>
+            )}
+            <ResumeLink client:only="solid-js" />
+            {nextExerciseHref && (
+              <a
+                href={nextExerciseHref}
+                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1"
+                aria-label="Next exercise"
+              >
+                →
+              </a>
+            )}
+          </div>
           {Astro.url.pathname !== "/go" && (
             <a
               href="/go"
