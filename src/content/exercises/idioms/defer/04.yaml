@@ -1,0 +1,35 @@
+target: go
+themeId: idioms/defer
+type: fill-word
+order: 4
+prompt: |
+  Type the keyword that schedules a function call to run
+  when the enclosing function returns.
+generator:
+  kind: template
+  vars:
+    word:
+      - "defer"
+  ts: |-
+    // TS: try { ... } finally { cleanup(); }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	${word} fmt.Println("third")
+    	${word} fmt.Println("second")
+    	fmt.Println("first")
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Five letters, lowercase. Same English word for putting something off until later."
+  - "`defer`."
+  - "`defer`."
+notes: |
+  Pin the keyword. The two `defer` calls also demonstrate
+  LIFO order (per MCQ slot 2) — when this program runs:
+  prints `first`, then on return `second`, then `third`.
+  Slot 8 verifies the runnable form.

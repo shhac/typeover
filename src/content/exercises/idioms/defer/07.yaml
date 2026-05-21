@@ -1,0 +1,71 @@
+target: go
+themeId: idioms/defer
+type: fill-line
+order: 7
+prompt: |
+  Defer-arg-evaluation gotcha from MCQ slot 3 in action.
+  Write the line that defers a closure-wrapped call so the
+  print sees the LATEST value of `i` (not the value at the
+  defer site).
+
+  Without the closure wrap, the deferred call would print
+  `i = 1`. With the closure wrap, it prints `i = 2`.
+
+  Expected output: `i = 2`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'defer func() { fmt.Println("i =", i) }()'
+  ts: |-
+    // TS: try { i = 2 } finally { console.log("i =", i) }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	i := 1
+    	${line}
+    	i = 2
+    }
+  distractors:
+    - match: 'defer fmt.Println("i =", i)'
+      explain: |-
+        No closure wrap — `i`'s value at the defer site (`1`)
+        is captured by value at that moment. Output would be
+        `i = 1`. The closure wrap defers the EVALUATION of
+        `i`, so it sees the latest.
+    - match: 'defer func(x int) { fmt.Println("i =", x) }(i)'
+      explain: |-
+        Closure with an argument also captures `i` by value
+        at the defer site (because args are evaluated at the
+        defer site, just like the bare-call form). Would
+        print `i = 1`. The zero-arg closure form is the
+        right idiom for "see latest."
+    - match: 'defer func() { fmt.Println("i =", i) }'
+      explain: |-
+        Missing the trailing `()`. Defer needs a CALL
+        expression, not a function VALUE. Pattern:
+        `defer func() { ... }()` — definition + immediate
+        invocation.
+expectStdout: |
+  i = 2
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Three pieces: `defer` keyword, anonymous function with NO arguments that prints `i =` and `i`, trailing `()` to invoke. The zero-arg closure captures `i` by reference."
+  - "`defer func() { fmt.Println(\"i =\", i) }()`."
+  - "See canonical."
+notes: |
+  Drills MCQ slot 3's gotcha + the closure-wrap workaround.
+  This is THE most common defer-related interview question
+  in Go shops.
+
+  Two ways to read it:
+  1. `defer fn(args)` — args captured at defer site.
+  2. `defer func() { ...uses outer vars... }()` — outer
+     vars captured by reference, evaluated at fire time.
+
+  Distractor #2 (closure with arg) is a subtle near-miss
+  worth pinning explicitly.
