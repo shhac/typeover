@@ -1,5 +1,6 @@
 import { createSignal, onMount } from "solid-js";
 import {
+  Eyebrow,
   PaletteChip,
   RadioGroup,
   type RadioOption,
