@@ -1,0 +1,118 @@
+target: go
+themeId: types/structs
+type: mcq
+order: 1
+prompt: |
+  Translate the TypeScript record `User` into the idiomatic Go
+  struct declaration. Go's struct is a typed bag of fields —
+  similar in spirit to a TS `interface` or `type` alias, but with
+  its own keyword family (`type Foo struct { ... }`) that you
+  don't get to skip.
+generator:
+  kind: variant
+  variants:
+    - id: user
+      ts: |-
+        interface User {
+          name: string;
+          age: number;
+        }
+      canonical: |-
+        type User struct {
+        	name string
+        	age  int
+        }
+      distractors:
+        - |-
+          interface User {
+            name string
+            age  int
+          }
+        - |-
+          type User {
+            name string
+            age  int
+          }
+        - |-
+          struct User {
+            name string
+            age  int
+          }
+    - id: point
+      ts: |-
+        interface Point {
+          x: number;
+          y: number;
+        }
+      canonical: |-
+        type Point struct {
+        	x int
+        	y int
+        }
+      distractors:
+        - |-
+          interface Point {
+            x int
+            y int
+          }
+        - |-
+          type Point {
+            x int
+            y int
+          }
+        - |-
+          struct Point {
+            x int
+            y int
+          }
+    - id: book
+      ts: |-
+        interface Book {
+          title: string;
+          pages: number;
+        }
+      canonical: |-
+        type Book struct {
+        	title string
+        	pages int
+        }
+      distractors:
+        - |-
+          interface Book {
+            title string
+            pages int
+          }
+        - |-
+          type Book {
+            title string
+            pages int
+          }
+        - |-
+          struct Book {
+            title string
+            pages int
+          }
+hints:
+  - "Go's struct declaration is `type <Name> struct { <fields> }`. The keyword `interface` exists in Go too but means something different (method-set contract — Module 4)."
+  - "Three keywords stacked: `type` introduces a named type, `struct` says what kind, then `{ ... }` lists fields with `name type` per line."
+  - "`type User struct { ... }` with fields one per line."
+runtime: none
+notes: |
+  Theme 3.1 opener — the structural shift. TS unifies "this thing
+  has these fields" under `interface` / `type`; Go splits them: a
+  STRUCT is concrete data with fields, an INTERFACE is a behavior
+  contract (Module 4). Same word, different meaning — a common
+  early TS-leak.
+
+  Distractors:
+    1. `interface { ... }` — TS keyword leak; Go's interface is for
+       methods, not fields.
+    2. `type Foo { ... }` (no `struct`) — TS-style alias syntax.
+       Go requires the underlying-type keyword.
+    3. `struct Foo { ... }` (no `type` wrapper) — Go's `struct`
+       keyword can only appear AFTER `type Name`. Bare `struct
+       Foo` doesn't declare a named type; it's not even a literal.
+
+  Module 3 introducing-new-pattern beat: this slot establishes
+  the keyword family before any slot demands productive use of
+  struct literals / field access / pointer-to-struct.
