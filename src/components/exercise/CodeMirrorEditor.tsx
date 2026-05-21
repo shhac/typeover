@@ -259,6 +259,23 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
         },
         ".cm-activeLine": { backgroundColor: "rgba(255,255,255,0.02)" },
         ".cm-activeLineGutter": { backgroundColor: "rgba(255,255,255,0.02)" },
+        /* Caret colour. CM's cursor is a `border-left`-styled
+         * element that doesn't inherit `color` — without these the
+         * caret is invisible on dark themes (the default border
+         * colour resolves to `black` on the dark `--color-bg-inset`).
+         * `caret-color` covers the text-insertion caret in non-CM
+         * contexts; `.cm-cursor` covers CM's drawn cursor proper.
+         * `.cm-dropCursor` covers the drop-target indicator on
+         * drag/drop. */
+        "&": { caretColor: "var(--color-accent-primary)" },
+        ".cm-cursor, .cm-dropCursor": {
+          borderLeftColor: "var(--color-accent-primary)",
+          borderLeftWidth: "1.5px",
+        },
+        "&.cm-focused .cm-selectionBackground, ::selection": {
+          backgroundColor: "var(--color-accent-primary)",
+          opacity: "0.18",
+        },
         "&.cm-focused": readOnly
           ? { outline: "none" }
           : { outline: "2px solid var(--color-accent-primary)" },

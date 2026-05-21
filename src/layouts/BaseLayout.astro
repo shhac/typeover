@@ -197,24 +197,25 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
       <header
         class="border-b border-border-default text-xs font-mono"
       >
-        <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center gap-4">
+        <div class="mx-auto px-4 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center gap-3 sm:gap-4">
           <a
             href="/"
-            class="text-fg-secondary hover:text-fg-primary transition-colors focus-ring"
+            class="text-fg-secondary hover:text-fg-primary transition-colors focus-ring shrink-0"
             aria-label="typeover — back to home"
           >
             <span class="text-accent-ts">type</span><span class="text-accent-primary">over</span>
           </a>
-          {/* Exercise nav arrows + resume link, grouped so they read
-            * as one chrome-strip rather than three independent
-            * widgets. On non-exercise routes the arrows are absent;
-            * the resume link still surfaces if the learner has
-            * recorded progress somewhere. */}
-          <div class="flex flex-row items-center gap-2">
+          {/* Exercise nav arrows + resume link, grouped as one
+            * chrome strip. `min-w-0` lets the ResumeLink truncate
+            * inside the flex row on narrow viewports instead of
+            * forcing the whole header to overflow. On mobile, the
+            * resume label hides itself (see ResumeLink); the
+            * arrows alone keep the navigation reachable in ~60px. */}
+          <div class="flex flex-row items-center gap-1 sm:gap-2 min-w-0">
             {prevExerciseHref && (
               <a
                 href={prevExerciseHref}
-                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1"
+                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1 shrink-0"
                 aria-label="Previous exercise"
               >
                 ←
@@ -224,7 +225,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
             {nextExerciseHref && (
               <a
                 href={nextExerciseHref}
-                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1"
+                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1 shrink-0"
                 aria-label="Next exercise"
               >
                 →
@@ -234,9 +235,9 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
           {Astro.url.pathname !== "/go" && (
             <a
               href="/go"
-              class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring"
+              class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring shrink-0"
             >
-              curriculum →
+              curriculum<span class="hidden sm:inline"> →</span>
             </a>
           )}
         </div>

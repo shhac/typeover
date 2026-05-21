@@ -75,13 +75,18 @@ export function ResumeLink() {
     });
   });
 
+  /* Truncate the slug to keep the chrome compact on mid-width
+   * screens. Mobile (< sm) drops the entire link to give the brand
+   * + arrows + curriculum-link three children room on a single
+   * row; sm+ shows the truncated label; lg+ shows it untruncated. */
   return (
     <Show when={fragment()}>
       {(f) => (
         <a
           href={f().href}
-          class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring"
+          class="hidden sm:inline-block text-fg-muted hover:text-fg-secondary transition-colors focus-ring truncate max-w-[200px] lg:max-w-none"
           aria-label={`Resume ${f().themeSlug} ${f().slotLabel}`}
+          title={`Resume ${f().themeSlug} ${f().slotLabel}`}
         >
           resume — {f().themeSlug} · {f().slotLabel}
         </a>
