@@ -48,15 +48,21 @@ function buildProgram(data) {
   }
   if (data?.type === "fill-line" && data.expectStdout !== undefined) {
     const tmpl = data.generator?.canonical;
-    const correct = data.generator?.vars?.line?.[0];
+    /* The blank var's name is read from `blanks[0]` rather than
+     * hardcoded to `line` so authors can pick a name that better
+     * describes the missing piece (e.g. `sig` for a func
+     * signature). Falls back to `line` for legacy entries that
+     * pre-date `blanks` enforcement. */
+    const blankVar = data?.blanks?.[0] ?? "line";
+    const correct = data.generator?.vars?.[blankVar]?.[0];
     if (!tmpl || correct === undefined) return null;
-    /* fill-line's canonical contains `${line}` (or other vars). For
-     * the verifier we only need to substitute the blank's correct
-     * value — other vars in the template would have been substituted
-     * at exercise time, but for our purposes vars.line[0] is enough
-     * to produce a runnable program when the rest of the template is
-     * plain text. */
-    return { kind: "fill-line", code: tmpl.replace(/\$\{line\}/g, correct) };
+    /* Substitute only the blank var — other template vars are
+     * substituted at exercise time, but for verification we need
+     * the canonical form which is "first pool value" for every
+     * var. The blank's first value is enough to make the rest of
+     * the template (plain text + the var's substitution) runnable. */
+    const re = new RegExp(`\\$\\{${blankVar}\\}`, "g");
+    return { kind: "fill-line", code: tmpl.replace(re, correct) };
   }
   return null;
 }
