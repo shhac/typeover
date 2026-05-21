@@ -416,3 +416,77 @@ describe("lastTouchedExerciseId", () => {
     expect(lastTouchedExerciseId()).toBe("foundations/variables/01");
   });
 });
+
+describe("legacy ID migration (lang prefix)", () => {
+  /* Pre-multi-language IDs were `<module>/<theme>/<index>` — three
+   * segments. After the Zig-track reorg they became
+   * `<lang>/<module>/<theme>/<index>` (four segments). Existing
+   * learners' localStorage carries the old shape; the first read on
+   * a fresh tab silently rewrites every legacy key under a `go/`
+   * prefix and persists. */
+
+  const seedLegacy = (exercises: RawProgress["exercises"]) => {
+    const blob: RawProgress = {
+      version: 1,
+      startedAt: "2025-01-01T00:00:00.000Z",
+      lastSeenAt: "2025-01-01T00:00:00.000Z",
+      exercises,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
+  };
+
+  const slot = (lastSeenAt: string) => ({
+    firstSeenAt: "2025-01-01T00:00:00.000Z",
+    lastSeenAt,
+    instancesSeen: 1,
+    instancesPassed: 1,
+    instancesFailed: 0,
+    hintsUsedTotal: 0,
+  });
+
+  it("rewrites a 3-segment id to a `go/`-prefixed 4-segment id", () => {
+    seedLegacy({ "foundations/variables/01": slot("2025-02-01T00:00:00.000Z") });
+    /* First read triggers the migration + write-back. */
+    const ex = getExerciseProgress("go/foundations/variables/01");
+    expect(ex.instancesPassed).toBe(1);
+    const persisted = readRaw() as RawProgress;
+    expect(persisted.exercises["go/foundations/variables/01"]).toBeDefined();
+    expect(persisted.exercises["foundations/variables/01"]).toBeUndefined();
+  });
+
+  it("leaves modern 4-segment ids untouched", () => {
+    seedLegacy({ "go/foundations/variables/01": slot("2025-02-01T00:00:00.000Z") });
+    const ex = getExerciseProgress("go/foundations/variables/01");
+    expect(ex.instancesPassed).toBe(1);
+    const persisted = readRaw() as RawProgress;
+    /* Modern ids stay as-is; no spurious double-prefix. */
+    expect(persisted.exercises["go/foundations/variables/01"]).toBeDefined();
+    expect(persisted.exercises["go/go/foundations/variables/01"]).toBeUndefined();
+  });
+
+  it("prefers the modern entry when both shapes exist for the same exercise", () => {
+    seedLegacy({
+      "foundations/variables/01": slot("2024-01-01T00:00:00.000Z"),
+      "go/foundations/variables/01": slot("2025-02-01T00:00:00.000Z"),
+    });
+    const ex = getExerciseProgress("go/foundations/variables/01");
+    /* Both legacy + modern carry instancesPassed: 1; the modern
+     * timestamp wins, and the legacy key is dropped. */
+    expect(ex.lastSeenAt).toBe("2025-02-01T00:00:00.000Z");
+    const persisted = readRaw() as RawProgress;
+    expect(persisted.exercises["foundations/variables/01"]).toBeUndefined();
+  });
+
+  it("ignores ids with the wrong segment count", () => {
+    seedLegacy({
+      "weird-bare-key": slot("2025-02-01T00:00:00.000Z"),
+      "go/foundations/variables/01": slot("2025-02-01T00:00:00.000Z"),
+    });
+    /* Trigger a read. */
+    getExerciseProgress("go/foundations/variables/01");
+    const persisted = readRaw() as RawProgress;
+    /* The bare id is meaningless under either schema; leave it alone
+     * so a future migration can decide what to do with it. */
+    expect(persisted.exercises["weird-bare-key"]).toBeDefined();
+  });
+});
