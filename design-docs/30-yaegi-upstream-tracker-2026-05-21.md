@@ -100,9 +100,13 @@ Re-probed today to make sure nothing has slipped:
   pre-flight)
 - `nil` map writes panic ✓
 - comma-ok lookup ✓
-- **interface-wraps-nil-pointer trap** ✓ (re-probed
-  2026-05-21 — `(*MyErr)(nil)` returned through `Error`
-  interface compares `e == nil → false`, matches real Go)
+- ~~**interface-wraps-nil-pointer trap**~~ — entry was
+  INCORRECT; re-probed AGAIN 2026-05-21 (Module 7.7 prep)
+  with three variants (explicit cast, var-then-return,
+  direct interface assignment) and all THREE evaluated
+  `err == nil → TRUE`. Yaegi simplifies the (type,value)
+  comparison and does NOT reproduce the real-Go trap.
+  This is a Yaegi LIMITATION, not a working feature.
 - **goroutines** ✓ (`go func(){...}()` with buffered/
   unbuffered channels)
 - **channels** ✓ (send `<-`, receive `<-`, `close`,

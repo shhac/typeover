@@ -1,0 +1,76 @@
+target: go
+themeId: idioms/gotchas
+type: freeform
+order: 8
+prompt: |
+  Demonstrate the **loop-variable-capture-shadow workaround**.
+  The bulletproof fix that works on ALL Go versions (1.21
+  and earlier): shadow the loop variable inside the loop body
+  before the goroutine launches.
+
+  Build:
+
+  1. `var wg sync.WaitGroup`.
+  2. Build a slice of three captured values: `out := make
+     ([]int, 3)`.
+  3. `wg.Add(3)`.
+  4. `for i := 0; i < 3; i++`:
+     - `i := i` (shadow — same name, new binding).
+     - `go func() { defer wg.Done(); out[i] = i }()`.
+  5. `wg.Wait()`.
+  6. Print `out`.
+
+  Expected output: `[0 1 2]`.
+
+  Without the shadow (`i := i`), the goroutines would race
+  on `i` and the output would be unpredictable (often
+  `[3 3 3]`). With it, each goroutine sees its own copy.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: `for (let i = 0; ...)` — let already gives per-iteration binding.
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	out := make([]int, 3)
+    	wg.Add(3)
+    	for i := 0; i < 3; i++ {
+    		i := i
+    		go func() {
+    			defer wg.Done()
+    			out[i] = i
+    		}()
+    	}
+    	wg.Wait()
+    	fmt.Println(out)
+    }
+expectStdout: |
+  [0 1 2]
+hints:
+  - "Six pieces: WaitGroup decl, out slice, Add(3), the for loop with `i := i` shadow + goroutine writing out[i] = i, Wait, Println."
+  - "The `i := i` is on its own line inside the loop body, before the `go func()` launch. Same name, new scope binding."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  THE bulletproof loop-var-capture workaround. Works
+  pre-1.22 (where the loop var is shared) AND on 1.22+
+  (where each iteration gets its own — the shadow is a
+  no-op but harmless).
+
+  Yaegi's behaviour matches pre-1.22 semantics by default
+  (loop var IS shared) — per design-docs/30. So the shadow
+  is load-bearing in our runtime, demonstrating the issue
+  + the fix in one slot.
+
+  Per `out` writes: each goroutine writes a DIFFERENT
+  index, so no race on the slice. `out` itself is shared
+  across goroutines but that's fine because the writes
+  don't overlap.
