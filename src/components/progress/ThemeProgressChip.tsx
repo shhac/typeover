@@ -1,11 +1,7 @@
-import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { ProgressChip } from "~/components/ds";
-import {
-  invalidateProgressCache,
-  PROGRESS_CHANGED_EVENT,
-  STORAGE_KEY,
-  summarizeTheme,
-} from "~/lib/progress";
+import { summarizeTheme } from "~/lib/progress";
+import { useProgressListener } from "~/lib/use-progress-listener";
 
 /*
  * Theme-level progress chip island. Mounts via `client:only` in
@@ -37,24 +33,7 @@ interface ThemeProgressChipProps {
 export function ThemeProgressChip(props: ThemeProgressChipProps) {
   const [summary, setSummary] = createSignal<ReturnType<typeof summarizeTheme> | null>(null);
 
-  const refresh = () => setSummary(summarizeTheme(props.exerciseIds));
-
-  onMount(() => {
-    refresh();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === null) {
-        invalidateProgressCache();
-        refresh();
-      }
-    };
-    const onSameTab = () => refresh();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    onCleanup(() => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    });
-  });
+  useProgressListener(() => setSummary(summarizeTheme(props.exerciseIds)));
 
   /* Memo gates `<Show>` on the truthy summary; the function-child
    * receives an accessor that re-runs when summary() updates.

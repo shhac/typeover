@@ -5,6 +5,7 @@ import {
   type ExerciseProgress,
   type Progress,
 } from "./progress-schema";
+import { nowIso } from "./now-iso";
 
 /*
  * Local progress storage. Minimal v0 — enough to power "resume" and
@@ -34,7 +35,7 @@ export const PROGRESS_CHANGED_EVENT = "typeover:progress-changed";
 export type { ExerciseProgress, Progress };
 export { safeParseProgress };
 
-const now = () => new Date().toISOString();
+const now = nowIso;
 const empty = emptyProgress;
 
 /* Module-level cache. Every public reader (getExerciseProgress,

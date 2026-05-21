@@ -1,11 +1,7 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { NavLink } from "~/components/ds/NavLink";
-import {
-  invalidateProgressCache,
-  lastTouchedExerciseId,
-  PROGRESS_CHANGED_EVENT,
-  STORAGE_KEY,
-} from "~/lib/progress";
+import { lastTouchedExerciseId } from "~/lib/progress";
+import { useProgressListener } from "~/lib/use-progress-listener";
 
 /*
  * Header chrome island: "resume — <theme-slug> · ex N" link that
@@ -54,26 +50,9 @@ function describe(exerciseId: string): ResumeFragment | null {
 export function ResumeLink() {
   const [fragment, setFragment] = createSignal<ResumeFragment | null>(null);
 
-  const refresh = () => {
+  useProgressListener(() => {
     const id = lastTouchedExerciseId();
     setFragment(id ? describe(id) : null);
-  };
-
-  onMount(() => {
-    refresh();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === null) {
-        invalidateProgressCache();
-        refresh();
-      }
-    };
-    const onSameTab = () => refresh();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    onCleanup(() => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    });
   });
 
   /* Truncate the slug to keep the chrome compact on mid-width

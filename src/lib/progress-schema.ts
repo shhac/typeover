@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nowIso } from "./now-iso";
 
 /**
  * Storage schema for progress.ts's localStorage blob. Extracted so
@@ -70,13 +71,11 @@ export function safeParseProgress(raw: string | null): Progress {
   return result.ok ? result.value : emptyProgress();
 }
 
-const now = () => new Date().toISOString();
-
 export function emptyProgress(): Progress {
   return {
     version: 1,
-    startedAt: now(),
-    lastSeenAt: now(),
+    startedAt: nowIso(),
+    lastSeenAt: nowIso(),
     exercises: {},
   };
 }

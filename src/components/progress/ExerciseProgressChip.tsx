@@ -1,11 +1,7 @@
-import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { ProgressChip } from "~/components/ds";
-import {
-  getExerciseProgress,
-  invalidateProgressCache,
-  PROGRESS_CHANGED_EVENT,
-  STORAGE_KEY,
-} from "~/lib/progress";
+import { getExerciseProgress } from "~/lib/progress";
+import { useProgressListener } from "~/lib/use-progress-listener";
 
 /*
  * Per-exercise chip island. Renders "seen 3 · passed 2" beneath an
@@ -47,26 +43,7 @@ export function ExerciseProgressChip(props: ExerciseProgressChipProps) {
     return s !== null && s.instancesSeen > 0 ? s : null;
   });
 
-  onMount(() => {
-    refresh();
-    /* `storage` only fires in OTHER tabs (per the spec). The cache
-     * needs invalidating before re-read so we don't return the
-     * snapshot captured pre-write in this tab's module-level cache. */
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === null) {
-        invalidateProgressCache();
-        refresh();
-      }
-    };
-    /* Same-tab — write() already updated the cache, just re-read. */
-    const onSameTab = () => refresh();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    onCleanup(() => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener(PROGRESS_CHANGED_EVENT, onSameTab);
-    });
-  });
+  useProgressListener(refresh);
 
   return (
     <Show
