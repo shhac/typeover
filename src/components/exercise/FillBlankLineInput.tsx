@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase, type ExercisePhaseHandle } from "~/lib/exercise-phase";
@@ -8,11 +8,10 @@ import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
-import { CodeBlock } from "../ds/CodeBlock";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { Text } from "../ds/Text";
 import { ExerciseShell } from "./ExerciseShell";
-import { BlankInput } from "./BlankInput";
+import { CodeMirrorFillLine } from "./CodeMirrorFillLine";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
 import { RunResultPanel } from "./RunResultPanel";
@@ -241,43 +240,29 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
         Type the line →
       </div>
-      <CodeBlock lang="go">
-        <For each={instance().blankSegments ?? []}>
-          {(seg) => {
-            if (seg.kind === "text") return <span>{seg.text}</span>;
-            return (
-              <span class="inline-block align-baseline">
-                <BlankInput
-                  slotIdx={0}
-                  varName={seg.varName}
-                  expected={seg.expected}
-                  value={input()}
-                  submitted={phase.submitted()}
-                  /* Reveal flow re-uses BlankInput's revealed styling
-                   * but our oracle is stdout, not string match — so
-                   * styling-by-match would mislead. Pass false; the
-                   * Feedback panel carries the correctness signal. */
-                  revealed={false}
-                  locked={phase.current() === "right"}
-                  onInput={(value) => {
-                    setInput(value);
-                    /* Editing the input invalidates the last Run's
-                     * grade — otherwise Submit could grade fresh
-                     * garbage against the previous Run's stdout
-                     * (design-docs/19 F-3). Clearing runResult
-                     * also drops canSubmit back to false so the
-                     * learner has to Run again. */
-                    yaegi.clear();
-                  }}
-                  onEnter={() => {
-                    if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
-                  }}
-                />
-              </span>
-            );
-          }}
-        </For>
-      </CodeBlock>
+      <CodeMirrorFillLine
+        segments={instance().blankSegments ?? []}
+        value={input}
+        onValueChange={(value) => {
+          setInput(value);
+          /* Editing the input invalidates the last Run's grade —
+           * otherwise Submit could grade fresh garbage against the
+           * previous Run's stdout (design-docs/19 F-3). Clearing
+           * runResult also drops canSubmit back to false so the
+           * learner has to Run again. */
+          yaegi.clear();
+        }}
+        submitted={phase.submitted}
+        /* Reveal flow re-uses BlankInput's revealed styling but our
+         * oracle is stdout, not string match — so styling-by-match
+         * would mislead. Pass false; the Feedback panel carries the
+         * correctness signal. */
+        revealed={() => false}
+        locked={() => phase.current() === "right"}
+        onEnter={() => {
+          if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
+        }}
+      />
       {/* Mobile-only Go-symbol bar — same primitive as Freeform.
        * Targets `document.activeElement` (the focused BlankInput)
        * via insertAtFocused; ref forwarding through BlankInput +
