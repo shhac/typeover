@@ -5,7 +5,7 @@ import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
-import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "./CodeMirrorEditor";
+import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "../ds/CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";

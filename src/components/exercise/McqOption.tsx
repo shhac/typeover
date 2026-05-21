@@ -1,15 +1,6 @@
 import { cn } from "../ds/_internal";
-import { CodeMirrorEditor } from "./CodeMirrorEditor";
-
-/* Inside the test environment, the CodeMirror surface degrades to
- * a plain <pre> via the editor's TestareaFallback path. That keeps
- * `getByText(option)` working in the existing McqOption tests. */
-function isTestEnv(): boolean {
-  return (
-    typeof document !== "undefined" &&
-    document.documentElement.hasAttribute("data-codemirror-test")
-  );
-}
+import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
+import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 
 /**
  * The four possible visual states for an MCQ option. Resolved purely
@@ -105,7 +96,7 @@ export function McqOption(props: McqOptionProps) {
        *  one node. The CodeMirrorEditor itself handles the
        *  test-env detection; the wrapper just chooses the right
        *  shell. */}
-      {isTestEnv() ? (
+      {isCodeMirrorTestEnv() ? (
         <pre
           id={`opt-${props.groupName}-${props.index}-text`}
           class="font-mono text-sm text-fg-primary whitespace-pre-wrap leading-relaxed"

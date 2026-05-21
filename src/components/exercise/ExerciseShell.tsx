@@ -5,7 +5,7 @@ import { HintButton } from "../ds/HintButton";
 import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
-import { CodeMirrorEditor } from "./CodeMirrorEditor";
+import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
 import { recordHintUsed } from "~/lib/progress";
 import { formatInline } from "~/lib/format-inline";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";

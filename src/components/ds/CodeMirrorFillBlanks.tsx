@@ -2,12 +2,9 @@ import { For, onCleanup, onMount, type JSX } from "solid-js";
 import { render } from "solid-js/web";
 import { EditorState } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType } from "@codemirror/view";
-import {
-  HighlightStyle,
-  syntaxHighlighting,
-} from "@codemirror/language";
 import { go } from "@codemirror/lang-go";
-import { tags } from "@lezer/highlight";
+import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
+import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import type { FillSegment } from "~/lib/generator-runtime";
 
 /*
@@ -53,29 +50,6 @@ interface CodeMirrorFillBlanksProps {
   /** Optional aria-label override on the editor contentDOM. */
   ariaLabel?: string;
 }
-
-function isTestEnv(): boolean {
-  return (
-    typeof document !== "undefined" &&
-    document.documentElement.hasAttribute("data-codemirror-test")
-  );
-}
-
-/* Palette-aware syntax highlight style. Identical to the editor's
- * default; copied (rather than re-imported) so the fill-blanks
- * surface can evolve its own tag list without coupling. */
-const syntaxStyle = HighlightStyle.define([
-  { tag: [tags.keyword, tags.controlKeyword, tags.modifier], color: "var(--color-accent-primary)" },
-  { tag: [tags.function(tags.variableName), tags.definition(tags.function(tags.variableName))], color: "var(--color-accent-primary)" },
-  { tag: [tags.string, tags.character, tags.special(tags.string)], color: "var(--color-accent-go)" },
-  { tag: [tags.typeName, tags.className], color: "var(--color-accent-go)" },
-  { tag: [tags.number, tags.bool, tags.null, tags.literal], color: "var(--color-accent-ts)" },
-  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "var(--color-fg-faint)", fontStyle: "italic" },
-  { tag: [tags.operator, tags.punctuation, tags.derefOperator], color: "var(--color-fg-secondary)" },
-  { tag: [tags.variableName, tags.propertyName, tags.attributeName], color: "var(--color-fg-primary)" },
-  { tag: [tags.escape, tags.regexp], color: "var(--color-accent-go)" },
-  { tag: tags.meta, color: "var(--color-fg-muted)" },
-]);
 
 /* The widget owns its mount lifecycle: toDOM creates a host span,
  * mounts the caller-supplied JSX via Solid's standalone render, and
@@ -180,7 +154,7 @@ function LegacyFallback(props: CodeMirrorFillBlanksProps): JSX.Element {
 }
 
 export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Element {
-  if (isTestEnv()) return LegacyFallback(props);
+  if (isCodeMirrorTestEnv()) return LegacyFallback(props);
 
   let parent: HTMLDivElement | undefined;
   let view: EditorView | undefined;
@@ -209,26 +183,17 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
         go(),
-        syntaxHighlighting(syntaxStyle, { fallback: true }),
         decorationField,
         atomicField,
         EditorView.contentAttributes.of({
           "aria-label": props.ariaLabel ?? "Fill-the-blanks Go snippet",
           spellcheck: "false",
         }),
-        EditorView.theme({
-          "&": {
-            fontFamily:
-              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-            fontSize: "0.875rem",
-            backgroundColor: "var(--color-bg-inset)",
-            color: "var(--color-fg-primary)",
-            borderRadius: "0.125rem",
-            border: "1px solid var(--color-border-default)",
-          },
-          ".cm-scroller": { lineHeight: "1.6" },
-          ".cm-content": { padding: "0.75rem" },
-          "&.cm-focused": { outline: "none" },
+        ...codemirrorThemeExtensions({
+          minHeight: "auto",
+          contentPadding: "0.75rem",
+          surfaceFocusOutline: false,
+          caret: false,
         }),
       ],
     });

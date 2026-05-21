@@ -12,7 +12,7 @@ import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { Text } from "../ds/Text";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
-import { CodeMirrorFillBlanks } from "./CodeMirrorFillBlanks";
+import { CodeMirrorFillBlanks } from "../ds/CodeMirrorFillBlanks";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
 import { RunResultPanel } from "./RunResultPanel";

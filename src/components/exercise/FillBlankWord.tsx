@@ -6,7 +6,7 @@ import { useExercisePhase } from "~/lib/exercise-phase";
 import { evaluateBlanks, extractBlankPositions } from "~/lib/fill-blank";
 import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
-import { CodeMirrorFillBlanks } from "./CodeMirrorFillBlanks";
+import { CodeMirrorFillBlanks } from "../ds/CodeMirrorFillBlanks";
 
 interface FillBlankWordProps {
   exerciseId: string;
