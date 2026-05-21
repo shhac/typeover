@@ -1,0 +1,39 @@
+target: go
+themeId: concurrency/sync
+type: mcq
+order: 3
+prompt: |
+  Pick the statement that's TRUE about `sync.WaitGroup`.
+generator:
+  kind: variant
+  variants:
+    - id: add-before-wait
+      ts: |-
+        // TS: Promise.all([...]) is the closest analog — but the
+        // promise list is known up front. WaitGroup lets the count
+        // grow over time (with the Add-before-launch rule).
+      canonical: "Call `wg.Add(n)` BEFORE launching the goroutines whose completion you'll wait for; each goroutine calls `wg.Done()` (typically deferred); a caller blocks on `wg.Wait()`. Calling `Add` from inside a goroutine races with `Wait`."
+      distractors:
+        - "Call `wg.Done()` BEFORE launching; the goroutine calls `wg.Add(1)` when it starts working."
+        - "WaitGroup auto-tracks goroutines launched via `go`; you only need to call `wg.Wait()`."
+        - "`Wait` is a poll — call it in a loop until it returns true."
+hints:
+  - "Three calls: `Add(n)` to set expected count, `Done()` to decrement, `Wait()` to block until zero. The race-free recipe is about WHEN each call happens."
+  - "Add BEFORE launch (caller's side), Done inside the goroutine (worker's side), Wait in the caller."
+  - "Add(n) before launch; Done() inside; Wait() blocks the caller."
+runtime: none
+notes: |
+  The Add-before-launch rule is the most common
+  WaitGroup mistake. If you Add from inside the goroutine,
+  there's a race: the goroutine might not have started by
+  the time the caller calls Wait, so Wait sees counter=0
+  and returns immediately, missing the work.
+
+  Distractors:
+    1. Inverted order — Done before launch + Add inside;
+       Wait would underflow / race instantly.
+    2. "Auto-tracks" — no such Go feature; you must Add
+       explicitly.
+    3. "Wait is a poll" — Wait is BLOCKING, no loop needed.
+
+  Slot 8's freeform drills the correct shape.

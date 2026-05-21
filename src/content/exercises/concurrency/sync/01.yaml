@@ -1,0 +1,44 @@
+target: go
+themeId: concurrency/sync
+type: mcq
+order: 1
+prompt: |
+  `sync.Mutex` is Go's classic mutual-exclusion primitive.
+  Pick the line that creates a usable mutex declared as
+  variable `mu`.
+
+  TypeScript: no built-in mutex (JS is single-threaded).
+  Libraries like `async-mutex` provide it. Go's stdlib
+  bakes it in.
+generator:
+  kind: variant
+  variants:
+    - id: var-mutex
+      ts: |-
+        // TS: const mu = new Mutex(); // from async-mutex
+        // Go: var mu sync.Mutex — the zero value is a usable,
+        // unlocked mutex (no NewMutex constructor needed).
+      canonical: "var mu sync.Mutex"
+      distractors:
+        - "mu := sync.NewMutex()"
+        - "mu := new(sync.Mutex())"
+        - "var mu = make(sync.Mutex)"
+hints:
+  - "`sync.Mutex`'s zero value is a usable, unlocked mutex — no constructor call needed. Pattern: `var <name> sync.Mutex`."
+  - "`var mu sync.Mutex`."
+  - "`var mu sync.Mutex`."
+runtime: none
+notes: |
+  Theme 6.4 opener. Critical sync API design beat: most
+  types in `sync` have **useful zero values**.
+  `var mu sync.Mutex` is enough — no `sync.NewMutex()` call.
+  Same for `sync.WaitGroup`, `sync.Once`, `sync.RWMutex`.
+  Only `sync.Cond` requires `sync.NewCond(&mu)`.
+
+  Distractors:
+    1. `sync.NewMutex()` — doesn't exist (would be the Java/
+       C# habit). The Go stdlib deliberately omits it.
+    2. `new(sync.Mutex())` — confuses `new` (allocates a
+       pointer to a type) with constructor-call syntax.
+    3. `make(sync.Mutex)` — `make` is for slices, maps,
+       channels only. Mutex uses zero-value init.

@@ -1,0 +1,77 @@
+target: go
+themeId: concurrency/sync
+type: fill-line
+order: 7
+prompt: |
+  `sync.Once` runs a function exactly once across all
+  goroutines, no matter how many call it. Useful for
+  lazy init.
+
+  Write the `once.Do(...)` call that prints `init` exactly
+  one time, even though `init` is wrapped in a loop that
+  iterates 5 times.
+
+  Expected output: `init` printed once, then `done`.
+
+  Expected output (full):
+  ```
+  init
+  done
+  ```
+generator:
+  kind: template
+  vars:
+    line:
+      - 'once.Do(func() { fmt.Println("init") })'
+  ts: |-
+    // TS: const initFn = (() => { let ran = false; return () => { if (ran) return; ran = true; init(); }; })();
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var once sync.Once
+    	for i := 0; i < 5; i++ {
+    		${line}
+    	}
+    	fmt.Println("done")
+    }
+  distractors:
+    - match: 'once.Run(func() { fmt.Println("init") })'
+      explain: |-
+        Wrong method name — `sync.Once` has `Do`, not `Run`.
+        Common Java/C# habit (`runOnce`); Go's name is the
+        bare verb `Do`.
+    - match: 'once.Do(fmt.Println("init"))'
+      explain: |-
+        Passes the RESULT of `fmt.Println` (nil + side effect
+        on the FIRST call to the line). `Do` takes a `func()`
+        — pass a function value, not a call. The closure
+        wrapper `func() { ... }` is mandatory.
+    - match: 'once(func() { fmt.Println("init") })'
+      explain: |-
+        Calls `once` as a function. `once` is a struct value;
+        you call its method `Do(...)`.
+expectStdout: |
+  init
+  done
+runtime: yaegi
+blanks: [line]
+hints:
+  - "`once.Do(func() { ... })` — pass a `func()` closure. The closure runs once, even across many `Do` calls."
+  - "`once.Do(func() { fmt.Println(\"init\") })`."
+  - "`once.Do(func() { fmt.Println(\"init\") })`."
+notes: |
+  `sync.Once` is THE idiomatic lazy-init primitive. Used
+  pervasively for things like opening a singleton DB
+  connection, parsing a config file, registering metrics.
+
+  Implementation note (not in the prompt to keep it concise):
+  `Once` is thread-safe — if two goroutines call `Do`
+  concurrently on a fresh `Once`, exactly one runs the
+  function and the other waits for it to finish before
+  returning.

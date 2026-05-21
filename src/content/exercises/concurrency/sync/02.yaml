@@ -1,0 +1,54 @@
+target: go
+themeId: concurrency/sync
+type: mcq
+order: 2
+prompt: |
+  Pick the IDIOMATIC pattern for guarding access to a shared
+  counter `count` with `mu sync.Mutex` from inside a function.
+generator:
+  kind: variant
+  variants:
+    - id: lock-defer-unlock
+      ts: |-
+        // TS: with async-mutex, you'd `await mu.acquire()` then call
+        // release in a try/finally. Go's `defer` makes it a one-liner.
+      canonical: |-
+        mu.Lock()
+        defer mu.Unlock()
+        count++
+      distractors:
+        - |-
+          mu.Lock()
+          count++
+          mu.Unlock()
+        - |-
+          defer mu.Lock()
+          defer mu.Unlock()
+          count++
+        - |-
+          mu.Sync(func() {
+              count++
+          })
+hints:
+  - "Three lines: lock immediately, defer unlock right after (panic-safe), then do the work. Order matters — `defer` runs LIFO on return."
+  - "`mu.Lock(); defer mu.Unlock(); count++`."
+  - "Lock + defer Unlock + work."
+runtime: none
+notes: |
+  The defer-unlock pattern is canonical for three reasons:
+
+  1. **Panic-safety** — if `count++` were to panic (unlikely
+     here but realistic for richer operations), the unlock
+     still runs.
+  2. **Early-return safety** — if the function returns
+     mid-way, defer fires.
+  3. **One-line cognitive load** — pair Lock and Unlock
+     adjacent so a reader sees the boundary.
+
+  Distractors:
+    1. Manual unlock after work — works for happy path, no
+       panic-safety. Strongly discouraged style.
+    2. `defer mu.Lock()` — defers the LOCK, meaning the
+       work happens BEFORE the lock acquires. Catastrophic.
+    3. `mu.Sync(func() {...})` — invented method; the stdlib
+     Mutex has only `Lock`/`Unlock`/`TryLock`.
