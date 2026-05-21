@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildCandidatePool, substituteAtBlank } from "./fill-blank";
+import {
+  buildCandidatePool,
+  evaluateBlanks,
+  extractBlankPositions,
+  substituteAtBlank,
+  type BlankPosition,
+} from "./fill-blank";
 import type { ExerciseInstance, FillSegment, GeneratorSpec } from "./generator";
 
 /*
@@ -185,5 +191,148 @@ describe("substituteAtBlank", () => {
   it("handles the no-blank case (variant generator → no blankSegments)", () => {
     const instance = makeInstance([{ kind: "text", text: "plain text only" }]);
     expect(substituteAtBlank(instance, "ignored")).toBe("plain text only");
+  });
+});
+
+describe("extractBlankPositions", () => {
+  const text = (s: string): FillSegment => ({ kind: "text", text: s });
+  const blank = (varName: string, expected: string): FillSegment => ({
+    kind: "blank",
+    varName,
+    expected,
+  });
+
+  it("returns the blank segments tagged with their original segment indices", () => {
+    const segments: FillSegment[] = [
+      text("var "),
+      blank("name", "age"),
+      text(" "),
+      blank("type", "int"),
+      text(" = 42"),
+    ];
+    expect(extractBlankPositions(segments)).toEqual([
+      { idx: 1, seg: { kind: "blank", varName: "name", expected: "age" } },
+      { idx: 3, seg: { kind: "blank", varName: "type", expected: "int" } },
+    ]);
+  });
+
+  it("returns [] when the segment stream has no blanks (variant generator shape)", () => {
+    const segments: FillSegment[] = [text("plain text only")];
+    expect(extractBlankPositions(segments)).toEqual([]);
+  });
+
+  it("returns [] for an empty segment stream", () => {
+    expect(extractBlankPositions([])).toEqual([]);
+  });
+
+  it("preserves the repeated-blank case as TWO independent positions", () => {
+    /* `${x} == ${x}` renders two BlankInputs that share the same
+     * varName but get independent slot keys via their segment idx —
+     * critical for the FillBlankWord component's per-input state. */
+    const segments: FillSegment[] = [blank("x", "a"), text(" == "), blank("x", "a")];
+    const positions = extractBlankPositions(segments);
+    expect(positions).toHaveLength(2);
+    expect(positions[0]!.idx).toBe(0);
+    expect(positions[1]!.idx).toBe(2);
+    /* Both share varName + expected, but the consumer keys on idx. */
+    expect(positions[0]!.seg.varName).toBe(positions[1]!.seg.varName);
+  });
+
+  it("does not mutate the input array order", () => {
+    const segments: FillSegment[] = [blank("a", "x"), text("|"), blank("b", "y")];
+    const before = [...segments];
+    extractBlankPositions(segments);
+    expect(segments).toEqual(before);
+  });
+});
+
+describe("evaluateBlanks — vacuous-truth guard", () => {
+  /* The load-bearing contract per fill-blank.ts:46. `Array.every`
+   * returns true on an empty array; a regression that drops the
+   * positions.length===0 short-circuit would silently auto-pass any
+   * fill-word authored with `blanks: []`. */
+  it("returns both flags false when positions is empty (NOT true)", () => {
+    expect(evaluateBlanks([], {})).toEqual({ allFilled: false, allCorrect: false });
+  });
+
+  it("returns both flags false when positions is empty even when inputs has entries", () => {
+    /* Inputs map keyed against non-existent positions must not flip
+     * the guard to true. */
+    expect(evaluateBlanks([], { 0: "anything", 5: "stuff" })).toEqual({
+      allFilled: false,
+      allCorrect: false,
+    });
+  });
+});
+
+describe("evaluateBlanks — allFilled", () => {
+  const pos = (idx: number, expected: string): BlankPosition => ({
+    idx,
+    seg: { kind: "blank", varName: `v${idx}`, expected },
+  });
+
+  it("is false when any position has no input entry", () => {
+    expect(evaluateBlanks([pos(1, "a"), pos(2, "b")], { 1: "a" }).allFilled).toBe(false);
+  });
+
+  it("is false when any position has an empty-string input", () => {
+    expect(evaluateBlanks([pos(1, "a"), pos(2, "b")], { 1: "a", 2: "" }).allFilled).toBe(false);
+  });
+
+  it("is true when every position has a non-empty string (regardless of correctness)", () => {
+    expect(
+      evaluateBlanks([pos(1, "a"), pos(2, "b")], { 1: "wrong", 2: "also-wrong" }).allFilled,
+    ).toBe(true);
+  });
+
+  it("treats undefined inputs[idx] same as empty (the `?? ''` fallback)", () => {
+    /* Spec: positions whose slot was never typed-into appear as
+     * undefined in the inputs map. The helper coerces to "" so the
+     * filled-check is consistent. */
+    expect(evaluateBlanks([pos(1, "a")], {}).allFilled).toBe(false);
+  });
+});
+
+describe("evaluateBlanks — allCorrect", () => {
+  const pos = (idx: number, expected: string): BlankPosition => ({
+    idx,
+    seg: { kind: "blank", varName: `v${idx}`, expected },
+  });
+
+  it("is true when every position matches its expected exactly", () => {
+    expect(evaluateBlanks([pos(0, "var"), pos(2, "int")], { 0: "var", 2: "int" }).allCorrect).toBe(
+      true,
+    );
+  });
+
+  it("is false when any position mismatches expected", () => {
+    expect(
+      evaluateBlanks([pos(0, "var"), pos(2, "int")], { 0: "var", 2: "string" }).allCorrect,
+    ).toBe(false);
+  });
+
+  it("matches by EXACT string — no trimming, no case-folding", () => {
+    /* Submission-normalisation is the consumer's job; this helper
+     * is intentionally strict-equality on the typed value. */
+    expect(evaluateBlanks([pos(0, "var")], { 0: " var" }).allCorrect).toBe(false);
+    expect(evaluateBlanks([pos(0, "var")], { 0: "VAR" }).allCorrect).toBe(false);
+    expect(evaluateBlanks([pos(0, "var")], { 0: "var " }).allCorrect).toBe(false);
+  });
+
+  it("the same canonical blank repeated at two slots must BOTH match independently", () => {
+    /* The `${x} == ${x}` case: positions share varName+expected,
+     * but the inputs map keys on slot idx — each occurrence is
+     * graded separately. */
+    const positions = [pos(0, "a"), pos(2, "a")];
+    expect(evaluateBlanks(positions, { 0: "a", 2: "a" }).allCorrect).toBe(true);
+    expect(evaluateBlanks(positions, { 0: "a", 2: "b" }).allCorrect).toBe(false);
+    expect(evaluateBlanks(positions, { 0: "b", 2: "a" }).allCorrect).toBe(false);
+  });
+
+  it("is false when a position's input is empty (allCorrect requires equality with non-empty expected)", () => {
+    /* Empty string can only match an expected of empty string; the
+     * fill-blank schema rejects empty expected at authoring time, so
+     * an empty input always fails allCorrect. */
+    expect(evaluateBlanks([pos(0, "var")], { 0: "" }).allCorrect).toBe(false);
   });
 });
