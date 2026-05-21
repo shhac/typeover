@@ -239,47 +239,63 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
         "aria-label": props.ariaLabel ?? (lang === "go" ? "Go code" : "TypeScript source"),
         spellcheck: "false",
       }),
-      EditorView.theme({
-        "&": {
-          fontFamily:
-            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-          fontSize: "0.875rem",
-          backgroundColor: "var(--color-bg-inset)",
-          color: "var(--color-fg-primary)",
-          borderRadius: "0.125rem",
-          border: "1px solid var(--color-border-default)",
-          minHeight: readOnly ? "auto" : "16rem",
+      EditorView.theme(
+        {
+          "&": {
+            fontFamily:
+              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+            fontSize: "0.875rem",
+            backgroundColor: "var(--color-bg-inset)",
+            color: "var(--color-fg-primary)",
+            borderRadius: "0.125rem",
+            border: "1px solid var(--color-border-default)",
+            minHeight: readOnly ? "auto" : "16rem",
+          },
+          ".cm-scroller": { lineHeight: "1.6" },
+          /* `caret-color` lives on .cm-content (the contenteditable
+           * surface) — that's where the browser draws the native
+           * text-insertion caret. Setting it on the editor root
+           * doesn't propagate down because contenteditable
+           * overrides. */
+          ".cm-content": { padding: "0.75rem 0", caretColor: "var(--color-accent-primary)" },
+          ".cm-gutters": {
+            backgroundColor: "var(--color-bg-inset)",
+            color: "var(--color-fg-faint)",
+            border: "none",
+          },
+          ".cm-activeLine": { backgroundColor: "rgba(255,255,255,0.02)" },
+          ".cm-activeLineGutter": { backgroundColor: "rgba(255,255,255,0.02)" },
+          /* CM's drawn cursor is a `border-left`-styled <div>. The
+           * default theme sets `border-left: 1.2px solid black` —
+           * a *shorthand*. To override on a dark background we
+           * have to use the shorthand too (a longhand
+           * `borderLeftColor` would lose to the shorthand's
+           * declared order). Repeating the rule under
+           * `&.cm-focused .cm-cursorLayer .cm-cursor` raises
+           * specificity above the focused-state default that
+           * CM applies via `&.cm-focused > .cm-scroller >
+           * .cm-cursorLayer .cm-cursor`. */
+          ".cm-cursor, .cm-dropCursor": {
+            borderLeft: "1.5px solid var(--color-accent-primary)",
+          },
+          "&.cm-focused .cm-cursorLayer .cm-cursor": {
+            borderLeft: "1.5px solid var(--color-accent-primary)",
+          },
+          "&.cm-focused .cm-selectionBackground, ::selection": {
+            backgroundColor: "var(--color-accent-primary)",
+            opacity: "0.18",
+          },
+          "&.cm-focused": readOnly
+            ? { outline: "none" }
+            : { outline: "2px solid var(--color-accent-primary)" },
         },
-        ".cm-scroller": { lineHeight: "1.6" },
-        ".cm-content": { padding: "0.75rem 0" },
-        ".cm-gutters": {
-          backgroundColor: "var(--color-bg-inset)",
-          color: "var(--color-fg-faint)",
-          border: "none",
-        },
-        ".cm-activeLine": { backgroundColor: "rgba(255,255,255,0.02)" },
-        ".cm-activeLineGutter": { backgroundColor: "rgba(255,255,255,0.02)" },
-        /* Caret colour. CM's cursor is a `border-left`-styled
-         * element that doesn't inherit `color` — without these the
-         * caret is invisible on dark themes (the default border
-         * colour resolves to `black` on the dark `--color-bg-inset`).
-         * `caret-color` covers the text-insertion caret in non-CM
-         * contexts; `.cm-cursor` covers CM's drawn cursor proper.
-         * `.cm-dropCursor` covers the drop-target indicator on
-         * drag/drop. */
-        "&": { caretColor: "var(--color-accent-primary)" },
-        ".cm-cursor, .cm-dropCursor": {
-          borderLeftColor: "var(--color-accent-primary)",
-          borderLeftWidth: "1.5px",
-        },
-        "&.cm-focused .cm-selectionBackground, ::selection": {
-          backgroundColor: "var(--color-accent-primary)",
-          opacity: "0.18",
-        },
-        "&.cm-focused": readOnly
-          ? { outline: "none" }
-          : { outline: "2px solid var(--color-accent-primary)" },
-      }),
+        /* `dark: true` flips the editor's internal dark-mode
+         * styling so its default cursor rule under `&dark .cm-cursor`
+         * doesn't fight us. Our explicit borderLeft above wins
+         * either way, but flipping the flag also keeps any other
+         * dark-mode-conditional default in sync with our palette. */
+        { dark: true },
+      ),
     ];
 
     const editorOnly: Extension[] = readOnly
