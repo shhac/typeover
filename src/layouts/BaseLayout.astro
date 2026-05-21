@@ -1,6 +1,7 @@
 ---
 import "~/styles/global.css";
 import { ResumeLink } from "~/components/header/ResumeLink";
+import { NAV_LINK_CLASS } from "~/components/ds/NavLink";
 
 interface Props {
   title: string;
@@ -215,7 +216,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
             {prevExerciseHref && (
               <a
                 href={prevExerciseHref}
-                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1 shrink-0"
+                class={`${NAV_LINK_CLASS} px-1 shrink-0`}
                 aria-label="Previous exercise"
               >
                 ←
@@ -225,7 +226,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
             {nextExerciseHref && (
               <a
                 href={nextExerciseHref}
-                class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring px-1 shrink-0"
+                class={`${NAV_LINK_CLASS} px-1 shrink-0`}
                 aria-label="Next exercise"
               >
                 →
@@ -233,10 +234,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
             )}
           </div>
           {Astro.url.pathname !== "/go" && (
-            <a
-              href="/go"
-              class="text-fg-muted hover:text-fg-secondary transition-colors focus-ring shrink-0"
-            >
+            <a href="/go" class={`${NAV_LINK_CLASS} shrink-0`}>
               curriculum<span class="hidden sm:inline"> →</span>
             </a>
           )}

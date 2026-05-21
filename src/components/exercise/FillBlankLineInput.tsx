@@ -8,6 +8,7 @@ import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
+import { InstructionLine } from "../ds/InstructionLine";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
 import { Text } from "../ds/Text";
 import { ExerciseShell } from "./ExerciseShell";
@@ -236,9 +237,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
-        Type the line →
-      </div>
+      <InstructionLine>Type the line →</InstructionLine>
       <CodeMirrorFillBlanks
         segments={instance().blankSegments ?? []}
         ariaLabel="Fill-the-line Go snippet"

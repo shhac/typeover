@@ -2,6 +2,7 @@ import { createEffect, Match, Show, Switch, type JSX } from "solid-js";
 import { Button, ButtonLink } from "../ds/Button";
 import { Feedback } from "../ds/Feedback";
 import { HintButton } from "../ds/HintButton";
+import { InstructionLine } from "../ds/InstructionLine";
 import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
@@ -127,9 +128,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
          * match the live editor below (palette-themed via
          * design-docs/16 F-19 follow-up). Renders as a static
          * <pre> inside vitest per the editor's test-env fallback. */}
-        <div class="text-micro uppercase tracking-widest text-fg-muted">
-          TypeScript reference
-        </div>
+        <InstructionLine class="mb-0">TypeScript reference</InstructionLine>
         <CodeMirrorEditor
           value={props.ts}
           readOnly

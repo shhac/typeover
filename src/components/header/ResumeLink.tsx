@@ -1,4 +1,5 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { NavLink } from "~/components/ds/NavLink";
 import {
   invalidateProgressCache,
   lastTouchedExerciseId,
@@ -82,14 +83,14 @@ export function ResumeLink() {
   return (
     <Show when={fragment()}>
       {(f) => (
-        <a
+        <NavLink
           href={f().href}
-          class="hidden sm:inline-block text-fg-muted hover:text-fg-secondary transition-colors focus-ring truncate max-w-[200px] lg:max-w-none"
+          class="hidden sm:inline-block truncate max-w-[200px] lg:max-w-none"
           aria-label={`Resume ${f().themeSlug} ${f().slotLabel}`}
           title={`Resume ${f().themeSlug} ${f().slotLabel}`}
         >
           resume — {f().themeSlug} · {f().slotLabel}
-        </a>
+        </NavLink>
       )}
     </Show>
   );

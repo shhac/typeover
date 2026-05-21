@@ -1,5 +1,6 @@
 import { createMemo, createSignal, Show } from "solid-js";
 import { Button } from "../ds/Button";
+import { InstructionLine } from "../ds/InstructionLine";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -121,9 +122,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
-        Fill the blanks →
-      </div>
+      <InstructionLine>Fill the blanks →</InstructionLine>
       <CodeMirrorFillBlanks
         segments={segments()}
         ariaLabel="Fill-the-blanks Go snippet"
