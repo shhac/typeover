@@ -1,0 +1,38 @@
+target: go
+themeId: idioms/project-layout
+type: fill-word
+order: 4
+prompt: |
+  Type the directory name that's the conventional parent
+  for binaries in a multi-binary Go module — each binary
+  gets its own subdirectory under this.
+generator:
+  kind: template
+  vars:
+    word:
+      - "cmd"
+  ts: |-
+    // TS: convention varies (bin/, src/).
+  canonical: |-
+    myproject/
+    ├── go.mod
+    ├── go.sum
+    └── ${word}/
+        ├── serverd/
+        │   └── main.go
+        └── clientd/
+            └── main.go
+runtime: none
+blanks: [word]
+hints:
+  - "Three letters, lowercase. Short for the English word for the action you give to a CPU process."
+  - "`cmd`."
+  - "`cmd`."
+notes: |
+  Pin the directory name. The `cmd/<name>/` shape lets
+  `go build ./cmd/...` produce ALL binaries with one
+  command, naming each binary after its subdirectory.
+
+  Canonical is a directory tree diagram (not Go source) —
+  `runtime: none` because layout is a project-structure
+  concern, not a runtime one.

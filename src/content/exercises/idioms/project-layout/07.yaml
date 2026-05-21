@@ -1,0 +1,70 @@
+target: go
+themeId: idioms/project-layout
+type: fill-line
+order: 7
+prompt: |
+  Following the "thin main, fat libraries" idiom: write a
+  THIN `main()` function that calls a helper `run()` and
+  prints its result.
+
+  The pattern in a real project: `main()` is one or two
+  lines that delegates to a package-level function for
+  argument parsing, setup, and the real work. Easy to
+  test the function; hard to test `main()`.
+
+  Expected output: `result: 42`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "func main() { fmt.Println(\"result:\", run()) }"
+  ts: |-
+    // TS: function main() { console.log("result:", run()); }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func run() int {
+    	return 42
+    }
+
+    ${line}
+  distractors:
+    - match: "func main() { fmt.Println(\"result:\", 42) }"
+      explain: |-
+        Inlines the constant 42 directly in main — bypasses
+        the run() helper. The whole point of the "thin main"
+        pattern is that main DELEGATES, so the real work
+        lives in a testable function.
+    - match: "func Main() { fmt.Println(\"result:\", run()) }"
+      explain: |-
+        Capital `Main` — Go's entry point is bare lowercase
+        `main`. The toolchain looks for that specific name
+        in package main.
+    - match: "func main() { run() }"
+      explain: |-
+        Calls run() but discards its result. The slot
+        expects the result to be printed; main is also
+        the place where final output formatting happens.
+expectStdout: |
+  result: 42
+runtime: yaegi
+blanks: [line]
+hints:
+  - "One line: `func main() { fmt.Println(\"result:\", run()) }`. Delegate to run, print its return."
+  - "`func main() { fmt.Println(\"result:\", run()) }`."
+  - "See canonical."
+notes: |
+  The thin-main idiom is universally applicable:
+  ```
+  func main() {
+      if err := run(); err != nil {
+          fmt.Fprintln(os.Stderr, err)
+          os.Exit(1)
+      }
+  }
+  ```
+  is the most expressive form (with error handling). Our
+  scaffold simplifies — no errors, no os — because the
+  lesson is about delegation, not error handling.

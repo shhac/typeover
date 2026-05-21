@@ -286,6 +286,36 @@ workaround-driven (swap).
 `errors.Is` works fine with both stdlib and user-defined
 sentinels — no workaround needed there.
 
+#### Quirk surfaced 2026-05-21 (Module 7.4 authoring)
+
+**`testing` package is NOT extractable via `yaegi extract`**
+because it's tightly coupled to the `go test` runner
+binary. Probe: `import "testing"` fails with the standard
+"unable to find source related to" error. Unlike sync/
+time/context, this can't be vendored from yaegi's stdlib
+directory — no `go1_22_testing.go` exists there, only
+sub-packages (`fstest`, `iotest`, `quick`).
+
+**Workaround:** Mock-T pattern. Tiny struct that mirrors
+`*testing.T`'s Errorf signature:
+```go
+type T struct{ failed bool }
+func (t *T) Errorf(format string, args ...any) { ... }
+```
+Lesson (table-driven testing, if-Errorf idiom, format-
+string usage) is preserved; learners can lift the pattern
+directly into a real `_test.go` because the method
+signatures match.
+
+Slots 6-9 of `idioms/testing` use this scaffold.
+
+**What retires when fixed:** if yaegi gains testing
+support (unlikely without a fork — see "Forking is not the
+answer" section), the mock-T type definitions could be
+deleted from slots 6-9 canonicals and the method calls
+swapped to `*testing.T`. Until then, the mock-T shape IS
+the canonical Yaegi-runnable form.
+
 ## What we'd do differently if a Yaegi PR landed
 
 The `alternateCanonicals` infrastructure (shipped commit
