@@ -1,9 +1,10 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase, type ExercisePhaseHandle } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
 import { normaliseSubmission } from "~/lib/submission-normalise";
+import { useAutoSubmitOnCorrect } from "~/lib/use-auto-submit-on-correct";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
@@ -112,42 +113,25 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       another();
       setInput("");
       yaegi.clear();
-      autoSubmittedFor = null;
+      autoSubmit.reset();
     },
     onTryAgain: () => {
       yaegi.clear();
-      autoSubmittedFor = null;
+      autoSubmit.reset();
     },
   });
 
   /* Auto-Submit on correct Run + auto-Run on Submit-without-Run.
-   * design-docs/26-ux-asks. Two reactive behaviours:
-   *
-   *  1. When a fresh runResult lands AND it's correct AND we're
-   *     still in the picking phase → fire phase.submit(). Skips
-   *     the manual "Run, see green, click Submit" two-step.
-   *  2. When the learner clicks Submit but no runResult exists
-   *     yet (or it's stale because they edited) → trigger Run
-   *     first; the auto-Submit-on-correct effect picks up from
-   *     there if the result is correct.
-   *
-   * `autoSubmittedFor` guards against re-submitting the same
-   * result if the effect re-fires for any reason. */
-  let autoSubmittedFor: object | null = null;
-  createEffect(() => {
-    const r = yaegi.runResult();
-    /* Track yaegi.running() too: useYaegiRun sets runResult BEFORE
-     * flipping running back to false, so this effect would fire
-     * once with running still true and bail on phase.submit's
-     * canSubmit gate. Re-tracking running means we re-fire the
-     * tick after, when canSubmit returns true. */
-    if (yaegi.running()) return;
-    if (r === null || r === autoSubmittedFor) return;
-    if (phase.current() !== "picking") return;
-    if (isCorrect()) {
-      autoSubmittedFor = r;
-      phase.submit();
-    }
+   * design-docs/26-ux-asks. The reactive choreography
+   * ("result lands → was it correct → are we still picking →
+   * commit verdict") is encapsulated in `useAutoSubmitOnCorrect`;
+   * this component wires it up + drives the second leg via the
+   * wrapped phase below. */
+  const autoSubmit = useAutoSubmitOnCorrect({
+    runResult: yaegi.runResult,
+    running: yaegi.running,
+    isCorrect,
+    phase,
   });
 
   /* The phase exposed to ExerciseShell wraps the inner one so we
