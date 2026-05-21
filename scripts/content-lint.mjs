@@ -98,7 +98,10 @@ for await (const path of glob(join(contentRoot, "exercises", "**/*.yaml"))) {
     const seen = seenPerLang.get(lang);
     const prior = seen.get(data.order);
     if (prior) {
-      err(path, `module order ${data.order} collides with module "${prior}" in language "${lang}".`);
+      err(
+        path,
+        `module order ${data.order} collides with module "${prior}" in language "${lang}".`,
+      );
     } else {
       seen.set(data.order, slug);
     }
