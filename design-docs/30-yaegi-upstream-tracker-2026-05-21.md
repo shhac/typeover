@@ -100,6 +100,36 @@ Re-probed today to make sure nothing has slipped:
   pre-flight)
 - `nil` map writes panic ✓
 - comma-ok lookup ✓
+- **interface-wraps-nil-pointer trap** ✓ (re-probed
+  2026-05-21 — `(*MyErr)(nil)` returned through `Error`
+  interface compares `e == nil → false`, matches real Go)
+
+### User-defined generics ✓ (probed 2026-05-21)
+
+Big finding for Module 4.2 authoring. Yaegi DOES support
+user-defined generics — the limitation is exclusively in the
+STDLIB extraction path (`yaegi extract slices` emits empty for
+generic exports). User code with generic functions, generic
+structs, custom constraint interfaces, and `~T`
+underlying-type constraints all RUN correctly.
+
+Probes that passed:
+- `func Max[T int | float64](a, b T) T { ... }` — type-set
+  constraint
+- `type Stack[T any] struct { items []T }` with generic
+  methods (Push / Pop)
+- `type Ordered interface { ~int | ~float64 | ~string }` +
+  `func Min[T Ordered](a, b T) T { ... }` — custom
+  constraint package shape
+
+Practical impact: Module 4.2 (`interfaces/generics`) can be
+authored end-to-end with runnable canonicals — same fill-line +
+freeform shape as the rest of the curriculum, no
+alternateCanonicals workaround needed for the bulk of the
+theme. The only Module-4.2 slots that would need the workaround
+are ones that try to USE the generic stdlib (slices.Sort,
+maps.Keys, etc.); those slots either reach for the pre-generics
+equivalent or stay MCQ-recognition.
 
 ## What we'd do differently if a Yaegi PR landed
 
