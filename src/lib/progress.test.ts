@@ -369,10 +369,7 @@ describe("aggregateModuleProgress", () => {
 });
 
 describe("findNextUnfinishedExerciseId", () => {
-  const THEMES = [
-    { exerciseIds: ["m/t1/01", "m/t1/02"] },
-    { exerciseIds: ["m/t2/01", "m/t2/02"] },
-  ];
+  const THEMES = [{ exerciseIds: ["m/t1/01", "m/t1/02"] }, { exerciseIds: ["m/t2/01", "m/t2/02"] }];
 
   it("returns the first id when nothing is passed", () => {
     expect(findNextUnfinishedExerciseId(THEMES)).toBe("m/t1/01");

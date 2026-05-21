@@ -31,8 +31,7 @@ export function Container(props: ParentProps<ContainerProps>) {
   const width = local.width ?? "default";
   /* Only `width="prose"` yields to `--measure`. Other widths
    * keep their explicit max-width regardless of style. */
-  const measureStyle =
-    width === "prose" ? ({ "max-width": "var(--measure)" } as const) : undefined;
+  const measureStyle = width === "prose" ? ({ "max-width": "var(--measure)" } as const) : undefined;
   return (
     <div
       {...rest}

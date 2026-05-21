@@ -56,9 +56,7 @@ export function HintButton(props: HintButtonProps) {
     <div class="flex flex-col gap-3">
       <Show
         when={!exhausted()}
-        fallback={
-          <span class="font-mono text-xs text-fg-faint">all three hints shown</span>
-        }
+        fallback={<span class="font-mono text-xs text-fg-faint">all three hints shown</span>}
       >
         <Button
           variant="ghost"

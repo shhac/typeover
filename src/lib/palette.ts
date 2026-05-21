@@ -105,20 +105,36 @@ export const PALETTE_HOME_STYLE: Record<PaletteId, StyleId> = {
  *  hunt across two files. `Record<PaletteId, ...>` makes the
  *  typechecker enforce coverage at the canonical-source site. */
 export const PALETTE_LABELS: Record<PaletteId, { label: string; description: string }> = {
-  "phosphor-amber": { label: "Phosphor Amber", description: "Bloomberg trading-floor amber on near-black." },
+  "phosphor-amber": {
+    label: "Phosphor Amber",
+    description: "Bloomberg trading-floor amber on near-black.",
+  },
   "phosphor-green": { label: "Phosphor Green", description: "IBM 3270 / VT220 CRT ghost." },
   "ice-blue": { label: "Ice Blue", description: "Arctic quant-desk slate." },
   "tape-reel": { label: "Tape Reel", description: "DEC oxblood on parchment." },
-  "warm-paper": { label: "Warm Paper", description: "Off-white panels on light, warm-dark on dark." },
+  "warm-paper": {
+    label: "Warm Paper",
+    description: "Off-white panels on light, warm-dark on dark.",
+  },
   kraft: { label: "Kraft", description: "True brown shipping-carton paper." },
   manila: { label: "Manila", description: "Folder yellow with ink-blue accent." },
   newsprint: { label: "Newsprint", description: "Off-white pulp + headline red." },
   calfskin: { label: "Calfskin", description: "Pale calfskin with sepia ink." },
-  "parchment-ink": { label: "Parchment & Ink", description: "Cream-on-light, aged-paper-on-dark — the warm textbook canon." },
+  "parchment-ink": {
+    label: "Parchment & Ink",
+    description: "Cream-on-light, aged-paper-on-dark — the warm textbook canon.",
+  },
   pelican: { label: "Pelican", description: "Penguin paperback orange spine." },
   almanac: { label: "Almanac", description: "Off-white + deep teal headings." },
-  "e-reader": { label: "E-Reader", description: "Modern e-ink — cool grey paper on light, warm night-mode + amber highlight on dark." },
-  "slate-rule": { label: "Slate Rule", description: "Modern academic — cool slate ground, steel-blue accent. Gwern-influenced." },
+  "e-reader": {
+    label: "E-Reader",
+    description:
+      "Modern e-ink — cool grey paper on light, warm night-mode + amber highlight on dark.",
+  },
+  "slate-rule": {
+    label: "Slate Rule",
+    description: "Modern academic — cool slate ground, steel-blue accent. Gwern-influenced.",
+  },
   "aurora-amber": { label: "Aurora Amber", description: "Amber + TS-blue radial bloom." },
   "glacier-blue": { label: "Glacier Blue", description: "Cool cyan-to-ice bloom." },
   "lavender-mist": { label: "Lavender Mist", description: "Lilac + rose synthwave." },

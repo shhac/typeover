@@ -104,10 +104,7 @@ export function McqOption(props: McqOptionProps) {
           <code>{props.text}</code>
         </pre>
       ) : (
-        <div
-          id={`opt-${props.groupName}-${props.index}-text`}
-          class="flex-1 min-w-0"
-        >
+        <div id={`opt-${props.groupName}-${props.index}-text`} class="flex-1 min-w-0">
           <CodeMirrorEditor
             value={props.text}
             readOnly

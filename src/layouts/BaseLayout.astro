@@ -38,6 +38,42 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
  * proposer-cycle round 2 — the lighter alternative to a service
  * worker. */
 const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
+
+/* Inline script body: prefetches the Yaegi WASM on first hover /
+ * focus / touch over an in-curriculum link from off-route pages.
+ * Hoisted out of the JSX template-literal expression so the
+ * surrounding `<script is:inline set:html={...}>` is a simple
+ * identifier — keeps oxlint's `no-unused-expressions` rule
+ * unconfused (it flagged the template-literal-in-JSX-braces
+ * shape) and reads as a deliberate static asset. */
+const yaegiPrefetchScript = `(function () {
+  var fired = false;
+  function ok() {
+    var c = navigator.connection;
+    if (c && c.saveData) return false;
+    if (c && c.effectiveType === "slow-2g") return false;
+    return true;
+  }
+  function prefetch() {
+    if (fired) return;
+    if (!ok()) return;
+    fired = true;
+    var link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "fetch";
+    link.href = "/yaegi/yaegi.wasm";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+  function handler(e) {
+    var t = e.target;
+    if (!t || typeof t.closest !== "function") return;
+    if (t.closest('a[href^="/go/"]')) prefetch();
+  }
+  document.addEventListener("pointerover", handler, { passive: true });
+  document.addEventListener("focusin", handler, { passive: true });
+  document.addEventListener("touchstart", handler, { passive: true });
+})();`;
 ---
 
 <!doctype html>
@@ -134,38 +170,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
     {/* Hover/focus prefetch of the Yaegi WASM from off-route pages
       * (landing, /go index, privacy). On /go/* the <link rel="preload">
       * above already covers it. design-docs/25 P5. */}
-    {!isExerciseRoute && (
-      <script is:inline>
-        {`(function () {
-          var fired = false;
-          function ok() {
-            var c = navigator.connection;
-            if (c && c.saveData) return false;
-            if (c && c.effectiveType === "slow-2g") return false;
-            return true;
-          }
-          function prefetch() {
-            if (fired) return;
-            if (!ok()) return;
-            fired = true;
-            var link = document.createElement("link");
-            link.rel = "prefetch";
-            link.as = "fetch";
-            link.href = "/yaegi/yaegi.wasm";
-            link.crossOrigin = "anonymous";
-            document.head.appendChild(link);
-          }
-          function handler(e) {
-            var t = e.target;
-            if (!t || typeof t.closest !== "function") return;
-            if (t.closest('a[href^="/go/"]')) prefetch();
-          }
-          document.addEventListener("pointerover", handler, { passive: true });
-          document.addEventListener("focusin", handler, { passive: true });
-          document.addEventListener("touchstart", handler, { passive: true });
-        })();`}
-      </script>
-    )}
+    {!isExerciseRoute && <script is:inline set:html={yaegiPrefetchScript} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

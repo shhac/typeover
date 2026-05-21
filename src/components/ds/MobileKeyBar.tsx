@@ -114,10 +114,10 @@ export function MobileKeyBar(props: MobileKeyBarProps) {
       >
         <div class="flex flex-row min-h-11">
           {/* Bar buttons live outside the natural keyboard tab order
-            * (tabindex=-1). They're discoverable by sight on the bar
-            * itself and only useful from a thumb-tap; a hardware-
-            * keyboard user shouldn't have to Tab through 17 symbol
-            * buttons to escape the textarea. design-docs/19 F-14. */}
+           * (tabindex=-1). They're discoverable by sight on the bar
+           * itself and only useful from a thumb-tap; a hardware-
+           * keyboard user shouldn't have to Tab through 17 symbol
+           * buttons to escape the textarea. design-docs/19 F-14. */}
           <For each={keys()}>
             {(k) => (
               <button

@@ -77,7 +77,7 @@ describe("BaseLayout bootstrap — enum coverage", () => {
  * a per-event link injection — sanity in the source, not at runtime.
  */
 describe("BaseLayout hover/focus Yaegi prefetch", () => {
-  it("injects a <link rel=\"prefetch\"> with the right shape", async () => {
+  it('injects a <link rel="prefetch"> with the right shape', async () => {
     const src = await bootstrapSource();
     expect(src).toMatch(/link\.rel\s*=\s*"prefetch"/);
     expect(src).toMatch(/link\.href\s*=\s*"\/yaegi\/yaegi\.wasm"/);

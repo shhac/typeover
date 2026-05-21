@@ -52,7 +52,10 @@ export const codemirrorSyntaxStyle = HighlightStyle.define([
     tag: [tags.function(tags.variableName), tags.definition(tags.function(tags.variableName))],
     color: "var(--color-accent-primary)",
   },
-  { tag: [tags.string, tags.character, tags.special(tags.string)], color: "var(--color-accent-go)" },
+  {
+    tag: [tags.string, tags.character, tags.special(tags.string)],
+    color: "var(--color-accent-go)",
+  },
   { tag: [tags.typeName, tags.className], color: "var(--color-accent-go)" },
   { tag: [tags.number, tags.bool, tags.null, tags.literal], color: "var(--color-accent-ts)" },
   {
@@ -101,9 +104,7 @@ export interface CodeMirrorThemeOptions {
  * `syntaxHighlighting(...)` are sibling extensions — callers spread
  * the result into their extensions list.
  */
-export function codemirrorThemeExtensions(
-  opts: CodeMirrorThemeOptions = {},
-): Extension[] {
+export function codemirrorThemeExtensions(opts: CodeMirrorThemeOptions = {}): Extension[] {
   const minHeight = opts.minHeight ?? "auto";
   const contentPadding = opts.contentPadding ?? "0.75rem";
   const focused = opts.surfaceFocusOutline === true;

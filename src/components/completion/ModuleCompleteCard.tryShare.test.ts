@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { tryShare } from "./ModuleCompleteCard";
 
 /*
@@ -76,18 +76,14 @@ describe("tryShare — failure paths", () => {
 
 describe("tryShare — cancellation vs throw disambiguation", () => {
   it("returns 'idle' when share throws AbortError (user dismissed the sheet)", async () => {
-    const share = vi.fn().mockRejectedValue(
-      new DOMException("aborted", "AbortError"),
-    );
+    const share = vi.fn().mockRejectedValue(new DOMException("aborted", "AbortError"));
     setNavigator({ share });
     const result = await tryShare("x", "y");
     expect(result).toBe("idle");
   });
 
   it("returns 'error' when share throws a non-AbortError DOMException", async () => {
-    const share = vi.fn().mockRejectedValue(
-      new DOMException("blocked", "NotAllowedError"),
-    );
+    const share = vi.fn().mockRejectedValue(new DOMException("blocked", "NotAllowedError"));
     setNavigator({ share });
     const result = await tryShare("x", "y");
     expect(result).toBe("error");

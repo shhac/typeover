@@ -138,8 +138,7 @@ export function Freeform(props: FreeformProps) {
       correctMessage={<span>Correct — your program prints the expected output.</span>}
       wrongMessage={
         <span>
-          Stdout doesn't match yet. Inspect the result below, edit, Run again, or reveal the
-          answer.
+          Stdout doesn't match yet. Inspect the result below, edit, Run again, or reveal the answer.
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}
@@ -191,11 +190,7 @@ export function Freeform(props: FreeformProps) {
       />
       <Show when={yaegi.runResult()}>
         {(r) => (
-          <RunResultPanel
-            result={r()}
-            expectStdout={props.expectStdout}
-            ref={runPanelFocus.ref}
-          />
+          <RunResultPanel result={r()} expectStdout={props.expectStdout} ref={runPanelFocus.ref} />
         )}
       </Show>
     </ExerciseShell>

@@ -316,9 +316,18 @@ describe("summariseCoverage", () => {
 
   it("counts modules complete / partial / empty correctly", () => {
     const tree = [
-      node("a", [{ id: "a/x", exerciseCount: 5 }, { id: "a/y", exerciseCount: 3 }]), // complete
-      node("b", [{ id: "b/x", exerciseCount: 0 }, { id: "b/y", exerciseCount: 4 }]), // partial
-      node("c", [{ id: "c/x", exerciseCount: 0 }, { id: "c/y", exerciseCount: 0 }]), // empty
+      node("a", [
+        { id: "a/x", exerciseCount: 5 },
+        { id: "a/y", exerciseCount: 3 },
+      ]), // complete
+      node("b", [
+        { id: "b/x", exerciseCount: 0 },
+        { id: "b/y", exerciseCount: 4 },
+      ]), // partial
+      node("c", [
+        { id: "c/x", exerciseCount: 0 },
+        { id: "c/y", exerciseCount: 0 },
+      ]), // empty
     ];
     const s = summariseCoverage(tree);
     expect(s.modulesComplete).toBe(1);
@@ -328,7 +337,10 @@ describe("summariseCoverage", () => {
 
   it("counts themes covered (≥1 exercise) and total exercises", () => {
     const tree = [
-      node("a", [{ id: "a/x", exerciseCount: 7 }, { id: "a/y", exerciseCount: 0 }]),
+      node("a", [
+        { id: "a/x", exerciseCount: 7 },
+        { id: "a/y", exerciseCount: 0 },
+      ]),
       node("b", [{ id: "b/x", exerciseCount: 3 }]),
     ];
     const s = summariseCoverage(tree);

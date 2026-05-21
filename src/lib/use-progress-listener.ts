@@ -1,9 +1,5 @@
 import { onCleanup, onMount } from "solid-js";
-import {
-  invalidateProgressCache,
-  PROGRESS_CHANGED_EVENT,
-  STORAGE_KEY,
-} from "./progress";
+import { invalidateProgressCache, PROGRESS_CHANGED_EVENT, STORAGE_KEY } from "./progress";
 
 /**
  * Subscribe a `refresh` callback to BOTH cross-tab `storage`

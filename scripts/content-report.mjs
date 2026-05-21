@@ -137,4 +137,6 @@ console.log(
   `Themes:    ${themeSummary.complete} complete (≥${SLOT_TARGET} slots) · ${themeSummary.wip} WIP · ${themeSummary.empty} empty`,
 );
 console.log(`Exercises: ${totalExercises} authored across ${themesWithContent} theme(s)`);
-console.log(`Launch progress (themes with any content): ${themesWithContent}/${totalThemes} = ${pct}%`);
+console.log(
+  `Launch progress (themes with any content): ${themesWithContent}/${totalThemes} = ${pct}%`,
+);

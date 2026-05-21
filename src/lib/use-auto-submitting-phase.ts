@@ -56,9 +56,7 @@ export interface UseAutoSubmittingPhase {
   reset: () => void;
 }
 
-export function useAutoSubmittingPhase(
-  args: UseAutoSubmittingPhaseArgs,
-): UseAutoSubmittingPhase {
+export function useAutoSubmittingPhase(args: UseAutoSubmittingPhaseArgs): UseAutoSubmittingPhase {
   const autoSubmit = useAutoSubmitOnCorrect({
     runResult: args.runResult,
     running: args.running,
@@ -70,8 +68,7 @@ export function useAutoSubmittingPhase(
     submitted: args.phase.submitted,
     revealed: args.phase.revealed,
     current: args.phase.current,
-    canSubmit: () =>
-      args.hasInput() && !args.running() && args.phase.current() === "picking",
+    canSubmit: () => args.hasInput() && !args.running() && args.phase.current() === "picking",
     submit: () => {
       if (args.running()) return;
       if (!args.hasInput()) return;

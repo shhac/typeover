@@ -153,7 +153,9 @@ export function PaletteChip(props: PaletteChipProps) {
   const colors = () => PALETTE_CHIP_COLORS[props.palette][theme()];
   return (
     <span
-      class={"inline-flex items-center justify-center rounded-sm border " + (props.class ?? "w-9 h-6")}
+      class={
+        "inline-flex items-center justify-center rounded-sm border " + (props.class ?? "w-9 h-6")
+      }
       style={{
         "background-color": colors().bg,
         "border-color": colors().accent + "60",

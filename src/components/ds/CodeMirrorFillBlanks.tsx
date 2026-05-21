@@ -62,7 +62,11 @@ class BlankWidget extends WidgetType {
     private readonly slotIdx: number,
     private readonly varName: string,
     private readonly expected: string,
-    private readonly renderBlank: (slotIdx: number, varName: string, expected: string) => JSX.Element,
+    private readonly renderBlank: (
+      slotIdx: number,
+      varName: string,
+      expected: string,
+    ) => JSX.Element,
   ) {
     super();
   }
@@ -83,10 +87,7 @@ class BlankWidget extends WidgetType {
   toDOM(): HTMLElement {
     const host = document.createElement("span");
     host.className = "inline-block align-baseline";
-    const dispose = render(
-      () => this.renderBlank(this.slotIdx, this.varName, this.expected),
-      host,
-    );
+    const dispose = render(() => this.renderBlank(this.slotIdx, this.varName, this.expected), host);
     this.disposers.push(dispose);
     return host;
   }
@@ -116,9 +117,10 @@ interface BlankPosition {
   expected: string;
 }
 
-function buildDocAndRanges(
-  segments: readonly FillSegment[],
-): { doc: string; blankRanges: BlankPosition[] } {
+function buildDocAndRanges(segments: readonly FillSegment[]): {
+  doc: string;
+  blankRanges: BlankPosition[];
+} {
   let doc = "";
   const blankRanges: BlankPosition[] = [];
   segments.forEach((seg, slotIdx) => {
@@ -127,7 +129,13 @@ function buildDocAndRanges(
     } else {
       const from = doc.length;
       doc += seg.expected;
-      blankRanges.push({ from, to: doc.length, slotIdx, varName: seg.varName, expected: seg.expected });
+      blankRanges.push({
+        from,
+        to: doc.length,
+        slotIdx,
+        varName: seg.varName,
+        expected: seg.expected,
+      });
     }
   });
   return { doc, blankRanges };
@@ -156,6 +164,7 @@ function LegacyFallback(props: CodeMirrorFillBlanksProps): JSX.Element {
 export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Element {
   if (isCodeMirrorTestEnv()) return LegacyFallback(props);
 
+  /* oxlint-disable-next-line no-unassigned-vars — Solid ref binding. */
   let parent: HTMLDivElement | undefined;
   let view: EditorView | undefined;
 

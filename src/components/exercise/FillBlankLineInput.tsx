@@ -247,11 +247,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       />
       <Show when={yaegi.runResult()}>
         {(r) => (
-          <RunResultPanel
-            result={r()}
-            expectStdout={props.expectStdout}
-            ref={runPanelFocus.ref}
-          />
+          <RunResultPanel result={r()} expectStdout={props.expectStdout} ref={runPanelFocus.ref} />
         )}
       </Show>
     </ExerciseShell>

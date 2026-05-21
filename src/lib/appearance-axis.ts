@@ -34,9 +34,7 @@ export interface AppearanceAxis<T extends string> {
   set: (next: T) => void;
 }
 
-export function defineAppearanceAxis<T extends string>(
-  config: AxisConfig<T>,
-): AppearanceAxis<T> {
+export function defineAppearanceAxis<T extends string>(config: AxisConfig<T>): AppearanceAxis<T> {
   const valueSet: ReadonlySet<string> = new Set(config.values);
   const isValue = (s: string | null | undefined): s is T =>
     typeof s === "string" && valueSet.has(s);

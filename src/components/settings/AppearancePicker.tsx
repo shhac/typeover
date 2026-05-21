@@ -215,7 +215,9 @@ export function AppearancePicker() {
       description: `Follow the active style's default palette. Changes as you switch Style.`,
       swatch: <PaletteChip palette={defaultLabel} />,
     };
-    const filtered = (showAllPalettes() ? PALETTES : PALETTES.filter((p) => PALETTE_HOME_STYLE[p] === style())).map(
+    const filtered = (
+      showAllPalettes() ? PALETTES : PALETTES.filter((p) => PALETTE_HOME_STYLE[p] === style())
+    ).map(
       (p): RadioOption<PaletteChoice> => ({
         value: p,
         label: PALETTE_LABELS[p].label,

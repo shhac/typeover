@@ -25,8 +25,7 @@ import { cn } from "./_internal";
  * `<a>`. Updates land once.
  */
 
-export const NAV_LINK_CLASS =
-  "text-fg-muted hover:text-fg-secondary transition-colors focus-ring";
+export const NAV_LINK_CLASS = "text-fg-muted hover:text-fg-secondary transition-colors focus-ring";
 
 interface NavLinkProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
@@ -41,9 +40,7 @@ export function NavLink(props: ParentProps<NavLinkProps>) {
     <a
       {...rest}
       class={cn(NAV_LINK_CLASS, local.class)}
-      {...(local.external
-        ? { target: "_blank", rel: rest.rel ?? "noopener noreferrer" }
-        : {})}
+      {...(local.external ? { target: "_blank", rel: rest.rel ?? "noopener noreferrer" } : {})}
     >
       {local.children}
     </a>

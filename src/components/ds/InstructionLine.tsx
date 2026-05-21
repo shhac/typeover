@@ -26,10 +26,7 @@ export function InstructionLine(props: ParentProps<InstructionLineProps>) {
   return (
     <div
       {...rest}
-      class={cn(
-        "text-micro uppercase tracking-widest text-fg-muted mb-1.5",
-        local.class,
-      )}
+      class={cn("text-micro uppercase tracking-widest text-fg-muted mb-1.5", local.class)}
     >
       {local.children}
     </div>

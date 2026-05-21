@@ -94,22 +94,16 @@ describe("substitute", () => {
    * tripping the schema's `${ref}` refinement. */
   describe("backslash-escape opt-out", () => {
     it("leaves `\\${name}` as a literal `${name}` in the output", () => {
-      expect(substitute("hello \\${name} world", { name: "ignored" })).toBe(
-        "hello ${name} world",
-      );
+      expect(substitute("hello \\${name} world", { name: "ignored" })).toBe("hello ${name} world");
     });
 
     it("does not throw on an escaped reference to an undeclared var", () => {
       expect(() => substitute("got \\${got}, want \\${want}", {})).not.toThrow();
-      expect(substitute("got \\${got}, want \\${want}", {})).toBe(
-        "got ${got}, want ${want}",
-      );
+      expect(substitute("got \\${got}, want \\${want}", {})).toBe("got ${got}, want ${want}");
     });
 
     it("mixes substituted and escaped occurrences correctly", () => {
-      expect(substitute("real=${x}, literal=\\${x}", { x: "42" })).toBe(
-        "real=42, literal=${x}",
-      );
+      expect(substitute("real=${x}, literal=\\${x}", { x: "42" })).toBe("real=42, literal=${x}");
     });
 
     /* Edge case: consecutive backslashes. Our regex uses a
@@ -129,10 +123,9 @@ describe("substitute", () => {
     });
 
     it("survives a long mixed string with both forms", () => {
-      const tmpl =
-        'console.log(`got \\${got}, want \\${want}`); fmt.Println(${actual})';
+      const tmpl = "console.log(`got \\${got}, want \\${want}`); fmt.Println(${actual})";
       expect(substitute(tmpl, { actual: "actual" })).toBe(
-        'console.log(`got ${got}, want ${want}`); fmt.Println(actual)',
+        "console.log(`got ${got}, want ${want}`); fmt.Println(actual)",
       );
     });
   });

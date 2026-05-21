@@ -178,39 +178,23 @@ describe("lastExerciseInModule", () => {
   ];
 
   it("returns the moduleId when the exercise is the last exercise of the last theme", () => {
-    const result = lastExerciseInModule(
-      exercise("modA/t3/03", "modA/t3", 3),
-      themes,
-      exercises,
-    );
+    const result = lastExerciseInModule(exercise("modA/t3/03", "modA/t3", 3), themes, exercises);
     expect(result).toEqual({ moduleId: "modA" });
   });
 
   it("returns null when this is the last theme but NOT its last exercise", () => {
-    const result = lastExerciseInModule(
-      exercise("modA/t3/02", "modA/t3", 2),
-      themes,
-      exercises,
-    );
+    const result = lastExerciseInModule(exercise("modA/t3/02", "modA/t3", 2), themes, exercises);
     expect(result).toBeNull();
   });
 
   it("returns null when this is the last exercise of a non-last theme", () => {
-    const result = lastExerciseInModule(
-      exercise("modA/t1/01", "modA/t1", 1),
-      themes,
-      exercises,
-    );
+    const result = lastExerciseInModule(exercise("modA/t1/01", "modA/t1", 1), themes, exercises);
     expect(result).toBeNull();
   });
 
   it("identifies last theme by `order`, not array position", () => {
     const shuffled = [...themes].reverse();
-    const result = lastExerciseInModule(
-      exercise("modA/t3/03", "modA/t3", 3),
-      shuffled,
-      exercises,
-    );
+    const result = lastExerciseInModule(exercise("modA/t3/03", "modA/t3", 3), shuffled, exercises);
     expect(result).toEqual({ moduleId: "modA" });
   });
 

@@ -150,9 +150,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
             when={phase() === "right"}
             fallback={
               props.wrongMessage ?? (
-                <span>
-                  Not quite. Try again, reshuffle this exercise, or reveal the answer.
-                </span>
+                <span>Not quite. Try again, reshuffle this exercise, or reveal the answer.</span>
               )
             }
           >

@@ -1,17 +1,8 @@
 import { createEffect, onCleanup, onMount } from "solid-js";
 import { EditorState, Compartment, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import {
-  bracketMatching,
-  indentOnInput,
-  indentUnit,
-} from "@codemirror/language";
-import {
-  defaultKeymap,
-  history,
-  historyKeymap,
-  indentWithTab,
-} from "@codemirror/commands";
+import { bracketMatching, indentOnInput, indentUnit } from "@codemirror/language";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { go } from "@codemirror/lang-go";
 import { javascript } from "@codemirror/lang-javascript";
@@ -128,6 +119,8 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
       </pre>
     );
   }
+  /* oxlint-disable-next-line no-unassigned-vars — Solid's `ref={el}`
+   * binding assigns via a compiler-emitted setter the linter doesn't see. */
   let el: HTMLTextAreaElement | undefined;
   onMount(() => {
     if (props.ref && el) {
@@ -177,6 +170,7 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   if (isCodeMirrorTestEnv()) return TestareaFallback(props);
 
+  /* oxlint-disable-next-line no-unassigned-vars — Solid ref binding. */
   let parent: HTMLDivElement | undefined;
   let view: EditorView | undefined;
   const editableCompartment = new Compartment();

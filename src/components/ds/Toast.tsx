@@ -37,7 +37,13 @@ interface ToastProps {
 export function Toast(props: ToastProps) {
   return (
     <Show when={props.state()}>
-      {(state) => <ToastBody state={state()} onDismiss={props.onDismiss} duration={props.durationMs ?? 4000} />}
+      {(state) => (
+        <ToastBody
+          state={state()}
+          onDismiss={props.onDismiss}
+          duration={props.durationMs ?? 4000}
+        />
+      )}
     </Show>
   );
 }

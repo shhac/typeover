@@ -378,8 +378,8 @@ describe("style-axis a11y matrix (design-docs/21)", () => {
                   Appearance
                 </Heading>
                 <Text tone="secondary" size="sm">
-                  Each style rebinds typography, border treatment, palette, radius,
-                  and reading measure. axe verifies structural a11y survives.
+                  Each style rebinds typography, border treatment, palette, radius, and reading
+                  measure. axe verifies structural a11y survives.
                 </Text>
                 <Stack direction="row" gap="sm" wrap>
                   <Badge variant="primary">style:{style}</Badge>

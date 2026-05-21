@@ -146,7 +146,7 @@ describe("<FillBlankLineInput> — stale-runResult invalidation", () => {
      * is still enabled, but clicking it triggers a fresh Run
      * against the current input, not a stale grading. */
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
-    const { container, getAllByText, getByText } = renderFBL();
+    const { container, getAllByText } = renderFBL();
     const input = lineInput(container);
     setVal(input, "doubled := count * 2");
     fireEvent.click(getAllByText("Run")[0]!);

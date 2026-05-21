@@ -1,11 +1,7 @@
 import { render } from "@solidjs/testing-library";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ThemeProgressChip } from "./ThemeProgressChip";
-import {
-  __resetProgressCacheForTests,
-  recordInstancePassed,
-  STORAGE_KEY,
-} from "~/lib/progress";
+import { __resetProgressCacheForTests, recordInstancePassed, STORAGE_KEY } from "~/lib/progress";
 
 /*
  * Tests for the theme-level progress chip island. Pins the same

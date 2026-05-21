@@ -12,7 +12,6 @@
  */
 export function isCodeMirrorTestEnv(): boolean {
   return (
-    typeof document !== "undefined" &&
-    document.documentElement.hasAttribute("data-codemirror-test")
+    typeof document !== "undefined" && document.documentElement.hasAttribute("data-codemirror-test")
   );
 }

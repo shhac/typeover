@@ -76,7 +76,17 @@ function renderHarness(rectBottom: number) {
           captured = el;
           /* Stub bounding rect — jsdom returns zeroes otherwise. */
           el.getBoundingClientRect = () =>
-            ({ bottom: rectBottom, top: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+            ({
+              bottom: rectBottom,
+              top: 0,
+              left: 0,
+              right: 0,
+              width: 0,
+              height: 0,
+              x: 0,
+              y: 0,
+              toJSON: () => ({}),
+            }) as DOMRect;
         }}
         tabindex="-1"
       />
