@@ -1,0 +1,100 @@
+target: go
+themeId: errors/type-assertions
+type: freeform
+order: 8
+prompt: |
+  Define a CUSTOM ERROR TYPE and use it productively.
+
+  Build:
+  1. `type ValidationError struct { Field string; Reason
+     string }` with a pointer-receiver `Error() string` that
+     returns `"validation: <field>: <reason>"`.
+  2. `func validate(name string) error` that returns a
+     `*ValidationError{Field: "name", Reason: "empty"}` when
+     name is `""`, nil otherwise.
+  3. In `main`: call `validate("")`, then comma-ok type-assert
+     to `*ValidationError` and print `e.Field` + `e.Reason`
+     on separate lines.
+
+  Expected output:
+  ```
+  name
+  empty
+  ```
+
+  TypeScript reference:
+  ```ts
+  class ValidationError extends Error {
+    constructor(public field: string, public reason: string) { super(); }
+  }
+  function validate(name: string): Error | null {
+    if (name === "") return new ValidationError("name", "empty");
+    return null;
+  }
+  const err = validate("");
+  if (err instanceof ValidationError) {
+    console.log(err.field);
+    console.log(err.reason);
+  }
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class ValidationError extends Error {
+      constructor(public field: string, public reason: string) { super(); }
+    }
+    function validate(name: string): Error | null {
+      if (name === "") return new ValidationError("name", "empty");
+      return null;
+    }
+    const err = validate("");
+    if (err instanceof ValidationError) {
+      console.log(err.field);
+      console.log(err.reason);
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type ValidationError struct {
+    	Field  string
+    	Reason string
+    }
+
+    func (e *ValidationError) Error() string {
+    	return fmt.Sprintf("validation: %s: %s", e.Field, e.Reason)
+    }
+
+    func validate(name string) error {
+    	if name == "" {
+    		return &ValidationError{Field: "name", Reason: "empty"}
+    	}
+    	return nil
+    }
+
+    func main() {
+    	err := validate("")
+    	if e, ok := err.(*ValidationError); ok {
+    		fmt.Println(e.Field)
+    		fmt.Println(e.Reason)
+    	}
+    }
+expectStdout: |
+  name
+  empty
+hints:
+  - "Three pieces: struct + pointer-receiver `Error() string` method, `validate` returning the typed error wrapped as `error`, `main` doing comma-ok assertion."
+  - "`if e, ok := err.(*ValidationError); ok { ... }` — extract back to the concrete type."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  End-to-end custom-error-type. Uses comma-ok TYPE ASSERTION
+  (not type switch) so it runs cleanly on Yaegi with the
+  user-defined type (per design-docs/30 — type switches on
+  user types fall to default; type assertions work).
+
+  Drills theme 3.1 (struct) + theme 3.2 (pointer-receiver
+  method) + theme 4.1 (implicit interface satisfaction) +
+  theme 5.1 (error interface) + this theme's type assertion.

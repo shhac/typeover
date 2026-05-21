@@ -1,0 +1,78 @@
+target: go
+themeId: errors/type-assertions
+type: fill-line
+order: 7
+prompt: |
+  Type-switch on a STDLIB error type. Scaffold calls
+  `strconv.Atoi("abc")` and passes the error to `describe`.
+  Write the `case` line that matches `*strconv.NumError` and
+  binds the typed value to `e` (declared at the switch line).
+
+  Expected output: `numerr Atoi`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "case *strconv.NumError:"
+  ts: |-
+    // TS: if (err instanceof SyntaxError) console.log("syntax", err.message);
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"strconv"
+    )
+
+    func describe(err error) {
+    	switch e := err.(type) {
+    	${line}
+    		fmt.Println("numerr", e.Func)
+    	default:
+    		fmt.Println("other")
+    	}
+    }
+
+    func main() {
+    	_, err := strconv.Atoi("abc")
+    	describe(err)
+    }
+  distractors:
+    - match: "case strconv.NumError:"
+      explain: |-
+        Missing pointer star. `strconv.Atoi` returns
+        `*strconv.NumError` (pointer to the struct), so the
+        case must match `*strconv.NumError`. The Error()
+        method has a pointer receiver per the stdlib
+        convention.
+    - match: "case *strconv.NumError, *strconv.ErrSyntax:"
+      explain: |-
+        Multiple types in one case is valid syntactically, but
+        when you list multiple types the bound variable falls
+        back to the SWITCH expression's interface type — you
+        lose the typed `e`. The case here only needs the one
+        type.
+    - match: "if e, ok := err.(*strconv.NumError); ok:"
+      explain: |-
+        Comma-ok type assertion, not a type-switch case.
+        Type-switch case syntax is `case <Type>:`, not an
+        `if-init` shape. Slot 6 covers the comma-ok form;
+        this slot is specifically the type-switch dispatch.
+expectStdout: |
+  numerr Atoi
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Type-switch case: `case <Type>:`. The variable bound at the switch line (`e`) is automatically typed to <Type> inside this case. For NumError: `case *strconv.NumError:`."
+  - "`case *strconv.NumError:`."
+  - "`case *strconv.NumError:`."
+notes: |
+  Uses STDLIB `*strconv.NumError` because per design-docs/30,
+  Yaegi type switches on USER-defined types fall through to
+  default. The lesson — "dispatch on error type via type
+  switch" — fully exercised with the stdlib type.
+
+  Distractor #2 (multiple types per case) is a real Go
+  feature worth knowing — but it sacrifices the typed
+  binding, so it's only useful when you want to handle
+  multiple types identically.

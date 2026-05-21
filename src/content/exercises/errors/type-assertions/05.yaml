@@ -1,0 +1,35 @@
+target: go
+themeId: errors/type-assertions
+type: fill-word
+order: 5
+prompt: |
+  Type the conventional name for the COMMA-OK boolean — the
+  second value returned by a "safe" type assertion. Same
+  convention you've used for map lookups (Module 2.2 slot 4),
+  channel receives (Module 6), and `errors.As` (theme 5.2).
+generator:
+  kind: template
+  vars:
+    okvar: ["ok"]
+  ts: |-
+    // TS: e instanceof MyError — bool, no extra value bound
+  canonical: |-
+    if e, ${okvar} := err.(*MyError); ${okvar} {
+    	use(e.code)
+    }
+blanks: [okvar]
+hints:
+  - "Two letters. Lowercase. The Go-canonical name for any 'did this succeed?' bool returned by a multi-return."
+  - "Two letters."
+  - "`ok`."
+runtime: none
+notes: |
+  Convention drill. `ok` is the Go-canonical name for "did
+  this succeed?" bools — used in:
+    - map lookup: `v, ok := m[k]`
+    - type assertion: `v, ok := i.(T)`
+    - channel receive: `v, ok := <-ch`
+    - errors.As (close cousin: `bool` return)
+
+  Worth one slot to anchor the convention before slot 6
+  productive use.

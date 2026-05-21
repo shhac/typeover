@@ -1,0 +1,34 @@
+target: go
+themeId: errors/type-assertions
+type: fill-word
+order: 4
+prompt: |
+  Type the keyword that turns a type assertion into a TYPE
+  SWITCH. Goes in parens where a single type would normally
+  go (`v.(type)` vs `v.(*MyError)`). Lowercase, four letters.
+generator:
+  kind: template
+  vars:
+    kw: ["type"]
+  ts: |-
+    // TS: instanceof chain
+    if (err instanceof NotFoundError) { ... }
+  canonical: |-
+    switch e := err.(${kw}) {
+    case *NotFoundError:
+    	handleNotFound(e)
+    case *TimeoutError:
+    	handleTimeout(e)
+    }
+blanks: [kw]
+hints:
+  - "The keyword goes inside the parens: `err.(<here>)`. For a normal assertion you'd put a type; for the switch form, you put the keyword for the concept of \"type itself\"."
+  - "Four letters."
+  - "`type`."
+runtime: none
+notes: |
+  Tight drill — the `.(type)` syntax is the smallest atom of
+  the type-switch shape. Worth one slot.
+
+  Pairs with slot 5 (`ok` for comma-ok). Together the two
+  fill-words cover the two dispatch idioms from this theme.

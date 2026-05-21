@@ -160,6 +160,36 @@ are ones that try to USE the generic stdlib (slices.Sort,
 maps.Keys, etc.); those slots either reach for the pre-generics
 equivalent or stay MCQ-recognition.
 
+#### Quirk surfaced 2026-05-21 (Module 5.3 authoring)
+
+Same root cause as the `errors.As` user-type quirk: **type
+SWITCH on user-defined types falls to default** in Yaegi.
+The `case *MyType:` branches don't match even when the
+interface value's dynamic type IS `*MyType` (probed twice,
+confirmed). Type ASSERTIONS (`v.(T)` single + comma-ok)
+work fine on user-defined types.
+
+The dividing line: anything going through Yaegi's
+reflection-bridge to match user-defined types against case
+lists or `errors.As` targets hits this. Single-value and
+comma-ok type assertions use a different code path and work.
+
+**Workaround:** for productive type-SWITCH slots, use stdlib
+types (`*strconv.NumError`, etc.). For user-defined
+custom-error-type exercises, use comma-ok TYPE ASSERTION
+instead of type switch. Slot 8 of `errors/type-assertions`
+uses comma-ok on `*ValidationError` (works); slots 7 + 9
+use type-switch with `*strconv.NumError` (works).
+
+**Author tip:** Yaegi enforces unused-variable in
+switch-bound vars more strictly than real Go — a `case`
+that doesn't use the bound `e` may need `_ = e` in the
+default branch.
+
+**What retires when fixed:** the stdlib-type lean in
+`errors/type-assertions` slots 7 + 9 can swap to user-defined
+types; the `_ = e` guard in slot 9's default can drop.
+
 #### Quirk surfaced 2026-05-21 (Module 5.2 authoring)
 
 `errors.As` works cleanly with STDLIB error types

@@ -1,0 +1,81 @@
+target: go
+themeId: errors/type-assertions
+type: freeform
+order: 9
+prompt: |
+  Theme 5.3 capstone — TYPE-SWITCH multi-branch dispatch on
+  stdlib errors. Real-world shape: `strconv.Atoi` produces one
+  error type, `strconv.ParseFloat` produces another. Dispatch
+  via type switch and print a tailored message per case.
+
+  Build:
+  1. `describe(err error)` that uses `switch e := err.(type)`
+     and handles two cases: `*strconv.NumError` (prints
+     `parse failed: <Num>`) and a `default` (prints `other`).
+  2. In `main`: call describe with the error from
+     `strconv.Atoi("not-a-number")` and the error from
+     `strconv.ParseFloat("1.2.3", 64)`.
+
+  Expected output:
+  ```
+  parse failed: not-a-number
+  parse failed: 1.2.3
+  ```
+
+  Both stdlib functions return `*strconv.NumError`, so both
+  hit the same case. The default branch is exercised in
+  real-world dispatch but isn't fired here — included to
+  show the canonical shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS analog: instanceof chain
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"strconv"
+    )
+
+    func describe(err error) {
+    	switch e := err.(type) {
+    	case *strconv.NumError:
+    		fmt.Println("parse failed:", e.Num)
+    	default:
+    		fmt.Println("other")
+    		_ = e
+    	}
+    }
+
+    func main() {
+    	_, err1 := strconv.Atoi("not-a-number")
+    	describe(err1)
+    	_, err2 := strconv.ParseFloat("1.2.3", 64)
+    	describe(err2)
+    }
+expectStdout: |
+  parse failed: not-a-number
+  parse failed: 1.2.3
+hints:
+  - "Three pieces: describe with the type-switch on `err.(type)`, two cases (*strconv.NumError + default), main with two `strconv` calls."
+  - "Inside `case *strconv.NumError:`, `e` is already typed to `*strconv.NumError` — access `e.Num` directly."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Theme 5.3 capstone using STDLIB types because Yaegi's
+  type-switch falls to default for user-defined types
+  (design-docs/30).
+
+  The `_ = e` in the default case keeps Yaegi happy with
+  the unused-variable check — `e` is declared by the switch
+  but not used in the default branch. Real Go is permissive
+  here (the switch-bound var is fine to leave unused in some
+  branches); Yaegi is stricter.
+
+  Module 5: 3 of 5 themes done with this slot. Themes 5.4
+  (packages-and-imports) + 5.5 (modules-and-gomod) remain.
+  Both are documentation-heavy (package keyword, import
+  paths, semantic versioning) — likely MCQ-heavy with fewer
+  runnable canonicals.
