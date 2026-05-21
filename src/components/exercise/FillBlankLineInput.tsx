@@ -39,6 +39,7 @@ interface FillBlankLineInputProps {
    *  behind for runtime-limitation reasons. */
   successNote?: string;
   nextExerciseHref?: string;
+  prevExerciseHref?: string;
   themeHref?: string;
 }
 
@@ -234,6 +235,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
         </Show>
       }
       nextExerciseHref={props.nextExerciseHref}
+      prevExerciseHref={props.prevExerciseHref}
       themeHref={props.themeHref}
     >
       <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">

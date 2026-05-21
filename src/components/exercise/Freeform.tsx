@@ -23,6 +23,7 @@ interface FreeformProps {
   runtime: "yaegi" | "server";
   successNote?: string;
   nextExerciseHref?: string;
+  prevExerciseHref?: string;
   themeHref?: string;
 }
 
@@ -143,6 +144,7 @@ export function Freeform(props: FreeformProps) {
         </span>
       }
       nextExerciseHref={props.nextExerciseHref}
+      prevExerciseHref={props.prevExerciseHref}
       themeHref={props.themeHref}
     >
       <CodeMirrorEditor

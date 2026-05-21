@@ -19,6 +19,7 @@ import {
   findAdjacentExercises,
   firstExerciseOfNextTheme,
   lastExerciseInModule,
+  lastExerciseOfPreviousTheme,
   loadExerciseContext,
   moduleCompleteHref,
   paramsForExercise,
@@ -73,7 +74,19 @@ function resolveNextExerciseHref(): string | undefined {
   if (lastInModule) return moduleCompleteHref(lastInModule.moduleId);
   return undefined;
 }
+/* "← Previous" target — symmetric to next. No module-wrap fallback
+ * (no concept of "previous module complete" page); if this is the
+ * very first exercise of the curriculum the link is omitted and the
+ * shell only shows the parent-theme breadcrumb-up. */
+function resolvePrevExerciseHref(): string | undefined {
+  const { prev } = findAdjacentExercises(entry, exercises);
+  if (prev) return exerciseHref(prev.id);
+  const prevThemeLast = lastExerciseOfPreviousTheme(entry, themes, exercises);
+  if (prevThemeLast) return exerciseHref(prevThemeLast.id);
+  return undefined;
+}
 const nextExerciseHref = resolveNextExerciseHref();
+const prevExerciseHref = resolvePrevExerciseHref();
 const parentThemeHref = themeHref(themeEntry.id);
 ---
 
@@ -114,6 +127,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
+              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -127,6 +141,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               hints={ex.hints}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
+              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -143,6 +158,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               alternateCanonicals={ex.alternateCanonicals}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
+              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
@@ -157,6 +173,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               runtime={ex.runtime}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
+              prevExerciseHref={prevExerciseHref}
               themeHref={parentThemeHref}
             />
           )}

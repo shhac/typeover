@@ -307,3 +307,33 @@ export function firstExerciseOfNextTheme(
     .sort(byOrder);
   return nextThemeExercises[0] ?? null;
 }
+
+/**
+ * Cross-theme "previous exercise" — last exercise of the previous
+ * theme in the same module by order. Mirror of
+ * `firstExerciseOfNextTheme`. Used by the route to render
+ * "← Previous exercise" so a learner can back up across theme
+ * boundaries without bouncing to the curriculum index.
+ *
+ * Returns null when there is no previous theme in this module
+ * (i.e. we're in the first theme; the caller falls back to the
+ * theme overview link).
+ */
+export function lastExerciseOfPreviousTheme(
+  exercise: Exercise,
+  themes: readonly Theme[],
+  allExercises: readonly Exercise[],
+): Exercise | null {
+  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
+  if (!ownTheme) return null;
+  const moduleThemes = themes
+    .filter((t) => t.data.moduleId === ownTheme.data.moduleId)
+    .sort(byOrder);
+  const i = moduleThemes.findIndex((t) => t.id === ownTheme.id);
+  const prevTheme = moduleThemes[i - 1];
+  if (!prevTheme) return null;
+  const prevThemeExercises = allExercises
+    .filter((ex) => ex.data.themeId === prevTheme.id)
+    .sort(byOrder);
+  return prevThemeExercises[prevThemeExercises.length - 1] ?? null;
+}

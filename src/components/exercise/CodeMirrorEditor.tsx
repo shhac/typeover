@@ -3,7 +3,7 @@ import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import {
   bracketMatching,
-  defaultHighlightStyle,
+  HighlightStyle,
   syntaxHighlighting,
   indentOnInput,
   indentUnit,
@@ -17,6 +17,7 @@ import {
 } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { go } from "@codemirror/legacy-modes/mode/go";
+import { tags } from "@lezer/highlight";
 
 /*
  * Solid wrapper around CodeMirror 6 for the Freeform exercise's
@@ -143,6 +144,40 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
   );
 }
 
+/* Palette-aware syntax highlight style. Each token tag maps to a
+ * CSS variable from the design-system palette so the editor's
+ * colours flip with the active theme/style/palette pin rather than
+ * shipping CodeMirror's default purple-on-dark `defaultHighlightStyle`
+ * (which fights every palette per the 2026-05-21 screenshot review).
+ *
+ * Mapping rationale:
+ *   - keyword + function names → `--color-accent-primary` (the
+ *     site's brand amber); these are the visual anchor for "this is
+ *     Go" in any palette.
+ *   - strings + types → `--color-accent-go`; pulls the Go-accent
+ *     into the editor so the language identity is visible.
+ *   - numbers + booleans + nulls → `--color-accent-ts`; semantically
+ *     odd but pragmatically: these are the second-rank "literal"
+ *     class and need a contrasting hue, and the TS-accent (blue)
+ *     is already present in every palette per design-docs/22.
+ *   - comments → `--color-fg-faint`; comments should recede.
+ *   - operators + punctuation → `--color-fg-secondary`; readable but
+ *     not loud.
+ *   - variables → `--color-fg-primary`; default body colour, no
+ *     extra emphasis. */
+const syntaxStyle = HighlightStyle.define([
+  { tag: [tags.keyword, tags.controlKeyword, tags.modifier], color: "var(--color-accent-primary)" },
+  { tag: [tags.function(tags.variableName), tags.definition(tags.function(tags.variableName))], color: "var(--color-accent-primary)" },
+  { tag: [tags.string, tags.character, tags.special(tags.string)], color: "var(--color-accent-go)" },
+  { tag: [tags.typeName, tags.className], color: "var(--color-accent-go)" },
+  { tag: [tags.number, tags.bool, tags.null, tags.literal], color: "var(--color-accent-ts)" },
+  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "var(--color-fg-faint)", fontStyle: "italic" },
+  { tag: [tags.operator, tags.punctuation, tags.derefOperator], color: "var(--color-fg-secondary)" },
+  { tag: [tags.variableName, tags.propertyName, tags.attributeName], color: "var(--color-fg-primary)" },
+  { tag: [tags.escape, tags.regexp], color: "var(--color-accent-go)" },
+  { tag: tags.meta, color: "var(--color-fg-muted)" },
+]);
+
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   if (isTestEnv()) return TestareaFallback(props);
 
@@ -163,7 +198,7 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
         indentUnit.of("\t"),
         highlightActiveLine(),
         StreamLanguage.define(go),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+        syntaxHighlighting(syntaxStyle, { fallback: true }),
         editableCompartment.of(EditorView.editable.of(!props.disabled)),
         keymap.of([
           {
