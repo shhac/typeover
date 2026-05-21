@@ -2,6 +2,7 @@ export { Adaptive } from "./Adaptive";
 export { Badge } from "./Badge";
 export { Button, ButtonLink } from "./Button";
 export { CodeBlock } from "./CodeBlock";
+export { CodePane } from "./CodePane";
 export { Compare } from "./Compare";
 export { Container } from "./Container";
 export { Divider } from "./Divider";

@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
 import { FOCUS_RING_CLASS } from "../ds/_internal";
+import { CodePane } from "../ds/CodePane";
 import { Text } from "../ds/Text";
 import type { RunResult } from "~/lib/use-yaegi-run";
 
@@ -40,11 +41,7 @@ interface RunResultPanelProps {
  */
 export function RunResultPanel(props: RunResultPanelProps) {
   const stdoutMatches = () => props.result.stdout === props.expectStdout;
-  const stdoutPaneClass = () =>
-    "bg-bg-inset p-3 rounded-sm border whitespace-pre-wrap " +
-    (stdoutMatches() ? "border-success/40" : "border-error/40");
-  const expectedPaneClass =
-    "bg-bg-inset p-3 rounded-sm border border-border-default/60 whitespace-pre-wrap";
+  const noOutput = <span class="text-fg-faint italic">(no output)</span>;
 
   return (
     <div
@@ -67,41 +64,35 @@ export function RunResultPanel(props: RunResultPanelProps) {
           <Text tone="faint" size="xs" family="mono" class="mb-1">
             what you got
           </Text>
-          <pre class={stdoutPaneClass()}>
-            <Show
-              when={props.result.stdout !== ""}
-              fallback={<span class="text-fg-faint italic">(no output)</span>}
-            >
+          <CodePane tone={stdoutMatches() ? "success" : "error"}>
+            <Show when={props.result.stdout !== ""} fallback={noOutput}>
               {props.result.stdout}
             </Show>
-          </pre>
+          </CodePane>
         </div>
         <div>
           <Text tone="faint" size="xs" family="mono" class="mb-1">
             what we wanted
           </Text>
-          <pre class={expectedPaneClass}>
-            <Show
-              when={props.expectStdout !== ""}
-              fallback={<span class="text-fg-faint italic">(no output)</span>}
-            >
+          <CodePane tone="neutral">
+            <Show when={props.expectStdout !== ""} fallback={noOutput}>
               {props.expectStdout}
             </Show>
-          </pre>
+          </CodePane>
         </div>
       </div>
 
       <Show when={props.result.stderr !== ""}>
-        <pre class="bg-bg-inset p-3 rounded-sm border border-error/40 whitespace-pre-wrap">
+        <CodePane tone="error">
           <span class="text-fg-faint text-xs mr-2">stderr</span>
           {props.result.stderr}
-        </pre>
+        </CodePane>
       </Show>
       <Show when={props.result.error !== ""}>
-        <pre class="bg-error/5 p-3 rounded-sm border border-error/40 text-error whitespace-pre-wrap">
+        <CodePane tone="errorEmphatic">
           <span class="text-fg-faint text-xs mr-2">error</span>
           {props.result.error}
-        </pre>
+        </CodePane>
       </Show>
     </div>
   );

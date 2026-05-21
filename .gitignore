@@ -41,3 +41,8 @@ SESSION_HANDOVER.md
 # Go) when the size starts to bite or strict-fresh builds become
 # valuable.
 
+
+# Playtest screenshots (gitignored — Playwright MCP outputs)
+playtest-*.png
+page-*.png
+.playwright-mcp/

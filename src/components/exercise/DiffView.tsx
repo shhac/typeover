@@ -1,5 +1,6 @@
 import { For } from "solid-js";
 import { diffLines, diffWordsWithSpace, type Change } from "diff";
+import { CodePane } from "../ds/CodePane";
 
 interface DiffViewProps {
   /** What the learner submitted / typed. May be empty (e.g. they
@@ -45,7 +46,7 @@ export function DiffView(props: DiffViewProps) {
   };
 
   return (
-    <div class="bg-bg-inset rounded-sm border border-border-default p-3 font-mono text-sm text-fg-primary whitespace-pre-wrap leading-relaxed">
+    <CodePane as="div" tone="neutral">
       <For each={parts()}>
         {(part) => {
           if (part.added) {
@@ -67,6 +68,6 @@ export function DiffView(props: DiffViewProps) {
           return <span>{part.value}</span>;
         }}
       </For>
-    </div>
+    </CodePane>
   );
 }
