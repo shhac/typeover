@@ -1,45 +1,69 @@
 import { wrap, type Remote } from "comlink";
 import type { YaegiWorkerAPI } from "./yaegi-worker";
+import type { ZigWorkerAPI } from "./zig-worker";
 
 /*
- * Main-thread accessor for the Yaegi worker. One worker per page —
- * the worker is cheap to spawn but the WASM (~11 MB raw, ~1.9 MB
- * brotli) is best loaded once and reused across exercises.
+ * Main-thread accessors for the language-specific WASM runtimes. One
+ * worker per language per page — workers are cheap to spawn but the
+ * WASM payloads are best loaded once and reused across exercises in
+ * the same track.
  *
- * Consumers (freeform exercise components) call `getRunner()`,
- * `await runner.ready()`, then `runner.eval(code)`. The worker
- * boots lazily on the first getRunner() call so MCQ / fill-* pages
- * never download Yaegi.
+ * Consumers (freeform exercise components) call the right getter for
+ * their track, await `ready()`, then call `eval(code)`. Workers boot
+ * lazily on the first getter call, so an MCQ-only page never
+ * downloads any language runtime.
  *
- * Terminate hook is provided for when we want to hard-reset the
+ * Terminate hooks are provided for when we want to hard-reset a
  * worker between exercises (e.g. learner triggered an infinite loop
- * and we want to recover without a page reload). Step 3 wires this
- * to a "Stop" button alongside the freeform exercise component.
+ * and we want to recover without a page reload).
  */
 
 export type YaegiRunner = Remote<YaegiWorkerAPI>;
+export type ZigRunner = Remote<ZigWorkerAPI>;
 
-let runner: YaegiRunner | null = null;
-let worker: Worker | null = null;
+let yaegiRunner: YaegiRunner | null = null;
+let yaegiWorker: Worker | null = null;
 
 export function getRunner(): YaegiRunner {
-  if (runner) return runner;
-  worker = new Worker(new URL("./yaegi-worker.ts", import.meta.url), {
+  if (yaegiRunner) return yaegiRunner;
+  yaegiWorker = new Worker(new URL("./yaegi-worker.ts", import.meta.url), {
     type: "module",
   });
-  runner = wrap<YaegiWorkerAPI>(worker);
+  yaegiRunner = wrap<YaegiWorkerAPI>(yaegiWorker);
   /* Kick off the WASM load immediately. `ready()` is idempotent on
    * the worker side, so an exercise component awaiting it later
    * piggybacks on this in-flight init rather than starting a second. */
-  void runner.ready();
-  return runner;
+  void yaegiRunner.ready();
+  return yaegiRunner;
 }
 
-/** Kill the worker. Next `getRunner()` will spawn a fresh one with a
- *  fresh WASM load. Use this after a runaway-loop watchdog or when
- *  the learner clicks "Stop" in the freeform component. */
+/** Kill the Yaegi worker. Next `getRunner()` will spawn a fresh one
+ *  with a fresh WASM load. Use this after a runaway-loop watchdog or
+ *  when the learner clicks "Stop" in the freeform component. */
 export function terminateRunner(): void {
-  worker?.terminate();
-  worker = null;
-  runner = null;
+  yaegiWorker?.terminate();
+  yaegiWorker = null;
+  yaegiRunner = null;
+}
+
+let zigRunner: ZigRunner | null = null;
+let zigWorker: Worker | null = null;
+
+/** Lazy accessor for the Zig runner. Boots the compiler wasm on first
+ *  call; the heavier stdlib bundle is deferred to the first eval()
+ *  (see comment in zig-worker.ts on the split-loading model). */
+export function getZigRunner(): ZigRunner {
+  if (zigRunner) return zigRunner;
+  zigWorker = new Worker(new URL("./zig-worker.ts", import.meta.url), {
+    type: "module",
+  });
+  zigRunner = wrap<ZigWorkerAPI>(zigWorker);
+  void zigRunner.ready();
+  return zigRunner;
+}
+
+export function terminateZigRunner(): void {
+  zigWorker?.terminate();
+  zigWorker = null;
+  zigRunner = null;
 }

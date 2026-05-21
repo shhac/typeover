@@ -20,14 +20,18 @@
     "runtime:smoke": "node runtime/yaegi-wasm/smoke.mjs",
     "runtime:matrix": "node runtime/yaegi-wasm/matrix.mjs",
     "runtime:verify": "node runtime/yaegi-wasm/verify-runnable.mjs",
+    "runtime:zig:build": "bash runtime/zig-wasm/build.sh",
+    "runtime:zig:smoke": "node runtime/zig-wasm/smoke.mjs",
     "content:lint": "node scripts/content-lint.mjs",
     "content:new": "node scripts/content-new-theme.mjs",
     "content:report": "node scripts/content-report.mjs"
   },
   "dependencies": {
+    "@andrewbranch/untar.js": "^1.0.3",
     "@astrojs/check": "^0.9.4",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/solid-js": "^6.0.1",
+    "@bjorn3/browser_wasi_shim": "^0.4.2",
     "@codemirror/autocomplete": "^6.20.2",
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-go": "^6.0.1",

@@ -41,6 +41,13 @@ SESSION_HANDOVER.md
 # Go) when the size starts to bite or strict-fresh builds become
 # valuable.
 
+# Zig WASM artifacts: same model as yaegi — intentionally NOT
+# ignored, so Vercel deploys them without needing a Zig toolchain.
+# Regenerate locally via `pnpm runtime:zig:build` after any change
+# to runtime/zig-wasm/. ~7 MB raw / ~3.4 MB brotli on the wire
+# (zig.wasm + libcompiler_rt.a + zig-stdlib.tar.gz); the stdlib
+# tarball is lazy-loaded by the worker on first eval.
+
 
 # Playtest screenshots (gitignored — Playwright MCP outputs)
 playtest-*.png
