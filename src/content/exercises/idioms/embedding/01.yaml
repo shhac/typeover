@@ -1,0 +1,44 @@
+target: go
+themeId: idioms/embedding
+type: mcq
+order: 1
+prompt: |
+  Pick the line that EMBEDS the type `Animal` into the struct
+  `Dog` — the syntax that gives `Dog` access to all of
+  `Animal`'s fields and methods.
+
+  TypeScript: `class Dog extends Animal { breed: string }`.
+  Go has no `extends`; embedding is the composition-based
+  alternative.
+generator:
+  kind: variant
+  variants:
+    - id: embed-anon-field
+      ts: |-
+        // TS: class Dog extends Animal { breed: string }
+        // Go: type Dog struct { Animal; Breed string } — Animal is
+        // an UNNAMED field; its methods promote onto Dog.
+      canonical: "type Dog struct { Animal; Breed string }"
+      distractors:
+        - "type Dog struct extends Animal { Breed string }"
+        - "type Dog struct { animal Animal; Breed string }"
+        - "type Dog Animal { Breed string }"
+hints:
+  - "Embed = an UNNAMED field of the type. Pattern: `type Outer struct { InnerType; OtherFields }`. Note the lack of `extends` keyword."
+  - "`type Dog struct { Animal; Breed string }` — `Animal` is the unnamed embed."
+  - "`type Dog struct { Animal; Breed string }`."
+runtime: none
+notes: |
+  Theme 7.2 opener. The KEY distinction: an embedded field
+  has no name; you reference it by its TYPE name (`d.Animal`).
+  A named field like `animal Animal` is just composition
+  with no method-promotion.
+
+  Distractors:
+    1. `extends Animal` — Java/TS keyword; Go has no
+       inheritance, only composition.
+    2. `animal Animal` — NAMED field, no method promotion.
+       This is regular composition.
+    3. `type Dog Animal` — type-DEFINITION shape (creates a
+       new type with same underlying structure); not
+       embedding, and doesn't inherit methods.

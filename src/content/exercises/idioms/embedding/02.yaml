@@ -1,0 +1,47 @@
+target: go
+themeId: idioms/embedding
+type: mcq
+order: 2
+prompt: |
+  `Animal` has a method `Describe() string`. `Dog` embeds
+  `Animal` (`type Dog struct { Animal; Breed string }`).
+  What does **method promotion** mean for `Dog`?
+generator:
+  kind: variant
+  variants:
+    - id: method-promotion
+      ts: |-
+        // TS: class Dog extends Animal — methods inherited via the
+        // prototype chain.
+        // Go: methods of the embedded type promote onto Dog —
+        // `d.Describe()` works directly, even though Describe
+        // is defined on Animal.
+      canonical: "All exported methods of `Animal` become callable on `Dog` directly — `d.Describe()` works without any explicit forwarding. `Dog` can also DEFINE its own `Describe` to OVERRIDE the promoted one."
+      distractors:
+        - "Methods promote but only for the same package — `Dog` outside `Animal`'s package can't call `d.Describe()`."
+        - "Method promotion only works for value receivers; pointer receivers don't promote."
+        - "Methods don't promote — you must write `d.Animal.Describe()` to call them."
+hints:
+  - "Methods of the embedded type are automatically reachable on the outer type — like inheritance without the `extends` keyword."
+  - "Promotion: `d.Describe()` works directly. Can override by defining `Describe` on `Dog` too."
+  - "All methods promote; override by defining on the outer."
+runtime: none
+notes: |
+  Method promotion is the WHOLE POINT of embedding. The
+  shape gives you Java/C#-like "extend a class" ergonomics
+  via composition, without the multiple-inheritance issues
+  (you can embed many types, but if two embedded types
+  have the same method name, you have to write
+  `d.Animal.Describe()` explicitly — Go won't auto-pick).
+
+  Distractors:
+    1. "Same package only" — false; promotion crosses
+       package boundaries, subject to normal exportedness
+       rules.
+    2. "Value receivers only" — false; pointer receivers
+       promote too (with some addressability subtleties).
+    3. "Must write d.Animal.Describe()" — that form IS
+       valid (explicit forwarding) but NOT required.
+
+  Slot 8's freeform demonstrates override; slot 9 shows
+  the explicit-forwarding form.

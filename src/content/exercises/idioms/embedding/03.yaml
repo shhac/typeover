@@ -1,0 +1,47 @@
+target: go
+themeId: idioms/embedding
+type: mcq
+order: 3
+prompt: |
+  Pick the IDIOMATIC composite-literal syntax to construct a
+  `Dog` (which embeds `Animal`) with `Name: "Rex"` and
+  `Breed: "Lab"`.
+
+  TypeScript: `new Dog("Rex", "Lab")`. Go embedded fields
+  use the TYPE NAME as the field name in composite literals.
+generator:
+  kind: variant
+  variants:
+    - id: composite-literal
+      ts: |-
+        // TS: new Dog("Rex", "Lab")
+        // Go: composite literal with embedded type as field name.
+      canonical: "Dog{Animal: Animal{Name: \"Rex\"}, Breed: \"Lab\"}"
+      distractors:
+        - "Dog{Name: \"Rex\", Breed: \"Lab\"}"
+        - "Dog{\"Rex\", \"Lab\"}"
+        - "new Dog(Animal{Name: \"Rex\"}, \"Lab\")"
+hints:
+  - "Embedded type's name IS its field name in the composite literal. Pattern: `Outer{Embedded: Embedded{...}, OtherField: ...}`."
+  - "`Dog{Animal: Animal{Name: \"Rex\"}, Breed: \"Lab\"}`."
+  - "Use `Animal:` as the field name for the embed."
+runtime: none
+notes: |
+  Composite-literal beat that often surprises learners — the
+  embedded type's NAME is its field name, even though it
+  looks "unnamed" in the type declaration.
+
+  Distractors:
+    1. `Dog{Name: "Rex", ...}` — tries to set the promoted
+       Name directly. Doesn't work in composite literals
+       (only at method-access time). Must use
+       `Animal: Animal{Name: ...}`.
+    2. Positional `Dog{"Rex", "Lab"}` — positional literals
+       work for non-embedded structs in declaration order;
+       for embedded structs the inner needs its own
+       composite literal.
+    3. `new Dog(...)` — Java/TS constructor syntax. Go's
+       `new` allocates a pointer to zero value, doesn't take
+       constructor args.
+
+  Slot 6 drills this via fill-line.
