@@ -1,0 +1,45 @@
+target: go
+themeId: errors/modules-and-gomod
+type: mcq
+order: 1
+prompt: |
+  A Go **module** is a versioned collection of packages —
+  your project's unit of dependency tracking. Pick the
+  command that initialises a new module in the current
+  directory.
+
+  TypeScript: `npm init` writes `package.json`. Go's analog
+  is `go mod init <module-path>` writing `go.mod`. The module
+  path is usually the source URL but doesn't have to resolve.
+generator:
+  kind: variant
+  variants:
+    - id: init
+      ts: |-
+        // TS: `npm init` (interactive) or `npm init -y` (defaults).
+        // Output: package.json.
+      canonical: "go mod init github.com/you/yourthing"
+      distractors:
+        - "go init module github.com/you/yourthing"
+        - "go module new github.com/you/yourthing"
+        - "go get init"
+hints:
+  - "Three space-separated tokens: `go`, then `mod` (the subcommand for module operations), then `init`. Trailing arg is the module path."
+  - "`go mod <subcommand>`. The subcommand for first-time setup is `init`."
+  - "`go mod init <module-path>`."
+runtime: none
+notes: |
+  Theme 5.5 opener. `go mod init` produces a two-or-three-line
+  `go.mod` file: a `module` directive declaring the path, a
+  `go` directive declaring the language version, and (after
+  `go get` calls) a `require` block listing dependencies.
+
+  Distractors:
+    1. `go init module ...` — wrong word order; mirrors how
+       you might phrase it in English but Go subcommands are
+       `noun verb` (`go mod init`), not `verb noun`.
+    2. `go module new ...` — `module` isn't a `go` subcommand;
+       `mod` is. Also `new` would be the wrong verb (Cargo
+       uses `cargo new`; Go uses `init`).
+    3. `go get init` — `go get` is for adding/updating
+       dependencies, not initialising the module.

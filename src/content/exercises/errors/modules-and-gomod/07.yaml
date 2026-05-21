@@ -1,0 +1,40 @@
+target: go
+themeId: errors/modules-and-gomod
+type: fill-word
+order: 7
+prompt: |
+  Type the keyword that introduces a dependency block in
+  `go.mod`. The block lists `<path> <version>` pairs for each
+  third-party module the project depends on.
+generator:
+  kind: template
+  vars:
+    word:
+      - "require"
+  ts: |-
+    // TS package.json: "dependencies": { ... }
+  canonical: |-
+    module github.com/you/yourthing
+
+    go 1.22
+
+    ${word} (
+    	github.com/google/uuid v1.6.0
+    	github.com/stretchr/testify v1.9.0
+    )
+runtime: none
+blanks: [word]
+hints:
+  - "Seven letters. Same English verb you'd use in plain language: \"this module ___s these other modules\"."
+  - "Starts with `r`."
+  - "`require`."
+notes: |
+  Parallel to the `import` keyword inside Go source —
+  same conceptual operation (declare a dependency), different
+  layer:
+    - `import "X"` in a .go file: this FILE uses package X.
+    - `require X v1.2.3` in go.mod: this MODULE uses module X.
+
+  A program needs BOTH: `require` to pull X into the build
+  graph + `import` to pull X's names into a particular file's
+  scope.

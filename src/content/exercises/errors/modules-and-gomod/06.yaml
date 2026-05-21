@@ -1,0 +1,32 @@
+target: go
+themeId: errors/modules-and-gomod
+type: fill-word
+order: 6
+prompt: |
+  Type the directive keyword that goes first in `go.mod`,
+  before the module path.
+
+  TS package.json's analog is the `name` field; go.mod's
+  is shorter — a single bare keyword.
+generator:
+  kind: template
+  vars:
+    word:
+      - "module"
+  ts: |-
+    // TS package.json: "name": "your-thing"
+  canonical: |-
+    ${word} github.com/you/yourthing
+
+    go 1.22
+runtime: none
+blanks: [word]
+hints:
+  - "Six letters, lowercase. Same word you'd use to describe the project as a whole."
+  - "Starts with `m`. Same word as the file name's stem (`go.mod`)."
+  - "`module`."
+notes: |
+  Pure recognition. `go.mod` isn't Go source; we don't run it
+  via Yaegi (`runtime: none`). The canonical shows the two
+  load-bearing directives every fresh go.mod has: `module` +
+  `go`.
