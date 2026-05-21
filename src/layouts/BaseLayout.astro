@@ -1,5 +1,6 @@
 ---
 import "~/styles/global.css";
+import { ResumeLink } from "~/components/header/ResumeLink";
 
 interface Props {
   title: string;
@@ -190,7 +191,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
       <header
         class="border-b border-border-default text-xs font-mono"
       >
-        <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center">
+        <div class="mx-auto px-6 sm:px-8 w-full max-w-6xl py-3 flex flex-row justify-between items-center gap-4">
           <a
             href="/"
             class="text-fg-secondary hover:text-fg-primary transition-colors focus-ring"
@@ -198,6 +199,7 @@ const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
           >
             <span class="text-accent-ts">type</span><span class="text-accent-primary">over</span>
           </a>
+          <ResumeLink client:only="solid-js" />
           {Astro.url.pathname !== "/go" && (
             <a
               href="/go"

@@ -229,6 +229,28 @@ export function getExerciseProgress(id: string): ExerciseProgress {
 }
 
 /**
+ * The most-recently-touched exerciseId, or null when the learner
+ * has no recorded progress. Derives from existing data (max-by
+ * `lastSeenAt` across the exercises map) so no schema migration
+ * is needed.
+ *
+ * Used by the header's ResumeLink to render a "Resume — <theme>
+ * · ex N" affordance. design-docs/16 F-1.
+ */
+export function lastTouchedExerciseId(): string | null {
+  const p = read();
+  let bestId: string | null = null;
+  let bestAt = "";
+  for (const [id, slot] of Object.entries(p.exercises)) {
+    if (slot.lastSeenAt > bestAt) {
+      bestAt = slot.lastSeenAt;
+      bestId = id;
+    }
+  }
+  return bestId;
+}
+
+/**
  * Aggregate a set of exercises into the theme-level summary the
  * curriculum UIs render. Single source of truth for the
  * "theme complete" predicate — both ModuleCompleteCard and the

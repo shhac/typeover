@@ -3,6 +3,7 @@ import {
   aggregateModuleProgress,
   findNextUnfinishedExerciseId,
   getExerciseProgress,
+  lastTouchedExerciseId,
   recordHintUsed,
   recordInstanceFailed,
   recordInstancePassed,
@@ -390,5 +391,31 @@ describe("findNextUnfinishedExerciseId", () => {
     recordInstancePassed("m/t2/01");
     recordInstancePassed("m/t2/02");
     expect(findNextUnfinishedExerciseId(THEMES)).toBeNull();
+  });
+});
+
+describe("lastTouchedExerciseId", () => {
+  it("returns null when no progress is recorded", () => {
+    expect(lastTouchedExerciseId()).toBeNull();
+  });
+
+  it("returns the only recorded id when exactly one exists", () => {
+    recordInstanceSeen("foundations/loops/03");
+    expect(lastTouchedExerciseId()).toBe("foundations/loops/03");
+  });
+
+  it("returns the most-recently-touched id across multiple exercises", async () => {
+    recordInstanceSeen("foundations/variables/01");
+    /* Wait a beat so ISO timestamps differ between calls.
+     * `recordInstanceSeen` stamps `lastSeenAt = new Date().toISOString()`;
+     * back-to-back calls in the same ms would otherwise tie. */
+    await new Promise((r) => setTimeout(r, 5));
+    recordInstanceSeen("foundations/loops/05");
+    expect(lastTouchedExerciseId()).toBe("foundations/loops/05");
+
+    /* A later touch on the older id moves it back to the front. */
+    await new Promise((r) => setTimeout(r, 5));
+    recordInstancePassed("foundations/variables/01");
+    expect(lastTouchedExerciseId()).toBe("foundations/variables/01");
   });
 });
