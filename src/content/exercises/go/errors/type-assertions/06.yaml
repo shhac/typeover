@@ -1,0 +1,84 @@
+target: go
+themeId: go/errors/type-assertions
+type: fill-line
+order: 6
+prompt: |
+  Productive use of comma-ok type assertion on a USER-DEFINED
+  error type. The scaffold has a `NotFoundError` struct + a
+  function that returns one wrapped as `error`. Write the
+  if-condition line that extracts it back to the concrete type
+  and binds it to `nf` (along with the `ok` bool).
+
+  Expected output: `not found id=42`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if nf, ok := err.(*NotFoundError); ok {"
+  ts: |-
+    // TS: if (err instanceof NotFoundError) console.log(`id=${err.id}`);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type NotFoundError struct {
+    	ID int
+    }
+
+    func (e *NotFoundError) Error() string {
+    	return fmt.Sprintf("not found: %d", e.ID)
+    }
+
+    func find(id int) error {
+    	return &NotFoundError{ID: id}
+    }
+
+    func main() {
+    	err := find(42)
+    	${line}
+    		fmt.Println("not found id=" + fmt.Sprint(nf.ID))
+    	}
+    }
+  distractors:
+    - match: "nf := err.(*NotFoundError); if nf != nil {"
+      explain: |-
+        Single-value form — panics if `err` isn't actually a
+        `*NotFoundError`. The comma-ok form (`nf, ok := ...; ok`)
+        is the safer default. Yes the `if nf != nil` check
+        catches the post-conversion nil case but won't save you
+        from the panic.
+    - match: "if err is *NotFoundError {"
+      explain: |-
+        Python/C# `is` keyword leak. Go's type assertion is
+        `.(T)` with comma-ok for safety. There's no `is`
+        keyword.
+    - match: "if nf := err.(NotFoundError); nf != nil {"
+      explain: |-
+        Wrong type — `err` holds a `*NotFoundError` (pointer),
+        not a `NotFoundError` (value). The assertion needs to
+        match exactly: `err.(*NotFoundError)`.
+    - match: "if nf, ok := err.(NotFoundError); ok {"
+      explain: |-
+        Missing the pointer star — same shape as the previous
+        distractor with comma-ok added. The Error() method
+        has pointer receiver, so `*NotFoundError` (not
+        `NotFoundError`) is the type that satisfies `error`.
+expectStdout: |
+  not found id=42
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Comma-ok type assertion in an if-init: `if nf, ok := err.(*NotFoundError); ok { ... }`. The `*` matters — the Error() method has pointer receiver, so `*NotFoundError` is the concrete type satisfying error."
+  - "`if nf, ok := err.(*NotFoundError); ok {`."
+  - "`if nf, ok := err.(*NotFoundError); ok {`."
+notes: |
+  THE comma-ok type assertion in production form. User-defined
+  type works here because type ASSERTIONS go through native
+  Go runtime type info (probed this tick — passes cleanly on
+  Yaegi). The type SWITCH workflow (slot 7) hits the
+  reflection-bridge limitation and uses stdlib types.
+
+  Distractor #1 surfaces the single-value form's panic risk;
+  the rest cover common type-name mistakes (no pointer, wrong
+  keyword).

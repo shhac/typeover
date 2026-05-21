@@ -1,0 +1,69 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: mcq
+order: 2
+prompt: |
+  Pick the IDIOMATIC Go function signature for "load a User by
+  id, may fail" — the multi-return `(T, error)` convention that
+  every Go-shaped fallible operation uses.
+
+  TypeScript reaches for `Promise<User>` + reject paths or
+  `User | null` returns. Go's convention is positional:
+  result first, error second. The CALLER then checks the error
+  explicitly before using the result.
+generator:
+  kind: variant
+  variants:
+    - id: load-user
+      ts: |-
+        // TS: function loadUser(id: number): User | null
+        // — caller has to remember to null-check
+      canonical: "func loadUser(id int) (User, error)"
+      distractors:
+        - "func loadUser(id int) User throws error"
+        - "func loadUser(id int) (error, User)"
+        - "func loadUser(id int) User | error"
+    - id: fetch-data
+      ts: |-
+        // TS: async function fetchData(url: string): Promise<string>
+        // — caller catches via .then/.catch or try/await
+      canonical: "func fetchData(url string) (string, error)"
+      distractors:
+        - "func fetchData(url string) string throws error"
+        - "func fetchData(url string) (error, string)"
+        - "func fetchData(url string) string | error"
+    - id: parse-int
+      ts: |-
+        // TS: function parseInt(s: string): number | NaN
+        // — NaN as the failure sentinel
+      canonical: "func parseInt(s string) (int, error)"
+      distractors:
+        - "func parseInt(s string) int throws error"
+        - "func parseInt(s string) (error, int)"
+        - "func parseInt(s string) int | error"
+hints:
+  - "Two values returned, in parentheses, COMMA-separated. Result type FIRST, error type SECOND. Convention is universal — `os.Open`, `strconv.Atoi`, `json.Marshal`, every stdlib function that can fail follows this shape."
+  - "`(T, error)` — result first, error second."
+  - "`func loadUser(id int) (User, error)`."
+runtime: none
+notes: |
+  THE conventional shape. The order matters for muscle memory:
+  caller binds via `user, err := loadUser(42)` — result first,
+  error second. Mixing the order would land all the stdlib
+  upside-down.
+
+  Distractors:
+    1. `throws error` — Java/C# checked-exceptions syntax. Go
+       has no `throws` clause; errors are RETURNED, not
+       declared as a side-channel.
+    2. `(error, User)` — reversed order. Compiles, but breaks
+       every reader's expectation and every linter that
+       checks for the convention.
+    3. `T | error` — discriminated-union syntax (TS / Rust /
+       Swift). Go has no union return types; you return one
+       OR the other via the (T, error) tuple, where one of
+       T or error is the zero value on each path.
+
+  Followup beat for slot 7: the if-init `if err := f(); err
+  != nil { return ... }` idiom is the receiving-side
+  counterpart that makes this convention ergonomic.

@@ -1,0 +1,33 @@
+target: go
+themeId: go/collections/maps
+type: fill-word
+order: 5
+prompt: |
+  Translate the TS `delete` to Go. The Go builtin is a free-standing
+  function — not a method on the map — and it takes the map FIRST,
+  then the key.
+generator:
+  kind: template
+  vars:
+    name: [scores, cache, ages, prices, counts]
+    key: ["\"alice\"", "\"key\"", "\"bob\"", "\"item\"", "\"x\""]
+    fn: [delete]
+  ts: |-
+    delete ${name}[${key}];
+  canonical: |-
+    ${fn}(${name}, ${key})
+blanks: [fn]
+hints:
+  - "Go's map operations live as top-level builtins, not methods. Same family as `len`, `make`, `cap`, `copy`, `append`."
+  - "The builtin is six characters long; mirrors how slices got `append`."
+  - "`delete`."
+runtime: none
+notes: |
+  Blank is just `fn` (the name of the builtin). The bigger teaching
+  beat — `delete(m, k)` is a no-op when the key is absent, never
+  panics — is in the canonical's reveal.
+
+  Why fill-word: by slot 5 the learner has seen map shape several
+  times (literal, comma-ok). The novelty is "Go's mutators are
+  package-level functions, not methods" — same lesson as `append`
+  on slices, transferred to maps. Typing it cements the pattern.

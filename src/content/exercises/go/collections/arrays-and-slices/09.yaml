@@ -1,0 +1,54 @@
+target: go
+themeId: go/collections/arrays-and-slices
+type: freeform
+order: 9
+prompt: |
+  Write `evens(n int) []int` that returns the first `n` non-negative
+  even integers, then print `evens(5)` with `fmt.Println`. The
+  output should be `[0 2 4 6 8]`. Use `make` with a pre-reserved
+  capacity so `append` doesn't reallocate as the slice grows.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function evens(n: number): number[] {
+      const out: number[] = [];
+      for (let i = 0; i < n; i++) out.push(i * 2);
+      return out;
+    }
+    console.log(evens(5));   // [0, 2, 4, 6, 8]
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func evens(n int) []int {
+    	out := make([]int, 0, n)
+    	for i := 0; i < n; i++ {
+    		out = append(out, i*2)
+    	}
+    	return out
+    }
+
+    func main() {
+    	fmt.Println(evens(5))
+    }
+expectStdout: |
+  [0 2 4 6 8]
+runtime: yaegi
+hints:
+  - "Start with `make([]int, 0, n)` — length 0, capacity n — so the slice has room to grow without reallocation. Use a classic `for i := 0; i < n; i++` loop and `append` each `i*2`."
+  - "`append` returns a (possibly new) slice header — you must assign it back: `out = append(out, i*2)`. Dropping the return is the most common bug."
+  - "Skeleton: `out := make([]int, 0, n); for i := 0; i < n; i++ { out = append(out, i*2) }; return out`."
+notes: |
+  First freeform of theme 2.1. Drills three idioms at once:
+    1. `make([]T, 0, n)` — pre-reserve capacity (the slot-4 lesson
+       applied in production).
+    2. Classic `for` loop (Module 1.5 vocabulary; `range` is theme
+       2.3, so we deliberately avoid it here per the forward-
+       reference rule).
+    3. `out = append(out, x)` — the assignment-back idiom from
+       slot 5 in a loop context.
+
+  Yaegi grades against exact stdout match. `fmt.Println` on a slice
+  prints `[0 2 4 6 8]` (no commas, space-separated, square brackets).

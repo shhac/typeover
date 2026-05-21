@@ -1,0 +1,39 @@
+target: go
+themeId: go/foundations/loops
+type: fill-word
+order: 4
+prompt: |
+  Slot 1 covered the classic three-clause for-loop by recognition.
+  Now produce it: fill in the operator that introduces the counter
+  and the function that gets a slice's length.
+generator:
+  kind: template
+  vars:
+    var: [i, idx, k]
+    op: [":="]
+    len_fn: [len]
+  ts: |-
+    for (let ${var} = 0; ${var} < items.length; ${var}++) {
+      print(items[${var}]);
+    }
+  canonical: |-
+    for ${var} ${op} 0; ${var} < ${len_fn}(items); ${var}++ {
+        print(items[${var}])
+    }
+blanks: [op, len_fn]
+hints:
+  - "Two blanks. One is the operator that both declares the counter AND assigns to it (slot 1's MCQ showed this). The other is the function that replaces `.length` — Go puts length-of-collection in a top-level function, not a property."
+  - "Operator: `:=`. Length function: `len`. Same as `len(slice)` for length, `len(string)` for byte count, `len(map)` for key count."
+  - "Fills: `:=` and `len`. Canonical: `for i := 0; i < len(items); i++ { print(items[i]) }`."
+notes: |
+  First Theme 5 fill-word. Drills the two operator/function
+  reflexes from slot 1's MCQ via production:
+   - `:=` (counter declaration) — Theme 1 had this for vars in
+     general; the for-clause is just another place it lands.
+   - `len(slice)` (not `slice.length`) — the universal "size of
+     collection" function in Go, applies to slices, strings,
+     maps, channels.
+
+  Plus a stealth reminder of slot 1: `i++` (post-clause) is the
+  same in Go and TS — no shift needed there.
+runtime: none

@@ -1,0 +1,36 @@
+target: go
+themeId: go/foundations/variables
+type: fill-word
+order: 6
+prompt: |
+  Fill in the blanks to produce the idiomatic Go form when you want
+  to spell out the variable's type. (Exercise 2 covered this with
+  multiple choice — now you write it yourself.)
+generator:
+  kind: template
+  vars:
+    name: [count, total, age, score, attempts]
+    value: ["5", "42", "0", "100", "-1"]
+    kw: [var]
+    type: [int]
+  ts: |-
+    let ${name}: number = ${value};
+  canonical: |-
+    ${kw} ${name} ${type} = ${value}
+blanks: [kw, type]
+hints:
+  - "Two blanks. The keyword goes first; the type goes between the name and the `=`. Neither uses a colon — Go is positional."
+  - "The keyword is the one that introduces a typed declaration in Go (not the short-form `:=` operator). The type for TS `number` (when initialised with an integer literal) is the default Go integer type."
+  - "Keyword: `var`. Type: `int`. The blanks fill to: `var` and `int`."
+notes: |
+  Companion to MCQ #2 — same concept, but the learner now produces
+  the declaration instead of recognising it. The `kw` and `type`
+  blanks are single-pool template vars (same trick as exercise 4's
+  `op: [":="]` literal blank). When task #38's schema refinements
+  land, this pattern of "single-pool literal var" is a candidate to
+  formalise as a `literals:` field.
+
+  The `name` and `value` aren't blanked — they're just for visual
+  context. The learner already saw them in the TS source; the
+  exercise is about the *keyword and type*.
+runtime: none

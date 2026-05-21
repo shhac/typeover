@@ -1,0 +1,85 @@
+target: go
+themeId: go/types/nil-and-zero-values
+type: fill-line
+order: 5
+prompt: |
+  Zero-value-is-useful idiom. A `nil` slice is fully usable for
+  `append` — no `make` needed; `append` allocates a fresh backing
+  array on first write. This is the canonical "you don't have to
+  initialise" demonstration: the bare `var xs []int` declaration
+  is the entire setup.
+
+  Type the line that appends `1, 2, 3` to `xs` in one call.
+  Expected output:
+  ```
+  [1 2 3]
+  ```
+generator:
+  kind: template
+  vars:
+    line:
+      - "xs = append(xs, 1, 2, 3)"
+  ts: |-
+    // TS: have to start with [], not undefined — `undefined.push(1)` throws
+    let xs: number[] = [];
+    xs.push(1, 2, 3);
+    console.log(xs);  // [1, 2, 3]
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	var xs []int   // xs is nil
+    	${line}
+    	fmt.Println(xs)
+    }
+  distractors:
+    - match: "xs.append(1, 2, 3)"
+      explain: |-
+        Method-call syntax — slices don't have methods in Go.
+        `append` is the package-level builtin. Pattern:
+        `xs = append(xs, ...)` (must assign back; the slice
+        header may reallocate).
+    - match: "append(xs, 1, 2, 3)"
+      explain: |-
+        Dropping the return — `append` returns a NEW slice
+        header. If you don't assign back to `xs`, the call is
+        a no-op from the caller's perspective. The "must assign
+        back" rule from Module 2 theme 2.1 slot 5.
+    - match: "xs = make([]int, 0); xs = append(xs, 1, 2, 3)"
+      explain: |-
+        Works, but unnecessarily explicit. The whole point of
+        "zero-value is useful" is that `var xs []int` is ALREADY
+        a valid empty slice ready for append. The `make` call
+        does nothing the bare declaration didn't already do.
+    - match: "xs = []int{1, 2, 3}"
+      explain: |-
+        Composite literal — works but sidesteps the lesson. The
+        exercise is asking you to APPEND to the existing `xs`,
+        not to replace it with a literal. In real code you'd
+        use this form for known initialisers; `append` is for
+        building up a slice value-by-value.
+expectStdout: |
+  [1 2 3]
+runtime: yaegi
+blanks: [line]
+hints:
+  - "`append` is a builtin (not a method) — pattern is `xs = append(xs, ...values)`. Works on a nil slice; the first append allocates the backing array."
+  - "`xs = append(xs, 1, 2, 3)`."
+  - "`xs = append(xs, 1, 2, 3)`."
+notes: |
+  Zero-value-is-useful in action. `var xs []int` doesn't allocate
+  a backing array; `xs` is a nil slice (len 0, cap 0). The first
+  `append` notices the cap is too small and allocates fresh —
+  the assignment-back captures the new header.
+
+  Pairs with the zero-value MCQ (slot 1) and the nil-able MCQ
+  (slot 2): nil slice is a real, usable, productive state. This
+  is the load-bearing reason Go authors don't sprinkle `if xs ==
+  nil` checks everywhere — the language's builtins handle nil
+  gracefully.
+
+  Distractor #1 (`.append()`) and #2 (dropping return) re-pin
+  the Module 2 theme 2.1 slot 5 lesson — they're the most
+  common authoring mistakes from TS habits.

@@ -1,0 +1,45 @@
+target: go
+themeId: go/foundations/loops
+type: freeform
+order: 8
+prompt: |
+  Print the integers 1 to 5 inclusive, one per line, using Go's
+  classic three-clause `for` loop. The expected output is five
+  lines: `1`, `2`, `3`, `4`, `5`.
+
+  TypeScript's `for (let i = 1; i <= 5; i++) { ... }` maps almost
+  one-to-one — but watch the parentheses (Go drops them) and the
+  brace placement (Go requires the opening brace on the same line).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    for (let i = 1; i <= 5; i++) {
+      console.log(i);
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	for i := 1; i <= 5; i++ {
+    		fmt.Println(i)
+    	}
+    }
+expectStdout: |
+  1
+  2
+  3
+  4
+  5
+runtime: yaegi
+hints:
+  - "Three clauses separated by semicolons: init, condition, post. No parentheses around them in Go."
+  - "Use `:=` to introduce the loop variable. It's scoped to the loop body — the same way `let i` would be in TS."
+  - "`for i := 1; i <= 5; i++ { fmt.Println(i) }`"
+notes: |
+  First freeform of Theme 5. Drills the classic three-clause `for`
+  shape — the most TS-like of Go's three loop forms, and the
+  workhorse for index-based iteration before the range form arrives
+  in Module 2.

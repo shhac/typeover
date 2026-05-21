@@ -1,0 +1,72 @@
+target: go
+themeId: go/types/structs
+type: mcq
+order: 3
+prompt: |
+  What does the bare declaration `var u User` produce, before any
+  field is written?
+
+  In TypeScript, an uninitialised `User` is `undefined` — you have
+  to assign a literal or get a runtime error reaching for `u.name`.
+  Go gives you a fully-formed value: every field zeroed to its
+  type's zero value, no `undefined`, no panic on access.
+
+  Pick the line that correctly describes Go's behaviour, given:
+  ```go
+  type User struct {
+      name string
+      age  int
+      ok   bool
+  }
+  var u User
+  ```
+generator:
+  kind: variant
+  variants:
+    - id: user
+      ts: 'const u: User = undefined as any;  // accessing u.name throws'
+      canonical: 'u.name == "" && u.age == 0 && u.ok == false'
+      distractors:
+        - "u == nil  // structs are nil-able like TS objects"
+        - "u.name == undefined  // fields default to undefined"
+        - "panic: u not initialized  // bare var is unusable"
+    - id: point
+      ts: 'const p: Point = undefined as any;  // accessing p.x throws'
+      canonical: 'p.x == 0 && p.y == 0'
+      distractors:
+        - "p == nil  // structs are nil-able like TS objects"
+        - "p.x == undefined  // fields default to undefined"
+        - "panic: p not initialized  // bare var is unusable"
+    - id: book
+      ts: 'const b: Book = undefined as any;  // accessing b.title throws'
+      canonical: 'b.title == "" && b.pages == 0 && b.inStock == false'
+      distractors:
+        - "b == nil  // structs are nil-able like TS objects"
+        - "b.title == undefined  // fields default to undefined"
+        - "panic: b not initialized  // bare var is unusable"
+hints:
+  - "Go's zero-value rule is universal: every type has a defined zero value, and `var x T` initialises `x` to it. Structs are no exception — the zero value of a struct is the struct with every field at its OWN zero value."
+  - "Field-by-field: `string` → `\"\"`, `int` → `0`, `bool` → `false`, pointer → `nil`, map/slice/chan → `nil`. A struct of those types zeros each one."
+  - "`u.name == \"\" && u.age == 0 && u.ok == false`."
+runtime: none
+notes: |
+  THE central Go-vs-TS axis for structs: no undefined, ever.
+  `var u User` is fully usable on the first line; reaching for
+  `u.name` returns `""`, not a runtime error. This is the
+  zero-value-is-useful idiom that the rest of Module 3 leans on.
+
+  Distractors:
+    1. `u == nil` — structs are NOT pointers; they're value types.
+       Only pointers/maps/slices/chans/interfaces/funcs can be nil.
+    2. `u.name == undefined` — TS-undefined keyword leak. Go has
+       no `undefined`.
+    3. "panic: not initialized" — `var u User` doesn't panic.
+       Accessing a field of a nil pointer DOES panic (covered in
+       theme 3.3 pointers); accessing a field of a zero-value
+       struct does NOT.
+
+  Authoring note: I considered making this fill-line ("print the
+  zero-valued struct"), but the variant-kind MCQ better surfaces
+  the COMPARISON the learner needs to make (Go vs TS semantics).
+  fill-line would force them to produce code that's mostly
+  scaffold; MCQ keeps the cognitive load on the conceptual axis.

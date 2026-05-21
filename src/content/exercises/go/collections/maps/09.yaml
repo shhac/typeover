@@ -1,0 +1,87 @@
+target: go
+themeId: go/collections/maps
+type: freeform
+order: 9
+prompt: |
+  Write a complete program that counts the occurrences of each
+  letter in `"banana"` and prints them alphabetically as `a=3 b=1
+  n=2` (single line, space-separated, key=value pairs).
+
+  TypeScript reference:
+  ```ts
+  function letterCount(s: string): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const c of s) counts[c] = (counts[c] ?? 0) + 1;
+    return counts;
+  }
+  console.log(letterCount("banana"));
+  ```
+
+  Go-side: a fresh map, a range loop over the string's runes, and
+  the increment idiom that works because missing-key returns the
+  zero value (`counts[c]++` on a fresh key starts at `0+1=1`).
+  Map range order is randomised, so collect the keys, sort them,
+  then print.
+
+  Expected output: `a=3 b=1 n=2`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function letterCount(s: string): Record<string, number> {
+      const counts: Record<string, number> = {};
+      for (const c of s) counts[c] = (counts[c] ?? 0) + 1;
+      return counts;
+    }
+    const out = letterCount("banana");
+    // a=3 b=1 n=2
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sort"
+    )
+
+    func main() {
+    	counts := make(map[string]int)
+    	for _, c := range "banana" {
+    		counts[string(c)]++
+    	}
+    	keys := make([]string, 0, len(counts))
+    	for k := range counts {
+    		keys = append(keys, k)
+    	}
+    	sort.Strings(keys)
+    	for i, k := range keys {
+    		if i > 0 {
+    			fmt.Print(" ")
+    		}
+    		fmt.Printf("%s=%d", k, counts[k])
+    	}
+    	fmt.Println()
+    }
+expectStdout: |
+  a=3 b=1 n=2
+runtime: yaegi
+hints:
+  - "Three pieces: (1) `counts := make(map[string]int)`. (2) Range over the string — `for _, c := range \"banana\"` gives you runes; convert to string with `string(c)` for the map key. (3) `counts[key]++` increments — zero+1 means missing keys start at 1 for free."
+  - "Map iteration order is randomised in Go. To print deterministically, copy the keys into a slice, sort them with `sort.Strings(keys)`, then range the sorted slice."
+  - "See canonical: `counts[string(c)]++`, then sort keys, then `fmt.Printf(\"%s=%d\", k, counts[k])` joined with spaces."
+notes: |
+  Capstone-ish freeform for the maps theme. End-to-end map use:
+  `make`, the `counts[k]++` zero-leveraging idiom, `len(m)`, range
+  iteration. The deterministic-sort step also previews theme 2.3's
+  range-order divergence — TS dev expects insertion order; Go gives
+  you whatever the runtime feels like.
+
+  The `string(c)` cast for the map key is a deliberate beat: range
+  over a string yields `rune` (int32) at byte indices; the map's
+  key type is `string`, so the conversion is explicit. This sets up
+  theme 2.3's strings/bytes/runes lesson — a learner who has
+  reached for `c` directly here will appreciate `string(c)` more
+  when iteration arrives.
+
+  Out of scope: counting code points vs bytes (multi-byte runes),
+  case-insensitive folding, accents — all deferred to a later
+  strings deep-dive.

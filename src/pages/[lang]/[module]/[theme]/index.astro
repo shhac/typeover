@@ -1,0 +1,158 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  Badge,
+  Container,
+  Divider,
+  Eyebrow,
+  Heading,
+  Panel,
+  Stack,
+  Text,
+} from "~/components/ds";
+import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
+import { ExerciseProgressChip } from "~/components/progress/ExerciseProgressChip";
+import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
+import {
+  EXERCISE_TYPE_LABELS,
+  exerciseHref,
+  langHref,
+  loadThemeContext,
+  moduleHref,
+  paramsForTheme,
+} from "~/lib/curriculum";
+import { formatInline } from "~/lib/format-inline";
+import { formatBlock } from "~/lib/format-block";
+
+type ThemeEntry = CollectionEntry<"themes">;
+
+export async function getStaticPaths() {
+  const themes = await getCollection("themes");
+  return themes.flatMap((entry) => {
+    const params = paramsForTheme(entry.id);
+    if (!params) return [];
+    return [{ params, props: { theme: entry } }];
+  });
+}
+
+interface Props {
+  theme: ThemeEntry;
+}
+
+const { theme } = Astro.props;
+const lang = theme.data.target;
+
+const [modules, exercises] = await Promise.all([
+  getCollection("modules"),
+  getCollection("exercises"),
+]);
+
+const ctx = loadThemeContext(theme, { modules, exercises });
+if (!ctx) {
+  throw new Error(
+    `Theme "${theme.id}" references a module that doesn't exist (data.moduleId="${theme.data.moduleId}")`,
+  );
+}
+const { module: moduleEntry, exercises: themeExercises } = ctx;
+---
+
+<BaseLayout
+  title={`${theme.data.title} — typeover`}
+  description={`Exercises for ${theme.data.title} — TypeScript to Go.`}
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Breadcrumb
+            crumbs={[
+              { label: "Curriculum", href: langHref(lang) },
+              {
+                label: moduleEntry.data.title,
+                href: moduleHref(moduleEntry.id),
+                ariaLabel: `Up to ${moduleEntry.data.title} module overview`,
+              },
+              { label: theme.data.title },
+            ]}
+          />
+          <Heading level={1}>{theme.data.title}</Heading>
+        </Stack>
+
+        <Panel padding="airy" tone="default">
+          <Text tone="secondary" size="md" as="div" class="ds-prose">
+            <Fragment set:html={formatBlock(theme.data.intro)} />
+          </Text>
+        </Panel>
+
+        <Stack gap="md">
+          <Stack direction="row" gap="sm" align="baseline" wrap>
+            <Eyebrow>exercises</Eyebrow>
+            <Text tone="faint" size="sm" family="mono">
+              {themeExercises.length} ready
+            </Text>
+            {themeExercises.length > 0 && (
+              <ThemeProgressChip
+                client:only="solid-js"
+                exerciseIds={themeExercises.map((ex) => ex.id)}
+                firstExerciseHref={exerciseHref(themeExercises[0]!.id)}
+              />
+            )}
+          </Stack>
+
+          {themeExercises.length === 0 ? (
+            <Text tone="muted" size="sm" family="mono">
+              No exercises for this theme yet — coming soon.
+            </Text>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {themeExercises.map((ex) => (
+                <a
+                  href={exerciseHref(ex.id)}
+                  class="block group focus-ring"
+                >
+                  <Panel
+                    padding="default"
+                    tone="default"
+                    class="h-full transition-colors group-hover:border-accent-primary"
+                  >
+                    <Stack gap="sm">
+                      <Stack direction="row" gap="sm" align="baseline" wrap>
+                        <Text tone="faint" size="xs" family="mono">
+                          {ex.data.order.toString().padStart(2, "0")}
+                        </Text>
+                        <Badge variant="default" outline>
+                          {EXERCISE_TYPE_LABELS[ex.data.type]}
+                        </Badge>
+                        <ExerciseProgressChip client:only="solid-js" exerciseId={ex.id} />
+                      </Stack>
+                      <Text tone="primary" size="sm">
+                        <Fragment set:html={formatInline(ex.data.prompt.split("\n")[0] ?? "")} />
+                      </Text>
+                    </Stack>
+                  </Panel>
+                </a>
+              ))}
+            </div>
+          )}
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" justify="between" align="center" wrap>
+          <a href={langHref(lang)} class="text-fg-muted hover:text-fg-primary font-mono text-sm">
+            ← back to curriculum
+          </a>
+          {themeExercises[0] && (
+            <a
+              href={exerciseHref(themeExercises[0].id)}
+              class="text-accent-primary hover:underline font-mono text-sm"
+            >
+              start with exercise 01 →
+            </a>
+          )}
+        </Stack>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

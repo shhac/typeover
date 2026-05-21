@@ -1,0 +1,42 @@
+target: go
+themeId: go/types/methods
+type: fill-word
+order: 5
+prompt: |
+  Inside a method body, the receiver acts as the conventional
+  self-reference — Go has no `this`. Type the field-access
+  expression that reads the receiver's `n` field.
+generator:
+  kind: template
+  vars:
+    access: ["c.n"]
+  ts: |-
+    class Counter {
+      n = 0;
+      describe() { return "n is " + this.n; }
+    }
+  canonical: |-
+    type Counter struct {
+    	n int
+    }
+
+    func (c Counter) describe() string {
+    	return fmt.Sprintf("n is %d", ${access})
+    }
+blanks: [access]
+hints:
+  - "No `this`. The receiver name you declared (`c` in `func (c Counter) ...`) is your handle to the receiver's fields. Same dot-access as any other struct value."
+  - "Two tokens: receiver letter, dot, field name."
+  - "`c.n`."
+runtime: none
+notes: |
+  Pins the receiver-name convention: short single letter matching
+  the type (`c` for Counter, `p` for Point, `u` for User). Same
+  convention all Go style guides converge on; introduced
+  implicitly in slot 1's variants and made explicit here.
+
+  Could have asked just `${field}` (the `n` literally) instead of
+  the whole `${access}` expression — picked the access form
+  because the receiver-letter is the load-bearing part of the
+  no-`this` lesson. Splitting "type c" + "type n" across two
+  blanks would dilute it.

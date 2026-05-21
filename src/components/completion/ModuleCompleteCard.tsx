@@ -123,7 +123,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
    * progress.ts. */
   const nextUnfinishedHref = createMemo(() => {
     const exId = findNextUnfinishedExerciseId(props.themes);
-    return exId === null ? null : `/go/${exId}`;
+    return exId === null ? null : `/${exId}`;
   });
 
   const shareText = () => {
@@ -134,7 +134,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
       .replace("{exerciseCount}", String(p?.exercisesPassed ?? 0));
   };
 
-  const shareUrl = () => `${props.siteOrigin}/go/${props.moduleId}/complete`;
+  const shareUrl = () => `${props.siteOrigin}/${props.moduleId}/complete`;
 
   async function share() {
     setShareState(await tryShare(shareText(), shareUrl()));
@@ -196,7 +196,7 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
                         {summary.themeComplete ? "✓" : "·"} {summary.passed}/{summary.total}
                       </span>
                       <a
-                        href={`/go/${theme.id}`}
+                        href={`/${theme.id}`}
                         class="text-fg-secondary hover:text-fg-primary text-sm transition-colors"
                       >
                         {theme.title}

@@ -1,0 +1,54 @@
+target: go
+themeId: go/idioms/gotchas
+type: mcq
+order: 3
+prompt: |
+  **Goroutine leaks**. Pick the statement that BEST
+  describes a goroutine leak.
+generator:
+  kind: variant
+  variants:
+    - id: goroutine-leak
+      ts: |-
+        // TS: equivalent of an unresolved Promise + an event listener
+        // holding a reference — usually GC'd anyway. Go's goroutines
+        // don't GC the same way.
+      canonical: "A goroutine that the runtime can't terminate because it's blocked on a channel receive or send (or another sync primitive) that will never make progress. The goroutine's stack + captured variables stay alive forever."
+      distractors:
+        - "A goroutine that panics — the panic isn't recovered and the goroutine 'leaks' its error out to the caller."
+        - "A goroutine that runs for too long (over 1 second by default) and triggers the runtime's leak detector."
+        - "A goroutine that uses more stack than its initial 2 KB allocation, causing memory pressure."
+hints:
+  - "What does 'leak' mean for a goroutine? It can't be terminated; it holds memory + captured vars; nothing will unblock it."
+  - "Blocked on a channel / sync primitive with no path to unblock — the runtime can't reclaim it."
+  - "Permanently blocked goroutine = leak."
+runtime: none
+notes: |
+  Classic example:
+
+  ```go
+  func leaky() {
+      ch := make(chan int)
+      go func() {
+          v := <-ch       // blocks forever — no sender
+          fmt.Println(v)
+      }()
+      // leaky returns; the goroutine still exists, holding its stack
+  }
+  ```
+
+  Multiplied across millions of requests in a server, this
+  exhausts memory.
+
+  Fixes:
+  - Always have a path for cancellation (close the channel
+    OR send a sentinel OR use context).
+  - In production code, `pprof`'s goroutine profile +
+    `runtime.NumGoroutine()` are the diagnostics.
+
+  Distractors:
+    1. "Panic leak" — wrong sense of "leak"; panics in
+       goroutines crash the program.
+    2. "Runs too long + leak detector" — no such built-in.
+    3. "Stack > 2KB" — Go's goroutine stacks grow
+       dynamically; no leak signal.

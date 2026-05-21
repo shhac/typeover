@@ -35,13 +35,18 @@ function describe(exerciseId: string): ResumeFragment | null {
    * skipped — the header stays quiet rather than showing a broken
    * label. */
   const parts = exerciseId.split("/");
-  if (parts.length !== 3) return null;
-  const [, theme, slot] = parts;
+  /* Exercise IDs are now `<lang>/<module>/<theme>/<index>` (4 parts);
+   * we ignore the lang + module segments here and surface the theme
+   * + slot label, since the only thing the header chip uses is a
+   * short "<theme> · ex 03" tag. The href is the lang-prefixed
+   * absolute path verbatim. */
+  if (parts.length !== 4) return null;
+  const [, , theme, slot] = parts;
   if (!theme || !slot) return null;
   const slotNum = Number(slot);
   if (!Number.isInteger(slotNum) || slotNum < 1) return null;
   return {
-    href: `/go/${exerciseId}`,
+    href: `/${exerciseId}`,
     themeSlug: theme,
     slotLabel: `ex ${slotNum}`,
   };

@@ -1,0 +1,42 @@
+target: go
+themeId: go/idioms/project-layout
+type: mcq
+order: 2
+prompt: |
+  Pick the statement that's TRUE about the `internal/`
+  directory convention in Go.
+generator:
+  kind: variant
+  variants:
+    - id: internal-import-rule
+      ts: |-
+        // TS: no equivalent — privacy is via export keyword.
+        // Go: internal/ is enforced by the compiler at module boundaries.
+      canonical: "Packages under `internal/` can only be imported by code in the SAME MODULE (or its descendants). The compiler enforces this rule — external modules get an import error."
+      distractors:
+        - "Packages under `internal/` are compiled but never linked into binaries."
+        - "Packages under `internal/` use lowercase names by convention but have no compiler-enforced visibility rules."
+        - "Packages under `internal/` are private to the package they live in; even sibling packages within the same module can't import them."
+hints:
+  - "Compiler-enforced. The rule is about WHO can import packages under internal/."
+  - "Same-module only. External modules get a compile error if they try."
+  - "Importable only inside the same module."
+runtime: none
+notes: |
+  `internal/` is THE Go-toolchain-enforced privacy boundary
+  at the package level. Move package `helpers` to
+  `internal/helpers`, and external modules importing your
+  module can't see it — the compiler rejects the import.
+
+  Within the SAME module, any code under or alongside the
+  `internal/` parent CAN import. So `myorg/myproject/cmd/
+  serverd/main.go` can import `myorg/myproject/internal/
+  helpers`, but `someotherorg/theirproject/main.go` cannot.
+
+  Distractors:
+    1. "Compiled but not linked" — invented; internal/ has
+       no linker-level treatment.
+    2. "No compiler enforcement" — false; the spec
+       explicitly enforces this.
+    3. "Even siblings can't" — too strict; siblings WITHIN
+       the same module CAN import.

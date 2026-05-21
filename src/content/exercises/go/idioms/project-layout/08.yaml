@@ -1,0 +1,68 @@
+target: go
+themeId: go/idioms/project-layout
+type: freeform
+order: 8
+prompt: |
+  Build a small program demonstrating the **thin main +
+  delegated helpers** pattern that the `cmd/<binary>/main.go`
+  + `internal/<helpers>` layout encourages.
+
+  1. Helper: `greet(name string) string` returning
+     `"hello, " + name`.
+  2. Helper: `farewell(name string) string` returning
+     `"bye, " + name`.
+  3. `func main()`:
+     - `fmt.Println(greet("world"))`
+     - `fmt.Println(farewell("world"))`
+
+  Expected output:
+  ```
+  hello, world
+  bye, world
+  ```
+
+  Each helper is independently testable. In a real project,
+  they'd live in `internal/helpers/greet.go` and be imported
+  by `cmd/<binary>/main.go`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: separate modules per helper, main imports them.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func greet(name string) string {
+    	return "hello, " + name
+    }
+
+    func farewell(name string) string {
+    	return "bye, " + name
+    }
+
+    func main() {
+    	fmt.Println(greet("world"))
+    	fmt.Println(farewell("world"))
+    }
+expectStdout: |
+  hello, world
+  bye, world
+hints:
+  - "Three pieces: two named helper functions (greet, farewell), main calling both with `\"world\"`."
+  - "Each helper takes (string) and returns string. main prints each result on its own line."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Drills the "extract logic from main" pattern. The two
+  helpers each have one job; main composes them. Easy to
+  add a third (`question(name) string`) without touching
+  the first two — the open/closed instinct that good
+  layout enables.
+
+  In a real project these would each be their own file
+  (e.g. `internal/greetings/greet.go` +
+  `internal/greetings/farewell.go`); the package boundary
+  is what determines what's hidden behind `internal/`. Our
+  single-file form preserves the lesson.

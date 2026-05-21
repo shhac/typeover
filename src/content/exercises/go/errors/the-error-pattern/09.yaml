@@ -1,0 +1,100 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: freeform
+order: 9
+prompt: |
+  Theme 5.1 capstone — ERROR WRAPPING with `fmt.Errorf` `%w`
+  + UNWRAPPING with `errors.Is`. The pattern that lets a deep
+  inner error propagate up through layers while preserving its
+  identity for callers to match on.
+
+  Build:
+
+  1. `var ErrNotFound = errors.New("not found")` — a SENTINEL
+     error at package scope.
+  2. `func loadUser(id int) error` returning `ErrNotFound` for
+     any id.
+  3. `func handleRequest()` calling `loadUser` and wrapping the
+     result with `fmt.Errorf("handle: %w", err)` to add
+     context.
+  4. In `main`: call `handleRequest()`, print the resulting
+     error, then check `errors.Is(err, ErrNotFound)` and print
+     `"matched sentinel"` if true.
+
+  Expected output:
+  ```
+  handle: not found
+  matched sentinel
+  ```
+
+  TypeScript reference:
+  ```ts
+  // TS rough analog: throw new Error("handle: " + e.message, { cause: e })
+  // and check (e.cause instanceof X) at the top. Less ergonomic.
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const ErrNotFound = new Error("not found");
+    function loadUser(id: number): Error { return ErrNotFound; }
+    function handleRequest(): Error {
+      const err = loadUser(42);
+      return new Error("handle: " + err.message, { cause: err });
+    }
+    const err = handleRequest();
+    console.log(err.message);
+    if ((err as any).cause === ErrNotFound) console.log("matched sentinel");
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    var ErrNotFound = errors.New("not found")
+
+    func loadUser(id int) error {
+    	return ErrNotFound
+    }
+
+    func handleRequest() error {
+    	err := loadUser(42)
+    	if err != nil {
+    		return fmt.Errorf("handle: %w", err)
+    	}
+    	return nil
+    }
+
+    func main() {
+    	err := handleRequest()
+    	fmt.Println(err)
+    	if errors.Is(err, ErrNotFound) {
+    		fmt.Println("matched sentinel")
+    	}
+    }
+expectStdout: |
+  handle: not found
+  matched sentinel
+hints:
+  - "Three pieces: sentinel error at package scope, inner function returning it, outer function wrapping with `fmt.Errorf(\"handle: %w\", err)`. The `%w` verb (Go 1.13+) preserves the inner error for `errors.Is` to find."
+  - "Use `errors.Is(err, ErrNotFound)` to walk the wrap chain and match — `==` won't work after wrapping."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  THE wrap-and-unwrap idiom. `fmt.Errorf("...: %w", err)` is the
+  canonical wrapping form; `errors.Is(err, target)` walks the
+  wrap chain to match by identity. `errors.As` (target by type)
+  is theme 5.2's beat.
+
+  Sentinel errors live at PACKAGE SCOPE as `var Err<Name> =
+  errors.New(...)`. Capital `E` for exported (theme 4.1
+  convention). Callers do `errors.Is(err, pkg.ErrNotFound)` to
+  match against them across wrap layers.
+
+  Yaegi runs the whole shape (errors.New + fmt.Errorf %w +
+  errors.Is) cleanly — probed at the start of this tick.
+
+  Module 5 of 5 themes begins with this theme. Slots 02-09
+  shipped after the 01 MCQ; theme 5.1 complete with this slot.

@@ -1,0 +1,80 @@
+target: go
+themeId: go/concurrency/channels
+type: fill-line
+order: 7
+prompt: |
+  Use the **comma-ok form** of channel receive to detect that
+  the channel has been closed. `v, ok := <-ch` — `ok` is
+  `false` when the channel is closed and drained.
+
+  The scaffold sends one value, closes, then receives twice.
+  The first receive drains the value; the second should
+  observe `ok = false`. Print `closed` when `!ok`.
+
+  Type the second receive + check (the line that does the
+  comma-ok read and the conditional print).
+
+  Expected output:
+  ```
+  10
+  closed
+  ```
+generator:
+  kind: template
+  vars:
+    line:
+      - "if v, ok := <-ch; !ok { fmt.Println(\"closed\") } else { fmt.Println(v) }"
+  ts: |-
+    // TS: while ((const { value, done } = await iter.next(), !done)) { ... }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	ch := make(chan int, 1)
+    	ch <- 10
+    	close(ch)
+
+    	v1 := <-ch
+    	fmt.Println(v1)
+
+    	${line}
+    }
+  distractors:
+    - match: 'if v := <-ch; v == 0 { fmt.Println("closed") } else { fmt.Println(v) }'
+      explain: |-
+        Detecting closed-channel by checking for the zero
+        value is unsound — a sent value of `0` would look
+        identical to a closed channel. Comma-ok exists to
+        disambiguate.
+    - match: 'if ch.IsClosed() { fmt.Println("closed") } else { fmt.Println(<-ch) }'
+      explain: |-
+        Invented method — channels don't have an `IsClosed()`
+        method. The language-level mechanism is the comma-ok
+        receive: `v, ok := <-ch`.
+    - match: 'v, ok := <-ch; if !ok { fmt.Println("closed") } else { fmt.Println(v) }'
+      explain: |-
+        Almost right — just missing the if-init bind. Either
+        use `if v, ok := <-ch; !ok { ... }` to scope inside
+        the if, or split into two statements with `v, ok :=`
+        first then `if !ok { ... }`. Mixed syntax doesn't
+        parse.
+expectStdout: |
+  10
+  closed
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Comma-ok form: `v, ok := <-ch`. Bind both in the if-init: `if v, ok := <-ch; !ok { ... } else { ... }`."
+  - "`if v, ok := <-ch; !ok { fmt.Println(\"closed\") } else { fmt.Println(v) }`."
+  - "See canonical."
+notes: |
+  The comma-ok form is THE production-grade way to detect
+  channel-close. The simpler `for v := range ch` (slot 8 +
+  9 use it) handles the close implicitly — range terminates
+  when the channel is closed and drained.
+
+  Use comma-ok when you need explicit control over a single
+  receive (e.g. inside a select case where you want to
+  branch on close).

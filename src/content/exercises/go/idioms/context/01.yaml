@@ -1,0 +1,41 @@
+target: go
+themeId: go/idioms/context
+type: mcq
+order: 1
+prompt: |
+  Pick the line that creates a fresh root `context.Context` —
+  the starting point for any context chain in a program.
+
+  TypeScript: no direct analog. The closest pattern is an
+  `AbortController` (which most fetch-based code now uses).
+generator:
+  kind: variant
+  variants:
+    - id: background
+      ts: |-
+        // TS: const ctrl = new AbortController(); fetch(url, { signal: ctrl.signal })
+        // Go: ctx := context.Background() — root of any cancellation chain.
+      canonical: "ctx := context.Background()"
+      distractors:
+        - "ctx := context.New()"
+        - "ctx := new(context.Context)"
+        - "ctx := context.Root()"
+hints:
+  - "`context.<func>` returning a Context. The conventional name in the stdlib for the empty root is the same English word as a CPU process's `bg`."
+  - "`context.Background()`."
+  - "`context.Background()`."
+runtime: none
+notes: |
+  Theme 7.3 opener. `context.Background()` is the
+  conventional root for top-level / main / init code.
+  `context.TODO()` is its sibling — semantically identical
+  but signals "I haven't decided yet" to readers (used as
+  a placeholder during refactors).
+
+  Distractors:
+    1. `context.New()` — invented; the stdlib doesn't have it.
+    2. `new(context.Context)` — Context is an INTERFACE;
+       `new(Interface)` gives you a nil pointer to interface,
+       not a usable Context.
+    3. `context.Root()` — invented; the convention is
+       `Background` (for prod) / `TODO` (for placeholders).

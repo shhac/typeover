@@ -1,0 +1,38 @@
+target: go
+themeId: go/foundations/variables
+type: mcq
+order: 2
+prompt: |
+  Sometimes you want to spell out a variable's type even when you're
+  initialising it. Which Go matches this TypeScript?
+generator:
+  kind: template
+  vars:
+    name: [count, total, age, score, attempts]
+    value: ["10", "0", "42", "100", "-1"]
+  ts: |-
+    let ${name}: number = ${value};
+  canonical: |-
+    var ${name} int = ${value}
+  distractors:
+    - "${name}: int := ${value}"
+    - "int ${name} = ${value}"
+    - "var ${name}: int = ${value}"
+hints:
+  - "Go's short-declaration form `:=` infers the type — so it can't carry an explicit annotation. There's a longer form for that."
+  - "The keyword is `var`. The shape is: `var <name> <type> = <value>`. Note the *position* of the type — it follows the name."
+  - "`var ${name} int = ${value}`"
+notes: |
+  This exercise teaches that:
+  1. `:=` and explicit type annotations are mutually exclusive in Go.
+  2. The `var name Type = value` shape is positional: type *after* name,
+     no colon.
+  3. Go's `number` analogue is `int` here (a number literal is `int` by
+     default; `float64` would be wrong for `42`).
+
+  Distractors:
+   - `name: int := value` — the colon is TS-style and `:=` already
+     implies inference; can't have both.
+   - `int name = value` — C-style declaration order; not Go.
+   - `var name: int = value` — colon between name and type; not Go.
+runtime: none

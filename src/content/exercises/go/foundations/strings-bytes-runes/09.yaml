@@ -1,0 +1,46 @@
+target: go
+themeId: go/foundations/strings-bytes-runes
+type: freeform
+order: 9
+prompt: |
+  TypeScript template literals have no direct Go analogue — `fmt.Sprintf`
+  is the idiomatic substitute. Write a program that:
+
+  1. Declares `name := "world"` and `count := 3`.
+  2. Builds the string `"hello world, 3 times"` via `fmt.Sprintf` with
+     two `%s`/`%d` placeholders, stores it in a variable, then prints
+     it via `fmt.Println`.
+
+  The expected output is a single line: `hello world, 3 times`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let name = "world";
+    let count = 3;
+    let msg = "hello " + name + ", " + count + " times";
+    console.log(msg);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	name := "world"
+    	count := 3
+    	msg := fmt.Sprintf("hello %s, %d times", name, count)
+    	fmt.Println(msg)
+    }
+expectStdout: |
+  hello world, 3 times
+runtime: yaegi
+hints:
+  - "`fmt.Sprintf` is the template-literal analogue: it returns the formatted string instead of writing it. Take the result, then print it."
+  - "Verb cheatsheet: `%s` for strings, `%d` for ints, `%f` for floats, `%v` as a catch-all when you don't care."
+  - "`name := \"world\"; count := 3; msg := fmt.Sprintf(\"hello %s, %d times\", name, count); fmt.Println(msg)` — placeholders left-to-right match args left-to-right."
+notes: |
+  First freeform of Theme 3. Drills `fmt.Sprintf` as the
+  template-literal replacement. Composing the string into a variable
+  before printing (rather than using `fmt.Printf` directly) is
+  intentional — it surfaces the "Sprintf returns, Printf prints"
+  distinction that bites TS devs reaching for an inline template.

@@ -1,0 +1,66 @@
+target: go
+themeId: go/foundations/variables
+type: fill-line
+order: 7
+prompt: |
+  The TS program on the left declares two variables and prints
+  `doubled`. The Go translation has its second line missing — type
+  the idiomatic Go that, plugged in, makes the program print `10`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "doubled := count * 2"
+  ts: |-
+    let count = 5;
+    let doubled = count * 2;
+    console.log(doubled);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	count := 5
+    	${line}
+    	fmt.Println(doubled)
+    }
+  distractors:
+    - match: "var doubled = count * 2"
+      explain: |-
+        That compiles, but inside a function Go reaches for `:=`. `var` is fine
+        at package scope; here it's the un-idiomatic shape — you'd be writing
+        the more verbose form for no gain.
+    - match: "doubled = count * 2"
+      explain: |-
+        That's a re-assignment, not a declaration. `doubled` doesn't exist
+        yet — Go won't auto-create it the way TS's `let` would. Use `:=` to
+        declare and assign in one step.
+    - match: "const doubled := count * 2"
+      explain: |-
+        Go's `const` is for compile-time constants only (integers, strings,
+        floats, booleans). `count * 2` is computed at runtime, so this won't
+        compile. For a runtime value use `:=`.
+    - match: "let doubled = count * 2"
+      explain: |-
+        `let` is TypeScript. Go uses `:=` inside functions, `var` at package
+        scope.
+expectStdout: |
+  10
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Inside a function, Go's idiomatic way to declare AND initialise a variable in one step is the short-declaration operator. Not `var`, not bare `=`, and definitely not `let` or `const` — that's TS."
+  - "The operator is `:=`. It both declares the variable and assigns the right-hand side."
+  - "Type `doubled := count * 2`."
+notes: |
+  First fill-line under the redesigned input+Yaegi UX. The learner
+  types the line; we substitute into the canonical scaffold and run.
+  Expected stdout `10` is the round-trip from count=5 doubled.
+
+  Distractors landed in their structured `{match, explain}` form
+  2026-05-19 — the first fill-line exercise to ship targeted
+  wrong-pattern feedback per design-docs/99. Submitting any of
+  the four documented wrong shapes now surfaces a specific
+  explanation in the wrong-phase message; submitting an
+  unrecognised wrong line falls back to the generic message.

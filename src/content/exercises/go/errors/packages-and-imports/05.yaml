@@ -1,0 +1,42 @@
+target: go
+themeId: go/errors/packages-and-imports
+type: fill-word
+order: 5
+prompt: |
+  Type the keyword that begins the grouped import block. The
+  program below needs `fmt` and `strings` from the standard
+  library.
+
+  TS: `import { x } from 'y'`. Go's keyword is the same word
+  but its shape is different (parenthesised block, full path
+  string, no destructuring).
+generator:
+  kind: template
+  vars:
+    word:
+      - "import"
+  ts: |-
+    // TS: import { ... } from 'y'.
+  canonical: |-
+    package main
+
+    ${word} (
+    	"fmt"
+    	"strings"
+    )
+
+    func main() {
+    	fmt.Println(strings.ToUpper("hi"))
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Six letters. Same word as TypeScript/JavaScript use for module loading. Lowercase."
+  - "Starts with `i`."
+  - "`import`."
+notes: |
+  Lock in the keyword. The body — calling `strings.ToUpper`
+  through the imported package — demonstrates that you ACCESS
+  imported names via the package qualifier (`strings.X`), not
+  bare like `ToUpper(...)`. That's an implicit beat that pairs
+  with slot 2's capitalisation rule.

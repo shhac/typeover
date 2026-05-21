@@ -202,7 +202,8 @@ function validateRunnableExpectStdout(ex: Exercise, ctx: Ctx): void {
     if (ex.runtime === "none") {
       ctx.addIssue({
         code: "custom",
-        message: 'Freeform exercises need a non-"none" runtime (e.g. `"yaegi"`, `"zig"`, or `"server"`).',
+        message:
+          'Freeform exercises need a non-"none" runtime (e.g. `"yaegi"`, `"zig"`, or `"server"`).',
         path: ["runtime"],
       });
     }

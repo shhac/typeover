@@ -1,0 +1,49 @@
+target: go
+themeId: go/idioms/embedding
+type: fill-word
+order: 5
+prompt: |
+  When an outer type ALSO defines a method with the same
+  name as a promoted one, the outer's method overrides. To
+  call the inner's method explicitly, you go through the
+  embedded type's NAME as a field path:
+  `d.${word}.Describe()`.
+
+  Type the field name you'd use.
+generator:
+  kind: template
+  vars:
+    word:
+      - "Animal"
+  ts: |-
+    // TS: super.describe() — call the parent's method explicitly.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Animal struct{ Name string }
+
+    func (a Animal) Describe() string { return "animal: " + a.Name }
+
+    type Dog struct{ Animal }
+
+    func (d Dog) Describe() string { return "dog: " + d.${word}.Describe() }
+
+    func main() {
+    	d := Dog{Animal: Animal{Name: "Rex"}}
+    	fmt.Println(d.Describe())
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "The promoted field's name IS the embedded type's name."
+  - "`Animal`."
+  - "`Animal`."
+notes: |
+  Explicit forwarding via the type-name field path —
+  Go's equivalent of `super.method()`.
+
+  The Describe override here calls `d.Animal.Describe()` to
+  reuse the inner's behaviour while wrapping it — a common
+  pattern for decorators.

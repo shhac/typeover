@@ -62,27 +62,39 @@ function parseArgs(av) {
 }
 
 const { slug, flags } = parseArgs(argv.slice(2));
-if (!slug || !slug.includes("/")) {
+const slugParts = slug ? slug.split("/") : [];
+if (slugParts.length !== 3) {
   fail(
-    `Usage: pnpm content:new theme <module>/<theme-id>\n` +
-      `e.g.   pnpm content:new theme collections/slices`,
+    `Usage: pnpm content:new theme <lang>/<module>/<theme-id>\n` +
+      `e.g.   pnpm content:new theme go/collections/slices\n` +
+      `       pnpm content:new theme zig/basics/while-and-for`,
   );
 }
-const [moduleId, themeId] = slug.split("/", 2);
-const themeSlug = `${moduleId}/${themeId}`;
+const [lang, moduleSlug, themeSlugTail] = slugParts;
+const moduleId = `${lang}/${moduleSlug}`;
+const themeId = `${moduleId}/${themeSlugTail}`;
+const themeSlug = themeId;
 
 /* ───────── existence checks ───────── */
 
-const modulePath = join(contentRoot, "modules", `${moduleId}.yaml`);
+const modulePath = join(contentRoot, "modules", lang, `${moduleSlug}.yaml`);
 if (!existsSync(modulePath)) {
-  const modules = (await readdir(join(contentRoot, "modules")))
-    .filter((f) => f.endsWith(".yaml"))
-    .map((f) => f.replace(/\.yaml$/, ""));
-  fail(`Module "${moduleId}" doesn't exist.\n` + `  Known modules: ${modules.join(", ")}`);
+  const modulesDir = join(contentRoot, "modules", lang);
+  const modules = existsSync(modulesDir)
+    ? (await readdir(modulesDir))
+        .filter((f) => f.endsWith(".yaml"))
+        .map((f) => `${lang}/${f.replace(/\.yaml$/, "")}`)
+    : [];
+  fail(
+    `Module "${moduleId}" doesn't exist.\n` +
+      (modules.length > 0
+        ? `  Known modules for ${lang}: ${modules.join(", ")}`
+        : `  No modules under src/content/modules/${lang}/ yet.`),
+  );
 }
 
-const themeYamlPath = join(contentRoot, "themes", moduleId, `${themeId}.yaml`);
-const exercisesDir = join(contentRoot, "exercises", moduleId, themeId);
+const themeYamlPath = join(contentRoot, "themes", lang, moduleSlug, `${themeSlugTail}.yaml`);
+const exercisesDir = join(contentRoot, "exercises", lang, moduleSlug, themeSlugTail);
 const themeExists = existsSync(themeYamlPath);
 const exercisesExist = existsSync(exercisesDir);
 
@@ -104,7 +116,7 @@ const stampingTheme = !themeExists;
 
 // Highest existing order within this module — new theme defaults to N+1.
 async function nextOrder() {
-  const themesDir = join(contentRoot, "themes", moduleId);
+  const themesDir = join(contentRoot, "themes", lang, moduleSlug);
   if (!existsSync(themesDir)) return 1;
   const yamls = (await readdir(themesDir)).filter((f) => f.endsWith(".yaml"));
   let max = 0;
@@ -116,7 +128,7 @@ async function nextOrder() {
   return max + 1;
 }
 
-const defaultTitle = themeId
+const defaultTitle = themeSlugTail
   .split("-")
   .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
   .join(" ");
@@ -165,7 +177,7 @@ if (stampingTheme) {
 /* ───────── theme YAML ───────── */
 
 const themeYaml = stampingTheme
-  ? `target: go
+  ? `target: ${lang}
 moduleId: ${moduleId}
 title: ${yamlStr(title)}
 order: ${order}
@@ -190,7 +202,7 @@ function yamlStr(s) {
 // distractors. References to ${name} keep the schema's placeholder-
 // declared refinement happy and remind the author of the shape.
 function mcqStub(slot) {
-  return `target: go
+  return `target: ${lang}
 themeId: ${themeSlug}
 type: mcq
 order: ${slot}
@@ -224,7 +236,7 @@ notes: |
 // fill-word stub (slots 4-5). Template generator with one declared
 // blank var + a contextual name var.
 function fillWordStub(slot) {
-  return `target: go
+  return `target: ${lang}
 themeId: ${themeSlug}
 type: fill-word
 order: ${slot}
@@ -256,7 +268,7 @@ notes: |
 // runtime:verify passes; the canonical line is "fmt.Println()" which
 // prints an empty newline. expectStdout matches that empty newline.
 function fillLineStub(slot) {
-  return `target: go
+  return `target: ${lang}
 themeId: ${themeSlug}
 type: fill-line
 order: ${slot}
@@ -300,7 +312,7 @@ notes: |
 
 // freeform stub (slots 8-9). Trivial empty main + empty expectStdout.
 function freeformStub(slot) {
-  return `target: go
+  return `target: ${lang}
 themeId: ${themeSlug}
 type: freeform
 order: ${slot}

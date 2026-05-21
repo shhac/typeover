@@ -1,0 +1,69 @@
+target: go
+themeId: go/idioms/small-interfaces
+type: freeform
+order: 8
+prompt: |
+  Build a `Point` type that satisfies `fmt.Stringer` and
+  pass it through a `Stringer`-typed variable to force the
+  interface dispatch.
+
+  1. `type Point struct{ X, Y int }`.
+  2. `func (p Point) String() string` returning
+     `fmt.Sprintf("(%d,%d)", p.X, p.Y)`.
+  3. `type Stringer interface { String() string }`.
+  4. In `main`, assign `Point{X: 3, Y: 4}` to a
+     `Stringer`-typed variable and print
+     `s.String()`.
+
+  Expected output: `(3,4)`.
+
+  Real Go's `fmt.Println` auto-detects Stringer via
+  reflection — but Yaegi's `fmt` doesn't (design-docs/30).
+  Going through the interface explicitly demonstrates the
+  satisfaction without depending on the reflection path.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: class Point { constructor(public X: number, public Y: number) {}; toString() { return `(${this.X},${this.Y})` } }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Point struct {
+    	X, Y int
+    }
+
+    func (p Point) String() string {
+    	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
+    }
+
+    type Stringer interface {
+    	String() string
+    }
+
+    func main() {
+    	var s Stringer = Point{X: 3, Y: 4}
+    	fmt.Println(s.String())
+    }
+expectStdout: |
+  (3,4)
+hints:
+  - "Four pieces: Point struct, the `String()` method, a `Stringer` interface declaration, main with `var s Stringer = Point{...}` then `fmt.Println(s.String())`."
+  - "Going through the interface var forces Go to recognise the satisfaction — even without fmt's reflection auto-detection."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  The most common real-world use of `fmt.Stringer` —
+  custom printing for domain types. Real Go's
+  `fmt.Println(point)` auto-detects Stringer via
+  reflection; Yaegi's fmt doesn't (probed 2026-05-21,
+  documented in design-docs/30), so we go through an
+  interface variable explicitly.
+
+  The lesson — "implementing String() satisfies Stringer
+  implicitly" — is fully exercised even with the
+  explicit-call workaround. When Yaegi's fmt gains the
+  reflection check, the canonical can simplify back to
+  `fmt.Println(Point{X:3, Y:4})`.

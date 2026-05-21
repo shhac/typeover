@@ -1,0 +1,11 @@
+target: go
+moduleId: go/foundations
+title: Numeric primitives
+order: 2
+prerequisites: [go/foundations/variables]
+intro: |
+  TypeScript has one `number` type. Go has many: `int`, `int8`,
+  `int16`, `int32`, `int64`, `uint*` mirrors, `float32`, and
+  `float64`. The big idea: **Go has no implicit numeric conversion**.
+  A function expecting `int64` will not accept an `int32` without an
+  explicit cast. This frustrates briefly, then becomes a feature.

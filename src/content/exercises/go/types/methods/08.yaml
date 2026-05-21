@@ -1,0 +1,86 @@
+target: go
+themeId: go/types/methods
+type: freeform
+order: 8
+prompt: |
+  Write a complete program that:
+
+  1. Declares `type Counter struct { n int }`.
+  2. Defines a POINTER-receiver method `bump()` that increments
+     `c.n`.
+  3. Defines a VALUE-receiver method `read() int` that returns
+     `c.n`.
+  4. In `main`: create `c := Counter{}`, call `c.bump()` three
+     times, then print `c.read()`.
+
+  Expected output: `3`.
+
+  Drills: receiver-kind choice (pointer to mutate, value to
+  read — slot 2), method declaration syntax (slot 1), call-site
+  uniformity (slot 3).
+
+  TypeScript reference:
+  ```ts
+  class Counter {
+    n = 0;
+    bump() { this.n += 1; }
+    read() { return this.n; }
+  }
+  const c = new Counter();
+  c.bump(); c.bump(); c.bump();
+  console.log(c.read());  // 3
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Counter {
+      n = 0;
+      bump() { this.n += 1; }
+      read() { return this.n; }
+    }
+    const c = new Counter();
+    c.bump(); c.bump(); c.bump();
+    console.log(c.read());
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Counter struct {
+    	n int
+    }
+
+    func (c *Counter) bump() {
+    	c.n++
+    }
+
+    func (c Counter) read() int {
+    	return c.n
+    }
+
+    func main() {
+    	c := Counter{}
+    	c.bump()
+    	c.bump()
+    	c.bump()
+    	fmt.Println(c.read())
+    }
+expectStdout: |
+  3
+runtime: yaegi
+hints:
+  - "Two methods on Counter — one MUTATES (needs `*Counter` receiver, slot 2's rule), one READS (value receiver is fine). The call site is identical for both: `c.bump()` and `c.read()` look the same regardless of receiver kind."
+  - "Three pieces: struct decl, two method decls (one *Counter, one Counter), main with three bumps + one print."
+  - "See canonical."
+notes: |
+  Smallest possible end-to-end exercise that touches BOTH
+  receiver kinds in the same type. The pedagogy: a real-world
+  type often mixes methods — some mutating, some reading.
+  Style-guide convention says BE CONSISTENT (if any method on T
+  uses *T, all should), but the rule is informal and Counter is
+  a tiny enough example that mixing is defensible for didactic
+  reasons.
+
+  Notes for the next slot: slot 9 will hold the consistency
+  rule and pick *Counter throughout for the larger capstone.

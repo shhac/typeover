@@ -1,0 +1,33 @@
+target: go
+themeId: go/interfaces/generics
+type: fill-word
+order: 4
+prompt: |
+  Type the constraint that allows ANY type as the type
+  parameter. This is the constraint you reach for when the
+  function body doesn't need to know anything about T —
+  e.g. an identity function or a generic container.
+generator:
+  kind: template
+  vars:
+    constraint: ["any"]
+  ts: |-
+    function identity<T>(v: T): T { return v; }
+  canonical: |-
+    func Identity[T ${constraint}](v T) T {
+    	return v
+    }
+blanks: [constraint]
+hints:
+  - "Same keyword as theme 4.1 slot 3+5 — the empty-interface alias. Used as a generic constraint, it means \"no restriction\"."
+  - "Three letters, lowercase."
+  - "`any`."
+runtime: none
+notes: |
+  `any` does double duty: as a type (the empty interface) AND
+  as the maximally-permissive generic constraint. Same keyword
+  in both positions; the meaning is identical (no method
+  requirements).
+
+  Counterpart fill-word slot 5 drills `comparable` — the next-
+  most-common constraint.

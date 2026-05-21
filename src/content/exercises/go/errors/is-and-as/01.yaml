@@ -1,0 +1,48 @@
+target: go
+themeId: go/errors/is-and-as
+type: mcq
+order: 1
+prompt: |
+  Theme 5.1 slot 9 introduced `errors.Is` for matching a
+  WRAPPED error against a sentinel. This slot recaps the
+  CONTRACT.
+
+  Given:
+  ```go
+  var ErrNotFound = errors.New("not found")
+  err := fmt.Errorf("loading user: %w", ErrNotFound)
+  ```
+
+  Which expression correctly checks whether `err` represents an
+  "ErrNotFound" condition (possibly wrapped one or more layers)?
+generator:
+  kind: variant
+  variants:
+    - id: notfound
+      ts: |-
+        // TS: err.cause === ErrNotFound (one layer); for deeper chains,
+        // you'd walk .cause manually.
+      canonical: "errors.Is(err, ErrNotFound)"
+      distractors:
+        - "err == ErrNotFound"
+        - "err.message == ErrNotFound.message"
+        - "errors.As(err, ErrNotFound)"
+hints:
+  - "Use `errors.Is(err, target)` — walks the wrap chain, matches by identity. Direct `==` only works on UNWRAPPED sentinels; once wrapped, the equality breaks."
+  - "Function name is two letters."
+  - "`errors.Is(err, ErrNotFound)`."
+runtime: none
+notes: |
+  Theme 5.2 opener. Recaps theme 5.1 slot 9's idiom and
+  contrasts it with the broken `==` form. Sets up slot 2
+  (`errors.As` for type extraction) and slot 4 (the package's
+  function naming).
+
+  Distractors:
+    1. `err == ErrNotFound` — works UNTIL someone wraps the
+       error. Fragile, fails silently when wrapping is added
+       upstream.
+    2. Message comparison — string-compare is brittle (typo,
+       i18n) AND doesn't help once nested.
+    3. `errors.As` — wrong tool. `Is` matches by identity,
+       `As` extracts by type. Different jobs.

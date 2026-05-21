@@ -1,0 +1,96 @@
+target: go
+themeId: go/collections/maps
+type: freeform
+order: 10
+prompt: |
+  Maps in Go are reference types — passing a map to a function
+  shares the underlying table, the same way passing an object in
+  TypeScript shares the reference. The callee's mutations are
+  visible to the caller, no pointer needed.
+
+  Write a program that:
+  1. Builds `scores := map[string]int{"alan": 7, "bea": 4, "carl":
+     2}`.
+  2. Calls `clearScore(scores, "bea")` — a function you write
+     that takes the map by value and DELETES the key.
+  3. Prints the resulting map's entries alphabetically by key in
+     the form `alan=7 carl=2` (sorted, space-joined).
+
+  TypeScript reference:
+  ```ts
+  function clearScore(scores: Record<string, number>, name: string): void {
+    delete scores[name];
+  }
+  const scores = { alan: 7, bea: 4, carl: 2 };
+  clearScore(scores, "bea");
+  // scores: { alan: 7, carl: 2 }
+  ```
+
+  No pointer-to-map (`*map[K]V`) needed — the map header IS a
+  reference; the function and caller share the backing table.
+
+  Expected output: `alan=7 carl=2`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function clearScore(scores: Record<string, number>, name: string): void {
+      delete scores[name];
+    }
+    const scores = { alan: 7, bea: 4, carl: 2 };
+    clearScore(scores, "bea");
+    // scores is now { alan: 7, carl: 2 }
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sort"
+    )
+
+    func clearScore(scores map[string]int, name string) {
+    	delete(scores, name)
+    }
+
+    func main() {
+    	scores := map[string]int{"alan": 7, "bea": 4, "carl": 2}
+    	clearScore(scores, "bea")
+    	keys := make([]string, 0, len(scores))
+    	for k := range scores {
+    		keys = append(keys, k)
+    	}
+    	sort.Strings(keys)
+    	for i, k := range keys {
+    		if i > 0 {
+    			fmt.Print(" ")
+    		}
+    		fmt.Printf("%s=%d", k, scores[k])
+    	}
+    	fmt.Println()
+    }
+expectStdout: |
+  alan=7 carl=2
+hints:
+  - "The function signature is `func clearScore(scores map[string]int, name string)` — plain `map[K]V`, no pointer. Maps are reference types; the function's parameter is a HEADER that points at the same backing table as the caller's variable."
+  - "Inside the function: `delete(scores, name)` — the builtin from slot 5. The caller's `scores` sees the deletion because both variables point at the same table."
+  - "Look back at slot 9 for the deterministic-print pattern (collect keys, sort, format)."
+runtime: yaegi
+notes: |
+  Closes theme 2.2 by exposing the OTHER big map asymmetry from TS:
+  reference semantics. TS objects also share-on-pass, so this is the
+  one map behavior that doesn't trip a TS dev — but it IS worth
+  pinning because it contrasts with Go's by-value default for
+  structs and arrays (theme 2.1 slot 8 already showed the slice-vs-
+  array asymmetry; here maps land in the slice/channel/map/func
+  "reference family").
+
+  A common authoring mistake we DON'T grade against (because it
+  works) is `clearScore(scores *map[string]int, name string)` —
+  takes a pointer to the map header. It's overkill: the map header
+  itself already shares state, and using a pointer-to-map is only
+  necessary when the callee needs to REASSIGN the header (`*m = ...`).
+  Hint 1 calls out the over-engineering trap.
+
+  Out of scope: nil-map behavior in functions (calling `delete` on
+  a nil map is a no-op, not a panic — pinned in slot 5's notes),
+  comparable-keys-only constraint.

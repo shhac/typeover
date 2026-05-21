@@ -1,0 +1,72 @@
+target: go
+themeId: go/collections/iteration
+type: mcq
+order: 3
+prompt: |
+  Now flip slot 2 around: you want ONLY the index, no value. Pick
+  the idiomatic Go form.
+
+  TypeScript:
+  ```ts
+  for (let i = 0; i < items.length; i++) {
+    console.log(i);
+  }
+  ```
+
+  This is the form that bites slot 2's trap-believers in reverse:
+  when you DO want just the index, the one-value form is the
+  RIGHT answer.
+generator:
+  kind: variant
+  variants:
+    - id: items
+      ts: |-
+        for (let i = 0; i < items.length; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range items { fmt.Println(i) }"
+      distractors:
+        - "for _, i := range items { fmt.Println(i) }"
+        - "for i, _ := range items { fmt.Println(i) }"
+        - "for i = 0; i < len(items); i = i + 1 { fmt.Println(i) }"
+    - id: lines
+      ts: |-
+        for (let i = 0; i < lines.length; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range lines { fmt.Println(i) }"
+      distractors:
+        - "for _, i := range lines { fmt.Println(i) }"
+        - "for i, _ := range lines { fmt.Println(i) }"
+        - "for i = 0; i < len(lines); i = i + 1 { fmt.Println(i) }"
+    - id: rows
+      ts: |-
+        for (let i = 0; i < rows.length; i++) {
+          console.log(i);
+        }
+      canonical: "for i := range rows { fmt.Println(i) }"
+      distractors:
+        - "for _, i := range rows { fmt.Println(i) }"
+        - "for i, _ := range rows { fmt.Println(i) }"
+        - "for i = 0; i < len(rows); i = i + 1 { fmt.Println(i) }"
+hints:
+  - "On a slice, the one-value `range` form gives the INDEX. That's the asymmetry slot 2 warned about: same syntax, but here it's what you want."
+  - "Shape: `for i := range items`. No need for the explicit `i, _` — the one-value form already drops the value."
+  - "`for i := range items`."
+runtime: none
+notes: |
+  Closes the slice-range slot-2 trap: the one-value form IS the
+  idiomatic index-only iteration. The `for i, _ := range ...`
+  distractor is a "right answer, wrong shape" — `_` is for
+  positional drops in multi-return; range already supports the
+  one-value form for "stop here".
+
+  Distractors:
+    1. `for _, i := range items` — gives the VALUE as `i` (swap).
+    2. `for i, _ := range items` — works, but ceremonial; idiomatic
+       Go drops the `, _`.
+    3. Manual C-style loop with `len(items)` — works, but the
+       point of `range` is to skip the boilerplate.
+
+  Hint 2 explicitly calls out "no need for `, _`" because real-world
+  Go reviewers WILL flag the explicit form.

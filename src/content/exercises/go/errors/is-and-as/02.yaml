@@ -1,0 +1,74 @@
+target: go
+themeId: go/errors/is-and-as
+type: mcq
+order: 2
+prompt: |
+  When the error you want to handle is a CUSTOM TYPE (you want
+  to read its fields), not a sentinel — you need to EXTRACT
+  the concrete type out of the interface, possibly through
+  wrap layers. That's `errors.As`'s job.
+
+  Given:
+  ```go
+  type PathError struct { Op, Path string; Err error }
+  func (e *PathError) Error() string { return e.Op + " " + e.Path + ": " + e.Err.Error() }
+
+  err := fmt.Errorf("loading: %w", &PathError{Op: "open", Path: "x.txt", ...})
+  ```
+
+  Which expression correctly extracts the `*PathError` from
+  `err`, with `pe` bound to the value when matched?
+generator:
+  kind: variant
+  variants:
+    - id: pe
+      ts: |-
+        // TS: walk err.cause chain, check `instanceof PathError`,
+        // narrow the type. Manual.
+      canonical: |-
+        var pe *PathError
+        if errors.As(err, &pe) {
+        	use(pe.Path)
+        }
+      distractors:
+        - |-
+          if pe, ok := err.(*PathError); ok {
+            use(pe.Path)
+          }
+        - |-
+          pe := errors.As(err, &PathError{})
+          use(pe.Path)
+        - |-
+          if errors.Is(err, *PathError) {
+            use(err.Path)
+          }
+hints:
+  - "`errors.As(err, &target)` — pass a POINTER to a variable of the target type. If the chain contains a matching type, `As` writes into `*target` and returns true. Target must be a pointer because `As` mutates the pointee."
+  - "Two-statement shape: declare `var pe *Target`, then `if errors.As(err, &pe) { ... }`."
+  - "`var pe *PathError; if errors.As(err, &pe) { ... }`."
+runtime: none
+notes: |
+  THE type-extraction idiom. Companion to slot 1's identity-
+  matching `errors.Is`. Together they cover the two question
+  shapes:
+    - `errors.Is(err, sentinel)` — is this THIS specific error?
+    - `errors.As(err, &target)` — is this AN error of THIS
+      type? (and give me the value)
+
+  Distractors:
+    1. `err.(*PathError)` — type assertion. Works for an
+       UNWRAPPED error but fails the moment someone wraps.
+       Same fragility as theme 5.1 slot 1's `==` antipattern,
+       restated for the type-extraction case.
+    2. Single-value `errors.As` — wrong shape. `As` mutates
+       through a pointer; it doesn't RETURN the target.
+    3. `errors.Is(err, *PathError)` — confuses Is (identity)
+       with As (type), and passes a TYPE EXPRESSION as the
+       second arg (Go doesn't allow that).
+
+  Runtime caveat for theme 5.2: per design-docs/30 (updated
+  this tick), Yaegi's `errors.As` works with STDLIB error
+  types (like `*strconv.NumError`) but fails on
+  user-defined types in interpreted code. Slots 7 + 9
+  productive use therefore lean on `*strconv.NumError` to
+  stay runnable; the recognition MCQ stays domain-agnostic.

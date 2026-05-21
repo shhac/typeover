@@ -1,0 +1,30 @@
+target: go
+themeId: go/interfaces/interfaces
+type: fill-word
+order: 5
+prompt: |
+  Type the EMPTY INTERFACE alias — the type that ANY value
+  satisfies because it requires zero methods. Used as a
+  parameter type when a function accepts arbitrary types.
+generator:
+  kind: template
+  vars:
+    anykw: ["any"]
+  ts: |-
+    function describe(v: unknown): void { console.log(v); }
+  canonical: |-
+    func describe(v ${anykw}) {
+    	fmt.Println(v)
+    }
+blanks: [anykw]
+hints:
+  - "Go 1.18+ keyword. Three letters. Lowercase. Aliases the older `interface{}` form."
+  - "Three letters."
+  - "`any`."
+runtime: none
+notes: |
+  Drills the modern alias for the empty interface. `interface{}`
+  still works but `any` is the idiomatic post-1.18 form.
+
+  Pairs with slot 4 (Stringer method drill) to cover the two
+  most-common interface idioms a learner reaches for.

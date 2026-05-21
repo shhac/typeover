@@ -1,0 +1,64 @@
+target: go
+themeId: go/idioms/small-interfaces
+type: fill-line
+order: 7
+prompt: |
+  Write the `String()` method on `Tag` so that `t.String()`
+  returns `[tag: go]` for a tag named `"go"`.
+
+  Expected output: `[tag: go]`.
+
+  In real Go, `fmt.Println(t)` auto-detects the Stringer
+  interface and calls `String()` for you. Yaegi's `fmt`
+  doesn't do that reflection check (see design-docs/30),
+  so the scaffold invokes `t.String()` explicitly to keep
+  the lesson honest.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'func (t Tag) String() string { return "[tag: " + t.name + "]" }'
+  ts: |-
+    // TS: class Tag { toString() { return `[tag: ${this.name}]` } }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Tag struct{ name string }
+
+    ${line}
+
+    func main() {
+    	t := Tag{name: "go"}
+    	fmt.Println(t.String())
+    }
+  distractors:
+    - match: 'func (t Tag) ToString() string { return "[tag: " + t.name + "]" }'
+      explain: |-
+        Wrong method name — Go's convention is `String()`,
+        and the `fmt` reflection check in real Go looks for
+        that exact name.
+    - match: 'func (t Tag) String() string { fmt.Println("[tag: " + t.name + "]") }'
+      explain: |-
+        Doesn't RETURN the string — prints it directly. The
+        Stringer contract is to RETURN. Calling it as
+        `t.String()` would yield the empty string AND a
+        stray print.
+expectStdout: |
+  [tag: go]
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Method signature: `func (t Tag) String() string`. Body returns the formatted string with `\"[tag: \" + t.name + \"]\"`."
+  - "`func (t Tag) String() string { return \"[tag: \" + t.name + \"]\" }`."
+  - "See canonical."
+notes: |
+  Drills the implicit-satisfaction beat — no explicit
+  `implements Stringer` declaration, just defining the
+  method is enough.
+
+  Distractor #2 (pointer receiver) is a subtle real bug
+  worth pinning — value vs pointer receivers affect what
+  interfaces a type satisfies. Theme 3.2 covered this in
+  full; this slot re-pins the practical consequence.

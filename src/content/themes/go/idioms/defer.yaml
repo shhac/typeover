@@ -1,0 +1,11 @@
+target: go
+moduleId: go/idioms
+title: Defer
+order: 1
+prerequisites: [go/foundations/functions-and-multi-return]
+intro: |
+  `defer fn()` schedules `fn` to run when the surrounding function
+  returns. The closest TS analogue is a `try/finally` you don't
+  have to indent. Multiple defers run LIFO. **Arguments are
+  evaluated at the defer site**, not at the call site — a common
+  surprise. Also: defer in a loop accumulates.

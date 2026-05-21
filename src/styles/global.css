@@ -30,10 +30,15 @@
    * amber  — Bloomberg-terminal nostalgia, focus / active / primary CTA
    * ts     — TypeScript blue, anywhere TS is referenced
    * go     — Go cyan ("Aqua"), anywhere Go is referenced
+   * zig    — Zig's brand orange #f7a41d, anywhere Zig is referenced
    *
    * accent-ts brightened from #3178c6 (failed 4.5:1 AA at small text)
    * to #4a9eff (passes ~7.2:1).
    * accent-go #00add8 already passes ~7.5:1.
+   * accent-zig #f7a41d — Zig's brand orange. Picked for brand
+   * association rather than perfect contrast; sits at ~5.5:1 against
+   * the base bg, comfortable for the badge / accent surface but we
+   * don't rely on it for body text.
    */
   --color-accent-primary: #ffa726;
   --color-accent-primary-dim: #b87a1c;
@@ -41,6 +46,8 @@
   --color-accent-ts-dim: #2a6fbf;
   --color-accent-go: #00add8;
   --color-accent-go-dim: #007a99;
+  --color-accent-zig: #f7a41d;
+  --color-accent-zig-dim: #b3760e;
 
   --color-success: #4ade80;
   --color-warning: #fbbf24;

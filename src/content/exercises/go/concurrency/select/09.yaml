@@ -1,0 +1,82 @@
+target: go
+themeId: go/concurrency/select
+type: freeform
+order: 9
+prompt: |
+  Theme 6.3 capstone — fan-in pattern: two producer goroutines
+  feed into different channels; one consumer uses `select` to
+  read whichever is ready, in a loop.
+
+  1. Make two unbuffered channels: `c1, c2 := make(chan string),
+     make(chan string)`.
+  2. Launch a goroutine that sends `"alpha"` on `c1`.
+  3. Launch a goroutine that sends `"beta"` on `c2`.
+  4. Loop twice (`for i := 0; i < 2; i++`); each iteration
+     does a `select` that reads from `c1` or `c2` and prints
+     `recv:` + value.
+
+  Expected output (order may vary on real Go, but our
+  deterministic-output test expects both lines to appear —
+  the slot uses sorted printing or relies on Yaegi's stable
+  scheduling):
+  ```
+  recv: alpha
+  recv: beta
+  ```
+
+  Two producers + one consumer is the canonical fan-in
+  shape. `select` lets the consumer service either channel
+  without committing to one.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: Promise.allSettled with two promises, then iterate results.
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sort"
+    )
+
+    func main() {
+    	c1 := make(chan string)
+    	c2 := make(chan string)
+    	go func() { c1 <- "alpha" }()
+    	go func() { c2 <- "beta" }()
+    	got := []string{}
+    	for i := 0; i < 2; i++ {
+    		select {
+    		case v := <-c1:
+    			got = append(got, v)
+    		case v := <-c2:
+    			got = append(got, v)
+    		}
+    	}
+    	sort.Strings(got)
+    	for _, v := range got {
+    		fmt.Println("recv:", v)
+    	}
+    }
+expectStdout: |
+  recv: alpha
+  recv: beta
+hints:
+  - "Five pieces: two channels, two producer goroutines, an accumulator slice, the for+select loop that appends from whichever channel fires, then sort + print."
+  - "The sort step at the end is the deterministic-output trick — select's randomisation between ready cases means we can't predict the read order, but sorting the accumulated values gives stable output."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Theme 6.3 capstone — fan-in via select + the sort trick
+  for deterministic test output.
+
+  **Deterministic-output strategy**: `select` picks at random
+  among ready cases (per slot 2). To test concurrent code
+  with line-by-line output equality, we collect all received
+  values into a slice, sort, then print. Any interleaving
+  produces the same output.
+
+  Module 6 status: 3 of 4 themes done. Theme 6.4 (sync)
+  remains and is fully unlocked by the sync-vendor in the
+  previous tick.

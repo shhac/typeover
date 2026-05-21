@@ -1,0 +1,38 @@
+target: go
+themeId: go/concurrency/select
+type: mcq
+order: 3
+prompt: |
+  Adding a `default` case to a `select` block changes its
+  behaviour. Pick the statement that describes the change.
+generator:
+  kind: variant
+  variants:
+    - id: default-non-blocking
+      ts: |-
+        // TS analog: const v = ch.tryRead() — non-blocking poll.
+      canonical: "With `default`, `select` becomes NON-BLOCKING — if no channel case is ready, `default` runs immediately. Without `default`, `select` BLOCKS until a case is ready."
+      distractors:
+        - "`default` is the fallback for unknown channel types — it runs when one of the cases panics."
+        - "`default` runs after all other cases finish; it's a finaliser, not a fallback."
+        - "`default` is syntactically allowed but semantically ignored — `select` always blocks."
+hints:
+  - "Two modes: blocking (no default) vs non-blocking (default). Default makes it a POLL."
+  - "Default = non-blocking poll. Without default, select blocks until one case is ready."
+  - "Default makes select non-blocking."
+runtime: none
+notes: |
+  Mode-switch beat. The non-blocking form is essential for
+  cases where you want to check if a channel is ready
+  WITHOUT committing to wait — e.g. draining a buffered
+  channel without blocking, or peeking before falling back
+  to other work.
+
+  Distractors:
+    1. "Fallback for panic" — panics aren't recoverable
+       through select cases.
+    2. "Finaliser" — invented; default IS a case-equivalent,
+       not a post-handler.
+    3. "Ignored" — false; behaviour DOES change.
+
+  Slot 7 drills the non-blocking poll shape.

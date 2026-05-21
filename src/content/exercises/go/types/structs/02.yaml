@@ -1,0 +1,60 @@
+target: go
+themeId: go/types/structs
+type: mcq
+order: 2
+prompt: |
+  Construct a struct value. Pick the IDIOMATIC Go literal — named
+  fields, not positional. Go allows BOTH forms, but positional
+  literals are a known maintenance hazard: add a field in the
+  middle of the struct declaration and every positional caller
+  silently misalines. Named literals are the canon for anything
+  with more than two fields.
+generator:
+  kind: variant
+  variants:
+    - id: user
+      ts: |-
+        const u: User = { name: "alice", age: 30 };
+      canonical: 'u := User{name: "alice", age: 30}'
+      distractors:
+        - 'u := User{"alice", 30}'
+        - 'u := { name: "alice", age: 30 }'
+        - 'u := new(User){name: "alice", age: 30}'
+    - id: point
+      ts: |-
+        const p: Point = { x: 3, y: 4 };
+      canonical: "p := Point{x: 3, y: 4}"
+      distractors:
+        - "p := Point{3, 4}"
+        - "p := { x: 3, y: 4 }"
+        - "p := new(Point){x: 3, y: 4}"
+    - id: book
+      ts: |-
+        const b: Book = { title: "Go", pages: 320 };
+      canonical: 'b := Book{title: "Go", pages: 320}'
+      distractors:
+        - 'b := Book{"Go", 320}'
+        - 'b := { title: "Go", pages: 320 }'
+        - 'b := new(Book){title: "Go", pages: 320}'
+hints:
+  - "Composite literals have two shapes — positional (`Foo{a, b}`) and named (`Foo{x: a, y: b}`). Named is the maintenance-safe default; positional only works when EVERY field is provided in declaration order."
+  - "Shape: `TypeName{fieldA: valueA, fieldB: valueB}`. No leading `new`, no bare braces — the type name is part of the literal."
+  - "`User{name: \"alice\", age: 30}`."
+runtime: none
+notes: |
+  Distractors:
+    1. `Foo{val1, val2}` — positional literal. WORKS today; flagged
+       wrong here because it breaks the moment a field is inserted
+       upstream. The pedagogy belt-and-braces "don't make this
+       habit" wins out over technical correctness.
+    2. Bare `{ name: ..., age: ... }` — TS-style. Go's composite
+       literal requires the type name; the compiler doesn't infer
+       the struct type from context.
+    3. `new(Foo){...}` — `new(T)` returns `*T`, you can't follow
+       it with a composite literal. Either `new(Foo)` (zero-valued
+       pointer) OR `&Foo{...}` (pointer to a literal) — not both.
+
+  Why the variant-kind generator: drilling the SAME structural
+  pattern across three different field-name sets prevents
+  recognition-based memorisation. The learner has to read the
+  shape, not the variable names.

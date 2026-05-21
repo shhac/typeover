@@ -1,0 +1,107 @@
+target: go
+themeId: go/foundations/functions-and-multi-return
+type: mcq
+order: 2
+prompt: |
+  TypeScript returns multiple values by packing them into an
+  array/tuple or an object. Go has direct language-level support:
+  a function can declare and return more than one value as a tuple
+  in the signature. Pick the Go translation.
+generator:
+  kind: variant
+  variants:
+    - id: divmod
+      ts: |
+        function divmod(a: number, b: number): [number, number] {
+          return [Math.floor(a / b), a % b];
+        }
+      canonical: |-
+        func divmod(a, b int) (int, int) {
+            return a / b, a % b
+        }
+      distractors:
+        - |-
+          func divmod(a, b int) [int, int] {
+              return [a / b, a % b]
+          }
+        - |-
+          func divmod(a, b int): (int, int) {
+              return (a / b, a % b)
+          }
+        - |-
+          func divmod(a, b int) {int, int} {
+              return {a / b, a % b}
+          }
+    - id: minmax
+      ts: |
+        function minmax(xs: number[]): [number, number] {
+          return [Math.min(...xs), Math.max(...xs)];
+        }
+      canonical: |-
+        func minmax(xs []int) (int, int) {
+            return min(xs), max(xs)
+        }
+      distractors:
+        - |-
+          func minmax(xs []int) [int, int] {
+              return [min(xs), max(xs)]
+          }
+        - |-
+          func minmax(xs []int): (int, int) {
+              return (min(xs), max(xs))
+          }
+        - |-
+          func minmax(xs []int) Tuple<int, int> {
+              return Tuple(min(xs), max(xs))
+          }
+    - id: split-name
+      ts: |
+        function splitName(full: string): [string, string] {
+          const i = full.indexOf(" ");
+          return [full.slice(0, i), full.slice(i + 1)];
+        }
+      canonical: |-
+        func splitName(full string) (string, string) {
+            i := strings.Index(full, " ")
+            return full[:i], full[i+1:]
+        }
+      distractors:
+        - |-
+          func splitName(full string) [string, string] {
+              i := strings.Index(full, " ")
+              return [full[:i], full[i+1:]]
+          }
+        - |-
+          func splitName(full string): (string, string) {
+              i := strings.Index(full, " ")
+              return (full[:i], full[i+1:])
+          }
+        - |-
+          func splitName(full string) {string, string} {
+              i := strings.Index(full, " ")
+              return {full[:i], full[i+1:]}
+          }
+hints:
+  - "Go writes a multi-return type as a parenthesised, comma-separated tuple — `(int, int)` — placed after the parameter list, no colon. The `return` statement also takes a bare comma-separated list, not an array literal: `return a, b` (not `[a, b]`)."
+  - "Three Go-isms to spot: parens around the return-type tuple (not square brackets, not curly braces); bare commas in `return a, b` (not packed into an array or tuple constructor); and no colon before the return type."
+  - "The canonical shape is `func name(args) (T1, T2) { ... return v1, v2 }`. Parens, no colon, bare commas."
+notes: |
+  Second Theme 6 exercise — multi-return values, the most
+  distinctive Go function feature (TS has no language-level
+  equivalent; you fake it with tuples or destructure-friendly
+  objects).
+
+  Three variants drill the same shape on three realistic surfaces:
+   - Two ints out (divmod — classic)
+   - Two ints out, slice in (minmax)
+   - Two strings out, slice operations (splitName)
+
+  Distractors uniformly mis-spell the return-type bracket choice
+  (`[int, int]` for TS array, `{int, int}` for object literal,
+  `Tuple<int, int>` for generic class-style) and the return-statement
+  packing (`[a, b]`, `(a, b)`, `{a, b}`). Each is a near-miss that
+  reads as "almost right" but won't compile.
+
+  Variant kind because each example brings its own data-type and
+  body shape.
+runtime: none

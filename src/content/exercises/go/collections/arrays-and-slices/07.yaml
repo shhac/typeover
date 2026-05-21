@@ -1,0 +1,77 @@
+target: go
+themeId: go/collections/arrays-and-slices
+type: fill-line
+order: 7
+prompt: |
+  Slicing in Go returns a *view* over the same backing array —
+  mutations leak through. To get an independent copy, allocate a
+  fresh slice with `make` and use `copy`. Type the line that
+  produces an independent copy of `xs[1:4]` into `ys`.
+
+  After the line, `ys[0] = 99` must NOT affect `xs`. The program
+  prints `xs` then `ys`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "copy(ys, xs[1:4])"
+  ts: |-
+    const xs = [1, 2, 3, 4, 5];
+    const ys = xs.slice(1, 4);  // independent copy in TS
+    ys[0] = 99;
+    console.log(xs);            // [1, 2, 3, 4, 5] — unchanged
+    console.log(ys);            // [99, 3, 4]
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	xs := []int{1, 2, 3, 4, 5}
+    	ys := make([]int, 3)
+    	${line}
+    	ys[0] = 99
+    	fmt.Println(xs)
+    	fmt.Println(ys)
+    }
+  distractors:
+    - match: "ys = xs[1:4]"
+      explain: |-
+        That re-slices into `ys` — but a Go slice expression is a
+        VIEW, not a copy. `ys[0] = 99` would write through to
+        `xs[1]`, so `xs` would print `[1 99 3 4 5]`. The whole
+        point of `copy` is to detach.
+    - match: "ys := xs[1:4]"
+      explain: |-
+        Same aliasing problem, plus `:=` re-declares `ys` (shadowing
+        the `make`'d one). The `make` allocation becomes dead. You
+        want to KEEP the freshly-allocated `ys` and fill it.
+    - match: "copy(xs[1:4], ys)"
+      explain: |-
+        Arguments reversed. `copy(dst, src)` — destination first.
+        This would copy `ys`'s zero values INTO `xs`, blanking it.
+    - match: "ys = append(ys, xs[1:4]...)"
+      explain: |-
+        Works but doubles up: `ys` is already `make([]int, 3)` (so
+        len=3, three zeros), and append adds three more on top.
+        Result has len 6, not 3. Use `copy` when the destination is
+        already sized.
+expectStdout: |
+  [1 2 3 4 5]
+  [99 3 4]
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Slicing in Go is a view over the same backing array — `ys := xs[1:4]` shares storage with `xs`. To detach, allocate a fresh slice (already done above with `make([]int, 3)`) and `copy` into it."
+  - "The built-in is `copy(dst, src)` — destination first. Source is the slice expression `xs[1:4]`."
+  - "`copy(ys, xs[1:4])`."
+notes: |
+  Theme 2.1's headline slot. The aliasing surprise is THE Go-vs-TS
+  divergence for slices, and surfacing it via a "make this NOT
+  alias" exercise drives the lesson home better than an
+  observe-the-aliasing one would.
+
+  All four distractors are common authoring mistakes — kept the
+  `:=` shadowing one because it's a frequent learner mistake when
+  transitioning from `let ys = ...`. The `append` one rewards
+  partial knowledge with a wrong-length result.

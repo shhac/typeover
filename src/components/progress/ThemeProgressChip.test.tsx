@@ -12,7 +12,7 @@ import { __resetProgressCacheForTests, recordInstancePassed, STORAGE_KEY } from 
  * invisible placeholder (design-docs/16 F-10).
  */
 
-const THEME_EXERCISES = ["foundations/variables/01", "foundations/variables/02"];
+const THEME_EXERCISES = ["go/foundations/variables/01", "go/foundations/variables/02"];
 const FIRST_HREF = "/go/foundations/variables/01";
 
 beforeEach(() => {

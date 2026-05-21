@@ -47,11 +47,13 @@ const [modulesRaw, themesRaw, exercisesRaw] = await Promise.all([
   loadCollection("exercises"),
 ]);
 
-/* Module ID is the filename stem; theme ID is the relative path
- * under themes/ minus extension. Mirrors how astro:content + the
- * lint identify entries. */
+/* Module / theme IDs match Astro's collection IDs:
+ *   modules/<lang>/<module>.yaml      → `<lang>/<module>`
+ *   themes/<lang>/<module>/<theme>.yaml → `<lang>/<module>/<theme>`
+ * Mirrors how astro:content + the lint identify entries. */
 function moduleId(path) {
-  return basename(path, ".yaml");
+  const rel = relative(join(contentRoot, "modules"), path);
+  return rel.slice(0, -".yaml".length).split(sep).join("/");
 }
 function themeId(path) {
   const rel = relative(join(contentRoot, "themes"), path);

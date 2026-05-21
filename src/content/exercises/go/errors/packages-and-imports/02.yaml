@@ -1,0 +1,46 @@
+target: go
+themeId: go/errors/packages-and-imports
+type: mcq
+order: 2
+prompt: |
+  The **capitalisation rule** is Go's entire export mechanism.
+  Pick the statement that is TRUE about Go identifier visibility.
+
+  TypeScript uses `export` keywords + `default` markers; Go uses
+  the first letter of the name. Mechanical, irreversible — you
+  can't have a capitalised-but-package-private identifier.
+generator:
+  kind: variant
+  variants:
+    - id: caps-rule
+      ts: |-
+        // TS: export keyword on each thing you want public.
+        // Go: name starts with capital → exported, lowercase → package-private.
+      canonical: "Identifiers starting with a CAPITAL letter are exported (visible outside the package); lowercase identifiers are package-private."
+      distractors:
+        - "All top-level identifiers are exported by default; use `private` to hide them."
+        - "Identifiers must be prefixed with `export` to be visible outside the package."
+        - "Capitalisation is purely stylistic — visibility is controlled by `public`/`private` keywords."
+hints:
+  - "First letter of the identifier name does ALL the work. No keywords, no annotations, no exceptions."
+  - "Capital → exported (public to other packages). Lowercase → package-private."
+  - "Capital = exported; lowercase = package-private."
+runtime: none
+notes: |
+  The most pervasive Go convention. Applies to every named
+  identifier: types, functions, methods, constants, variables,
+  struct fields. `fmt.Println` (capital P) is callable from
+  outside `fmt`; `fmt.println` (if it existed) would not be.
+
+  Distractors:
+    1. "All exported by default + `private`" — that's TypeScript.
+       Go inverts the default (most things package-private).
+    2. "`export` keyword" — that's TypeScript/JavaScript.
+       Go has no such keyword.
+    3. "Capitalisation is stylistic + `public`/`private`" —
+       conflates Go's mechanical rule with Java/C#. The
+       capitalisation IS the access modifier.
+
+  This rule is why design-docs/02 lists capitalisation as one
+  of Module 1's load-bearing beats. Learners who internalise it
+  in week 1 stop tripping on "why can't I call this" errors.

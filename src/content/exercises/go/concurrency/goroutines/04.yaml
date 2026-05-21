@@ -1,0 +1,47 @@
+target: go
+themeId: go/concurrency/goroutines
+type: fill-word
+order: 4
+prompt: |
+  Type the keyword that launches a function call as a goroutine.
+
+  TypeScript has no single-keyword equivalent — closest is
+  `queueMicrotask(fn)` or `setTimeout(fn, 0)`, neither of which
+  produces true parallelism. Go's keyword is two letters.
+generator:
+  kind: template
+  vars:
+    word:
+      - "go"
+  ts: |-
+    // TS: queueMicrotask(worker) — still single-threaded.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func worker() {
+    	fmt.Println("worker ran")
+    }
+
+    func main() {
+    	${word} worker()
+    	// main returns before worker has a chance to print;
+    	// in real programs use a sync.WaitGroup or done channel.
+    	fmt.Println("main done")
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Two letters. Lowercase. The name of the language."
+  - "`go`."
+  - "`go`."
+notes: |
+  Runtime: none because the program is intentionally
+  unsynchronised — `worker()`'s output may or may not show
+  before main exits (Yaegi's scheduler tends to drop the
+  print). The slot is about pinning the KEYWORD, not the
+  output.
+
+  Slot 8's freeform shows the synchronised version using
+  a done channel.

@@ -1,0 +1,67 @@
+target: go
+themeId: go/idioms/project-layout
+type: fill-line
+order: 6
+prompt: |
+  A binary's `main.go` (under `cmd/serverd/main.go`) is the
+  ENTRY POINT — it should be small and orchestrate. Heavy
+  logic lives in OTHER packages and is called from `main`.
+
+  Write the `package` declaration at the top of a
+  `cmd/serverd/main.go` file. (Binary entry points use a
+  specific package name regardless of their directory.)
+
+  Expected output: `serverd started`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "package main"
+  ts: |-
+    // TS: no equivalent.
+  canonical: |-
+    ${line}
+
+    import "fmt"
+
+    func run() string {
+    	return "serverd started"
+    }
+
+    func main() {
+    	fmt.Println(run())
+    }
+  distractors:
+    - match: "package serverd"
+      explain: |-
+        Binary entry points must use `package main` — that's
+        what the toolchain looks for to identify an
+        executable. The directory name (`serverd`) becomes
+        the BINARY name when built, but the package
+        declaration is always `main`.
+    - match: "package cmd"
+      explain: |-
+        Wrong package name — binary entry points are
+        ALWAYS `package main` regardless of their directory.
+        `cmd` is the parent directory; not a package name.
+    - match: "module main"
+      explain: |-
+        `module` is the go.mod directive (theme 5.5). Inside
+        .go source files, the keyword is `package`.
+expectStdout: |
+  serverd started
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Two tokens: the `package` keyword and the special name `main` that marks this file as a binary entry point."
+  - "`package main`."
+  - "`package main`."
+notes: |
+  Drills the convention from MCQ slot 1: regardless of
+  directory (`cmd/serverd/`, root-level, etc.), every Go
+  binary's entry-point file uses `package main`.
+
+  The single-file scaffold doesn't actually live in a
+  `cmd/<name>/` directory (Yaegi runs single files), but
+  the LESSON — "entry points use package main" — is fully
+  exercised.

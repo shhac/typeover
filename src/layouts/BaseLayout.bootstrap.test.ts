@@ -76,11 +76,15 @@ describe("BaseLayout bootstrap — enum coverage", () => {
  * idempotence flag, the prefetch behaviour quietly degrades into
  * a per-event link injection — sanity in the source, not at runtime.
  */
-describe("BaseLayout hover/focus Yaegi prefetch", () => {
+describe("BaseLayout hover/focus runtime prefetch", () => {
   it('injects a <link rel="prefetch"> with the right shape', async () => {
     const src = await bootstrapSource();
     expect(src).toMatch(/link\.rel\s*=\s*"prefetch"/);
-    expect(src).toMatch(/link\.href\s*=\s*"\/yaegi\/yaegi\.wasm"/);
+    /* prefetch href is parameterised (Yaegi for /go anchors, zig.wasm
+     * for /zig anchors); verify both target paths appear as string
+     * literals in the inline script body. */
+    expect(src).toContain("/yaegi/yaegi.wasm");
+    expect(src).toContain("/zig/zig.wasm");
     expect(src).toMatch(/link\.crossOrigin\s*=\s*"anonymous"/);
   });
 
@@ -106,8 +110,9 @@ describe("BaseLayout hover/focus Yaegi prefetch", () => {
     expect(src).toMatch(/addEventListener\("touchstart"/);
   });
 
-  it("only fires on /go/* anchors", async () => {
+  it("fires on /go/* and /zig/* anchors", async () => {
     const src = await bootstrapSource();
     expect(src).toMatch(/'a\[href\^="\/go\/"\]'/);
+    expect(src).toMatch(/'a\[href\^="\/zig\/"\]'/);
   });
 });

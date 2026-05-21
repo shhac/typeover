@@ -139,40 +139,49 @@ describe("truncateIntro", () => {
 });
 
 describe("exerciseHref", () => {
-  it("returns /go/<exerciseId>", () => {
-    expect(exerciseHref("foundations/variables/01")).toBe("/go/foundations/variables/01");
+  it("returns /<exerciseId> (IDs already carry the lang prefix)", () => {
+    expect(exerciseHref("go/foundations/variables/01")).toBe("/go/foundations/variables/01");
+    expect(exerciseHref("zig/basics/hello-and-output/01")).toBe("/zig/basics/hello-and-output/01");
   });
 });
 
 describe("themeHref", () => {
-  it("returns /go/<themeId>", () => {
-    expect(themeHref("foundations/variables")).toBe("/go/foundations/variables");
+  it("returns /<themeId> (IDs already carry the lang prefix)", () => {
+    expect(themeHref("go/foundations/variables")).toBe("/go/foundations/variables");
+    expect(themeHref("zig/basics/hello-and-output")).toBe("/zig/basics/hello-and-output");
   });
 });
 
 describe("paramsForExercise", () => {
-  it("splits a well-formed id into module/theme/index", () => {
-    expect(paramsForExercise("foundations/variables/01")).toEqual({
+  it("splits a well-formed id into lang/module/theme/index", () => {
+    expect(paramsForExercise("go/foundations/variables/01")).toEqual({
+      lang: "go",
       module: "foundations",
       theme: "variables",
       index: "01",
     });
+    expect(paramsForExercise("zig/basics/hello/02")).toEqual({
+      lang: "zig",
+      module: "basics",
+      theme: "hello",
+      index: "02",
+    });
   });
 
-  it("returns null when the id has fewer than 3 parts", () => {
-    expect(paramsForExercise("foundations/variables")).toBeNull();
+  it("returns null when the id has fewer than 4 parts", () => {
+    expect(paramsForExercise("foundations/variables/01")).toBeNull();
     expect(paramsForExercise("foundations")).toBeNull();
     expect(paramsForExercise("")).toBeNull();
   });
 
-  it("returns null when the id has more than 3 parts", () => {
-    expect(paramsForExercise("a/b/c/d")).toBeNull();
+  it("returns null when the id has more than 4 parts", () => {
+    expect(paramsForExercise("a/b/c/d/e")).toBeNull();
   });
 
   it("returns null when any part is empty", () => {
-    expect(paramsForExercise("foundations//01")).toBeNull();
-    expect(paramsForExercise("/variables/01")).toBeNull();
-    expect(paramsForExercise("foundations/variables/")).toBeNull();
+    expect(paramsForExercise("go/foundations//01")).toBeNull();
+    expect(paramsForExercise("/foundations/variables/01")).toBeNull();
+    expect(paramsForExercise("go/foundations/variables/")).toBeNull();
   });
 });
 

@@ -1,0 +1,12 @@
+target: go
+moduleId: go/types
+title: Nil & zero values
+order: 4
+prerequisites: [go/types/structs, go/types/pointers]
+intro: |
+  Every type has a **zero value** — what an uninitialised variable of
+  that type holds. For numbers: 0. For strings: `""`. For bools:
+  `false`. For pointers, interfaces, maps, slices, channels, and
+  functions: `nil`. `nil` is *not* TypeScript's `undefined` — it's a
+  typed absence, and conflating "nil pointer" with "nil interface" is
+  one of the classic Go bugs.

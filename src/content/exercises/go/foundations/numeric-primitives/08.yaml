@@ -1,0 +1,41 @@
+target: go
+themeId: go/foundations/numeric-primitives
+type: freeform
+order: 8
+prompt: |
+  Write a Go program that declares an `int` named `count` set to `42`,
+  converts it to a `float64` via an explicit cast, divides by `5`, and
+  prints the result. The print should produce exactly `8.4`.
+
+  TypeScript would let you divide int by int and get a float; Go won't.
+  Go's no-implicit-conversion rule (this theme's headline idea) means
+  you have to write the cast yourself.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let count = 42;
+    console.log(count / 5);  // 8.4 in TS — but Go won't do this implicitly
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	count := 42
+    	result := float64(count) / 5
+    	fmt.Println(result)
+    }
+expectStdout: |
+  8.4
+runtime: yaegi
+hints:
+  - "Go's `int / int` always returns `int`, truncating the remainder. To get a fractional result you need at least one operand to be a float."
+  - "The cast syntax is `float64(x)`, not `(float64) x` or `x as float64`. It looks like a function call."
+  - "`package main; import \"fmt\"; func main() { count := 42; result := float64(count) / 5; fmt.Println(result) }`"
+notes: |
+  First freeform of Theme 2. Drills the no-implicit-conversion rule
+  through a concrete cast. The literal `5` here is an untyped
+  constant — Go infers its type from context, so `float64(count) / 5`
+  doesn't need an extra cast on the 5. That's a subtle Go-ism we
+  don't drill here; the hint stays focused on the int-to-float cast.

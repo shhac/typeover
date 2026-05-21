@@ -1,0 +1,62 @@
+target: go
+themeId: go/collections/iteration
+type: mcq
+order: 1
+prompt: |
+  Translate the TS index-and-value loop to its idiomatic Go form.
+  The Go `range` keyword over a slice yields TWO values per
+  iteration — and they come out in a specific ORDER (i, v),
+  NOT the TS forEach `(v, i)` order.
+generator:
+  kind: variant
+  variants:
+    - id: nums
+      ts: |-
+        for (let i = 0; i < nums.length; i++) {
+          console.log(i, nums[i]);
+        }
+      canonical: "for i, v := range nums { fmt.Println(i, v) }"
+      distractors:
+        - "for v, i := range nums { fmt.Println(i, v) }"
+        - "for i := 0; i < range nums; i++ { fmt.Println(i, nums[i]) }"
+        - "nums.forEach(i, v) { fmt.Println(i, v) }"
+    - id: scores
+      ts: |-
+        for (let i = 0; i < scores.length; i++) {
+          console.log(i, scores[i]);
+        }
+      canonical: "for i, v := range scores { fmt.Println(i, v) }"
+      distractors:
+        - "for v, i := range scores { fmt.Println(i, v) }"
+        - "for i := 0; i < range scores; i++ { fmt.Println(i, scores[i]) }"
+        - "scores.forEach(i, v) { fmt.Println(i, v) }"
+    - id: lines
+      ts: |-
+        for (let i = 0; i < lines.length; i++) {
+          console.log(i, lines[i]);
+        }
+      canonical: "for i, v := range lines { fmt.Println(i, v) }"
+      distractors:
+        - "for v, i := range lines { fmt.Println(i, v) }"
+        - "for i := 0; i < range lines; i++ { fmt.Println(i, lines[i]) }"
+        - "lines.forEach(i, v) { fmt.Println(i, v) }"
+hints:
+  - "Go's range over a slice produces TWO values: the index, then the value. Different from TS `.forEach((v, i) => ...)` which puts the value first."
+  - "Shape: `for i, v := range coll { ... }`. The destructuring is left-to-right: index first, then value."
+  - "`for i, v := range nums`."
+runtime: none
+notes: |
+  Theme 2.3 opener — central reality: same `range` keyword, but the
+  shape of what it yields changes per collection type. Slot 1 pins
+  the slice form (i, v). Later slots show the asymmetry: one-value
+  range over a slice gives the index, but one-value range over a
+  map gives the key.
+
+  Distractors:
+    1. `for v, i := range` — TS `.forEach` order leak. The most
+       common TS-dev mistake; their reflex is "value first".
+    2. `for i := 0; i < range nums; i++` — `range` as an expression,
+       not a keyword. Reveals the same confusion as `len(nums)`
+       vs `nums.length`.
+    3. `nums.forEach(...)` — method-syntax leak. Go has no
+       collection methods.

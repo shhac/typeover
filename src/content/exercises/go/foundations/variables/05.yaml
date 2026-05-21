@@ -1,0 +1,40 @@
+target: go
+themeId: go/foundations/variables
+type: fill-word
+order: 5
+prompt: |
+  Fill in the blanks to produce the idiomatic Go translation of the
+  TypeScript above.
+generator:
+  kind: template
+  vars:
+    name: [count, total, n, score, attempts]
+    value: ["5", "42", "0", "100", "-1"]
+    op: [":="]
+  ts: |-
+    let ${name} = ${value};
+  canonical: |-
+    ${name} ${op} ${value}
+blanks: [name, op]
+hints:
+  - "You need the variable name (same as TS) and the short-declaration operator. The operator is the one Go uses inside functions to declare AND assign in one step."
+  - "The operator is two characters. Look at exercise 1's canonical answer if you've forgotten."
+  - "The blanks fill to: `${name}` and `:=`."
+notes: |
+  First fill-blank-word exercise. The `name` blank is also a var in
+  the generator vars block — so the learner has to *type the same
+  name they saw in the TS source* into the blank. That tightens the
+  read-then-write loop: you can't fill the blank without having
+  parsed the TS prompt.
+
+  The `op` blank is a fixed `:=` — we model it as a "var" with a
+  one-element pool so the template substitution machinery treats it
+  uniformly. Slight overload of the template generator's mental
+  model — once we have a third or fourth fill-word exercise that
+  needs literal-blank slots, we may want a dedicated `literals:`
+  field in the schema. Parked.
+
+  Distractors set to empty list because fill-word doesn't use them
+  (no MCQ shuffle). The schema allows `distractors` on template
+  generators; we just don't engage it here.
+runtime: none

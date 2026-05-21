@@ -1,0 +1,110 @@
+target: go
+themeId: go/collections/maps
+type: fill-line
+order: 8
+prompt: |
+  TS habit: `const counts: Record<string, number> = {}` and you can
+  write into `counts` immediately. Go's bare `var counts
+  map[string]int` declares a NIL map — writing to it (`counts[w]++`)
+  panics at runtime.
+
+  The fix is one missing line: initialize `counts` so writes are
+  legal. Use `make`, and assign to the existing variable (don't
+  re-declare it).
+
+  Expected output: `cat=2 dog=1 fox=1` (alphabetised, single line).
+generator:
+  kind: template
+  vars:
+    line:
+      - "counts = make(map[string]int)"
+  ts: |-
+    function tally(words: string[]): Record<string, number> {
+      const counts: Record<string, number> = {};
+      for (const w of words) counts[w] = (counts[w] ?? 0) + 1;
+      return counts;
+    }
+    const out = tally(["cat", "dog", "cat", "fox"]);
+    // { cat: 2, dog: 1, fox: 1 }
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sort"
+    )
+
+    func tally(words []string) map[string]int {
+    	var counts map[string]int
+    	${line}
+    	for _, w := range words {
+    		counts[w]++
+    	}
+    	return counts
+    }
+
+    func main() {
+    	counts := tally([]string{"cat", "dog", "cat", "fox"})
+    	keys := make([]string, 0, len(counts))
+    	for k := range counts {
+    		keys = append(keys, k)
+    	}
+    	sort.Strings(keys)
+    	for i, k := range keys {
+    		if i > 0 {
+    			fmt.Print(" ")
+    		}
+    		fmt.Printf("%s=%d", k, counts[k])
+    	}
+    	fmt.Println()
+    }
+  distractors:
+    - match: "counts := make(map[string]int)"
+      explain: |-
+        `:=` introduces a new variable, but `counts` was already
+        declared above with `var`. In the same block that's a
+        compile error ("no new variables on left side of :="). Use
+        `=` to assign to the existing nil header.
+    - match: "counts = new(map[string]int)"
+      explain: |-
+        `new(T)` returns `*T` — a pointer-to-T. So this returns
+        `*map[string]int`, which doesn't match the `map[string]int`
+        type of `counts`. Type mismatch. `new` is for getting a
+        zero-pointer; `make` is for getting a usable map / slice /
+        channel header.
+    - match: "make(counts, map[string]int)"
+      explain: |-
+        Arguments inverted. `make` takes the type FIRST (and an
+        optional size hint for maps). Shape: `make(map[K]V)` or
+        `make(map[K]V, sizeHint)`.
+    - match: "var counts = make(map[string]int)"
+      explain: |-
+        Same shadowing issue as `:=` — `var counts = ...` inside
+        the same block where `var counts map[string]int` already
+        ran is a redeclaration error. Use `=` (plain assignment),
+        not `var` again.
+expectStdout: |
+  cat=2 dog=1 fox=1
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Nil-map writes panic. `counts` was declared as a nil map (`var counts map[string]int` gives you the zero value, which for maps is `nil`). You need a `make` to give it a real backing table before any write."
+  - "Use `=` (plain assignment) — the variable already exists. `:=` would try to re-declare and fail in the same block."
+  - "`counts = make(map[string]int)`."
+notes: |
+  The "missing make" panic is one of Go's most-stumbled-over
+  runtime errors for TS devs. The TS habit `const counts = {}; counts[k] = v`
+  works because object literals ARE the storage; Go's nil map header
+  has nowhere to put writes.
+
+  Distractors lean on the most common authoring mistakes:
+    1. `:=` redeclaration — the closest-to-correct mistake;
+       compile-time catch.
+    2. `new` — the right-spelled, wrong-semantics mistake;
+       type mismatch.
+    3. Swapped args — fundamental builtin misuse.
+    4. `var` redeclaration — the JS/TS habit of re-using `var`.
+
+  The output is deliberately sort-stable (alphabetised) so the
+  expectStdout is deterministic. Map range order is randomised in
+  Go — sorting the keys before printing fixes that.

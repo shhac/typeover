@@ -1,0 +1,53 @@
+target: go
+themeId: go/idioms/gotchas
+type: mcq
+order: 2
+prompt: |
+  **Slice aliasing**. Pick what prints:
+
+  ```go
+  a := []int{1, 2, 3, 4}
+  b := a[1:3]
+  b[0] = 99
+  fmt.Println(a)
+  ```
+generator:
+  kind: variant
+  variants:
+    - id: slice-aliasing
+      ts: |-
+        // TS: arr.slice(1, 3) COPIES — no aliasing.
+        // Go: a[1:3] shares the backing array — mutations bleed.
+      canonical: "Prints `[1 99 3 4]` — `b` shares the backing array with `a`, so writing through `b[0]` mutates `a[1]`."
+      distractors:
+        - "Prints `[1 2 3 4]` — slicing in Go copies into a new array, so `b` is independent."
+        - "Prints `[99 2 3 4]` — `b[0]` mutates the first element of `a` regardless of the slice offset."
+        - "Panics with `index out of range` because `b` only has 2 elements."
+hints:
+  - "A slice is a header (ptr, len, cap) pointing into a backing array. `a[1:3]` doesn't copy — `b` points into a's array starting at offset 1."
+  - "Aliasing: write through b → see it through a. At offset 1, so a[1] = 99."
+  - "`[1 99 3 4]`."
+runtime: none
+notes: |
+  Slice aliasing is the second-most-common gotcha. Real-
+  world impact: a function takes a slice param, modifies
+  it for "scratch space," and surprises the caller whose
+  data is now corrupted.
+
+  Mitigation: when you need true independence, COPY:
+  ```go
+  b := make([]int, len(a[1:3]))
+  copy(b, a[1:3])
+  ```
+  Or `append` to a nil slice, which forces a new backing
+  array (when the original cap is exceeded).
+
+  Distractors:
+    1. "Slicing copies" — TypeScript / Ruby intuition.
+    2. "b[0] mutates a[0]" — would be true if b were a
+       different shape; b actually shares offset+len.
+    3. "Index OOB panic" — false; b has len 2, so b[0] is
+       valid.
+
+  This re-pins theme 2.1 slot 10's shared-backing-array
+  lesson in the gotcha context.

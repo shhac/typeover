@@ -1,0 +1,70 @@
+target: go
+themeId: go/concurrency/sync
+type: freeform
+order: 8
+prompt: |
+  Build a small program that uses `sync.WaitGroup` correctly:
+
+  1. Declare `var wg sync.WaitGroup`.
+  2. Call `wg.Add(3)` BEFORE the launch loop (slot 3's rule).
+  3. Launch three goroutines; each defers `wg.Done()` and
+     prints `"worker"`.
+  4. Call `wg.Wait()`.
+  5. After Wait returns, print `"done"`.
+
+  Expected output:
+  ```
+  worker
+  worker
+  worker
+  done
+  ```
+
+  All three workers print the same fixed string, so any
+  interleaving produces the same observable output.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: Promise.all([p1, p2, p3]).then(() => console.log("done"));
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	wg.Add(3)
+    	for i := 0; i < 3; i++ {
+    		go func() {
+    			defer wg.Done()
+    			fmt.Println("worker")
+    		}()
+    	}
+    	wg.Wait()
+    	fmt.Println("done")
+    }
+expectStdout: |
+  worker
+  worker
+  worker
+  done
+hints:
+  - "Three pieces: WaitGroup declaration + `Add(3)`, the for-loop launch with each goroutine doing `defer wg.Done()` + print, then `wg.Wait()` + print `done`."
+  - "Add BEFORE launch. defer Done at the top of each goroutine. Wait blocks until counter hits 0."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Drills the full WaitGroup recipe from MCQ slot 3. Mirror
+  of theme 6.1 slot 9's capstone — that one launched via
+  goroutines too, but used `chan bool` for synchronisation.
+  This slot uses WaitGroup, the alternative primitive for
+  the same job.
+
+  Choosing between channels and WaitGroup: WaitGroup is
+  better when you JUST need "wait for N to finish";
+  channels are better when you also need to ship VALUES
+  back.

@@ -1,0 +1,86 @@
+target: go
+themeId: go/interfaces/interfaces
+type: fill-line
+order: 7
+prompt: |
+  Recover the concrete type from inside an interface variable
+  using a TYPE ASSERTION. Use the comma-ok form so a wrong
+  guess doesn't panic — same idiom as map lookups from
+  Module 2.
+
+  Given `var v any = "hello"`, write the if-init line that
+  checks if `v` is a string AND binds the recovered value
+  to `s` if so.
+
+  Expected output: `string: hello`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if s, ok := v.(string); ok {"
+  ts: |-
+    let v: unknown = "hello";
+    if (typeof v === "string") {
+      console.log("string:", v);
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	var v any = "hello"
+    	${line}
+    		fmt.Println("string:", s)
+    	}
+    }
+  distractors:
+    - match: "if s := v.(string); true {"
+      explain: |-
+        Single-value type assertion form — if `v` ISN'T a
+        string, this PANICS. The comma-ok form (`s, ok := ...`)
+        is the safe path; use it whenever you're not certain
+        of the concrete type.
+    - match: "if s, ok := v.string; ok {"
+      explain: |-
+        Missing the assertion parens. Type assertion shape is
+        `v.(T)` — parens around the type. Without them, Go's
+        parser sees this as a field-access `v.string` (and
+        `any` has no `.string` field).
+    - match: "if s, ok := v as string; ok {"
+      explain: |-
+        TS-syntax leak — TS uses `as` for type casts. Go's
+        type assertion uses `.(T)`. Different syntax, similar
+        idea: tell the compiler "treat this value as T",
+        check at runtime that it actually is.
+    - match: "if typeof v == \"string\" {"
+      explain: |-
+        TS `typeof` keyword leak. Go has no `typeof`; the
+        type-membership question is answered by type assertion
+        (comma-ok form for safety).
+expectStdout: |
+  string: hello
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Type assertion shape: `v.(T)`. The comma-ok form binds two values: the recovered concrete value AND a bool indicating success. Use it inside an `if`-init: `if s, ok := v.(string); ok { ... }`."
+  - "`if s, ok := v.(string); ok {`."
+  - "`if s, ok := v.(string); ok {`."
+notes: |
+  THE type-assertion idiom. The comma-ok form is the safe path
+  for "I'm not sure what's in this interface"; the single-value
+  form (`s := v.(string)`) panics on mismatch and is used only
+  when the caller has already verified the type via a
+  type-switch or a contract.
+
+  Pattern parallels Module 2.2's map comma-ok lookup: same
+  shape (`v, ok := ...; if ok { ... }`) carries from map index
+  to type assertion. Both are Go's "graceful-fallback" idiom
+  for I-don't-know-if-this-exists queries.
+
+  Distractor #1 is the actual common bug — single-value form
+  trades safety for one fewer character. Always use comma-ok
+  unless you've proven the type by other means.
+
+  Brace on the END of the blank line because the body opens
+  the if-block — same author convention as theme 3.2 slot 6.

@@ -1,0 +1,112 @@
+target: go
+themeId: go/interfaces/generics
+type: freeform
+order: 9
+prompt: |
+  Theme 4.2 capstone — extract a REUSABLE constraint interface
+  and use it on a generic function.
+
+  Build:
+
+  1. `type Ordered interface { ~int | ~float64 | ~string }` —
+     a named constraint listing the orderable types. The `~`
+     means "this type OR any named type with this underlying
+     type", so `type MyInt int` would also satisfy the
+     constraint.
+  2. `func Min[T Ordered](a, b T) T` returning the smaller of
+     a and b.
+  3. In `main`: print `Min(3, 5)`, `Min(2.1, 1.5)`, and
+     `Min("a", "b")` — three calls covering all three
+     constraint members.
+
+  Expected output:
+  ```
+  3
+  1.5
+  a
+  ```
+
+  This is the canonical "extract your constraints into a
+  package-level interface" pattern. The Go stdlib's `cmp.Ordered`
+  (Go 1.21+) is exactly this shape — your code can target it
+  directly, or you can define your own for older Go targets /
+  custom type sets.
+
+  TypeScript reference:
+  ```ts
+  // TS has nothing direct — closest is `<T extends number | string>`
+  function min<T extends number | string>(a: T, b: T): T {
+    return a < b ? a : b;
+  }
+  console.log(min(3, 5));
+  console.log(min(2.1, 1.5));
+  console.log(min("a", "b"));
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function min<T extends number | string>(a: T, b: T): T {
+      return a < b ? a : b;
+    }
+    console.log(min(3, 5));
+    console.log(min(2.1, 1.5));
+    console.log(min("a", "b"));
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Ordered interface {
+    	~int | ~float64 | ~string
+    }
+
+    func Min[T Ordered](a, b T) T {
+    	if a < b {
+    		return a
+    	}
+    	return b
+    }
+
+    func main() {
+    	fmt.Println(Min[int](3, 5))
+    	fmt.Println(Min[float64](2.1, 1.5))
+    	fmt.Println(Min[string]("a", "b"))
+    }
+expectStdout: |
+  3
+  1.5
+  a
+hints:
+  - "Three pieces: the `Ordered` interface (type-set union with `~` prefixes), the generic Min function constrained to Ordered, and three main() calls demonstrating it across types."
+  - "`~int` syntax means \"int OR any type with underlying type int\". The tilde isn't strictly necessary if you only care about the literal types, but it's the conventional flexible form (stdlib `cmp.Ordered` uses it)."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Module 4 capstone. Reuses every beat in the theme:
+    - Generic function declaration (slot 1)
+    - Named constraint interface (slot 2 + 5)
+    - Type-set with `|` (slot 3 + 6)
+    - The `~T` underlying-type form (introduced here for the
+      first time in this theme; canonical Go pattern)
+    - Function-level type-inference at the call site (Min(3,5)
+      doesn't need Min[int](3, 5))
+
+  Yaegi runs custom constraints cleanly per design-docs/30 —
+  with one caveat surfaced this tick: Yaegi's type inference
+  for type-set constraints DOESN'T propagate from untyped
+  constants. `Min(2.1, 1.5)` fails with "untyped float does
+  not implement main.Ordered"; `Min[float64](2.1, 1.5)` works.
+  Real `go build` is happy with the inferred version.
+
+  Authoring decision: use explicit type args (`Min[int]`,
+  `Min[float64]`, `Min[string]`) in the canonical. The lesson
+  about constraints is preserved; the inference shortcut is
+  documented as a Yaegi runtime quirk in design-docs/30. The
+  modern Go canonical (inferred) is captured here for when
+  Yaegi catches up — no alternateCanonicals needed because
+  the explicit form IS valid Go too.
+
+  Module 4 complete with this slot: theme 4.1 (interfaces)
+  done, theme 4.2 (generics) done. Next: Module 5 (errors &
+  packaging) — 5 themes, the biggest remaining module.

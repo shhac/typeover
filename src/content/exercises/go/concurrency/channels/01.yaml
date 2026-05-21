@@ -1,0 +1,42 @@
+target: go
+themeId: go/concurrency/channels
+type: mcq
+order: 1
+prompt: |
+  Pick the line that creates a new UNBUFFERED channel of `int`.
+
+  TypeScript doesn't have channels natively — closest analog
+  is an EventEmitter or a stream. Go's channels are first-class
+  language primitives with typed payload.
+generator:
+  kind: variant
+  variants:
+    - id: make-int
+      ts: |-
+        // TS: no native equivalent. Close: new Subject<number>() (RxJS).
+      canonical: "ch := make(chan int)"
+      distractors:
+        - "ch := chan int{}"
+        - "var ch chan int = new chan(int)"
+        - "ch := make(channel int)"
+hints:
+  - "Channels are built with `make` (same as slices and maps). Type syntax is `chan <element-type>` — keyword + type."
+  - "`make(chan <T>)`. T is `int`."
+  - "`ch := make(chan int)`."
+runtime: none
+notes: |
+  Theme 6.2 opener. `make` is the only way to create a usable
+  channel — `var ch chan int` declares it but leaves it `nil`,
+  and `nil` channels block forever on send/receive (sometimes
+  used deliberately to disable a `select` case, but never as
+  default).
+
+  Distractors:
+    1. `ch := chan int{}` — composite-literal shape; channels
+       can't be composite-literal-initialised because they're
+       opaque runtime objects.
+    2. `new chan(int)` — Java/C# habit; `new` exists in Go
+       (allocates zero-valued pointer) but isn't the right
+       constructor for channels.
+    3. `make(channel int)` — wrong keyword; it's `chan`,
+       five letters, not `channel`.

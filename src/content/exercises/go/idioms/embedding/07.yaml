@@ -1,0 +1,64 @@
+target: go
+themeId: go/idioms/embedding
+type: fill-line
+order: 7
+prompt: |
+  Define the embedded type field for `Dog`. The scaffold has
+  the surrounding `type Dog struct { ... Breed string }` —
+  type the EMBED LINE (the one that brings `Animal`'s
+  fields and methods into `Dog`).
+
+  Expected output: `Rex` (printing the promoted `Name`).
+generator:
+  kind: template
+  vars:
+    line:
+      - "Animal"
+  ts: |-
+    // TS analog: class Dog extends Animal — the `extends Animal` clause.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Animal struct{ Name string }
+
+    type Dog struct {
+    	${line}
+    	Breed string
+    }
+
+    func main() {
+    	d := Dog{Animal: Animal{Name: "Rex"}, Breed: "Lab"}
+    	fmt.Println(d.Name)
+    }
+  distractors:
+    - match: "extends Animal"
+      explain: |-
+        Java/TS keyword. Go has no `extends`; embedding is
+        just the type name on its own line.
+    - match: "animal Animal"
+      explain: |-
+        NAMED field (lowercase `animal`). That's regular
+        composition — `d.animal.Name` would work, but
+        `d.Name` would NOT (methods/fields don't promote
+        through named fields). The exercise wants method
+        promotion, so the embed must be unnamed.
+    - match: "Animal Animal"
+      explain: |-
+        Named field that happens to share its type's name.
+        Compiles but defeats the purpose — Go treats this
+        as a regular named field, not an embed. The embed
+        syntax is the TYPE NAME ALONE.
+expectStdout: |
+  Rex
+runtime: yaegi
+blanks: [line]
+hints:
+  - "An embed is the TYPE NAME on its own line — no field name, no annotations. Just `Animal`."
+  - "`Animal`."
+  - "`Animal`."
+notes: |
+  Pin the embed syntax via fill-line. Distractor #2 (named
+  field with the lowercase name) is the most common
+  near-miss — looks like composition but loses promotion.

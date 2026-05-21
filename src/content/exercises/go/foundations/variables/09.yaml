@@ -1,0 +1,45 @@
+target: go
+themeId: go/foundations/variables
+type: freeform
+order: 9
+prompt: |
+  Write a Go program that declares three `int` variables — `a := 3`,
+  `b := 4`, and `c := a + b` — then prints them on three lines via
+  `fmt.Println`. The expected output is shown below.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let a = 3;
+    let b = 4;
+    let c = a + b;
+    console.log(a);
+    console.log(b);
+    console.log(c);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	a := 3
+    	b := 4
+    	c := a + b
+    	fmt.Println(a)
+    	fmt.Println(b)
+    	fmt.Println(c)
+    }
+expectStdout: |
+  3
+  4
+  7
+runtime: yaegi
+hints:
+  - "Inside a function, the short declaration `name := value` is the idiomatic form. No `var`, no `let`, no semicolon."
+  - "`fmt.Println` writes its argument followed by a newline. Three calls = three lines of output."
+  - "`package main` / `import \"fmt\"` / `func main()` is the standard scaffold for a runnable Go program."
+notes: |
+  First freeform exercise on the curriculum. Goal: verify that the
+  Yaegi runtime + freeform component chain works end-to-end with a
+  trivially-shaped program. If a learner submits the canonical here,
+  Yaegi runs in ~10 ms and stdout matches exactly.

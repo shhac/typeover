@@ -1,0 +1,69 @@
+target: go
+themeId: go/errors/packages-and-imports
+type: fill-line
+order: 6
+prompt: |
+  The scaffold imports `fmt` and `strings`. Write the FULL
+  import block as one parenthesised group with both entries.
+
+  Expected output: `Hello, World!`
+
+  Per `gofmt`, multi-import files use the block form. Single
+  imports use the bare `import "X"` line, but 2+ imports
+  must be grouped.
+generator:
+  kind: template
+  vars:
+    line:
+      - |-
+        import (
+        	"fmt"
+        	"strings"
+        )
+  ts: |-
+    // TS: import { ... } from 'fmt'; import { ... } from 'strings';
+  canonical: |-
+    package main
+
+    ${line}
+
+    func main() {
+    	fmt.Println(strings.Title("hello, world!"))
+    }
+  distractors:
+    - match: |-
+        import "fmt"
+        import "strings"
+      explain: |-
+        Works, but `gofmt` will collapse two consecutive
+        single-imports into the block form. The block IS the
+        idiom for 2+ imports.
+    - match: |-
+        import ("fmt", "strings")
+      explain: |-
+        Wrong — block imports are line-separated, not
+        comma-separated. No commas inside the import block;
+        each path is its own line.
+    - match: |-
+        import { fmt, strings }
+      explain: |-
+        TS / ES module destructuring syntax. Go imports the
+        whole package; you access names via the package
+        qualifier (`fmt.Println`).
+expectStdout: |
+  Hello, World!
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Three lines: opening `import (`, two indented `\"X\"` entries, closing `)`. Indent with TABS — `gofmt`'s convention."
+  - "`import (` ↵ tab `\"fmt\"` ↵ tab `\"strings\"` ↵ `)`."
+  - "See canonical."
+notes: |
+  Note: `strings.Title` is deprecated in modern Go (use
+  `golang.org/x/text/cases`), but it's still in the stdlib and
+  Yaegi supports it. Keeps the slot single-file + runnable
+  without reaching for an external dep.
+
+  Multi-line fill-line slot — the `line` var holds the entire
+  block. Worked example for the curriculum's other multi-line
+  templates.

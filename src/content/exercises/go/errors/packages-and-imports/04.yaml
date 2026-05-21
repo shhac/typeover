@@ -1,0 +1,40 @@
+target: go
+themeId: go/errors/packages-and-imports
+type: fill-word
+order: 4
+prompt: |
+  Type the keyword that declares this file's package. The file
+  is the entry point of an executable, so the package name is
+  `main`.
+
+  TS doesn't have this concept — files are modules implicitly.
+  Go requires every file to declare its package as the very
+  first non-comment line.
+generator:
+  kind: template
+  vars:
+    word:
+      - "package"
+  ts: |-
+    // TS: no equivalent — modules are file-based.
+  canonical: |-
+    ${word} main
+
+    import "fmt"
+
+    func main() {
+    	fmt.Println("hi")
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "The keyword that declares package membership in Go. Lowercase, six letters."
+  - "Starts with `p`. The same word you'd use to describe a unit of code in any language."
+  - "`package`."
+notes: |
+  Pedagogically simple — just pin the keyword name. Sets up
+  slot 5 (the `import` keyword) and slot 6 (the capitalisation
+  rule in use).
+
+  Runs under Yaegi because it's a single-file program;
+  multi-package scenarios are MCQ-only.

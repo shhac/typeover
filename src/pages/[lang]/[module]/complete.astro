@@ -1,0 +1,126 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { Container, Heading, Panel, Stack, Text } from "~/components/ds";
+import { ModuleCompleteCard } from "~/components/completion/ModuleCompleteCard";
+import { byOrder, exerciseHref, langHref, paramsForModule } from "~/lib/curriculum";
+
+/*
+ * Module-completion screen. Reached from the last exercise of the
+ * last theme in a module via the route's `nextExerciseHref`. Direct
+ * URL navigation also works — the card detects partial progress and
+ * renders an "almost there" view instead of the celebration.
+ *
+ * Per design-docs/07 + 11: the share button is the v0 growth lever.
+ * No marketing chrome elsewhere; the only outbound mechanic is a
+ * learner-celebrated milestone composing a pre-filled share.
+ */
+
+type Module = CollectionEntry<"modules">;
+
+export async function getStaticPaths() {
+  const modules = await getCollection("modules");
+  return modules.flatMap((entry) => {
+    const params = paramsForModule(entry.id);
+    if (!params) return [];
+    return [{ params, props: { entry } }];
+  });
+}
+
+interface Props {
+  entry: Module;
+}
+
+const { entry } = Astro.props;
+const moduleData = entry.data;
+const moduleId = entry.id;
+const lang = moduleData.target;
+
+const [allModules, allThemes, allExercises] = await Promise.all([
+  getCollection("modules"),
+  getCollection("themes"),
+  getCollection("exercises"),
+]);
+
+const themes = allThemes
+  .filter((t) => t.data.moduleId === moduleId)
+  .sort(byOrder)
+  .map((t) => ({
+    id: t.id,
+    title: t.data.title,
+    exerciseIds: allExercises
+      .filter((ex) => ex.data.themeId === t.id)
+      .sort(byOrder)
+      .map((ex) => ex.id),
+  }));
+
+/* Continue href:
+ *   - first exercise of the next module of this language by order,
+ *     when one exists and has any exercises authored
+ *   - else /<lang> (curriculum index, when this was the last module
+ *     OR the next module has no content yet)
+ *
+ * Cross-language hop is intentionally NOT bridged here — finishing
+ * Go's last module sends the learner back to /go, not on to Zig. */
+const sortedModules = allModules
+  .filter((m) => m.data.target === lang)
+  .slice()
+  .sort(byOrder);
+const i = sortedModules.findIndex((m) => m.id === moduleId);
+const nextModule = sortedModules[i + 1];
+const nextModuleFirstExercise = nextModule
+  ? allExercises
+      .filter((ex) => ex.data.themeId.startsWith(`${nextModule.id}/`))
+      .sort(byOrder)[0]
+  : undefined;
+
+const continueHref = nextModuleFirstExercise
+  ? exerciseHref(nextModuleFirstExercise.id)
+  : langHref(lang);
+const continueLabel = nextModule && nextModuleFirstExercise
+  ? `Continue to ${nextModule.data.title} →`
+  : "Back to curriculum";
+
+const siteOrigin = import.meta.env.SITE ?? "https://typeover.paulie.app";
+
+const shareTemplate =
+  "Just finished {moduleTitle} on typeover — Go for TypeScript devs. {themeCount} themes, {exerciseCount} exercises down.";
+---
+
+<BaseLayout
+  title={`${moduleData.title} complete — typeover`}
+  description={`Celebrate finishing the ${moduleData.title} module of typeover.`}
+>
+  <main class="py-12 sm:py-20">
+    <Container width="default">
+      <Stack gap="xl">
+        <Stack gap="sm">
+          <Heading level={1}>Module complete</Heading>
+          <Text tone="muted" size="sm">
+            One module down. Share if you want — there's no other growth
+            mechanic on the site.
+          </Text>
+        </Stack>
+        <Panel padding="airy" tone="default">
+          {/* client:load (not client:only) so the SSR pass renders a
+            * fallback with moduleTitle + Continue button. If the JS
+            * chunk fails to hydrate the learner still sees something
+            * meaningful instead of an empty Panel. design-docs/19
+            * F-15. */}
+          <ModuleCompleteCard
+            client:load
+            moduleId={moduleId}
+            moduleTitle={moduleData.title}
+            moduleOrder={i + 1}
+            totalModules={sortedModules.length}
+            themes={themes}
+            continueHref={continueHref}
+            continueLabel={continueLabel}
+            shareTemplate={shareTemplate}
+            siteOrigin={siteOrigin}
+          />
+        </Panel>
+      </Stack>
+    </Container>
+  </main>
+</BaseLayout>

@@ -1,0 +1,60 @@
+target: go
+themeId: go/foundations/numeric-primitives
+type: fill-line
+order: 6
+prompt: |
+  `double` is already a `float64`; `count` is an `int`. They can't
+  divide as-is. Type the idiomatic Go line that computes the ratio
+  without truncating. The program should print `2.5`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "ratio := double / float64(count)"
+  ts: |-
+    let ratio = double / count;
+    console.log(ratio);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	double := 10.0
+    	count := 4
+    	${line}
+    	fmt.Println(ratio)
+    }
+  distractors:
+    - match: "ratio := float64(double) / count"
+      explain: |-
+        Wrong side. `double` is already `float64` — casting it to its
+        own type is a no-op; `count` is the `int` that needs to become
+        a float so the divide stays in floating-point.
+    - match: "ratio := double / count"
+      explain: |-
+        Go won't mix numeric types implicitly the way TS does. A
+        `float64` and an `int` can't divide as-is — the compiler
+        refuses rather than guessing which one to coerce. Convert the
+        `int` to `float64` explicitly.
+    - match: "ratio := int(double) / count"
+      explain: |-
+        That would truncate `double` to `10` before dividing, then
+        give you integer division — `10 / 4 == 2`, not `2.5`. Push
+        toward the wider type, not the narrower one.
+    - match: "ratio := double / float(count)"
+      explain: |-
+        Go doesn't have a bare `float` type — it's `float32` or
+        `float64` specifically. `float64` is the default; that's what
+        you want here.
+expectStdout: |
+  2.5
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Look at the types. `double` is already a `float64`; `count` is an `int`. They can't divide as-is. To get a meaningful ratio, the integer needs to become a float — not the other way round, and not by truncating."
+  - "The general form is `targetType(value)`. Target type is `float64`. Value is the operand whose type doesn't match."
+  - "Type `ratio := double / float64(count)`."
+notes: |
+  Migrated to input+Yaegi UX. Distractors kept as the
+  wrong-pattern bank for future targeted feedback.

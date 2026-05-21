@@ -1,0 +1,81 @@
+target: go
+themeId: go/errors/is-and-as
+type: fill-line
+order: 6
+prompt: |
+  Productive use of `errors.Is` across two wrap layers. The
+  scaffold has a sentinel `ErrNotFound`, a function that
+  returns it through TWO `fmt.Errorf("%w")` wraps, and a main
+  that should print `matched` when `errors.Is` finds the
+  sentinel in the chain.
+
+  Type the if-condition line that checks for the sentinel.
+
+  Expected output: `matched`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if errors.Is(err, ErrNotFound) {"
+  ts: |-
+    // TS analog: walk err.cause until you find ErrNotFound. Manual.
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    var ErrNotFound = errors.New("not found")
+
+    func inner() error {
+    	return ErrNotFound
+    }
+
+    func outer() error {
+    	if err := inner(); err != nil {
+    		return fmt.Errorf("layer1: %w", fmt.Errorf("layer2: %w", err))
+    	}
+    	return nil
+    }
+
+    func main() {
+    	err := outer()
+    	${line}
+    		fmt.Println("matched")
+    	}
+    }
+  distractors:
+    - match: "if err == ErrNotFound {"
+      explain: |-
+        Direct equality fails after wrapping. `err` is now the
+        outer `fmt.Errorf("layer1: ...")` wrapper, not the
+        sentinel. `==` doesn't unwrap. Use `errors.Is(err,
+        ErrNotFound)` to walk the chain.
+    - match: "if errors.As(err, &ErrNotFound) {"
+      explain: |-
+        Wrong tool — `errors.As` extracts by TYPE, not
+        identity. Sentinels are values; use `errors.Is`. Also
+        `&ErrNotFound` (pointer to a stored error value)
+        doesn't match the `As` signature anyway.
+    - match: 'if err.Error() == "not found" {'
+      explain: |-
+        String comparison on the message. Brittle and slow,
+        AND fails after wrapping (the wrapper's message is
+        "layer1: layer2: not found", not "not found"). Use
+        the typed identity check via `errors.Is`.
+expectStdout: |
+  matched
+runtime: yaegi
+blanks: [line]
+hints:
+  - "`errors.Is(err, target)` walks the wrap chain via the `Unwrap() error` interface. Returns true when it finds `target` (by identity) anywhere in the chain."
+  - "`if errors.Is(err, ErrNotFound) {`."
+  - "`if errors.Is(err, ErrNotFound) {`."
+notes: |
+  Productive use of slot 1's recognition. Two layers of wrap
+  to demonstrate the chain-walk is real, not just one-level.
+
+  Yaegi-verified: errors.Is + nested fmt.Errorf %w all run
+  cleanly (probed in tick #8 and tick #9).

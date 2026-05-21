@@ -1,0 +1,36 @@
+target: go
+themeId: go/idioms/project-layout
+type: fill-word
+order: 5
+prompt: |
+  Type the directory name that — when used as a parent of
+  packages — enforces "importable only from the same
+  module" at the compiler level.
+generator:
+  kind: template
+  vars:
+    word:
+      - "internal"
+  ts: |-
+    // TS: no equivalent (only `export` keyword controls visibility).
+  canonical: |-
+    myorg/myproject/
+    ├── go.mod
+    ├── cmd/serverd/main.go    (CAN import myproject/internal/helpers)
+    └── ${word}/
+        └── helpers/
+            └── helpers.go     (NOT importable by external modules)
+runtime: none
+blanks: [word]
+hints:
+  - "Eight letters, lowercase. Same English word as the antonym of `external`."
+  - "`internal`."
+  - "`internal`."
+notes: |
+  Pin the directory name. The rule: packages with `internal`
+  anywhere in their path can only be imported by code rooted
+  at the parent of that `internal/` directory.
+
+  So `myproject/internal/helpers` is importable by anything
+  under `myproject/...` (cmd/, internal/, package at root,
+  etc.) but NOT by `someoneelse/...`.

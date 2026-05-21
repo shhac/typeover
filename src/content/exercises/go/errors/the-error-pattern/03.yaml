@@ -1,0 +1,111 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: mcq
+order: 3
+prompt: |
+  Slot 2 pinned the `(T, error)` return convention. This slot
+  pins the CALLER side — the idiomatic check-and-early-return
+  pattern that appears in every Go codebase, hundreds of times.
+
+  Pick the IDIOMATIC shape for "call a fallible function, bail
+  on error, otherwise use the result."
+generator:
+  kind: variant
+  variants:
+    - id: load
+      ts: |-
+        // TS: try { const u = loadUser(42); ... } catch (e) { ... }
+      canonical: |-
+        u, err := loadUser(42)
+        if err != nil {
+        	return err
+        }
+        use(u)
+      distractors:
+        - |-
+          try {
+            u := loadUser(42)
+            use(u)
+          } catch err {
+            return err
+          }
+        - |-
+          u := loadUser(42).orThrow()
+          use(u)
+        - |-
+          u, err := loadUser(42)
+          if (err) return err
+          use(u)
+    - id: parse
+      ts: |-
+        // TS: try { const n = parseInt("42"); ... } catch (e) { ... }
+      canonical: |-
+        n, err := parseInt("42")
+        if err != nil {
+        	return err
+        }
+        use(n)
+      distractors:
+        - |-
+          try {
+            n := parseInt("42")
+            use(n)
+          } catch err {
+            return err
+          }
+        - |-
+          n := parseInt("42").orThrow()
+          use(n)
+        - |-
+          n, err := parseInt("42")
+          if (err) return err
+          use(n)
+    - id: fetch
+      ts: |-
+        // TS: try { const s = fetchData("url"); ... } catch (e) { ... }
+      canonical: |-
+        s, err := fetchData("url")
+        if err != nil {
+        	return err
+        }
+        use(s)
+      distractors:
+        - |-
+          try {
+            s := fetchData("url")
+            use(s)
+          } catch err {
+            return err
+          }
+        - |-
+          s := fetchData("url").orThrow()
+          use(s)
+        - |-
+          s, err := fetchData("url")
+          if (err) return err
+          use(s)
+hints:
+  - "No try/catch — Go's error handling is INLINE. After every fallible call: check `if err != nil` and return early (or handle locally). The shape repeats; that's the price of explicitness."
+  - "Three lines: destructure (`u, err := ...`), check `if err != nil`, return / handle. Compare against `nil`, NOT a truthy check — Go's `if` doesn't coerce."
+  - "Explicit nil check + early return. No parens around the condition."
+runtime: none
+notes: |
+  THE most-typed pattern in Go. Slot 7 will drill the
+  compressed if-init form (`if err := f(); err != nil { ... }`)
+  which inlines the call and the check; this slot uses the
+  expanded two-statement form because the result is also
+  needed after the check.
+
+  Distractors:
+    1. try/catch — Java/Python/JS/TS exception leak.
+    2. `.orThrow()` — Rust/Swift exception-equivalent. Some
+       codebases use a `must.Must` wrapper to approximate; not
+       idiomatic for normal control flow.
+    3. `if (err)` — truthy check + missing space. Go requires
+       `err != nil` explicitly (no truthy coercion) and
+       doesn't use parens around the condition.
+
+  Why "explicitness is a feature": Go's authors traded
+  syntactic compactness for control-flow clarity. The pattern
+  IS the design; learners who fight it write less idiomatic
+  Go.

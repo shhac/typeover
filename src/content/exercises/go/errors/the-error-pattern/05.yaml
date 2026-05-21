@@ -1,0 +1,40 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: fill-word
+order: 5
+prompt: |
+  Return the "no error" sentinel from the success path. Type
+  the keyword.
+generator:
+  kind: template
+  vars:
+    noerror: ["nil"]
+  ts: |-
+    function divide(a: number, b: number): { value: number; err: Error | null } {
+      if (b === 0) return { value: 0, err: new Error("div by zero") };
+      return { value: a / b, err: null };
+    }
+  canonical: |-
+    func divide(a, b int) (int, error) {
+    	if b == 0 {
+    		return 0, errors.New("divide by zero")
+    	}
+    	return a / b, ${noerror}
+    }
+blanks: [noerror]
+hints:
+  - "Same nil-able keyword from theme 3.4. The `error` interface IS nil-able; the success path returns `nil` in the error slot."
+  - "Three letters, lowercase."
+  - "`nil`."
+runtime: none
+notes: |
+  Pairs with slot 4 (`errors` package). The success path returns
+  the zero value of the result type AND `nil` for the error.
+  This is THE shape that lets `if err != nil` work — non-nil
+  error signals failure, nil signals success.
+
+  Authoring note: the zero value of `error` is `nil` per theme
+  3.4 slot 2 (nil-able types include interfaces). Worth knowing
+  that there's nothing special about how the error slot signals
+  "no error" — it's just nil-on-interface, same mechanic as
+  any other nil-able type.

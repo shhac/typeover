@@ -1,0 +1,62 @@
+target: go
+themeId: go/idioms/gotchas
+type: fill-word
+order: 4
+prompt: |
+  Fill in the keyword. **Loop variable capture** in
+  goroutines before Go 1.22 captured the SHARED loop
+  variable (all goroutines saw the FINAL value). Go 1.22's
+  fix gives each iteration its OWN loop variable.
+
+  The bulletproof workaround that works on EVERY Go version:
+  shadow the loop var inside the loop body before launching
+  the goroutine.
+
+  ```go
+  for i := 0; i < 3; i++ {
+      i := i        // shadow — same name, NEW scope binding
+      go ${word} () { fmt.Println(i) }()
+  }
+  ```
+
+  Type the keyword that introduces the anonymous function.
+generator:
+  kind: template
+  vars:
+    word:
+      - "func"
+  ts: |-
+    // TS: same fix works — `for (let i ...)` gives per-iteration binding.
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	wg.Add(3)
+    	for i := 0; i < 3; i++ {
+    		i := i // shadow
+    		go ${word} () {
+    			defer wg.Done()
+    			fmt.Println(i)
+    		}()
+    	}
+    	wg.Wait()
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Four letters, lowercase. Same word as Module 1 theme 1.5's named-function declaration."
+  - "`func`."
+  - "`func`."
+notes: |
+  Pin the anonymous-function keyword in the context of the
+  loop-var fix. The `i := i` line on its own scope shadows
+  the loop variable, giving each goroutine its own
+  iteration value.
+
+  Slot 8's freeform demonstrates the bug + the fix.

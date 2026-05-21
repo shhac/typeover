@@ -1,0 +1,59 @@
+target: go
+themeId: go/errors/type-assertions
+type: mcq
+order: 1
+prompt: |
+  Slot 7 of theme 4.1 introduced type assertions (`v.(T)`).
+  Theme 5.2's `errors.As` is the wrap-aware version. This slot
+  recaps the BARE assertion form — used when you have an error
+  interface value and KNOW it's a specific concrete type (no
+  wraps involved).
+
+  Pick the SAFE form that won't panic if the type doesn't
+  match.
+generator:
+  kind: variant
+  variants:
+    - id: assert
+      ts: |-
+        // TS: try { (err as MyError).code } catch { ... }
+      canonical: |-
+        if e, ok := err.(*MyError); ok {
+        	use(e.code)
+        }
+      distractors:
+        - |-
+          e := err.(*MyError)
+          use(e.code)
+        - |-
+          e := err as *MyError
+          use(e.code)
+        - |-
+          if err is *MyError {
+            use(err.code)
+          }
+hints:
+  - "Comma-ok form: `if e, ok := err.(*T); ok { ... }`. The `ok` bool says whether the assertion succeeded; the `e` var holds the value when it did. Skipping the comma-ok form panics on a mismatch."
+  - "Two-statement shape: `e, ok := err.(*T); if ok { ... }`. Use the if-init compression: `if e, ok := err.(*T); ok { ... }`."
+  - "`if e, ok := err.(*MyError); ok { ... }`."
+runtime: none
+notes: |
+  Theme 5.3 opener. Recap of theme 4.1 slot 7's comma-ok form,
+  scoped to errors. The contrast slot 2 will introduce is the
+  TYPE SWITCH — same job, multiple branches.
+
+  Distractors:
+    1. Single-value form `e := err.(*MyError)` — works when
+       you've already verified the type by other means, but
+       panics on mismatch. Comma-ok is the default safer form.
+    2. `as *MyError` — TS keyword leak.
+    3. `if err is *MyError` — Python / C# / Rust `is`/`matches`
+       keyword leak. Go uses the comma-ok type assertion.
+
+  Yaegi note for downstream slots: type ASSERTIONS work on
+  user-defined types (verified this tick). Type SWITCHES on
+  user-defined types fall to default (Yaegi quirk per
+  design-docs/30 — same root cause as `errors.As`-on-custom-
+  type). Slots 6/7 productive use will use either stdlib types
+  for the type-switch path or comma-ok-assertion-sequences for
+  the user-type path.

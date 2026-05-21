@@ -1,0 +1,43 @@
+target: go
+themeId: go/idioms/small-interfaces
+type: mcq
+order: 2
+prompt: |
+  `fmt.Stringer` is the most common one-method interface in
+  Go. Pick its definition.
+generator:
+  kind: variant
+  variants:
+    - id: stringer-decl
+      ts: |-
+        // TS analog: `interface Stringer { toString(): string }` —
+        // built into Object.prototype by default.
+      canonical: "type Stringer interface { String() string }"
+      distractors:
+        - "type Stringer interface { ToString() string }"
+        - "type Stringer interface { string() string }"
+        - "interface Stringer { String string }"
+hints:
+  - "One method. Method name has TWO capital letters worth of structure: same word as Java/JS's `toString`, but Go's name is just `String`. Returns string."
+  - "`type Stringer interface { String() string }`."
+  - "`type Stringer interface { String() string }`."
+runtime: none
+notes: |
+  `fmt.Stringer` is THE canonical small interface — any
+  type that defines a `String() string` method
+  AUTOMATICALLY gets prettier printing through `fmt`. The
+  package's print routines check for `Stringer` and call
+  `String()` if present.
+
+  Distractors:
+    1. `ToString()` — JS/Java/.NET habit; Go's name is
+       shorter.
+    2. Lowercase `string()` — package-private, can't satisfy
+       a public interface.
+    3. `String string` (field instead of method) — confuses
+       interface (method set) with struct (fields). Theme 4.1
+       slot 1 distractor returns.
+
+  Slot 8 demonstrates: define `String()` on a custom type
+  and pass it to `fmt.Println` — print auto-uses the
+  custom representation.

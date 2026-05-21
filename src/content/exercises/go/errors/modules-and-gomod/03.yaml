@@ -1,0 +1,45 @@
+target: go
+themeId: go/errors/modules-and-gomod
+type: mcq
+order: 3
+prompt: |
+  Pick the command that adds a third-party package as a
+  dependency of your module and updates `go.mod` + `go.sum`.
+
+  TypeScript: `npm install <pkg>` mutates `package.json` +
+  `package-lock.json`. Go's analog has a more compact spelling.
+generator:
+  kind: variant
+  variants:
+    - id: get
+      ts: |-
+        // TS: npm install <pkg>
+        // Go: go get <module-path>[@version]
+      canonical: "go get github.com/google/uuid"
+      distractors:
+        - "go install github.com/google/uuid"
+        - "go add github.com/google/uuid"
+        - "go mod require github.com/google/uuid"
+hints:
+  - "Two-word command, three syllables. The verb is the same one TypeScript's `npm` uses internally for fetching."
+  - "`go <verb> <module-path>`. The verb starts with `g`."
+  - "`go get <module-path>`."
+runtime: none
+notes: |
+  Theme 5.5 essential mechanics.
+
+  Distractors:
+    1. `go install` — DIFFERENT command. `go install` builds
+       and installs a binary into $GOBIN; it doesn't mutate
+       go.mod. Common confusion because both fetch deps.
+    2. `go add` — Cargo / npm habit (`cargo add`, `npm add`);
+       Go's command is `get`. Different verb tradition.
+    3. `go mod require` — `go mod` has subcommands but
+       `require` isn't one of them (`tidy`, `download`, `vendor`,
+       `verify`, `why`, `edit`, `graph`, `init`, but not
+       `require`). The `require` directive lives INSIDE
+       go.mod; you add it via `go get`.
+
+  Modern Go (1.16+) requires `go get` to be run from within a
+  module directory; outside, use `go install <pkg>@version`
+  for binaries.

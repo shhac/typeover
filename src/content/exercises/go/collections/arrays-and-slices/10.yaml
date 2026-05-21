@@ -1,0 +1,45 @@
+target: go
+themeId: go/collections/arrays-and-slices
+type: freeform
+order: 10
+prompt: |
+  Slices have no methods in Go. The operations TS devs reach for
+  (`includes`, `indexOf`, `sort`) live in the `slices` package as
+  free-standing functions, slice-first argument.
+
+  Write a Go program that declares `names := []string{"ada", "alan",
+  "grace"}` and prints whether the slice contains `"alan"`. The
+  expected output is `true`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const names = ["ada", "alan", "grace"];
+    console.log(names.includes("alan"));   // true
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"slices"
+    )
+
+    func main() {
+    	names := []string{"ada", "alan", "grace"}
+    	fmt.Println(slices.Contains(names, "alan"))
+    }
+expectStdout: |
+  true
+runtime: yaegi
+hints:
+  - "Go's stdlib `slices` package (Go 1.21+) carries the slice operations TS devs reach for as methods. It's an import, not a method namespace."
+  - "`slices.Contains(slice, value)` — slice first, value second. Returns `bool`."
+  - "`fmt.Println(slices.Contains(names, \"alan\"))`."
+notes: |
+  Establishes the `slices.*` import pattern that slot 11 builds on
+  (Sort + Index). Single-call freeform: nothing fancy, just the
+  shape of the package + function-first-arg-slice convention.
+
+  Yaegi's stdlib subset must include `slices.Contains` — verified
+  on Module 1 builds. Output is the literal string "true\n" from
+  `fmt.Println(bool)`.

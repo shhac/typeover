@@ -1,0 +1,48 @@
+target: go
+themeId: go/interfaces/interfaces
+type: mcq
+order: 3
+prompt: |
+  How do you say "this function accepts a value of ANY type" in
+  Go?
+
+  TS uses `unknown` (safer) or `any` (escape hatch). Go has a
+  single keyword — and as of Go 1.18, it has a cleaner spelling
+  than the historical one.
+generator:
+  kind: variant
+  variants:
+    - id: describe
+      ts: |-
+        function describe(v: unknown): void {
+          console.log(typeof v, v);
+        }
+      canonical: "func describe(v any) { fmt.Println(v) }"
+      distractors:
+        - "func describe(v interface{}) { fmt.Println(v) }"
+        - "func describe(v unknown) { fmt.Println(v) }"
+        - "func describe(v Any) { fmt.Println(v) }"
+hints:
+  - "Go 1.18 added `any` as the canonical alias for `interface{}` — the empty interface, the interface that's satisfied by every type because it requires zero methods."
+  - "Three letters, lowercase."
+  - "`any`."
+runtime: none
+notes: |
+  `any` is an alias for `interface{}` introduced in Go 1.18 along
+  with generics. Same semantics — the empty method set is
+  satisfied by everything — but cleaner spelling. Style guides
+  converged on `any` quickly; `interface{}` still works and shows
+  up in older codebases.
+
+  Distractors:
+    1. `interface{}` — historically correct, technically still
+       valid. Marked wrong here because the IDIOMATIC modern form
+       is `any`. Worth knowing as a pre-1.18 form a learner will
+       see in older code.
+    2. `unknown` — TS keyword leak.
+    3. `Any` (capitalised) — Go has no `Any` type; the alias is
+       lowercase `any`.
+
+  Bridging to generics (Module 4.2): `any` is also the most
+  permissive type constraint — `func F[T any](v T)` accepts any
+  type T. The same word does double-duty.

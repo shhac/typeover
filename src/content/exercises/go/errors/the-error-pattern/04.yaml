@@ -1,0 +1,32 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: fill-word
+order: 4
+prompt: |
+  Type the stdlib PACKAGE NAME you import for `errors.New`,
+  `errors.Is`, `errors.As`. Lowercase, six letters.
+generator:
+  kind: template
+  vars:
+    pkg: ["errors"]
+  ts: |-
+    // TS: errors come from Error / Error.cause — no package needed.
+  canonical: |-
+    import "${pkg}"
+
+    func main() {
+    	e := errors.New("oops")
+    	_ = e
+    }
+blanks: [pkg]
+hints:
+  - "Same name as the type. Stdlib package."
+  - "Six letters, lowercase, plural."
+  - "`errors`."
+runtime: none
+notes: |
+  Trivial drill — the package name IS the type name. Common
+  enough that the muscle memory is worth a fill-word slot.
+
+  Pairs with slot 5 (`nil`) — the two single-word drills that
+  appear in every error-handling line a learner writes.

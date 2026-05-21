@@ -39,13 +39,13 @@ describe("content-report script", () => {
      * own `## <Title> (\`<id>\`)` heading. Test against the seven
      * known module IDs to catch a missing or duplicate render. */
     for (const moduleId of [
-      "foundations",
-      "collections",
-      "types",
-      "interfaces",
-      "errors",
-      "concurrency",
-      "idioms",
+      "go/foundations",
+      "go/collections",
+      "go/types",
+      "go/interfaces",
+      "go/errors",
+      "go/concurrency",
+      "go/idioms",
     ]) {
       expect(out, `missing module section: ${moduleId}`).toMatch(
         new RegExp(`\\(\`${moduleId}\`\\)`),

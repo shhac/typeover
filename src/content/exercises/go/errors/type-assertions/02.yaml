@@ -1,0 +1,67 @@
+target: go
+themeId: go/errors/type-assertions
+type: mcq
+order: 2
+prompt: |
+  When you have an `error` interface value and need to BRANCH
+  on its concrete type, Go's TYPE SWITCH is the cleaner shape
+  than a cascade of comma-ok assertions.
+
+  Pick the IDIOMATIC type-switch syntax.
+generator:
+  kind: variant
+  variants:
+    - id: ts
+      ts: |-
+        // TS analog: instanceof chain
+        if (err instanceof NotFoundError) { ... }
+        else if (err instanceof TimeoutError) { ... }
+      canonical: |-
+        switch e := err.(type) {
+        case *NotFoundError:
+        	handleNotFound(e)
+        case *TimeoutError:
+        	handleTimeout(e)
+        }
+      distractors:
+        - |-
+          switch err.type {
+          case *NotFoundError:
+            handleNotFound(err)
+          case *TimeoutError:
+            handleTimeout(err)
+          }
+        - |-
+          switch err {
+          case *NotFoundError:
+            handleNotFound(err)
+          case *TimeoutError:
+            handleTimeout(err)
+          }
+        - |-
+          match err {
+            *NotFoundError(e) => handleNotFound(e),
+            *TimeoutError(e) => handleTimeout(e),
+          }
+hints:
+  - "Special form: `switch <var> := <expr>.(type) { case <T1>: ...; case <T2>: ... }`. The `(type)` after the assertion makes this a TYPE SWITCH; inside each case the `<var>` is automatically typed to that case's type."
+  - "Key syntactic bit: `.(type)` instead of `.(T)`. Inside each case, the bound variable has the case's type."
+  - "`switch e := err.(type) { case *T1: ...; case *T2: ... }`."
+runtime: none
+notes: |
+  THE multi-branch dispatch shape. The `e` bound by the switch
+  is automatically the right type inside each case — no
+  re-assertion needed.
+
+  Distractors:
+    1. `err.type` — field access, not the type-switch syntax.
+    2. `switch err { case *T1: ... }` — value switch, not type
+       switch. Without `.(type)` the comparison is against
+       VALUES, not types.
+    3. `match err { ... }` — Rust pattern matching. Go has no
+       match keyword.
+
+  Yaegi caveat per design-docs/30: type switches on USER-
+  DEFINED types currently fall to `default` (reflection-bridge
+  quirk). The shape is still worth recognising; slots 7 + 9
+  use stdlib types for productive type-switch examples.

@@ -1,0 +1,75 @@
+target: go
+themeId: go/foundations/functions-and-multi-return
+type: fill-line
+order: 8
+prompt: |
+  Type the Go line that performs the `if err != nil` error check
+  after a call returns `(n, err)`. On error it should call
+  `handleError(err)` and return. The program forces an error and
+  prints `caught: oops`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'if err != nil { handleError(err); return }'
+  ts: |-
+    const result = parse(s);
+    if (result.err) { handleError(result.err); return; }
+    process(result.value);
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    func parse(s string) (int, error) {
+    	return 0, errors.New("oops")
+    }
+
+    func handleError(e error) {
+    	fmt.Println("caught:", e)
+    }
+
+    func process(n int) {
+    	fmt.Println("got", n)
+    }
+
+    func main() {
+    	n, err := parse("")
+    	${line}
+    	process(n)
+    }
+  distractors:
+    - match: 'if (err) { handleError(err); return }'
+      explain: |-
+        Two TS habits: Go doesn't take parens around `if` conditions,
+        and there are no truthy-tests on errors — `error` isn't a
+        bool. Compare against `nil` explicitly: `if err != nil`.
+    - match: 'if err { handleError(err); return }'
+      explain: |-
+        Go has no truthy / falsy. An `error` value is either `nil`
+        or non-nil — say so directly: `if err != nil { ... }`.
+    - match: 'if err === null { handleError(err); return }'
+      explain: |-
+        Two things: triple-equals is JS / TS, and Go's empty-marker
+        is `nil`, not `null`. The idiom is `if err != nil` — note
+        also the comparison is `!=` (we want the error-PRESENT
+        branch).
+    - match: 'if err == null { handleError(err); return }'
+      explain: |-
+        Two corrections at once. Go uses `nil` not `null`, AND you
+        want the `!= nil` branch (this body runs on error). The
+        idiom is `if err != nil { ... }`.
+expectStdout: |
+  caught: oops
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Four reflexes at once: no parens around the condition (Theme 4), `nil` not `null` (Theme 3), explicit `!= nil` comparison (Go has no truthy-tests on errors), and braces required around the body (Theme 4)."
+  - 'Go''s idiom: `if err != nil { ... }`. Plain `if err { ... }` doesn''t compile because `error` isn''t a bool.'
+  - 'Type `if err != nil { handleError(err); return }`.'
+notes: |
+  Migrated to input+Yaegi UX. Scaffold's parse always errors, so
+  the right line short-circuits before process. Distractors kept.

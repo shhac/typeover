@@ -1,0 +1,46 @@
+target: go
+themeId: go/idioms/project-layout
+type: mcq
+order: 1
+prompt: |
+  Pick the conventional directory path for the entry-point
+  source file of a binary called `serverd` inside a Go
+  module.
+
+  TypeScript: `src/index.ts` or `bin/serverd.ts` —
+  convention varies by tool. Go's `cmd/` directory
+  convention is widely followed (though not enforced).
+generator:
+  kind: variant
+  variants:
+    - id: cmd-binary-main
+      ts: |-
+        // TS: convention varies (bin/, src/, dist/).
+        // Go: cmd/<binary-name>/main.go.
+      canonical: "cmd/serverd/main.go"
+      distractors:
+        - "main/serverd.go"
+        - "bin/serverd/main.go"
+        - "src/serverd/main.go"
+hints:
+  - "Three segments: a top-level directory for binaries, the binary's name as a subdirectory, then `main.go` inside it."
+  - "`cmd/<binary-name>/main.go`."
+  - "`cmd/serverd/main.go`."
+runtime: none
+notes: |
+  Theme 7.6 opener. Convention:
+  - `cmd/<binary-name>/main.go` — one subdirectory per
+    binary; `main.go` is the entry point with `package main`
+    and `func main`.
+  - Multiple binaries → multiple `cmd/<name>/` dirs.
+
+  The directory-per-binary form is what `go build ./cmd/...`
+  iterates over to produce all binaries in one command.
+
+  Distractors:
+    1. `main/serverd.go` — non-conventional; doesn't compose
+       with multi-binary projects.
+    2. `bin/serverd/main.go` — `bin/` is for OUTPUTS in
+       most ecosystems, not sources.
+    3. `src/serverd/main.go` — JavaScript/Java habit;
+       Go doesn't use a `src/` parent.

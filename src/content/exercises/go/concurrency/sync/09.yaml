@@ -1,0 +1,83 @@
+target: go
+themeId: go/concurrency/sync
+type: freeform
+order: 9
+prompt: |
+  Theme 6.4 capstone + Module 6 capstone — pull together
+  Mutex + WaitGroup in one program. Three goroutines each
+  increment a shared `count` 100 times, guarded by a mutex.
+  Use a WaitGroup to wait for all three to finish, then
+  print the result.
+
+  1. `var wg sync.WaitGroup` + `var mu sync.Mutex`.
+  2. `count := 0`.
+  3. `wg.Add(3)`, launch 3 goroutines. Each:
+     - `defer wg.Done()`.
+     - Loops 100 times, each iteration:
+       `mu.Lock(); count++; mu.Unlock()`.
+  4. `wg.Wait()`.
+  5. Print `"count:"` + count.
+
+  Expected output: `count: 300`.
+
+  Without the mutex, the increments would race and the
+  final count would be nondeterministic + usually lower
+  than 300.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS analog: not directly comparable (JS is single-threaded).
+    // The shape mirrors Web Worker pools coordinating shared state.
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	var mu sync.Mutex
+    	count := 0
+    	wg.Add(3)
+    	for i := 0; i < 3; i++ {
+    		go func() {
+    			defer wg.Done()
+    			for j := 0; j < 100; j++ {
+    				mu.Lock()
+    				count++
+    				mu.Unlock()
+    			}
+    		}()
+    	}
+    	wg.Wait()
+    	fmt.Println("count:", count)
+    }
+expectStdout: |
+  count: 300
+hints:
+  - "Five pieces: WaitGroup + Mutex declarations, Add(3), the for-launch loop with each goroutine doing defer Done + a 100-iter loop of Lock-incr-Unlock, then Wait + final print."
+  - "The Lock/Unlock can be `mu.Lock(); count++; mu.Unlock()` on three lines (no defer needed for this trivial body because each iteration is its own critical section)."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Module 6 capstone — combines:
+
+  - Goroutines (theme 6.1)
+  - WaitGroup for "wait for N" (theme 6.4 slot 8)
+  - Mutex for shared-state protection (theme 6.4 slot 6)
+
+  Hand-wave on the defer-vs-not-defer for tight critical
+  sections: in the per-iteration Lock/Unlock here, the
+  bare-Unlock form is fine because the body is a single
+  fast op. For longer / fallible bodies, defer Unlock.
+
+  **Curriculum status after this slot: 6 of 7 modules
+  complete.** 49 themes, 441 exercises. Only Module 7
+  (idioms, 7 themes) remains.
+
+  Module 6 done: goroutines + channels + select + sync
+  all fully runnable thanks to the sync + time package
+  vendoring in this same auto-build session.

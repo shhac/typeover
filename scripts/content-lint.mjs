@@ -46,28 +46,38 @@ async function readYaml(path) {
   return parse(await readFile(path, "utf8"));
 }
 
-const modules = new Map(); // slug → { data, path }
-const themes = new Map(); // slug → { data, path } where slug is "<module>/<theme>"
+const modules = new Map(); // slug → { data, path } where slug is "<lang>/<module>"
+const themes = new Map(); // slug → { data, path } where slug is "<lang>/<module>/<theme>"
 const exercisesByTheme = new Map(); // themeSlug → Array<{ data, path, slug }>
 
+/* Multi-language tracks: file paths are
+ *   src/content/modules/<lang>/<module>.yaml
+ *   src/content/themes/<lang>/<module>/<theme>.yaml
+ *   src/content/exercises/<lang>/<module>/<theme>/<NN>.yaml
+ * The slug we build matches Astro's collection-id shape (lang
+ * prefix included) so the schema's moduleId / themeId fields
+ * compare equal to the path-derived keys. */
+
 for await (const path of glob(join(contentRoot, "modules", "**/*.yaml"))) {
-  const slug = basename(path, ".yaml");
+  const segments = relative(join(contentRoot, "modules"), path).split(sep);
+  /* `<lang>/<module>.yaml` → slug `<lang>/<module>`. */
+  const slug = `${segments[0]}/${basename(segments[segments.length - 1], ".yaml")}`;
   modules.set(slug, { data: await readYaml(path), path });
 }
 
 for await (const path of glob(join(contentRoot, "themes", "**/*.yaml"))) {
-  /* Theme slug = <module-dir>/<theme-basename>. */
+  /* `<lang>/<module>/<theme>.yaml` → slug `<lang>/<module>/<theme>`. */
   const segments = relative(join(contentRoot, "themes"), path).split(sep);
-  const slug = `${segments[0]}/${basename(segments[segments.length - 1], ".yaml")}`;
+  const slug = `${segments[0]}/${segments[1]}/${basename(segments[segments.length - 1], ".yaml")}`;
   themes.set(slug, { data: await readYaml(path), path });
 }
 
 for await (const path of glob(join(contentRoot, "exercises", "**/*.yaml"))) {
   const segments = relative(join(contentRoot, "exercises"), path).split(sep);
-  /* Exercise path is `<module>/<theme>/<NN>.yaml`. The themeId field
-   * inside is the authoritative parent reference — but we record the
-   * path-derived parent for cross-checking. */
-  const themeFromPath = `${segments[0]}/${segments[1]}`;
+  /* `<lang>/<module>/<theme>/<NN>.yaml`. The themeId field inside is
+   * the authoritative parent reference — but we record the path-
+   * derived parent for cross-checking. */
+  const themeFromPath = `${segments[0]}/${segments[1]}/${segments[2]}`;
   const exerciseSlug = `${themeFromPath}/${basename(segments[segments.length - 1], ".yaml")}`;
   const data = await readYaml(path);
   if (!exercisesByTheme.has(themeFromPath)) exercisesByTheme.set(themeFromPath, []);

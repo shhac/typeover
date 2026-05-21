@@ -33,7 +33,7 @@ import { getCollection } from "astro:content";
  * curriculum route would consume. */
 const themes = await getCollection("themes");
 const exercises = await getCollection("exercises");
-const sampleTheme = themes.find((t) => t.id === "foundations/variables");
+const sampleTheme = themes.find((t) => t.id === "go/foundations/variables");
 const sampleExerciseCount = sampleTheme
   ? exercises.filter((ex) => ex.data.themeId === sampleTheme.id).length
   : 0;

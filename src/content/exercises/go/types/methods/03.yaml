@@ -1,0 +1,68 @@
+target: go
+themeId: go/types/methods
+type: mcq
+order: 3
+prompt: |
+  Given a method declared with a POINTER receiver:
+
+  ```go
+  func (c *Counter) bump() { c.n++ }
+  ```
+
+  How do you CALL `bump` on a regular `Counter` value `c`? Pick
+  the form that works — Go's auto-addressing rules let you call
+  pointer-receiver methods through a value, but only when the
+  value is addressable.
+generator:
+  kind: variant
+  variants:
+    - id: counter
+      ts: 'const c = new Counter(); c.bump();'
+      canonical: "c.bump()"
+      distractors:
+        - "(&c).bump()  // verbose but works — needed only when c isn't addressable"
+        - "bump(&c)     // function-call form; bump is a method, not a free function"
+        - "Counter.bump(c)  // C#/Java-style static dispatch; Go has none"
+    - id: cart
+      ts: 'const c = new Cart(); c.add(2);'
+      canonical: "c.add(2)"
+      distractors:
+        - "(&c).add(2)     // verbose form — needed only when c isn't addressable"
+        - "add(&c, 2)      // function-call form; add is a method, not a free function"
+        - "Cart.add(c, 2)  // C#/Java-style static dispatch; Go has none"
+    - id: point
+      ts: 'const p = new Point(); p.scale(2);'
+      canonical: "p.scale(2)"
+      distractors:
+        - "(&p).scale(2)    // verbose form — needed only when p isn't addressable"
+        - "scale(&p, 2)     // function-call form; scale is a method, not a free function"
+        - "Point.scale(p, 2) // C#/Java-style static dispatch; Go has none"
+hints:
+  - "Go has AUTO-ADDRESSING for method calls: when you call a pointer-receiver method through an addressable value (a named variable, a field of an addressable struct, etc.), Go silently takes the address for you. Same syntax as a value-receiver call."
+  - "Just dot-and-call: `c.bump()`. No explicit `&` needed when `c` is a named variable."
+  - "`c.bump()`."
+runtime: none
+notes: |
+  Call-site is identical regardless of receiver kind — Go's
+  auto-addressing rule means a learner writing `c.bump()` doesn't
+  need to know or care whether `bump`'s declaration used a
+  pointer receiver, as long as `c` is addressable. This is the
+  point of the rule: the dot-syntax stays uniform.
+
+  Distractor 1 — `(&c).bump()` — is technically correct (the
+  unsugared form Go performs implicitly). Marked wrong here
+  because the IDIOMATIC form is the bare `c.bump()`; writing the
+  explicit address-take is noise unless the receiver is
+  non-addressable (e.g. `Counter{}.bump()` — a struct literal).
+  That non-addressable edge case is documented but not drilled —
+  per design-docs/26 sanity-check, Yaegi accepts pointer-receiver
+  calls on non-addressable literals where real `go build` rejects
+  them. We don't surface a "this won't compile" distractor that
+  Yaegi can't reproduce.
+
+  Distractor 2 — function-call form — re-pins slot 1's distinction
+  between method (receiver-in-parens) and free function (receiver
+  as normal param).
+
+  Distractor 3 — static dispatch — C#/Java leak. Go has no
+  type-name method dispatch; methods live on instances.

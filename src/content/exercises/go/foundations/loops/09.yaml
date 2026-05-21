@@ -1,0 +1,50 @@
+target: go
+themeId: go/foundations/loops
+type: freeform
+order: 9
+prompt: |
+  Write a program using Go's **while-style** `for` (a single
+  condition, no init or post) to print the powers of 2 strictly less
+  than 100 — `1`, `2`, `4`, `8`, `16`, `32`, `64`, one per line.
+
+  TypeScript would reach for `while (...)`. Go doesn't have `while`
+  at all; the one-clause `for` is the substitute.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let n = 1;
+    while (n < 100) {
+      console.log(n);
+      n *= 2;
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	n := 1
+    	for n < 100 {
+    		fmt.Println(n)
+    		n *= 2
+    	}
+    }
+expectStdout: |
+  1
+  2
+  4
+  8
+  16
+  32
+  64
+runtime: yaegi
+hints:
+  - "One-clause `for cond { ... }` is Go's while: no init, no post, just the condition. The loop runs until the condition is false."
+  - "Declare `n := 1` outside the loop; mutate it (`n *= 2`) inside. Once `n` hits 128 the condition fails and the loop exits."
+  - "`n := 1; for n < 100 { fmt.Println(n); n *= 2 }`"
+notes: |
+  Second freeform of Theme 5. Drills the while-style `for`. The
+  doubling sequence avoids float / strconv work — every value is an
+  int, every printout is a single integer. Pairs naturally with the
+  three-clause form from /08.

@@ -1,0 +1,83 @@
+target: go
+themeId: go/foundations/loops
+type: mcq
+order: 3
+prompt: |
+  TypeScript writes infinite loops as `while (true)`. Go has a
+  shorter idiomatic form — drop the condition entirely. Pick the
+  canonical Go translation.
+generator:
+  kind: variant
+  variants:
+    - id: event-loop
+      ts: 'while (true) { handleEvent(); }'
+      canonical: 'for { handleEvent() }'
+      distractors:
+        - 'for true { handleEvent() }'
+        - 'while (true) { handleEvent() }'
+        - 'for ;; { handleEvent() }'
+    - id: server-accept
+      ts: |
+        while (true) {
+          const conn = accept();
+          go handle(conn);
+        }
+      canonical: |-
+        for {
+            conn := accept()
+            go handle(conn)
+        }
+      distractors:
+        - |-
+          for true {
+              conn := accept()
+              go handle(conn)
+          }
+        - |-
+          while (true) {
+              const conn = accept()
+              go handle(conn)
+          }
+        - |-
+          for ;; {
+              conn := accept()
+              go handle(conn)
+          }
+    - id: poll-forever
+      ts: 'while (true) { poll(); sleep(1); }'
+      canonical: 'for { poll(); time.Sleep(time.Second) }'
+      distractors:
+        - 'for true { poll(); time.Sleep(time.Second) }'
+        - 'while (true) { poll(); time.Sleep(time.Second) }'
+        - 'loop { poll(); time.Sleep(time.Second) }'
+hints:
+  - "Go's third for-shape is just `for { body }` — no clauses at all. It runs forever; the only way out is `break` or `return` from inside the body."
+  - "Both `for true { ... }` and `for ;; { ... }` are legal Go but unidiomatic. The bare `for {` is the form you'll see in every real codebase."
+  - "Canonical: `for { ... }`. No semicolons. No `true`. No `while`."
+notes: |
+  Third Theme 5 exercise. Covers Go's third for-shape — the
+  no-clauses infinite loop. The most idiomatic translation of TS
+  `while (true)` is just `for { ... }` with no condition.
+
+  Variants cover three realistic infinite-loop patterns:
+   - Event-loop body (single statement)
+   - Server accept-and-spawn (multi-statement with goroutine
+     foreshadowing — `go handle(conn)` is the only Go-specific
+     keyword the learner has met that doesn't exist in TS, and
+     it'll get its own theme in Module 6)
+   - Polling with sleep (introduces `time.Sleep(time.Second)`,
+     the canonical pattern for polite polling)
+
+  Distractor pattern is consistent:
+   - `for true { ... }` — legal Go (untyped constant `true` is
+     just a condition expression that's always true), but
+     unidiomatic. Real Go uses `for {`.
+   - `while (true) { ... }` — straight TS leakage, no `while` in Go.
+   - `for ;; { ... }` — also legal, but the verbose three-clause
+     form. Same trap as `for ; cond ; { ... }` in slot 2.
+   - `loop { ... }` — Rust syntax, an easy near-miss for anyone
+     who's written Rust before.
+
+  Variant kind so each example gets a contextually meaningful
+  body.
+runtime: none

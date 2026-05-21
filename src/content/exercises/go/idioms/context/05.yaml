@@ -1,0 +1,47 @@
+target: go
+themeId: go/idioms/context
+type: fill-word
+order: 5
+prompt: |
+  After a context is cancelled, this method returns a
+  non-nil error describing WHY:
+  `context.Canceled` (explicit cancel) or
+  `context.DeadlineExceeded` (WithTimeout/WithDeadline
+  expired). Type the method name.
+generator:
+  kind: template
+  vars:
+    word:
+      - "Err"
+  ts: |-
+    // TS: signal.reason — the why-aborted field.
+  canonical: |-
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    )
+
+    func main() {
+    	ctx, cancel := context.WithCancel(context.Background())
+    	cancel()
+    	fmt.Println(ctx.${word}())
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Three letters, capitalised. Short for `error`. Same word as Module 5 theme 1's error-return convention."
+  - "`Err`."
+  - "`Err`."
+notes: |
+  `ctx.Err()` returns `nil` while the context is active,
+  then a sentinel error after cancellation. The two sentinel
+  values are public so callers can compare with `errors.Is`:
+
+  ```
+  if errors.Is(ctx.Err(), context.DeadlineExceeded) { ... }
+  ```
+
+  Pair with `<-ctx.Done()` (slot 4): Done channel CLOSES,
+  signalling "check Err".

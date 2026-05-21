@@ -1,0 +1,43 @@
+target: go
+themeId: go/collections/iteration
+type: fill-word
+order: 7
+prompt: |
+  Sum a slice of ints — the productive use of `for _, v := range`.
+  The blank is the placeholder for "I don't care about the index".
+
+  TypeScript:
+  ```ts
+  let sum = 0;
+  for (const n of nums) sum += n;
+  ```
+generator:
+  kind: template
+  vars:
+    name: [nums, scores, prices, ages, counts]
+    skip: ["_"]
+  ts: |-
+    let sum = 0;
+    for (const n of ${name}) sum += n;
+  canonical: |-
+    for ${skip}, n := range ${name} { sum += n }
+blanks: [skip]
+hints:
+  - "Slice range yields TWO values: index, value. The blank identifier `_` is Go's 'I don't care about this positional value' marker — same `_` you used for multi-return error-discarding."
+  - "One character. The literal blank identifier."
+  - "`_`."
+runtime: none
+notes: |
+  Productive `_` slot. Fill-word because the answer is exactly one
+  character — `_`. The bigger teaching beat is that the iteration
+  pattern from TS (`for-of` summing) cleanly translates to Go but
+  needs the explicit "throw away the index" marker.
+
+  Out of scope here: Go 1.22+'s `slices.Sum` doesn't yet exist (the
+  more recent `slices.Min`/`slices.Max` do, but no `Sum`). Manual
+  range loop is still the idiomatic accumulator pattern.
+
+  Why fill-word over fill-line: one character. MCQ would oversell
+  the choice (`_` vs `i` vs `n` vs nothing); fill-word forces the
+  learner to type it, which cements the muscle memory needed for
+  multi-return discarding in later modules.

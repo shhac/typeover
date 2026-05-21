@@ -1,0 +1,53 @@
+target: go
+themeId: go/foundations/strings-bytes-runes
+type: mcq
+order: 1
+prompt: |
+  TypeScript has one string type and no character type — `'A'` and
+  `"A"` are both strings. Go distinguishes single-quote from double-
+  quote: one is a single-codepoint *rune*, the other is a string.
+  Which Go form gives you a single character that you could compare
+  with other characters?
+generator:
+  kind: variant
+  variants:
+    - id: letter-A
+      ts: "let c = 'A';"
+      canonical: "c := 'A'"
+      distractors:
+        - 'c := "A"'
+        - 'c := byte(65)'
+        - 'c := 65'
+    - id: zero-digit
+      ts: "let c = '0';"
+      canonical: "c := '0'"
+      distractors:
+        - 'c := "0"'
+        - 'c := byte(48)'
+        - 'c := 48'
+    - id: newline
+      ts: "let c = '\\n';"
+      canonical: "c := '\\n'"
+      distractors:
+        - 'c := "\\n"'
+        - 'c := byte(10)'
+        - 'c := 10'
+hints:
+  - "Go and TypeScript draw the line between quote styles differently. In TS, `'x'` and `\"x\"` are identical — both strings. In Go, those two forms produce *different types* — one is a single codepoint, the other a string of length one."
+  - "Single-quote produces a `rune` — Go's 32-bit Unicode codepoint type. Double-quote produces a `string`. The rune is what you want when you mean 'one character.'"
+  - "The canonical uses single quotes: `c := 'A'` (or whichever character the prompt shows)."
+notes: |
+  First Theme 3 exercise. Establishes the single-most-confusing
+  TS→Go translation in the string family: quote style determines
+  type. A TS dev's reflex is `'x' === "x"`; Go's reflex is "single
+  quote = rune, double quote = string."
+
+  Variants cover three flavours of single-character intent (letter,
+  digit, escape sequence) to drill the rule across contexts. The
+  `byte(N)` distractor is a real near-miss — you CAN make a single
+  byte that matches ASCII, but it's the wrong type (uint8 vs rune)
+  and the wrong reflex.
+
+  Uses variant generator because each character's canonical/distractor
+  set is character-specific.
+runtime: none

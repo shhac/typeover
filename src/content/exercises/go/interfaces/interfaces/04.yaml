@@ -1,0 +1,39 @@
+target: go
+themeId: go/interfaces/interfaces
+type: fill-word
+order: 4
+prompt: |
+  Type the method NAME inside the `Stringer` interface. Note the
+  capitalisation — Go's idiomatic interface methods are EXPORTED
+  (capital first letter), even when the interface itself is
+  unexported, because non-exported methods can't be called from
+  another package.
+generator:
+  kind: template
+  vars:
+    method: ["String"]
+  ts: |-
+    interface Stringer {
+      toString(): string;
+    }
+  canonical: |-
+    type Stringer interface {
+    	${method}() string
+    }
+blanks: [method]
+hints:
+  - "TS uses `toString`; Go's canonical equivalent is the same word minus the prefix and capitalised. Match the convention `fmt` uses internally — when you pass any value to `fmt.Println`, it calls this method if defined."
+  - "Six letters, capitalised."
+  - "`String`."
+runtime: none
+notes: |
+  Drills the EXPORTED-METHOD convention. `Stringer` is the stdlib
+  interface (`fmt.Stringer`) — any type with `String() string`
+  satisfies it automatically, and `fmt.Println` will use it
+  instead of the default `%v` formatting.
+
+  Single-value var because the convention is canonical: this
+  exact method NAME is the stdlib convention, not a variant.
+
+  Slot 5 will drill `any` for the empty interface — the pair
+  covers the two most-common interface idioms (Stringer + any).

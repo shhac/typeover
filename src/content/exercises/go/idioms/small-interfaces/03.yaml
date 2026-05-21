@@ -1,0 +1,46 @@
+target: go
+themeId: go/idioms/small-interfaces
+type: mcq
+order: 3
+prompt: |
+  Pick the IDIOMATIC interface signature for a function that
+  needs to read bytes from somewhere. (The smallest
+  interface that does this in Go's stdlib has ONE method.)
+generator:
+  kind: variant
+  variants:
+    - id: io-reader
+      ts: |-
+        // TS analog: any ReadableStream / async iterator works
+        // — structural typing handles "reads bytes from somewhere".
+        // Go's idiom is the single-method io.Reader.
+      canonical: "type Reader interface { Read(p []byte) (n int, err error) }"
+      distractors:
+        - "type Reader interface { Read() ([]byte, error); ReadByte() (byte, error); ReadAll() ([]byte, error) }"
+        - "type Reader interface { Read([]byte) int }"
+        - "type Reader struct { Read func([]byte) (int, error) }"
+hints:
+  - "ONE method. Takes a byte slice to read INTO. Returns the number of bytes read AND an error. The byte slice is allocated by the caller (avoids allocation pressure)."
+  - "`Read(p []byte) (n int, err error)`."
+  - "One method: `Read(p []byte) (n int, err error)`."
+runtime: none
+notes: |
+  `io.Reader` is the second-most-pervasive small interface
+  after `Stringer`. One method. Implementations include
+  files, network connections, in-memory buffers, gzip
+  decoders — anything that produces a stream of bytes.
+
+  Distractors:
+    1. Three methods — violates the single-method
+       small-interface ideal. Real `io.Reader` is just one;
+       the other methods live on richer interfaces like
+       `io.ByteReader`, `io.ReadAll` (function not method).
+    2. Missing the error return — the canonical signature
+       returns `(n int, err error)` because partial reads
+       and EOF must be reported.
+    3. `struct` with a `Read` field — confuses interface
+       (method set) with struct (fields). Theme 4.1 slot 1
+       distractor.
+
+  This signature has shipped in `io` since Go 1.0; it's the
+  most-implemented interface in the entire ecosystem.

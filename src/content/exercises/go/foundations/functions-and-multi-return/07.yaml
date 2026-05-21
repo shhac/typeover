@@ -1,0 +1,75 @@
+target: go
+themeId: go/foundations/functions-and-multi-return
+type: fill-line
+order: 7
+prompt: |
+  Type the Go line that, on empty input, returns the zero value of
+  `int` alongside an error built from `"empty input"`. The program
+  calls `parse("")` and prints the error. It should print
+  `empty input`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'return 0, errors.New("empty input")'
+  ts: |-
+    function parse(s) {
+      if (!s) return { value: 0, err: new Error("empty input") };
+      return { value: parseValid(s), err: null };
+    }
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    func parseValid(s string) int { return 42 }
+
+    func parse(s string) (int, error) {
+    	if s == "" {
+    		${line}
+    	}
+    	return parseValid(s), nil
+    }
+
+    func main() {
+    	_, err := parse("")
+    	fmt.Println(err)
+    }
+  distractors:
+    - match: 'return null, "empty input"'
+      explain: |-
+        Two TS habits at once. Go doesn't have `null` — the zero value
+        for `int` is `0`. And the second return is an `error`, not a
+        bare string — wrap the message with `errors.New(...)`.
+    - match: 'return (0, "empty input")'
+      explain: |-
+        Go's multi-return isn't a tuple — no parens, no array. The
+        values are bare, comma-separated. (Parens around the return
+        VALUES; parens around the return TYPES in the function
+        signature — different thing.)
+    - match: 'return errors.New("empty input")'
+      explain: |-
+        The function signature is `(int, error)`. You have to return
+        both — the value AND the error. The zero value `0` goes first;
+        the error goes second.
+    - match: 'return nil, errors.New("empty input")'
+      explain: |-
+        `nil` is Go's null-ish for pointers, interfaces, maps, slices,
+        and channels. Not for `int` — its zero value is `0`. Use `0`
+        as the first return.
+expectStdout: |
+  empty input
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Two things have to be right. The first is the zero value for the value type — for `int`, that's `0` (not `null`, not `nil`, not omitted). The second is how Go constructs an error from a string — there's a function in the `errors` package for this."
+  - 'Shape: `return ZERO_VALUE, errors.New("msg")`. Bare commas — no array, no tuple parens. The value comes first, the error comes second.'
+  - 'Type `return 0, errors.New("empty input")`.'
+notes: |
+  Migrated to input+Yaegi UX. Scaffold provides parse with a
+  successful branch (parseValid → 42) and the failing branch the
+  learner fills. main prints the error; the Error() method's value
+  surfaces as the line's expected output. Distractors kept.

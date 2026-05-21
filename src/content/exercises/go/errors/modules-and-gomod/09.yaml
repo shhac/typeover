@@ -1,0 +1,81 @@
+target: go
+themeId: go/errors/modules-and-gomod
+type: freeform
+order: 9
+prompt: |
+  Theme 5.5 capstone + Module 5 capstone — build a small
+  program that pulls together the module's full surface:
+  package declaration, multi-import block, exported
+  qualified calls, and the error pattern from theme 5.1.
+
+  1. `package main`.
+  2. Import `errors`, `fmt`, `strconv` (grouped block,
+     alphabetical).
+  3. `divide(a, b int) (int, error)` — return `0,
+     errors.New("divide by zero")` when `b == 0`; otherwise
+     `a/b, nil`.
+  4. In `func main`:
+     - Call `divide(10, 0)`; if err, print `error:` and the
+       error message.
+     - Call `strconv.Itoa(7 + 3)` and print it after `sum:`.
+
+  Expected output:
+  ```
+  error: divide by zero
+  sum: 10
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function divide(a: number, b: number): [number, Error | null] {
+      if (b === 0) return [0, new Error("divide by zero")];
+      return [a / b, null];
+    }
+    const [_, err] = divide(10, 0);
+    if (err) console.log("error:", err.message);
+    console.log("sum:", String(7 + 3));
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    	"strconv"
+    )
+
+    func divide(a, b int) (int, error) {
+    	if b == 0 {
+    		return 0, errors.New("divide by zero")
+    	}
+    	return a / b, nil
+    }
+
+    func main() {
+    	if _, err := divide(10, 0); err != nil {
+    		fmt.Println("error:", err)
+    	}
+    	fmt.Println("sum:", strconv.Itoa(7+3))
+    }
+expectStdout: |
+  error: divide by zero
+  sum: 10
+hints:
+  - "Three pieces: (1) grouped import block with three entries alphabetised, (2) `divide(a, b int) (int, error)` with the b==0 guard returning errors.New(...), (3) main() that calls divide + checks err, then strconv.Itoa + print."
+  - "Error idiom from theme 5.1: `if _, err := divide(10, 0); err != nil { ... }`. The if-init shape keeps err scoped to the branch."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Module 5 capstone. Pulls together:
+    - `package main` + grouped imports (theme 5.4)
+    - `errors.New` + `(T, error)` return shape (theme 5.1)
+    - Multi-package qualified calls (theme 5.4 slot 7)
+    - If-init err != nil check (theme 5.1 slot 6)
+
+  Curriculum status: Modules 1-5 complete (45 themes, 405
+  exercises). Modules 6 (concurrency, 4 themes) and 7
+  (idioms, 7 themes) remain.
+
+  Yaegi caveat: the stdlib subset vendored excludes `os` and
+  `runtime`; capstone uses `errors`/`fmt`/`strconv` which
+  ARE available.

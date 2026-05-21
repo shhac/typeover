@@ -1,0 +1,69 @@
+target: go
+themeId: go/interfaces/interfaces
+type: mcq
+order: 2
+prompt: |
+  THE central Go-vs-TS shift for interfaces. In TypeScript, a
+  class explicitly declares which interfaces it implements:
+
+  ```ts
+  class English implements Greeter {
+    greet() { return "Hello"; }
+  }
+  ```
+
+  How do you say "English implements Greeter" in Go?
+generator:
+  kind: variant
+  variants:
+    - id: greeter
+      ts: |-
+        interface Greeter { greet(): string }
+        class English implements Greeter {
+          greet() { return "Hello"; }
+        }
+      canonical: |-
+        type English struct{}
+        func (e English) Greet() string { return "Hello" }
+        // English satisfies Greeter IMPLICITLY — no `implements` keyword.
+        // Any type with the matching method set satisfies the interface.
+      distractors:
+        - |-
+          type English struct{} implements Greeter
+          func (e English) Greet() string { return "Hello" }
+        - |-
+          type English struct{}
+          func (e English) Greet() string { return "Hello" }
+          English.implements(Greeter)
+        - |-
+          type English Greeter struct{}
+          func (e English) Greet() string { return "Hello" }
+hints:
+  - "Go has NO `implements` keyword. Interface satisfaction is IMPLICIT — if a type has all the methods an interface requires, it satisfies the interface. The compiler checks this when you assign the type to an interface-typed variable or pass it to an interface-typed parameter."
+  - "Just declare the methods. The connection from concrete type to interface is established by the METHODS, not by a declaration. No annotation needed; the relationship is structural."
+  - "Just `type English struct{}` + the methods — no `implements` anywhere."
+runtime: none
+notes: |
+  THE structural-typing-without-annotation beat. TS has
+  structural typing too (it's the whole point of TS interfaces)
+  but TS REQUIRES the `implements` declaration for nominal
+  clarity. Go doesn't even offer the declaration — the
+  relationship is purely structural and inferred.
+
+  Consequences worth knowing (not drilled here, but foreshadowed
+  for later slots):
+    - A type can satisfy multiple interfaces without "knowing"
+      about any of them.
+    - Refactoring an interface (adding a method) silently breaks
+      all implementers — there's no `implements` to flag the gap.
+    - The compiler check fires at the ASSIGNMENT/PASS site, not
+      the declaration site. Use `var _ Greeter = English{}` at
+      file scope as a compile-time assertion. (Module 4.1 slot
+      authoring may add a fill-line for this idiom.)
+
+  Distractors:
+    1. `struct{} implements Greeter` — TS keyword leak.
+    2. `English.implements(Greeter)` — runtime registration
+       call; some languages (Rust traits, Java) do this.
+    3. `type English Greeter struct{}` — invented form mixing
+       struct + interface declaration.

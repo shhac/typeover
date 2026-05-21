@@ -1,0 +1,44 @@
+target: go
+themeId: go/concurrency/goroutines
+type: mcq
+order: 2
+prompt: |
+  Pick the statement that is TRUE about goroutines.
+generator:
+  kind: variant
+  variants:
+    - id: cheap-and-multiplexed
+      ts: |-
+        // TS/Node: a "thread" is an OS thread (worker_threads) —
+        // expensive (~MB stack). Promises are NOT threads — they
+        // run on the same event loop.
+        // Go: goroutines start at ~2 KB stack, multiplex over
+        // a small pool of OS threads.
+      canonical: "Goroutines are cheap (a few KB of stack) and the runtime multiplexes many of them over a small pool of OS threads (M:N scheduler)."
+      distractors:
+        - "Each goroutine maps to one OS thread; starting 10,000 goroutines starts 10,000 threads."
+        - "Goroutines are coroutines — they share a single OS thread and yield cooperatively (no true parallelism)."
+        - "Goroutines must be started via the `runtime.Spawn(...)` builtin to register with the scheduler."
+hints:
+  - "Two parts: how MUCH do they cost (stack size), and how do they relate to OS threads?"
+  - "Cheap. Multiplexed M:N (many goroutines, few threads)."
+  - "Cheap + M:N multiplexed."
+runtime: none
+notes: |
+  Foundational mental model. The "cheap" + "multiplexed"
+  combo is what makes goroutines the right primitive for
+  things you'd reach for callbacks or threads in other
+  ecosystems.
+
+  Distractors:
+    1. "1:1 mapping to OS threads" — that's Java/C# threads;
+       Go's whole point is to break that.
+    2. "Cooperative single-thread coroutines" — that's
+       Node's event loop / Python's asyncio; Go IS parallel
+       across cores by default.
+    3. "Must register via runtime.Spawn" — invented API; the
+       only registration is the `go` keyword.
+
+  Real-world implication: you can fan out a goroutine per
+  request, per item, per worker without thinking about
+  thread-pool sizing.

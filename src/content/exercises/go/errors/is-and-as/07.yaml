@@ -1,0 +1,82 @@
+target: go
+themeId: go/errors/is-and-as
+type: fill-line
+order: 7
+prompt: |
+  Productive use of `errors.As`. The scaffold calls
+  `strconv.Atoi("abc")` (a known stdlib failure path), which
+  returns a `*strconv.NumError` wrapped in the error
+  interface. Use `errors.As` to extract it and access its
+  `Func` field.
+
+  Type the if-condition line.
+
+  Expected output: `Atoi`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if errors.As(err, &numErr) {"
+  ts: |-
+    // TS: try/catch + check `e.constructor.name === "..."`. Verbose.
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    	"strconv"
+    )
+
+    func main() {
+    	_, err := strconv.Atoi("abc")
+    	var numErr *strconv.NumError
+    	${line}
+    		fmt.Println(numErr.Func)
+    	}
+    }
+  distractors:
+    - match: "if numErr, ok := err.(*strconv.NumError); ok {"
+      explain: |-
+        Type assertion — works when `err` IS exactly that type
+        directly, but fails after wrapping. Real-world callers
+        receive wrapped errors; `errors.As` walks the chain.
+        For unwrapped errors the assertion works, but the
+        idiom for "extract this type from possibly-wrapped"
+        is `errors.As`.
+    - match: "if errors.Is(err, numErr) {"
+      explain: |-
+        Wrong tool — `errors.Is` matches by identity; you want
+        type extraction. `numErr` here is a nil pointer, so
+        this would compile but do the wrong thing.
+    - match: "if errors.As(err, numErr) {"
+      explain: |-
+        Missing `&` before `numErr`. `errors.As` WRITES into
+        the target through a pointer; it needs `&numErr`
+        (pointer to the *NumError variable, which IS
+        **NumError).
+    - match: "if errors.As(err, &strconv.NumError{}) {"
+      explain: |-
+        Address of a temporary literal — invalid in Go (can't
+        take address of a struct literal in this position) and
+        wouldn't let you USE the extracted value afterwards
+        anyway. Declare a variable first, then take its
+        address.
+expectStdout: |
+  Atoi
+runtime: yaegi
+blanks: [line]
+hints:
+  - "`errors.As(err, &numErr)` — pass the address of the typed variable. After the call, `numErr` is bound to the extracted error (or nil if no match)."
+  - "`if errors.As(err, &numErr) {`."
+  - "`if errors.As(err, &numErr) {`."
+notes: |
+  Productive use of slot 2's recognition. Uses `*strconv.
+  NumError` from the stdlib because per design-docs/30, Yaegi's
+  `errors.As` works cleanly on stdlib error types but fails on
+  Yaegi-defined custom types (reflection bridging issue). The
+  lesson — "extract a typed error from a possibly-wrapped chain"
+  — is fully exercised even though the example type is stdlib.
+
+  In real production code the target type is usually
+  user-defined; the API shape is identical.

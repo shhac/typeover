@@ -1,0 +1,44 @@
+target: go
+themeId: go/interfaces/generics
+type: fill-word
+order: 5
+prompt: |
+  Type the constraint that requires T to support `==` and
+  `!=` — and therefore usable as a map key inside the function
+  body.
+generator:
+  kind: template
+  vars:
+    constraint: ["comparable"]
+  ts: |-
+    function uniq<T>(xs: T[]): T[] {
+      const seen = new Set<T>();
+      return xs.filter(x => !seen.has(x) && (seen.add(x), true));
+    }
+  canonical: |-
+    func Uniq[T ${constraint}](xs []T) []T {
+    	seen := make(map[T]bool)
+    	out := []T{}
+    	for _, x := range xs {
+    		if !seen[x] {
+    			seen[x] = true
+    			out = append(out, x)
+    		}
+    	}
+    	return out
+    }
+blanks: [constraint]
+hints:
+  - "Built-in constraint that's stricter than `any` — requires `==` works on T. Lowercase, ten letters. THE most common constraint after `any`."
+  - "Ten letters."
+  - "`comparable`."
+runtime: none
+notes: |
+  Counterpart to slot 4 (`any`). Paired drills for the two
+  built-in constraints that cover ~90% of real generic Go code.
+  Custom type-set constraints (`Ordered`, `Number`) are slot 3's
+  beat; this slot is the canonical one-word builtin.
+
+  Canonical body uses `seen := make(map[T]bool)` — THE reason
+  to constrain on `comparable`. Without it, `make(map[T]bool)`
+  won't compile (T isn't guaranteed to be a valid key).

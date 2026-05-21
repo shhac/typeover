@@ -28,8 +28,12 @@ interface FillBlankLineInputProps {
   /** The exact stdout the substituted canonical should produce when
    *  the learner's input is correct. */
   expectStdout: string;
-  /** Must be "yaegi" for the input+Yaegi grading mode (schema enforces). */
-  runtime: "yaegi";
+  /** Which client-side runtime to grade against. Today: `"yaegi"` for
+   *  the Go track, `"zig"` for the Zig track. Schema's
+   *  `validateFillLineMode` restricts to these. Internal dispatch
+   *  arrives with the use-yaegi-run → use-runtime-run rename in
+   *  Step 5; today this component still only drives Yaegi. */
+  runtime: "yaegi" | "zig";
   /** Alternate submission strings that grade correct even when
    *  Yaegi can't run them (e.g. Go 1.21+ generic-stdlib forms our
    *  Yaegi build doesn't support yet). Whitespace-normalised match.

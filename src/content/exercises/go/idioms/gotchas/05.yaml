@@ -1,0 +1,47 @@
+target: go
+themeId: go/idioms/gotchas
+type: fill-word
+order: 5
+prompt: |
+  Type the builtin function used to FORCE a fresh backing
+  array when copying a slice. Pattern:
+
+  ```go
+  b := make([]int, len(src))
+  ${word}(b, src)
+  ```
+
+  This is the antidote to slice-aliasing surprises (slot 2).
+generator:
+  kind: template
+  vars:
+    word:
+      - "copy"
+  ts: |-
+    // TS: const b = [...src] — spread operator.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	a := []int{1, 2, 3, 4}
+    	b := make([]int, len(a))
+    	${word}(b, a)
+    	b[0] = 99
+    	fmt.Println(a, b)
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Four letters, lowercase. Same English word for duplicating data."
+  - "`copy`."
+  - "`copy`."
+notes: |
+  Pin the builtin. `copy(dst, src)` copies element-wise up
+  to `min(len(dst), len(src))` elements. The pattern
+  `make + copy` produces a true independent slice —
+  mutations on `b` don't bleed to `a`.
+
+  Observable evidence in the output: `a` keeps its
+  original values; `b[0]` only mutates `b`.

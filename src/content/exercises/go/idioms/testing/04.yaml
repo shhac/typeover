@@ -1,0 +1,40 @@
+target: go
+themeId: go/idioms/testing
+type: fill-word
+order: 4
+prompt: |
+  Type the prefix that every top-level test function name
+  must start with. (`go test` discovers tests by this
+  prefix.)
+generator:
+  kind: template
+  vars:
+    word:
+      - "Test"
+  ts: |-
+    // TS: no equivalent — jest discovers via filename + describe/it calls.
+  canonical: |-
+    // _test.go file shape (not runnable directly):
+
+    package mypkg
+
+    import "testing"
+
+    func ${word}Add(t *testing.T) {
+    	if 1+1 != 2 {
+    		t.Errorf("math broken")
+    	}
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Four letters, capitalised — same word as the file suffix `_test.go`."
+  - "`Test`."
+  - "`Test`."
+notes: |
+  Pin the prefix. Note the canonical here is a
+  documentation-style snippet (not runnable) — Yaegi can't
+  import `testing` (see design-docs/30), so this slot is
+  `runtime: none` and the canonical is illustrative.
+
+  Slot 8 demonstrates the runnable equivalent with a mock T.

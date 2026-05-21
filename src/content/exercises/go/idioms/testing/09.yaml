@@ -1,0 +1,100 @@
+target: go
+themeId: go/idioms/testing
+type: freeform
+order: 9
+prompt: |
+  Theme 7.4 capstone — table-driven test with a deliberate
+  failure case to show the failure-reporting shape.
+
+  1. Function under test: `func double(n int) int { return
+     n * 2 }`.
+  2. Three cases:
+     - `{"double zero", 0, 0}` — passes.
+     - `{"double three", 3, 6}` — passes.
+     - `{"double four BROKEN", 4, 7}` — fails (4*2 is 8,
+       not 7).
+  3. Table-driven loop using mock-T `Errorf` pattern.
+  4. Main reports PASS/FAIL count.
+
+  Expected output:
+  ```
+  double four BROKEN: got 8, want 7
+  FAIL (1 failed)
+  ```
+
+  The failure line is what `t.Errorf` would print in a
+  real test run; main aggregates with the count for
+  user-facing summary.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: test.each([...])('double %i', ...) — same shape with jest.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type T struct{ failures int }
+
+    func (t *T) Errorf(format string, args ...any) {
+    	t.failures++
+    	fmt.Printf(format, args...)
+    	fmt.Println()
+    }
+
+    func double(n int) int { return n * 2 }
+
+    func TestDouble(t *T) {
+    	cases := []struct {
+    		name string
+    		in   int
+    		want int
+    	}{
+    		{"double zero", 0, 0},
+    		{"double three", 3, 6},
+    		{"double four BROKEN", 4, 7},
+    	}
+    	for _, c := range cases {
+    		got := double(c.in)
+    		if got != c.want {
+    			t.Errorf("%s: got %d, want %d", c.name, got, c.want)
+    		}
+    	}
+    }
+
+    func main() {
+    	t := &T{}
+    	TestDouble(t)
+    	if t.failures > 0 {
+    		fmt.Printf("FAIL (%d failed)\n", t.failures)
+    	} else {
+    		fmt.Println("PASS")
+    	}
+    }
+expectStdout: |
+  double four BROKEN: got 8, want 7
+  FAIL (1 failed)
+hints:
+  - "Five pieces: T struct with failure counter, double function, table with three cases (the third deliberately wrong), table loop with Errorf, main with PASS/FAIL aggregate."
+  - "T's Errorf increments a counter so main can report the total."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Theme 7.4 capstone. Demonstrates the COMPLETE test
+  feedback loop: case-level message via Errorf + suite-
+  level aggregate via main. Mock-T tracks failure count
+  instead of just a boolean — closer to real testing.T's
+  behaviour where multiple failures accumulate within a
+  single test function before t.FailNow / t.Fatal aborts.
+
+  Module 7 status: 5 of 7 themes done. Themes 7.6 (project-
+  layout) and 7.7 (gotchas) remain. Both should be
+  authorable in the next 1-2 ticks.
+
+  Yaegi tracker (design-docs/30): `testing` package is
+  NOT extractable via `yaegi extract` because it's
+  coupled to the `go test` runner binary. Mock-T is the
+  workaround. WHAT RETIRES WHEN FIXED: slots 6-9
+  canonicals could swap mock-T for `*testing.T` and the
+  scaffold could simplify (drop mock-T type definition).

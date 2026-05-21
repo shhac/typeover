@@ -1,0 +1,11 @@
+target: go
+moduleId: go/concurrency
+title: Select
+order: 3
+prerequisites: [go/concurrency/channels]
+intro: |
+  `select` waits on multiple channel operations and runs the case
+  for whichever is ready first. With a `default` branch it becomes
+  non-blocking. Paired with `time.After(d)` it becomes a timeout.
+  This is the closest thing Go has to a "wait on a set of futures"
+  primitive.

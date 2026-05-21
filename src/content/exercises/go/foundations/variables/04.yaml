@@ -1,0 +1,53 @@
+target: go
+themeId: go/foundations/variables
+type: mcq
+order: 4
+prompt: |
+  TypeScript can declare several variables in one statement by
+  comma-separating them. Which is the idiomatic Go form for the
+  same intent?
+generator:
+  kind: template
+  vars:
+    a: [a, x, lo, first]
+    b: [b, y, hi, last]
+    av: ["1", "10", "0", "-1"]
+    bv: ["2", "20", "1", "0"]
+  ts: |-
+    let ${a} = ${av}, ${b} = ${bv};
+  canonical: |-
+    ${a}, ${b} := ${av}, ${bv}
+  distractors:
+    - "${a} := ${av}, ${b} := ${bv}"
+    - "var ${a}, ${b} = ${av}, ${bv}"
+    - "${a}, ${b} = ${av}, ${bv}"
+    - "let ${a}, ${b} = ${av}, ${bv}"
+hints:
+  - |-
+    Go has a single-statement shape for multi-declaration that takes
+    a tuple on each side — names on the left, values on the right.
+    No second `:=`, no `let`, no `var` keyword needed at function
+    scope.
+  - |-
+    The shape is `name1, name2 := expr1, expr2`. Comma between
+    names, comma between values, one `:=` in the middle. (This same
+    shape comes back when you unpack multi-return values later in
+    the curriculum.)
+  - |-
+    `${a}, ${b} := ${av}, ${bv}`
+notes: |
+  Introduced 2026-05-20 to fix the design-docs/02 MCQ-first
+  violation flagged on the previous slot-7 (now slot-8) fill-line —
+  the multi-decl shape was being introduced productively without any
+  prior recognition exposure. This MCQ is the recognition slot; the
+  fill-line two slots later is the production slot.
+
+  Distractors:
+    1. `a := 1, b := 2` — two `:=` in one statement isn't a Go
+       thing. The single-`:=`-with-tuples shape is the point.
+    2. `var a, b = 1, 2` — compiles but un-idiomatic at function
+       scope; the same pattern came up in slot 02's distractor bank.
+    3. `a, b = 1, 2` — re-assignment, not declaration; `a` and `b`
+       don't exist yet.
+    4. `let a, b = 1, 2` — TypeScript.
+runtime: none

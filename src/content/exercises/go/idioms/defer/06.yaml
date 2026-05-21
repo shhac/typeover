@@ -1,0 +1,61 @@
+target: go
+themeId: go/idioms/defer
+type: fill-line
+order: 6
+prompt: |
+  Write the deferred call that prints `world` AFTER the
+  function's other work finishes. The scaffold already prints
+  `hello` directly; you're adding the line that defers the
+  second print.
+
+  Expected output:
+  ```
+  hello
+  world
+  ```
+
+  Defer fires when the enclosing function returns — `main`
+  in this case.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'defer fmt.Println("world")'
+  ts: |-
+    // TS: try { console.log("hello"); } finally { console.log("world"); }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	${line}
+    	fmt.Println("hello")
+    }
+  distractors:
+    - match: 'fmt.Println("world")'
+      explain: |-
+        Missing the `defer` keyword — this would print "world"
+        FIRST (because it's the first statement), then "hello".
+        The slot wants "world" to print AFTER "hello" via defer.
+    - match: 'defer { fmt.Println("world") }'
+      explain: |-
+        Block syntax — defer takes a single function call, not
+        a block. The shape is `defer <call-expression>`.
+    - match: 'finally fmt.Println("world")'
+      explain: |-
+        Java/JS keyword. Go's deferred-execution keyword is
+        `defer`.
+expectStdout: |
+  hello
+  world
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Two tokens: `defer` keyword and the print call. Same as a normal print, just prefixed with `defer`."
+  - "`defer fmt.Println(\"world\")`."
+  - "`defer fmt.Println(\"world\")`."
+notes: |
+  First runnable defer slot. Order-of-output is the observable:
+  defer reorders prints by running its call on return rather
+  than at the textual statement position.

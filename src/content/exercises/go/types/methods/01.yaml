@@ -1,0 +1,121 @@
+target: go
+themeId: go/types/methods
+type: mcq
+order: 1
+prompt: |
+  Translate the TypeScript method `greet` on `User` into the
+  idiomatic Go method declaration.
+
+  Go's methods are not "inside" the struct like in a TS `class`.
+  They're top-level functions with a RECEIVER — an extra
+  parameter that goes between `func` and the method name,
+  written in its own set of parentheses.
+generator:
+  kind: variant
+  variants:
+    - id: user-greet
+      ts: |-
+        class User {
+          name: string;
+          greet(): string {
+            return "Hi, I'm " + this.name;
+          }
+        }
+      canonical: |-
+        func (u User) greet() string {
+        	return "Hi, I'm " + u.name
+        }
+      distractors:
+        - |-
+          func User.greet() string {
+            return "Hi, I'm " + this.name
+          }
+        - |-
+          type User struct {
+            greet() string
+          }
+        - |-
+          func greet(this User) string {
+            return "Hi, I'm " + this.name
+          }
+    - id: point-distance
+      ts: |-
+        class Point {
+          x: number;
+          y: number;
+          distance(): number {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+          }
+        }
+      canonical: |-
+        func (p Point) distance() float64 {
+        	return math.Sqrt(float64(p.x*p.x + p.y*p.y))
+        }
+      distractors:
+        - |-
+          func Point.distance() float64 {
+            return math.Sqrt(this.x * this.x + this.y * this.y)
+          }
+        - |-
+          type Point struct {
+            distance() float64
+          }
+        - |-
+          func distance(this Point) float64 {
+            return math.Sqrt(this.x * this.x + this.y * this.y)
+          }
+    - id: counter-bump
+      ts: |-
+        class Counter {
+          n: number;
+          bump(): void {
+            this.n += 1;
+          }
+        }
+      canonical: |-
+        func (c *Counter) bump() {
+        	c.n++
+        }
+      distractors:
+        - |-
+          func Counter.bump() {
+            this.n++
+          }
+        - |-
+          type Counter struct {
+            bump()
+          }
+        - |-
+          func bump(this Counter) {
+            this.n++
+          }
+hints:
+  - "Method declaration shape: `func (<receiver-name> <receiver-type>) <method-name>(<params>) <return-type> { ... }`. The receiver is the WHAT-THIS-IS-A-METHOD-ON tagging — its own parens, BEFORE the method name."
+  - "No `this`. The receiver name (e.g. `u`, `p`, `c`) acts as the conventional self-reference; pick a short letter that matches the type."
+  - "`func (u User) greet() string { ... }`."
+runtime: none
+notes: |
+  Theme 3.2 opener. The structural shift TS→Go for methods is the
+  positional move: TS methods live INSIDE the class brace; Go
+  methods live OUTSIDE the type, with the receiver parameter
+  binding them. The `type T struct { ... }` declaration declares
+  fields ONLY — no method slots.
+
+  Distractor pattern bank:
+    1. `func TypeName.method(...)` — C#/Java-style dot-syntax
+       method declaration. Wrong slot for the receiver.
+    2. `type Foo struct { method() }` — TS/Java class-body method
+       declaration. Go's struct is fields-only; methods attach
+       externally.
+    3. `func name(this Receiver)` — receiver as a NORMAL parameter
+       instead of in its own parens. Works in spirit but doesn't
+       attach the method to the type — the call site would be
+       `bump(c)` not `c.bump()`.
+
+  Variant kind: User/Point/Counter to drill the same pattern
+  across three contexts. Counter intentionally uses a *pointer*
+  receiver (`*Counter`) because bump mutates — anchors that
+  pointer receivers exist BEFORE slot 4 makes them productive.
+  Math.Sqrt in Point goes through `math.Sqrt(float64(...))`
+  because Yaegi's math package wants float64 — design-docs/30
+  applies.

@@ -1,0 +1,61 @@
+target: go
+themeId: go/concurrency/select
+type: fill-line
+order: 7
+prompt: |
+  Non-blocking poll. Write the `default` line that prints
+  `nothing ready` when no channel case has a value.
+
+  Scaffold creates `ch := make(chan int)` (unbuffered, no
+  sender) so the receive case is NOT ready — `default`
+  fires.
+
+  Expected output: `nothing ready`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'default: fmt.Println("nothing ready")'
+  ts: |-
+    // TS: const v = ch.tryRead(); if (!v) console.log("nothing ready");
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	ch := make(chan int)
+    	select {
+    	case v := <-ch:
+    		fmt.Println("got:", v)
+    	${line}
+    	}
+    }
+  distractors:
+    - match: 'case default: fmt.Println("nothing ready")'
+      explain: |-
+        `default` is its own keyword in `select`/`switch` —
+        NOT prefixed with `case`. The pattern is `default: ...`
+        on its own line.
+    - match: 'else: fmt.Println("nothing ready")'
+      explain: |-
+        Python / Ruby habit. Go's catch-all for switch/select
+        is `default`, not `else`.
+    - match: 'case <-ch:\n\t\tfmt.Println("got something")\n\tdefault:\n\t\tfmt.Println("nothing ready")'
+      explain: |-
+        The whole case-and-default has been written twice in
+        the answer — but the scaffold ALREADY has the case
+        line. You only need to type the default line.
+expectStdout: |
+  nothing ready
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Two tokens: `default:` (bare keyword + colon) then the print statement on the same line or the next."
+  - "`default: fmt.Println(\"nothing ready\")`."
+  - "`default: fmt.Println(\"nothing ready\")`."
+notes: |
+  Drills the non-blocking poll shape from MCQ slot 3.
+  Distractor #1 (`case default`) is the most common shape-
+  confusion from learners who think of `default` as a kind
+  of case — in Go syntax it's its own keyword.

@@ -2,7 +2,7 @@ import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
 import { cn } from "./_internal";
 
-type Variant = "default" | "ts" | "go" | "primary" | "success" | "error";
+type Variant = "default" | "ts" | "go" | "zig" | "primary" | "success" | "error";
 
 interface BadgeProps extends JSX.HTMLAttributes<HTMLSpanElement> {
   variant?: Variant;
@@ -13,6 +13,7 @@ const filledClass: Record<Variant, string> = {
   default: "bg-bg-elevated text-fg-secondary border-border-default",
   ts: "bg-accent-ts/15 text-accent-ts border-accent-ts/40",
   go: "bg-accent-go/15 text-accent-go border-accent-go/40",
+  zig: "bg-accent-zig/15 text-accent-zig border-accent-zig/40",
   primary: "bg-accent-primary/15 text-accent-primary border-accent-primary/40",
   success: "bg-success/15 text-success border-success/40",
   error: "bg-error/15 text-error border-error/40",
@@ -22,6 +23,7 @@ const outlineClass: Record<Variant, string> = {
   default: "border-border-default text-fg-secondary",
   ts: "border-accent-ts/60 text-accent-ts",
   go: "border-accent-go/60 text-accent-go",
+  zig: "border-accent-zig/60 text-accent-zig",
   primary: "border-accent-primary/60 text-accent-primary",
   success: "border-success/60 text-success",
   error: "border-error/60 text-error",

@@ -1,0 +1,36 @@
+target: go
+themeId: go/collections/maps
+type: fill-word
+order: 6
+prompt: |
+  Translate `Object.keys(${name}).length` to Go. The builtin you
+  want is the SAME ONE you've already used on slices and strings —
+  Go uniforms length across these three shapes under one name.
+generator:
+  kind: template
+  vars:
+    name: [scores, cache, ages, prices, counts]
+    fn: [len]
+  ts: |-
+    Object.keys(${name}).length
+  canonical: |-
+    ${fn}(${name})
+blanks: [fn]
+hints:
+  - "Three of Go's most-used builtins handle length: same name for slices, strings, and maps. You used it in Module 1 on strings."
+  - "Three letters."
+  - "`len`."
+runtime: none
+notes: |
+  Tiny slot, but worth its own row: TS makes a learner spell out
+  `Object.keys(m).length` or `Object.values(m).length`, which
+  hides the "map has a size" affordance behind two extra
+  allocations. Go just gives you `len(m)` — same idiom as `len(s)`
+  on a slice, `len(str)` on a string (bytes!), and `cap(s)` for a
+  slice's capacity.
+
+  Why fill-word: the answer is one word. The teaching beat is the
+  UNIFORM naming — typing `len(m)` after typing `len(xs)` and
+  `len(str)` in earlier modules cements the family. MCQ would
+  bury the lesson behind multiple-choice options that all read
+  too similar.

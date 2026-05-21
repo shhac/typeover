@@ -1,0 +1,38 @@
+target: go
+themeId: go/foundations/numeric-primitives
+type: fill-word
+order: 5
+prompt: |
+  Slot 3 introduced Go's explicit-conversion shape — call the target
+  type like a function. Now write it: an average of two integers
+  needs both operands converted to a float before division, or you
+  get integer division (which silently truncates). Fill the casts.
+generator:
+  kind: template
+  vars:
+    cast: [float64]
+  ts: |-
+    let avg: number = total / count;
+  canonical: |-
+    avg := ${cast}(total) / ${cast}(count)
+blanks: [cast]
+hints:
+  - "Two slots — both need the same target type. Go won't promote either operand for you; if you leave one as `int`, you get integer division and your average truncates."
+  - "The type is the same one slot 2 covered as the default for floats. Function-call form, applied to *each* operand."
+  - "Both blanks fill to `float64`."
+notes: |
+  Slot 5 drills the "convert both operands" idiom that the learner
+  read about in slot 3. The repeated `${cast}` placeholder produces
+  two independent input slots — each occurrence in the canonical is
+  a separate blank position, even with the same var name. This
+  pattern (same blank var appearing N times in the canonical) is
+  pinned in the test plan (12-test-plan.md P0 buildBlankSegments
+  "same blank var twice" case).
+
+  The MCQ-to-fill-word handoff teaches the same idea twice:
+  recognition in slot 3, production in slot 5. By the time the
+  learner hits the next theme they should reach for
+  `float64(operand)` reflexively.
+
+  Pool is single-element `[float64]` — same literal-blank pattern.
+runtime: none

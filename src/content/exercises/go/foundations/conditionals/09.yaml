@@ -1,0 +1,57 @@
+target: go
+themeId: go/foundations/conditionals
+type: freeform
+order: 9
+prompt: |
+  Use Go's `switch` statement (no fallthrough by default) to print a
+  one-word description for an integer score:
+
+  - 0 → `zero`
+  - positive → `positive`
+  - negative → `negative`
+
+  Hardcode `score := -7` and write the switch. The expected output is
+  a single line: `negative`.
+
+  TypeScript's `switch` works similarly, but a Go programmer reaches
+  for the tag-less `switch { case ... }` form when the cases are
+  boolean expressions rather than equality checks on one value.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let score = -7;
+    switch (true) {
+      case score === 0: console.log("zero"); break;
+      case score > 0:  console.log("positive"); break;
+      case score < 0:  console.log("negative"); break;
+    }
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	score := -7
+    	switch {
+    	case score == 0:
+    		fmt.Println("zero")
+    	case score > 0:
+    		fmt.Println("positive")
+    	case score < 0:
+    		fmt.Println("negative")
+    	}
+    }
+expectStdout: |
+  negative
+runtime: yaegi
+hints:
+  - "Go's switch has no fallthrough by default — drop the `break` you'd write in JS/TS. Each `case` is the body of a single branch."
+  - "The tag-less form `switch { case <expr>: ... }` uses arbitrary boolean expressions as cases. It's the idiomatic shape when cases aren't equality checks on one value."
+  - "`switch { case score == 0: fmt.Println(\"zero\"); case score > 0: fmt.Println(\"positive\"); case score < 0: fmt.Println(\"negative\") }`"
+notes: |
+  First freeform of Theme 4. Drills two things at once: (a) Go switch
+  has no implicit fallthrough, (b) the tag-less form for branching
+  on expressions. The TS counterpart uses `switch(true)` which is
+  the closest analogue — and a common TS pattern in the wild, so the
+  bridge is visible.

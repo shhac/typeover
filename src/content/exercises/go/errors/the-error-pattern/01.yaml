@@ -1,0 +1,49 @@
+target: go
+themeId: go/errors/the-error-pattern
+type: mcq
+order: 1
+prompt: |
+  Go has no exceptions. The `error` BUILT-IN INTERFACE is the
+  conventional vehicle for "something went wrong, here's what."
+  Pick the line that shows the canonical `error` interface
+  declaration — the one type built into the language that every
+  custom error implements implicitly (theme 4.1's lesson).
+generator:
+  kind: variant
+  variants:
+    - id: only
+      ts: |-
+        // TS analog: a class extends Error and provides .message.
+        // Go's error interface is method-only, no fields.
+      canonical: "type error interface { Error() string }"
+      distractors:
+        - "type Error interface { Message() string }"
+        - "class Error { message: string }"
+        - "type error struct { Error string }"
+hints:
+  - "Built-in interface with ONE method: `Error() string`. Capitalised method name (exported, per theme 4.1 slot 4 convention). Type name is `error` — lowercase, because it's a predeclared identifier built into the language."
+  - "One method. Method returns string. Type name is lowercase `error`."
+  - "`type error interface { Error() string }`."
+runtime: none
+notes: |
+  Theme 5.1 opener — the central type that anchors Go's error
+  handling. Predeclared (you don't declare it yourself, but
+  knowing the shape lets you SATISFY it for your own error
+  types). Slot 4 (`errors.New` builder) and slot 9 (custom
+  Error type) lean on this contract.
+
+  Distractors:
+    1. `Message()` instead of `Error()` — wrong method name.
+       The method is named after the type and returns a
+       short description.
+    2. TS-style class with a `message` field — Go uses a
+       method, not a field.
+    3. Struct with `Error string` field — confuses interface
+       (method set) with struct (fields). Theme 4.1 slot 1
+       distractor returns.
+
+  Capitalisation of `error` vs `Error`: the TYPE `error` is
+  lowercase because it's predeclared (a built-in like `int`
+  or `string`). The METHOD `Error` is capitalised because
+  it's exported (theme 4.1 slot 4). Worth knowing the
+  asymmetry.

@@ -1,0 +1,11 @@
+target: go
+moduleId: go/concurrency
+title: Channels
+order: 2
+prerequisites: [go/concurrency/goroutines]
+intro: |
+  Channels are typed pipes between goroutines. `ch <- v` sends, `v
+  := <-ch` receives. Unbuffered channels are a synchronisation
+  primitive: send blocks until receive completes. Buffered channels
+  decouple the two. Channel direction (`<-chan T`, `chan<- T`) is
+  part of the type signature.

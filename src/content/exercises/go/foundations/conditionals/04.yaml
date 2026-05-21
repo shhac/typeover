@@ -1,0 +1,168 @@
+target: go
+themeId: go/foundations/conditionals
+type: mcq
+order: 4
+prompt: |
+  Go's `switch` has two shapes the previous slot didn't show.
+  Pick the idiomatic Go translation of this TypeScript.
+generator:
+  kind: variant
+  variants:
+    - id: comma-list-primes
+      ts: |
+        switch (n) {
+          case 2: case 3: case 5: case 7:
+            primish();
+            break;
+        }
+      canonical: |-
+        switch n {
+        case 2, 3, 5, 7:
+            primish()
+        }
+      distractors:
+        - |-
+          switch n {
+          case 2; 3; 5; 7:
+              primish()
+          }
+        - |-
+          switch n {
+          case 2 | 3 | 5 | 7:
+              primish()
+          }
+        - |-
+          switch n {
+          case [2, 3, 5, 7]:
+              primish()
+          }
+    - id: comma-list-weekend
+      ts: |
+        switch (day) {
+          case "sat": case "sun":
+            offDay();
+            break;
+        }
+      canonical: |-
+        switch day {
+        case "sat", "sun":
+            offDay()
+        }
+      distractors:
+        - |-
+          switch day {
+          case "sat" || "sun":
+              offDay()
+          }
+        - |-
+          switch day {
+          case ("sat", "sun"):
+              offDay()
+          }
+        - |-
+          switch day {
+          match "sat", "sun":
+              offDay()
+          }
+    - id: tagless-range-check
+      ts: |
+        if (n < 0) negative();
+        else if (n > 100) tooBig();
+        else handle();
+      canonical: |-
+        switch {
+        case n < 0:
+            negative()
+        case n > 100:
+            tooBig()
+        default:
+            handle()
+        }
+      distractors:
+        - |-
+          switch true {
+          case n < 0:
+              negative()
+          case n > 100:
+              tooBig()
+          default:
+              handle()
+          }
+        - |-
+          if n < 0 { negative() }
+          elsif n > 100 { tooBig() }
+          else { handle() }
+        - |-
+          match n {
+          case (< 0): negative()
+          case (> 100): tooBig()
+          default: handle()
+          }
+    - id: tagless-bucket
+      ts: |
+        if (x === 0) zero();
+        else if (x % 2 === 0) even();
+        else odd();
+      canonical: |-
+        switch {
+        case x == 0:
+            zero()
+        case x%2 == 0:
+            even()
+        default:
+            odd()
+        }
+      distractors:
+        - |-
+          switch x {
+          case 0: zero()
+          case _%2 == 0: even()
+          default: odd()
+          }
+        - |-
+          switch x {
+          when 0: zero()
+          when %2 == 0: even()
+          default: odd()
+          }
+        - |-
+          select x {
+          case 0: zero()
+          case x%2 == 0: even()
+          default: odd()
+          }
+hints:
+  - |-
+    Two new Go-switch moves to learn: `case` accepts a
+    comma-separated list of values (one body for any of them), and
+    the bare keyword `switch` with no expression after it makes
+    each `case` a boolean — turning the switch into a tidy
+    if/else-if/else chain.
+  - |-
+    Shapes: `case 2, 3, 5, 7:` (commas, not semicolons or pipes or
+    array literals). Tagless: `switch { case <bool-expr>: ... }`
+    — no `true` placeholder, no value to match against, just
+    boolean cases.
+  - |-
+    Comma-list variant fills to `case 2, 3, 5, 7:` (or `case
+    "sat", "sun":` etc.). Tagless variant starts with bare
+    `switch {` and each `case` is a boolean expression.
+notes: |
+  Introduced 2026-05-20 to fix two MCQ-first violations flagged
+  by the foundations theme audit:
+    - comma-list `case 1, 2:` first appeared at slot 7 (now 8)
+      as a fill-line, no prior MCQ exposure.
+    - tagless `switch { case <expr>: }` first appeared at slot 8
+      (now 9) as a freeform, no prior MCQ exposure.
+
+  Two variants per shape (4 variants total) keep instance
+  replayability strong while covering both missing shapes. Each
+  learner instance sees ONE variant; the recognition bank
+  covers both syntactic moves across the bank.
+
+  Distractors are calibrated per variant — pipe-or, array-literal,
+  named keywords from other languages (Rust `match`, Kotlin
+  `when`, Go's own `select` which is for channels not values),
+  redundant `true` after `switch`. Each distractor names a
+  specific wrong-language habit a TS dev might bring.
+runtime: none

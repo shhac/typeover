@@ -1,0 +1,42 @@
+target: go
+themeId: go/concurrency/sync
+type: fill-word
+order: 5
+prompt: |
+  Type the method on `sync.WaitGroup` that DECREMENTS the
+  counter — the worker-side counterpart to `Add(n)` and
+  `Wait()`.
+generator:
+  kind: template
+  vars:
+    word:
+      - "Done"
+  ts: |-
+    // TS: no direct analog (Promise.all consumes resolve callbacks).
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    func main() {
+    	var wg sync.WaitGroup
+    	wg.Add(1)
+    	go func() {
+    		defer wg.${word}()
+    		fmt.Println("worker")
+    	}()
+    	wg.Wait()
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Four letters, capitalised. Past tense of the English verb for `finish`."
+  - "`Done`."
+  - "`Done`."
+notes: |
+  Pin the method name. Pair with `defer` (theme 6.1 slot 7
+  drilled this). `Done()` is equivalent to `Add(-1)` but the
+  named method reads better and signals intent.

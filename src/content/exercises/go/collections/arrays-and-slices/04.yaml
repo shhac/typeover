@@ -1,0 +1,52 @@
+target: go
+themeId: go/collections/arrays-and-slices
+type: mcq
+order: 4
+prompt: |
+  Pre-allocate room for many entries but start *empty*, so the
+  first `append` doesn't reallocate. Pick the Go form.
+generator:
+  kind: variant
+  variants:
+    - id: hundred-events
+      ts: '// reserve room for up to 100, start empty'
+      canonical: 'events := make([]int, 0, 100)'
+      distractors:
+        - 'events := make([]int, 100)'
+        - 'events := make([]int, 100, 0)'
+        - 'events := []int{cap: 100}'
+    - id: log-lines
+      ts: '// reserve room for up to 64 log lines, start empty'
+      canonical: 'lines := make([]string, 0, 64)'
+      distractors:
+        - 'lines := make([]string, 64)'
+        - 'lines := make([]string, 64, 0)'
+        - 'lines := []string{cap: 64}'
+    - id: byte-buffer
+      ts: '// reserve room for up to 4096 bytes, start empty'
+      canonical: 'buf := make([]byte, 0, 4096)'
+      distractors:
+        - 'buf := make([]byte, 4096)'
+        - 'buf := make([]byte, 4096, 0)'
+        - 'buf := []byte{cap: 4096}'
+hints:
+  - "`make` takes a third argument: the *capacity*. Length is how many elements are usable now; capacity is how many slots the backing array can hold before `append` has to reallocate."
+  - "You want length 0 (start empty) and capacity N (room to grow to N without reallocation). `make([]T, 0, N)`."
+  - "`make([]T, 0, N)` — length first, capacity second."
+runtime: none
+notes: |
+  Distractors:
+    1. `make([]T, 100)` — length 100, all zeros, length and capacity
+       both 100. The most common confusion. After this you'd have
+       to append starting at index 100; appending to an empty
+       slice with capacity 100 starts at index 0 and avoids the
+       allocation.
+    2. `make([]T, 100, 0)` — capacity < length is invalid; Go
+       panics at runtime with "len > cap".
+    3. `[]T{cap: 100}` — TS-object-literal leak. Slices have no
+       struct-tag init; their internal len/cap fields aren't
+       directly addressable.
+
+  Capacity is THE pre-launch performance idiom that bites learners
+  who skip it. We drill it explicitly in slot 9 (freeform append
+  loop uses `make([]T, 0, n)`).

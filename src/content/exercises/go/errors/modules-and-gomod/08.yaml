@@ -1,0 +1,73 @@
+target: go
+themeId: go/errors/modules-and-gomod
+type: fill-line
+order: 8
+prompt: |
+  A `go.mod` declares the module's identity + dependencies;
+  the Go SOURCE inside the module uses those dependencies
+  through `import`. Write the grouped import block for the
+  program below, which uses `fmt` to print and `strconv` to
+  parse a number.
+
+  Expected output: `42 plus 1 = 43`.
+generator:
+  kind: template
+  vars:
+    line:
+      - |-
+        import (
+        	"fmt"
+        	"strconv"
+        )
+  ts: |-
+    // TS: import { ... } from 'fmt'; import { ... } from 'strconv';
+  canonical: |-
+    package main
+
+    ${line}
+
+    func main() {
+    	n, _ := strconv.Atoi("42")
+    	fmt.Println(n, "plus 1 =", n+1)
+    }
+  distractors:
+    - match: |-
+        import "fmt"
+        import "strconv"
+      explain: |-
+        Two single-import lines work syntactically, but
+        `gofmt` will collapse them into the block form for
+        any 2+ imports. The block IS the idiom.
+    - match: |-
+        import (fmt, strconv)
+      explain: |-
+        Wrong shape — block imports are newline-separated,
+        each entry is a QUOTED PATH STRING. No commas, no
+        bare identifiers.
+    - match: |-
+        require (
+        	"fmt"
+        	"strconv"
+        )
+      explain: |-
+        `require` is the go.mod directive for declaring
+        MODULE-level dependencies (a different file). Go
+        source files use `import` to bring package names
+        into scope.
+expectStdout: |
+  42 plus 1 = 43
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Standard grouped import block, alphabetised by `gofmt`. Two entries: `\"fmt\"` and `\"strconv\"`, each on their own indented line."
+  - "`import (` newline tab `\"fmt\"` newline tab `\"strconv\"` newline `)`."
+  - "See canonical."
+notes: |
+  Bridges go.mod's `require` directive (slots 1-7's territory)
+  with Go source's `import` directive — distractor #3
+  surfaces the most common confusion (using the go.mod
+  keyword inside .go source).
+
+  Yaegi's vendored stdlib doesn't include `os` or `runtime`,
+  so we use `fmt` + `strconv` (both available) to keep the
+  runnable canonical valid.

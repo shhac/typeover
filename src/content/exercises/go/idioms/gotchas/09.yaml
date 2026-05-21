@@ -1,0 +1,120 @@
+target: go
+themeId: go/idioms/gotchas
+type: freeform
+order: 9
+prompt: |
+  Theme 7.7 capstone + **Module 7 capstone** +
+  **CURRICULUM CAPSTONE** — pull together three gotchas
+  into one defensive program that handles each correctly.
+
+  1. **Slice aliasing fix**: `dst := make([]int, len(src))`
+     + `copy(dst, src)` so caller's `src` is safe.
+  2. **Nil-interface trap fix**: `findOrNil` returns BARE
+     `nil` (not typed nil) so caller's `if err != nil`
+     works correctly.
+  3. **Goroutine coordination via context**: launch a worker
+     that respects `ctx.Done()`.
+
+  Build:
+  - `func safeCopy(src []int) []int` — make + copy + return.
+  - `func findOrNil() error` — returns `nil` (bare).
+  - `func work(ctx context.Context, done chan<- string)`:
+    select on ctx.Done OR a 100ms timer; send result on
+    `done`.
+  - In main:
+    - `src := []int{1, 2, 3}; cp := safeCopy(src); cp[0] = 99;`
+      print src + cp.
+    - `if err := findOrNil(); err == nil { fmt.Println("err ok")
+      } else { fmt.Println("err leak") }`.
+    - `ctx, cancel := context.WithCancel(context.Background());
+      done := make(chan string, 1); go work(ctx, done);
+      cancel(); fmt.Println(<-done)`.
+
+  Expected output:
+  ```
+  [1 2 3] [99 2 3]
+  err ok
+  cancelled
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS analog: Array.from(src) + abort controller + null returns.
+  canonical: |-
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"time"
+    )
+
+    func safeCopy(src []int) []int {
+    	dst := make([]int, len(src))
+    	copy(dst, src)
+    	return dst
+    }
+
+    func findOrNil() error {
+    	return nil
+    }
+
+    func work(ctx context.Context, done chan<- string) {
+    	select {
+    	case <-ctx.Done():
+    		done <- "cancelled"
+    	case <-time.After(100 * time.Millisecond):
+    		done <- "did work"
+    	}
+    }
+
+    func main() {
+    	src := []int{1, 2, 3}
+    	cp := safeCopy(src)
+    	cp[0] = 99
+    	fmt.Println(src, cp)
+
+    	if err := findOrNil(); err == nil {
+    		fmt.Println("err ok")
+    	} else {
+    		fmt.Println("err leak")
+    	}
+
+    	ctx, cancel := context.WithCancel(context.Background())
+    	done := make(chan string, 1)
+    	go work(ctx, done)
+    	cancel()
+    	fmt.Println(<-done)
+    }
+expectStdout: |
+  [1 2 3] [99 2 3]
+  err ok
+  cancelled
+hints:
+  - "Three independent demos in one main: safeCopy + nil-interface-fix + context-cancellation. Each demo prints one line."
+  - "safeCopy uses make+copy; findOrNil returns BARE nil; worker selects on ctx.Done with a longer time.After alternative."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  **Theme 7.7 capstone + Module 7 capstone + curriculum
+  capstone.**
+
+  Demonstrates that the gotchas have known antidotes —
+  apply them by default in production code:
+
+  1. `make + copy` for true slice independence.
+  2. BARE `nil` (not typed nil) in error returns.
+  3. `context.Context` for cancellation propagation.
+
+  **Curriculum status: COMPLETE.** 7 modules, 56 themes,
+  504 exercises. All themes have 9 slots following the
+  MCQ → fill-word → fill-line → freeform pedagogy from
+  design-docs/02.
+
+  The autonomous /auto-build cycle from 2026-05-21 brought
+  the curriculum from 2 modules / 18 themes to 7 modules /
+  56 themes over ~13 ticks. Three Yaegi stdlib packages
+  were vendored along the way (sync, time, context) to
+  enable Modules 6 + 7. Multiple Yaegi quirks documented
+  in design-docs/30 with workarounds + retire criteria.

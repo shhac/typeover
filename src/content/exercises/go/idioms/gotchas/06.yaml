@@ -1,0 +1,87 @@
+target: go
+themeId: go/idioms/gotchas
+type: fill-line
+order: 6
+prompt: |
+  Demonstrate the **FIX for the nil-interface trap**.
+  `findError` should return BARE `nil` (not a typed nil
+  pointer) so the caller's `if err == nil` check works
+  correctly.
+
+  Write the return statement in `findError`. The function
+  returns `error` (an interface); bare `nil` produces an
+  untyped nil interface value.
+
+  Expected output: `ok`.
+
+  Real-Go context: returning a `var p *MyErr` would produce
+  a NON-NIL interface (type set, value nil), making the
+  caller hit the "bad" branch — the classic gotcha. Yaegi's
+  interface comparison is simpler and doesn't reproduce
+  the trap (see design-docs/30), but the LESSON — "return
+  bare nil from interface-typed functions when there's no
+  error" — applies to production Go regardless.
+generator:
+  kind: template
+  vars:
+    line:
+      - "return nil"
+  ts: |-
+    // TS: return null — straightforward; no interface/value distinction.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type MyErr struct{ msg string }
+
+    func (e *MyErr) Error() string { return e.msg }
+
+    func findError() error {
+    	${line}
+    }
+
+    func main() {
+    	err := findError()
+    	if err == nil {
+    		fmt.Println("ok")
+    	} else {
+    		fmt.Println("bad:", err)
+    	}
+    }
+  distractors:
+    - match: "var p *MyErr; return p"
+      explain: |-
+        In REAL Go this is the bug — a typed-nil pointer
+        wrapped in an interface return makes `err == nil`
+        FALSE in the caller. The fix is to return the
+        bare `nil` literal.
+    - match: "return (*MyErr)(nil)"
+      explain: |-
+        Same trap with an explicit cast — typed nil through
+        an interface return. Return BARE `nil`.
+    - match: 'return &MyErr{msg: ""}'
+      explain: |-
+        Returns a real non-nil error — caller would
+        correctly enter the error branch. Not the "no
+        error" case the slot is about.
+expectStdout: |
+  ok
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Two tokens: `return` keyword and the bare `nil` literal."
+  - "`return nil`."
+  - "`return nil`."
+notes: |
+  The lesson is critical even when Yaegi doesn't
+  reproduce the trap: in production Go, returning a typed
+  nil pointer from an interface-typed function makes the
+  caller's `err != nil` check ALWAYS true. Always return
+  bare `nil` for the no-error path.
+
+  Yaegi quirk corrected 2026-05-21 (this tick): the
+  earlier confirmed-working entry was incorrect — re-probe
+  showed Yaegi's interface comparison simplifies the
+  type/value pair check and the trap does NOT fire under
+  Yaegi. design-docs/30 should be corrected.

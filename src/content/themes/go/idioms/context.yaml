@@ -1,0 +1,11 @@
+target: go
+moduleId: go/idioms
+title: Context
+order: 3
+prerequisites: [go/concurrency/goroutines, go/errors/the-error-pattern]
+intro: |
+  `context.Context` propagates cancellation, deadlines, and
+  request-scoped values across goroutines and API boundaries. By
+  convention, the first argument of any function that does I/O or
+  starts a goroutine is `ctx context.Context`. Listening for
+  `<-ctx.Done()` is how you write cancellable work.

@@ -1,0 +1,38 @@
+target: go
+themeId: go/types/pointers
+type: fill-word
+order: 5
+prompt: |
+  Dereference `p` to read the value it points at. The blank is
+  the single operator that goes before the variable name.
+
+  This is the deref half of the `&` / `*` pair. Slot 4 did
+  address-of; this slot does the inverse.
+generator:
+  kind: template
+  vars:
+    deref: ["*"]
+  ts: |-
+    let x = 42;
+    let p = { ref: x };
+    console.log(p.ref);  // 42 — TS auto-resolves
+  canonical: |-
+    x := 42
+    p := &x
+    fmt.Println(${deref}p)
+blanks: [deref]
+hints:
+  - "Deref operator. One character. It's the OPPOSITE of the address-of operator from slot 4 — they form the `&` / `*` pair."
+  - "Single character. The same character that turns `T` into `*T` in a type position."
+  - "`*`."
+runtime: none
+notes: |
+  Counterpart to slot 4. Together they cement the operator pair
+  before the productive slots that USE them (slot 6 mutate-via-
+  pointer; slot 7 `&T{}` literal).
+
+  Why two separate one-char fill-words instead of a combined
+  drill: `&` and `*` are EASILY confused — they look similar in
+  the source and have opposite directionality. Typing each in
+  isolation, in a focused single-character context, is the
+  cheapest way to bind which symbol does which.

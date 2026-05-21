@@ -1,0 +1,91 @@
+target: go
+themeId: go/types/methods
+type: fill-line
+order: 6
+prompt: |
+  Write the METHOD SIGNATURE (just the `func (...)` header) for a
+  pointer-receiver method `bump` on `Counter` that mutates `c.n`.
+
+  The scaffold has the body (`c.n++`) and the main() that calls
+  `c.bump()` already wired. Only the signature line is missing.
+
+  Expected output: `6` — the bump should land on the caller's
+  Counter.
+generator:
+  kind: template
+  vars:
+    line:
+      - "func (c *Counter) bump() {"
+  ts: |-
+    class Counter {
+      n = 5;
+      bump() { this.n += 1; }
+    }
+    const c = new Counter();
+    c.bump();
+    console.log(c.n);   // 6
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Counter struct {
+    	n int
+    }
+
+    ${line}
+    	c.n++
+    }
+
+    func main() {
+    	c := Counter{n: 5}
+    	c.bump()
+    	fmt.Println(c.n)
+    }
+  distractors:
+    - match: "func (c Counter) bump() {"
+      explain: |-
+        Value receiver — `c` inside the method is a COPY of the
+        caller's Counter. `c.n++` mutates the copy and the
+        return discards it. `main`'s `c.n` stays 5. Use the
+        pointer-receiver form to mutate the caller's storage.
+    - match: "func bump(c *Counter) {"
+      explain: |-
+        Function-call form, not a method declaration. The
+        receiver lives in its OWN parentheses BEFORE the method
+        name: `func (c *Counter) bump() { ... }`. Otherwise
+        `c.bump()` won't dispatch to this function.
+    - match: "func (c *Counter).bump() {"
+      explain: |-
+        Misplaced dot. Method-name comes right after the receiver
+        parens with NO punctuation between. Shape: `func (recv
+        T) name(params) returns { ... }`.
+    - match: "func Counter.bump(c *Counter) {"
+      explain: |-
+        C#/Java static-dispatch syntax — Go has no `Type.method`
+        declaration form. The receiver IS the binding; you don't
+        repeat the type name.
+expectStdout: |
+  6
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Method signature shape: `func (<recv-name> <recv-type>) <method-name>(<params>) <return-type> {`. For a mutating method on Counter: receiver is `(c *Counter)`, name is `bump`, no params, no return."
+  - "`func (c *Counter) bump() {`."
+  - "`func (c *Counter) bump() {` — note the opening brace closes the line; the body and closing brace are in the scaffold."
+notes: |
+  End-to-end productive use of the value-vs-pointer choice from
+  slot 2 and the `*` muscle memory from slot 4. Yaegi-verified.
+
+  Distractor bank covers the four most common mis-shapes:
+    1. Value receiver — THE actual bug for this scenario.
+    2. Free-function form — slot 1 distractor returns.
+    3. Punctuation noise between receiver and name — micro
+       syntax confusion.
+    4. C#/Java static-dispatch form — slot 1 distractor returns.
+
+  The blank includes the OPENING BRACE because fill-line
+  exercises render the line in-place; if the brace were on the
+  next line of the scaffold, the result would be a syntax-broken
+  template. Author convention here: when the blank is a function
+  HEADER, include the trailing `{` so the body's `}` matches.

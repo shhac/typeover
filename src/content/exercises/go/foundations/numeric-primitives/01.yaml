@@ -1,0 +1,40 @@
+target: go
+themeId: go/foundations/numeric-primitives
+type: mcq
+order: 1
+prompt: |
+  TypeScript collapses all numbers into one `number` type. Go
+  distinguishes by size and signedness. For an integer literal like
+  this, the *default* Go type — and the one you reach for unless you
+  have a specific reason not to — is one of the options below. Pick
+  it.
+generator:
+  kind: template
+  vars:
+    name: [count, total, score, items, attempts]
+    value: ["5", "42", "0", "100", "-1"]
+  ts: |-
+    let ${name}: number = ${value};
+  canonical: |-
+    var ${name} int = ${value}
+  distractors:
+    - "var ${name} int64 = ${value}"
+    - "var ${name} number = ${value}"
+    - "var ${name} float64 = ${value}"
+hints:
+  - "Go has several integer types. There's a default one — the one you'd reach for if you have no specific reason to pick a width — and that's what we want here."
+  - "The default integer type is named `int` (no suffix). It's sized to the platform's natural word size (typically 64-bit on modern machines)."
+  - "`var ${name} int = ${value}`"
+notes: |
+  First exercise of Theme 2. Establishes that `int` is the default
+  integer type in Go — distinct from `int64` (specific width),
+  `float64` (wrong category), or `number` (doesn't exist in Go).
+
+  Distractors:
+   - `int64` — works, but unidiomatic when `int` would do. The
+     "specific width when you mean it; int otherwise" rule will
+     return in slot 3.
+   - `number` — TypeScript's name, not Go's. Common typo.
+   - `float64` — wrong type category; would actually fail to
+     accept the integer literal cleanly in some edge cases.
+runtime: none

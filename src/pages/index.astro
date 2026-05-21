@@ -33,8 +33,8 @@ import TrackCard from "~/components/ds/TrackCard.astro";
  * exercises and the homepage silently lies until someone notices.
  * Compute both numbers from the content collection at build time. */
 const [foundationsThemes, foundationsExercises] = await Promise.all([
-  getCollection("themes", (t) => t.data.moduleId === "foundations"),
-  getCollection("exercises", (ex) => ex.data.themeId.startsWith("foundations/")),
+  getCollection("themes", (t) => t.data.moduleId === "go/foundations"),
+  getCollection("exercises", (ex) => ex.data.themeId.startsWith("go/foundations/")),
 ]);
 const foundationsExerciseCount = foundationsExercises.length;
 const foundationsThemeCount = foundationsThemes.length;
@@ -125,6 +125,7 @@ func greet(u User) string {
             <a href="/go/foundations/variables/01" class="inline-flex">
               <Button variant="primary" size="md">Start with Foundations</Button>
             </a>
+            {/* Path matches the lang-prefixed exercise ID `go/foundations/variables/01`. */}
             <a href="/go" class="inline-flex">
               <Button variant="secondary" size="md">Browse the curriculum</Button>
             </a>

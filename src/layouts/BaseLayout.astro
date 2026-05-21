@@ -24,29 +24,34 @@ const SITE_ORIGIN = import.meta.env.SITE ?? "https://typeover.paulie.app";
 const ogImage = new URL("/og-image.svg", SITE_ORIGIN).toString();
 const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
 
-/* Preload the Yaegi WASM on /go/* routes so the ~1.9 MB brotli
- * download happens in parallel with HTML parsing instead of waiting
- * for the first `getRunner()` call inside a Solid island. Cuts the
- * cold-start latency a learner perceives between landing on an
- * exercise route and clicking Run.
+/* Preload the runtime WASM on track routes so the brotli download
+ * happens in parallel with HTML parsing instead of waiting for the
+ * first `getRunner()` call inside a Solid island. Cuts the cold-start
+ * latency a learner perceives between landing on an exercise route
+ * and clicking Run.
  *
- * Gated to /go/* paths to avoid loading the WASM for /, /settings,
- * /privacy, /design-system etc. MCQ and fill-word exercises never
- * call getRunner() either, but the route-level gate is the
- * pragmatic v0 cut — refining further means a per-exercise-type
- * preload signal we don't currently surface. design-docs/20
+ * Gated to /go/<...> and /zig/<...> paths to avoid loading the WASM
+ * for /, /settings, /privacy, /design-system etc. MCQ and fill-word
+ * exercises never call getRunner() either, but the route-level gate
+ * is the pragmatic v0 cut — refining further means a per-exercise-
+ * type preload signal we don't currently surface. design-docs/20
  * proposer-cycle round 2 — the lighter alternative to a service
- * worker. */
-const isExerciseRoute = Astro.url.pathname.startsWith("/go/");
+ * worker.
+ *
+ * For Zig we preload only zig.wasm (~900 KB brotli); the heavier
+ * stdlib tarball is lazy-loaded by the worker on first eval(). */
+const path = Astro.url.pathname;
+const preloadWasm: { href: string } | null = path.startsWith("/go/")
+  ? { href: "/yaegi/yaegi.wasm" }
+  : path.startsWith("/zig/")
+    ? { href: "/zig/zig.wasm" }
+    : null;
+const isExerciseRoute = preloadWasm !== null;
 
-/* Inline script body: prefetches the Yaegi WASM on first hover /
+/* Inline script body: prefetches the runtime WASM on first hover /
  * focus / touch over an in-curriculum link from off-route pages.
- * Hoisted out of the JSX template-literal expression so the
- * surrounding `<script is:inline set:html={...}>` is a simple
- * identifier — keeps oxlint's `no-unused-expressions` rule
- * unconfused (it flagged the template-literal-in-JSX-braces
- * shape) and reads as a deliberate static asset. */
-const yaegiPrefetchScript = `(function () {
+ * Picks the right runtime by sniffing the anchor's href prefix. */
+const runtimePrefetchScript = `(function () {
   var fired = false;
   function ok() {
     var c = navigator.connection;
@@ -54,21 +59,22 @@ const yaegiPrefetchScript = `(function () {
     if (c && c.effectiveType === "slow-2g") return false;
     return true;
   }
-  function prefetch() {
+  function prefetch(href) {
     if (fired) return;
     if (!ok()) return;
     fired = true;
     var link = document.createElement("link");
     link.rel = "prefetch";
     link.as = "fetch";
-    link.href = "/yaegi/yaegi.wasm";
+    link.href = href;
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   }
   function handler(e) {
     var t = e.target;
     if (!t || typeof t.closest !== "function") return;
-    if (t.closest('a[href^="/go/"]')) prefetch();
+    if (t.closest('a[href^="/go/"]')) prefetch("/yaegi/yaegi.wasm");
+    else if (t.closest('a[href^="/zig/"]')) prefetch("/zig/zig.wasm");
   }
   document.addEventListener("pointerover", handler, { passive: true });
   document.addEventListener("focusin", handler, { passive: true });
@@ -164,13 +170,14 @@ const yaegiPrefetchScript = `(function () {
     </script>
     <link rel="canonical" href={pageUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {isExerciseRoute && (
-      <link rel="preload" href="/yaegi/yaegi.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+    {preloadWasm && (
+      <link rel="preload" href={preloadWasm.href} as="fetch" type="application/wasm" crossorigin="anonymous" />
     )}
-    {/* Hover/focus prefetch of the Yaegi WASM from off-route pages
-      * (landing, /go index, privacy). On /go/* the <link rel="preload">
-      * above already covers it. design-docs/25 P5. */}
-    {!isExerciseRoute && <script is:inline set:html={yaegiPrefetchScript} />}
+    {/* Hover/focus prefetch of the runtime WASM from off-route pages
+      * (landing, lang index, privacy). On track routes the
+      * <link rel="preload"> above already covers it.
+      * design-docs/25 P5. */}
+    {!isExerciseRoute && <script is:inline set:html={runtimePrefetchScript} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

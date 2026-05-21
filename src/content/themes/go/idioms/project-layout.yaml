@@ -1,0 +1,10 @@
+target: go
+moduleId: go/idioms
+title: Project layout
+order: 6
+prerequisites: [go/errors/packages-and-imports, go/errors/modules-and-gomod]
+intro: |
+  `cmd/<binary-name>/main.go` per binary; `internal/...` for
+  packages that should not be importable by other modules. Outside
+  those two conventions, layout is up to you. The `golang-standards/project-layout`
+  repo is *not* official and over-prescribes — start small.

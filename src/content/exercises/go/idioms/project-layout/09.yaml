@@ -1,0 +1,86 @@
+target: go
+themeId: go/idioms/project-layout
+type: freeform
+order: 9
+prompt: |
+  Theme 7.6 capstone — small but realistic CLI shape with
+  separated concerns. Build a mini program that mimics the
+  structure of a real `cmd/<binary>/main.go` +
+  `internal/store/` layout — but in one file for Yaegi.
+
+  1. `type Store struct{ items []string }` representing
+     the "internal" data layer.
+  2. Method `(*Store).Add(item string)` appending.
+  3. Method `(*Store).List() []string` returning a copy.
+  4. `run() (string, error)`: create a store, Add two items
+     ("apple", "banana"), call List, format the result as
+     `"items: apple, banana"`, return (formatted, nil).
+  5. Thin `main()`: call run, print the result.
+
+  Expected output: `items: apple, banana`.
+
+  In a real project: `Store` would live in
+  `internal/store/store.go`; `run` would live in
+  `cmd/listd/run.go`; `main()` in `cmd/listd/main.go`.
+  The same shape compiles fine in one file too — the
+  layout is what scales it.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: class Store + run(): [string, Error|null] + main().
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"strings"
+    )
+
+    type Store struct {
+    	items []string
+    }
+
+    func (s *Store) Add(item string) {
+    	s.items = append(s.items, item)
+    }
+
+    func (s *Store) List() []string {
+    	out := make([]string, len(s.items))
+    	copy(out, s.items)
+    	return out
+    }
+
+    func run() (string, error) {
+    	s := &Store{}
+    	s.Add("apple")
+    	s.Add("banana")
+    	items := s.List()
+    	return "items: " + strings.Join(items, ", "), nil
+    }
+
+    func main() {
+    	out, _ := run()
+    	fmt.Println(out)
+    }
+expectStdout: |
+  items: apple, banana
+hints:
+  - "Four pieces: Store struct + Add + List methods, run() helper, thin main."
+  - "List returns a COPY (make + copy) so callers can't mutate the store's slice from outside — defensive sharing."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Theme 7.6 capstone. Demonstrates the architecture pattern
+  the cmd/internal layout encourages:
+    - **Data layer** (Store) is hidden behind a method API.
+    - **Application logic** (run) composes the data layer.
+    - **Entry point** (main) is one or two lines.
+
+  `(*Store).List()` returns a copy — defensive sharing
+  protects the store from external mutation. Subtle but
+  important habit; library authors do this by default for
+  exported slices.
+
+  Module 7 status: 6 of 7 themes done. Only 7.7 (gotchas)
+  remains.
