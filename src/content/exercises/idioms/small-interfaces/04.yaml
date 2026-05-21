@@ -1,0 +1,44 @@
+target: go
+themeId: idioms/small-interfaces
+type: fill-word
+order: 4
+prompt: |
+  Type the method name that makes a type implement
+  `fmt.Stringer`. The method takes no arguments and
+  returns a string.
+generator:
+  kind: template
+  vars:
+    word:
+      - "String"
+  ts: |-
+    // TS: toString() — built into Object.prototype.
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type Point struct{ X, Y int }
+
+    func (p Point) ${word}() string {
+    	return fmt.Sprintf("(%d, %d)", p.X, p.Y)
+    }
+
+    func main() {
+    	p := Point{X: 1, Y: 2}
+    	fmt.Println(p)
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Six letters, capitalised (exported). Same as the return type's name — minus the lowercase."
+  - "`String`."
+  - "`String`."
+notes: |
+  Pin the method name. Slot 8 runs the full program to
+  show that `fmt.Println(p)` auto-detects the Stringer
+  interface and calls `String()`.
+
+  Note: returning a string via `fmt.Sprintf` is the
+  canonical pattern — Sprintf builds a string without
+  printing.

@@ -195,6 +195,38 @@ are ones that try to USE the generic stdlib (slices.Sort,
 maps.Keys, etc.); those slots either reach for the pre-generics
 equivalent or stay MCQ-recognition.
 
+#### Quirk surfaced 2026-05-21 (Module 7.5 authoring)
+
+**Yaegi's `fmt.Println(structValue)` does NOT auto-detect
+the Stringer interface** the way real Go does. Real Go uses
+reflection to check whether the value (or its pointer)
+has a `String() string` method and calls it for custom
+representation; Yaegi falls back to the bare struct dump
+`{field1 field2 ...}`.
+
+The interface satisfaction itself works — `var s Stringer
+= someValue; s.String()` works fine. The gap is
+specifically in Yaegi's `fmt` package's reflection-based
+auto-detection.
+
+**Workaround:** In runnable canonicals that demonstrate
+Stringer, go through an interface-typed variable:
+```go
+var s Stringer = Point{...}
+fmt.Println(s.String())
+```
+Or call `.String()` directly on the concrete value
+(`fmt.Println(p.String())`).
+
+Slot 7 + 8 of `idioms/small-interfaces` use this workaround.
+The user-facing prompt explicitly flags the Yaegi gap so
+learners don't internalise the awkward form as idiomatic.
+
+**What retires when fixed:** the explicit `s.String()` /
+`p.String()` calls in slots 7 + 8 can simplify back to
+bare `fmt.Println(value)`. The `notes:` block in 08
+explicitly flags this revert path.
+
 #### Quirk surfaced 2026-05-21 (Module 5.3 authoring)
 
 Same root cause as the `errors.As` user-type quirk: **type

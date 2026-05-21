@@ -1,0 +1,50 @@
+target: go
+themeId: idioms/small-interfaces
+type: mcq
+order: 1
+prompt: |
+  The Go community phrase is: **"accept interfaces, return
+  structs."** Pick the statement that best explains WHY.
+
+  TypeScript: structural typing makes this less of a sharp
+  distinction; you can return a wide type and callers don't
+  care. Go's nominal-yet-implicit interface satisfaction
+  rewards the rule more strongly.
+generator:
+  kind: variant
+  variants:
+    - id: why-accept-iface-return-struct
+      ts: |-
+        // TS: less of a guideline — structural typing softens it.
+        // Go: nominal interfaces with implicit satisfaction make
+        // this rule load-bearing for testability + decoupling.
+      canonical: "Accepting interfaces lets the caller pass any conforming type (esp. test fakes). Returning concrete structs preserves the type's full API for callers who need it — they can always discard fields they don't care about."
+      distractors:
+        - "Interfaces are slower to call than structs; the rule minimises overhead by limiting interface use to the boundary."
+        - "Go's compiler can't return interface values directly; structs are the only legal return type."
+        - "Returning a struct lets the caller call `make` on it; interfaces don't support `make`."
+hints:
+  - "Two parts: WHY accept interfaces (think testability), WHY return concrete (think information loss)."
+  - "Accept interfaces → caller substitutability. Return structs → preserve full API."
+  - "Substitutability on input; full info on output."
+runtime: none
+notes: |
+  Foundational style rule. Two halves:
+
+  1. **Accept interfaces** because the function only needs
+     the methods it calls — anything providing them works,
+     including test mocks, alternative impls, decorators.
+  2. **Return structs** because returning an interface
+     forces all callers to dance through the limited
+     interface even when they could use the richer concrete
+     type. (Anti-pattern in heavy use 2015-2018; community
+     pushed back.)
+
+  Distractors:
+    1. "Interfaces are slow" — micro-optimisation argument,
+       not the real reason. Actual perf difference is
+       negligible.
+    2. "Compiler can't return interfaces" — false; you CAN,
+       it's just stylistically discouraged.
+    3. "make on structs" — invented; `make` doesn't apply
+       to either struct or interface return values directly.
