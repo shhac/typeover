@@ -180,6 +180,55 @@ describe("<Freeform> — reveal flow", () => {
   });
 });
 
+describe("<Freeform> — Cmd/Ctrl+Enter triggers Run from inside the textarea", () => {
+  it("Cmd+Enter (mac) in the textarea calls yaegi.run() with the current code", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container } = renderFF();
+    const ta = textarea(container);
+    setVal(ta, 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello") }');
+    fireEvent.keyDown(ta, { key: "Enter", metaKey: true });
+    await vi.waitFor(() => {
+      expect(evalMock).toHaveBeenCalledTimes(1);
+    });
+    const program = evalMock.mock.calls[0]?.[0] as string;
+    expect(program).toContain('fmt.Println("hello")');
+  });
+
+  it("Ctrl+Enter (win/linux) in the textarea calls yaegi.run()", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container } = renderFF();
+    const ta = textarea(container);
+    setVal(ta, "package main\nfunc main() {}");
+    fireEvent.keyDown(ta, { key: "Enter", ctrlKey: true });
+    await vi.waitFor(() => {
+      expect(evalMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("plain Enter does NOT trigger Run (auto-indent path keeps owning bare Enter)", () => {
+    const { container } = renderFF();
+    const ta = textarea(container);
+    setVal(ta, "package main\nfunc main() {");
+    fireEvent.keyDown(ta, { key: "Enter" });
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("Shift+Cmd+Enter does NOT trigger Run (modifier-collision guard)", () => {
+    const { container } = renderFF();
+    setVal(textarea(container), "package main\nfunc main() {}");
+    fireEvent.keyDown(textarea(container), { key: "Enter", metaKey: true, shiftKey: true });
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("Cmd+Enter with empty code is a no-op (canRun gate holds)", () => {
+    const { container } = renderFF();
+    const ta = textarea(container);
+    setVal(ta, "   \n\n  ");
+    fireEvent.keyDown(ta, { key: "Enter", metaKey: true });
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("<Freeform> — Another resets scaffold + runResult", () => {
   it("Another after pass returns the textarea to the scaffold and clears runResult", async () => {
     evalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });

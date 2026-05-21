@@ -153,6 +153,25 @@ export function Freeform(props: FreeformProps) {
           yaegi.clear();
         }}
         onKeyDown={(e) => {
+          /* Cmd+Enter (Mac) / Ctrl+Enter (Win/Linux) triggers Run
+           * directly from inside the textarea. Mirrors the
+           * modifier-Enter idiom in most code editors (VS Code,
+           * Jupyter, etc.). Checked BEFORE the auto-indent handler
+           * because the auto-indent only fires on bare Enter and
+           * would short-circuit if we let it run first. design-
+           * docs/30 — freeform-UX user ask. */
+          if (
+            (e.key === "Enter" || e.key === "NumpadEnter") &&
+            (e.metaKey || e.ctrlKey) &&
+            !e.shiftKey &&
+            !e.altKey
+          ) {
+            e.preventDefault();
+            if (props.runtime === "yaegi" && !yaegi.running() && code().trim() !== "") {
+              void yaegi.run();
+            }
+            return;
+          }
           /* Auto-indent: Enter on an indented line opens the next
            * line at the same indent. Shift+Enter (and other modified
            * Enters) fall through to a bare newline. */
