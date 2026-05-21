@@ -1,0 +1,52 @@
+target: go
+themeId: errors/packages-and-imports
+type: freeform
+order: 8
+prompt: |
+  Build a small program demonstrating the package + import +
+  capitalisation triad from this theme.
+
+  1. `package main`.
+  2. Import `fmt` and `strings` as a grouped block.
+  3. In `func main`, call `strings.ToLower` on `"HELLO"` and
+     print the result via `fmt.Println`.
+
+  Expected output: `hello`.
+
+  TypeScript reference:
+  ```ts
+  console.log("HELLO".toLowerCase());
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("HELLO".toLowerCase());
+  canonical: |-
+    package main
+
+    import (
+    	"fmt"
+    	"strings"
+    )
+
+    func main() {
+    	fmt.Println(strings.ToLower("HELLO"))
+    }
+expectStdout: |
+  hello
+hints:
+  - "Three pieces: `package main`, grouped `import (\"fmt\" \"strings\")`, and `fmt.Println(strings.ToLower(\"HELLO\"))` inside main."
+  - "Both `fmt.Println` and `strings.ToLower` are exported (capital first letter). Access them via the package qualifier."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  First freeform of the theme. Direct rehearsal of slots 4
+  (package keyword), 5 (import keyword), 7 (qualified call
+  pattern).
+
+  Single-file deliberately — the multi-package version (a
+  separate `package foo` directory imported by `main`) can't
+  be authored as a single-file slot. Theme tradeoff: we teach
+  the conceptual rules (slots 1-3 MCQs) plus the SHAPE of the
+  single-file equivalent (slots 4-9 runnable).
