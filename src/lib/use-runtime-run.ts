@@ -1,24 +1,25 @@
 import { createSignal } from "solid-js";
-import { getRunner, terminateRunner } from "~/runtime";
+import { getRunner, getZigRunner, terminateRunner, terminateZigRunner } from "~/runtime";
 
 /*
- * Headless lifecycle for any component that runs Go code via the
- * Yaegi worker — Freeform, FillBlankLineInput, the dev-only
- * YaegiSmoke probe. Owns:
+ * Headless lifecycle for any component that runs learner code via a
+ * client-side WASM runtime. Today: Freeform + FillBlankLineInput
+ * (both languages) + the dev-only YaegiSmoke probe. Owns:
  *
  *   - the running / runResult signals
  *   - the run() async function (timer + eval + error-coercion)
  *   - the reset() function (terminate worker + sentinel result)
  *
- * Consumers supply a `buildProgram` accessor — the function the hook
- * calls to assemble the program text on each Run. That's the one
- * thing the three call sites genuinely differed on; everything else
- * was identical try/catch/finally + signal plumbing.
+ * Consumers supply a `runtime` selector (`"yaegi"` for Go, `"zig"`
+ * for Zig) plus a `buildProgram` accessor — the function the hook
+ * calls to assemble the program text on each Run. Those are the
+ * only two things the call sites genuinely differ on; everything
+ * else is identical try/catch/finally + signal plumbing.
  *
  * Why a hook rather than a context / singleton: each exercise wants
- * its own runResult lifecycle. The runner itself is the singleton
- * (in src/runtime/index.ts) — this hook only owns the per-component
- * state around it.
+ * its own runResult lifecycle. The runners themselves are
+ * singletons (in src/runtime/index.ts) — this hook only owns the
+ * per-component state around them.
  *
  * Generation-tagged settlements (design-docs/19 F-2). Every run()
  * captures a generation counter that reset() / clear() bump. When
@@ -30,6 +31,34 @@ import { getRunner, terminateRunner } from "~/runtime";
  * sees its own result silently clobbered by the older rejection.
  */
 
+/** Client-side runtimes the hook knows how to drive. Server-side
+ *  fallback (Vercel function) isn't wired yet; freeform exercises
+ *  with `runtime: "server"` short-circuit at the page level. */
+export type ClientRuntime = "yaegi" | "zig";
+
+/** Human-facing label per runtime. Surfaced through the handle so
+ *  shared UI (toolbar boot badge) renders the right language name
+ *  without each component owning the mapping. */
+export const RUNTIME_LABELS: Record<ClientRuntime, string> = {
+  yaegi: "Go",
+  zig: "Zig",
+};
+
+/* Internal — keep the {get, terminate} pair per runtime so the
+ * hook body stays branch-free. Each accessor is the worker
+ * singleton from src/runtime/index.ts; lazy-spawning lives there. */
+interface RuntimeAccessors {
+  get: () => {
+    ready(): Promise<void>;
+    eval(code: string): Promise<{ stdout: string; stderr: string; error: string }>;
+  };
+  terminate: () => void;
+}
+const RUNTIME_ACCESSORS: Record<ClientRuntime, RuntimeAccessors> = {
+  yaegi: { get: getRunner, terminate: terminateRunner },
+  zig: { get: getZigRunner, terminate: terminateZigRunner },
+};
+
 export interface RunResult {
   stdout: string;
   stderr: string;
@@ -39,16 +68,16 @@ export interface RunResult {
 
 /** Runtime boot lifecycle. `uninit` is the pre-mount default and the
  *  state reset() returns to. `booting` is in-flight WASM load. `ready`
- *  means subsequent eval() calls don't pay the ~1.9 MB cold-start
- *  cost. `error` surfaces a boot failure to the UI. */
+ *  means subsequent eval() calls don't pay the cold-start cost.
+ *  `error` surfaces a boot failure to the UI. */
 export type RuntimeStatus = "uninit" | "booting" | "ready" | "error";
 
-export interface YaegiRunHandle {
+export interface RuntimeRunHandle {
   /** Last completed run's outcome, or null pre-first-run / post-reset. */
   runResult: () => RunResult | null;
   /** True while an eval is in flight. Block double-Run, show spinner. */
   running: () => boolean;
-  /** Runtime boot status. Lets the UI show a "Booting Go runtime…"
+  /** Runtime boot status. Lets the UI show a "Booting <lang> runtime…"
    *  indicator and gate Run until ready. design-docs/16 F-4. */
   runtimeStatus: () => RuntimeStatus;
   /** Message when runtimeStatus === "error"; null otherwise. */
@@ -58,6 +87,8 @@ export interface YaegiRunHandle {
    *  affordance for learners on flaky networks. design-docs/26 P12.
    *  Resets to false on any transition out of "booting". */
   bootStalled: () => boolean;
+  /** Display name of the runtime, for the boot badge ("Go" / "Zig"). */
+  runtimeLabel: string;
   /** Assemble + send the program. Idempotent under racing clicks.
    *  Kicks off preflight if the runtime hasn't been booted yet. */
   run: () => Promise<void>;
@@ -72,7 +103,9 @@ export interface YaegiRunHandle {
   preflight: () => void;
 }
 
-interface UseYaegiRunArgs {
+interface UseRuntimeRunArgs {
+  /** Which client-side runtime to drive. */
+  runtime: ClientRuntime;
   /** Called inside run() to produce the program text. Lets the hook
    *  stay agnostic to whether the program is the learner's raw input
    *  (Freeform), a substituted scaffold (FillBlankLineInput), or
@@ -81,14 +114,16 @@ interface UseYaegiRunArgs {
 }
 
 /** How long the runtime can sit in "booting" before we surface a
- *  stall indicator. Calibrated against the ~1.9 MB brotli'd WASM
- *  download — a healthy 3G connection lands well under 5s; past
- *  that the user is on a flaky network / captive portal / hung
- *  CDN, and the in-exercise badge "↳ Booting Go runtime…" with no
- *  escape hatch is the wrong UX. */
+ *  stall indicator. Calibrated against the brotli'd WASM download —
+ *  a healthy 3G connection lands well under 5s; past that the user
+ *  is on a flaky network / captive portal / hung CDN, and the in-
+ *  exercise "↳ Booting…" badge with no escape hatch is wrong UX. */
 const BOOT_STALL_MS = 5000;
 
-export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
+export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
+  const accessors = RUNTIME_ACCESSORS[args.runtime];
+  const runtimeLabel = RUNTIME_LABELS[args.runtime];
+
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
   const [runtimeStatus, setRuntimeStatusRaw] = createSignal<RuntimeStatus>("uninit");
@@ -147,7 +182,8 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
       if (runtimeStatus() !== "booting") return;
       setBootStalled(true);
     }, BOOT_STALL_MS);
-    getRunner()
+    accessors
+      .get()
       .ready()
       .then(
         () => {
@@ -171,7 +207,7 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     setRunning(true);
     const t0 = performance.now();
     try {
-      const runner = getRunner();
+      const runner = accessors.get();
       const r = await runner.eval(args.buildProgram());
       if (gen !== currentGen()) return; /* stale — reset/clear happened mid-flight */
       setRunResult({
@@ -198,12 +234,12 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
 
   function reset(): void {
     /* Hard-reset the runtime when the learner's code looks stuck.
-     * Yaegi runs single-threaded inside the worker, so an infinite
-     * loop blocks subsequent calls until the worker is terminated.
-     * Bumping the generation invalidates any in-flight eval; its
-     * eventual rejection won't touch runResult. */
+     * Each runtime is single-threaded inside its worker, so an
+     * infinite loop blocks subsequent calls until the worker is
+     * terminated. Bumping the generation invalidates any in-flight
+     * eval; its eventual rejection won't touch runResult. */
     bumpGen();
-    terminateRunner();
+    accessors.terminate();
     setRunning(false);
     /* Runtime is gone — flip back to "uninit" so a subsequent
      * preflight() / run() triggers a fresh boot. Without this the
@@ -234,6 +270,7 @@ export function useYaegiRun(args: UseYaegiRunArgs): YaegiRunHandle {
     runtimeStatus,
     bootError,
     bootStalled,
+    runtimeLabel,
     run,
     reset,
     clear,

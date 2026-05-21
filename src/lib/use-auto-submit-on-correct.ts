@@ -1,5 +1,5 @@
 import { createEffect } from "solid-js";
-import type { RunResult } from "./use-yaegi-run";
+import type { RunResult } from "./use-runtime-run";
 import type { ExercisePhaseHandle } from "./exercise-phase";
 
 /*
@@ -24,7 +24,7 @@ import type { ExercisePhaseHandle } from "./exercise-phase";
  *      stale result doesn't get re-submitted).
  *
  * The hook re-runs phase.submit() at most once per RunResult
- * instance. It also re-tracks `yaegi.running()`: useYaegiRun sets
+ * instance. It also re-tracks `yaegi.running()`: useRuntimeRun sets
  * runResult BEFORE flipping running back to false, so without
  * re-tracking running the effect would fire too early and bail on
  * the canSubmit gate.

@@ -2,7 +2,7 @@ import { createRoot } from "solid-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /*
- * Tests for the useYaegiRun hook. Mocks `~/runtime` so we exercise
+ * Tests for the useRuntimeRun hook. Mocks `~/runtime` so we exercise
  * the hook's lifecycle (signals, timing, error coercion, reset
  * sentinel) without touching the real WASM worker. This is the
  * test surface that lets us pin run-lifecycle semantics independent
@@ -29,9 +29,16 @@ const { evalMock, readyMock, terminateMock } = vi.hoisted(() => ({
 vi.mock("~/runtime", () => ({
   getRunner: () => ({ eval: evalMock, ready: readyMock }),
   terminateRunner: terminateMock,
+  /* Zig accessors needed because use-runtime-run imports both; the
+   * hook only invokes the one that matches its `runtime` arg, but
+   * the module-level imports resolve eagerly. Use the same mock
+   * objects so tests can assert against them when a future case
+   * exercises the Zig branch. */
+  getZigRunner: () => ({ eval: evalMock, ready: readyMock }),
+  terminateZigRunner: terminateMock,
 }));
 
-import { useYaegiRun } from "./use-yaegi-run";
+import { useRuntimeRun } from "./use-runtime-run";
 
 beforeEach(() => {
   evalMock.mockReset();
@@ -50,15 +57,15 @@ afterEach(() => {
 });
 
 function setup(buildProgram: () => string = () => "package main\nfunc main(){}") {
-  let handle!: ReturnType<typeof useYaegiRun>;
+  let handle!: ReturnType<typeof useRuntimeRun>;
   createRoot((dispose) => {
-    handle = useYaegiRun({ buildProgram });
+    handle = useRuntimeRun({ runtime: "yaegi", buildProgram });
     disposers.push(dispose);
   });
   return handle;
 }
 
-describe("useYaegiRun", () => {
+describe("useRuntimeRun", () => {
   it("starts with runResult null and running false", () => {
     const h = setup();
     expect(h.runResult()).toBeNull();
@@ -258,7 +265,7 @@ describe("useYaegiRun", () => {
   });
 });
 
-describe("useYaegiRun — generation-tagged settlements", () => {
+describe("useRuntimeRun — generation-tagged settlements", () => {
   it("ignores a previous run's late resolution after reset()", async () => {
     /* design-docs/19 F-2 — reset-while-running race. The killed
      * worker's pending Comlink call eventually settles; without

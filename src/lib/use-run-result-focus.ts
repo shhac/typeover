@@ -1,6 +1,6 @@
 import { createEffect, type Accessor } from "solid-js";
 import { useKeyboardInset } from "./use-keyboard-inset";
-import type { RunResult } from "./use-yaegi-run";
+import type { RunResult } from "./use-runtime-run";
 
 /*
  * Move focus to the RunResultPanel when a fresh result lands, and

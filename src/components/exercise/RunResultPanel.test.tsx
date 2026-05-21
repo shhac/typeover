@@ -2,7 +2,7 @@ import { render } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
 
 import { RunResultPanel } from "./RunResultPanel";
-import type { RunResult } from "~/lib/use-yaegi-run";
+import type { RunResult } from "~/lib/use-runtime-run";
 
 /*
  * Pins the a11y contract added in the lighter variant of

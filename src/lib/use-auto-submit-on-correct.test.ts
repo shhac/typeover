@@ -1,7 +1,7 @@
 import { createRoot, createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
 import { useAutoSubmitOnCorrect } from "./use-auto-submit-on-correct";
-import type { RunResult } from "./use-yaegi-run";
+import type { RunResult } from "./use-runtime-run";
 import type { ExercisePhaseHandle } from "./exercise-phase";
 
 /*

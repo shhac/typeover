@@ -2,7 +2,7 @@ import { render } from "@solidjs/testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSignal } from "solid-js";
 import { useRunResultFocus } from "./use-run-result-focus";
-import type { RunResult } from "./use-yaegi-run";
+import type { RunResult } from "./use-runtime-run";
 
 /*
  * Tests for the mobile-keyboard-aware scroll behaviour added in

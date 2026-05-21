@@ -4,7 +4,7 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
-import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { useRuntimeRun } from "~/lib/use-runtime-run";
 import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "../ds/CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -17,10 +17,11 @@ interface FreeformProps {
   generator: GeneratorSpec;
   hints: readonly [string, string, string];
   expectStdout: string;
-  /** Which runtime to grade against. "yaegi" routes to the in-browser
-   *  Go worker; "zig" to the Zig worker (gated by the runtime hook
-   *  refactor in Step 5 — today this component only runs Yaegi). "server"
-   *  is reserved for the future fallback path (Vercel function). */
+  /** Which runtime to grade against. `"yaegi"` and `"zig"` route to
+   *  their respective in-browser workers. `"server"` is reserved for
+   *  the future Vercel-function fallback (not implemented yet — the
+   *  page's freeform gate excludes it via `runtime !== "none"` and
+   *  this component disables Run when the runtime isn't one we drive). */
   runtime: "yaegi" | "zig" | "server";
   successNote?: string;
   nextExerciseHref?: string;
@@ -49,7 +50,7 @@ func main() {
 /*
  * v0 freeform exercise — CodeMirror editor, Run button, stdout-match
  * grading. The run lifecycle (running / runResult / run / reset)
- * lives in `useYaegiRun`; the result panel + run toolbar are shared
+ * lives in `useRuntimeRun`; the result panel + run toolbar are shared
  * components in this directory. Everything left here is the
  * Freeform-specific shell: the editor seed and the
  * canSubmit/isCorrect predicates.
@@ -69,24 +70,35 @@ export function Freeform(props: FreeformProps) {
   const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
   let editorHandle: CodeMirrorEditorHandle | undefined;
 
-  const yaegi = useYaegiRun({ buildProgram: () => code() });
+  /* The hook can't drive `"server"` — that's the SSR fallback path
+   * we haven't wired yet. Snap to "yaegi" so the hook constructs
+   * cleanly; the Run button + mobile-bar Run handler below disable
+   * themselves when `props.runtime` isn't a client-side runtime, so
+   * the unused Yaegi accessor never actually fires. When server
+   * runtime lands, swap this to a real dispatcher (or refactor the
+   * page-level gate to skip rendering Freeform entirely for
+   * "server"). */
+  const hookRuntime = props.runtime === "server" ? "yaegi" : props.runtime;
+  const isClientRuntime = props.runtime === "yaegi" || props.runtime === "zig";
 
-  /* Preflight the Yaegi worker on mount when this exercise uses it.
-   * Hides the ~1.9 MB WASM cold-start behind a visible "Booting Go
+  const runner = useRuntimeRun({ runtime: hookRuntime, buildProgram: () => code() });
+
+  /* Preflight the worker on mount for client-side runtimes. Hides the
+   * brotli'd WASM cold-start behind a visible "Booting <lang>
    * runtime…" badge instead of a frozen-looking Run button on first
    * click. MCQ / fill-word pages skip this hook entirely so they
    * never pay the WASM cost. design-docs/16 F-4. */
   onMount(() => {
-    if (props.runtime === "yaegi") yaegi.preflight();
+    if (isClientRuntime) runner.preflight();
   });
 
   const isCorrect = () => {
-    const r = yaegi.runResult();
+    const r = runner.runResult();
     return r !== null && r.error === "" && r.stdout === props.expectStdout;
   };
-  const canSubmit = () => yaegi.runResult() !== null && !yaegi.running();
+  const canSubmit = () => runner.runResult() !== null && !runner.running();
 
-  const runPanelFocus = useRunResultFocus(yaegi.runResult);
+  const runPanelFocus = useRunResultFocus(runner.runResult);
 
   const phase = useExercisePhase({
     exerciseId: props.exerciseId,
@@ -95,27 +107,28 @@ export function Freeform(props: FreeformProps) {
     onAnother: () => {
       another();
       setCode(DEFAULT_SCAFFOLD);
-      yaegi.clear();
+      runner.clear();
     },
-    onTryAgain: () => yaegi.clear(),
+    onTryAgain: () => runner.clear(),
   });
 
   const toolbar = (
     <div class="flex flex-row gap-3 items-center flex-wrap">
       <RunResetToolbar
-        running={yaegi.running()}
-        canRun={props.runtime === "yaegi"}
-        onRun={yaegi.run}
-        onReset={yaegi.reset}
-        runtimeStatus={yaegi.runtimeStatus()}
-        bootError={yaegi.bootError()}
-        bootStalled={yaegi.bootStalled()}
+        running={runner.running()}
+        canRun={isClientRuntime}
+        onRun={runner.run}
+        onReset={runner.reset}
+        runtimeStatus={runner.runtimeStatus()}
+        runtimeLabel={runner.runtimeLabel}
+        bootError={runner.bootError()}
+        bootStalled={runner.bootStalled()}
       />
       {/* Disabled-Submit explainer per design-docs/16 F-18.
        * Submit is gated on a prior Run; without this hint a
        * learner who types a correct answer and clicks Submit
        * sees nothing and assumes the button is broken. */}
-      <Show when={yaegi.runResult() === null && code().trim() !== ""}>
+      <Show when={runner.runResult() === null && code().trim() !== ""}>
         <Text tone="muted" size="xs" family="mono">
           ↳ Run your code first to enable Submit
         </Text>
@@ -153,11 +166,11 @@ export function Freeform(props: FreeformProps) {
           /* Editing invalidates the last Run's grade. Without
            * clearing, Submit could grade fresh garbage against
            * the previous Run's stdout (design-docs/19 F-3). */
-          yaegi.clear();
+          runner.clear();
         }}
         onCmdEnter={() => {
-          if (props.runtime === "yaegi" && !yaegi.running() && code().trim() !== "") {
-            void yaegi.run();
+          if (isClientRuntime && !runner.running() && code().trim() !== "") {
+            void runner.run();
           }
         }}
         disabled={phase.current() === "right"}
@@ -176,12 +189,13 @@ export function Freeform(props: FreeformProps) {
           if (phase.current() === "right") return;
           editorHandle?.insertAtCursor(text);
         }}
-        /* Mirror the toolbar's runtime gate. Today the schema permits
-         * `runtime: "yaegi" | "server"` for freeform; only "yaegi"
-         * runs in the worker. Without this, a future server-runtime
-         * exercise would silently invoke yaegi.run via the mobile
-         * bar even though the toolbar Run is disabled. */
-        onRun={props.runtime === "yaegi" ? () => void yaegi.run() : undefined}
+        /* Mirror the toolbar's runtime gate. The schema permits
+         * `runtime: "yaegi" | "zig" | "server"` for freeform; only
+         * the client-side runtimes run in a worker. Without this, a
+         * future server-runtime exercise would silently invoke
+         * runner.run via the mobile bar even though the toolbar Run
+         * is disabled. */
+        onRun={isClientRuntime ? () => void runner.run() : undefined}
       />
       <InlineCanonicalReveal
         submission={code}
@@ -189,7 +203,7 @@ export function Freeform(props: FreeformProps) {
         mode="line"
         forceOpen={() => phase.revealed()}
       />
-      <Show when={yaegi.runResult()}>
+      <Show when={runner.runResult()}>
         {(r) => (
           <RunResultPanel result={r()} expectStdout={props.expectStdout} ref={runPanelFocus.ref} />
         )}

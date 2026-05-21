@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { useRuntimeRun } from "~/lib/use-runtime-run";
 import { RunResetToolbar } from "../exercise/RunResetToolbar";
 import { RunResultPanel } from "../exercise/RunResultPanel";
 
@@ -9,7 +9,7 @@ import { RunResultPanel } from "../exercise/RunResultPanel";
  * exercise components consume it. Mounted at /runtime-smoke for dev
  * inspection; not linked from any user-facing nav.
  *
- * Shares useYaegiRun + RunResetToolbar + RunResultPanel with the
+ * Shares useRuntimeRun + RunResetToolbar + RunResultPanel with the
  * production exercise surfaces — same lifecycle, same visual
  * vocabulary.
  */
@@ -38,7 +38,7 @@ const DEFAULT_EXPECT = `hello from yaegi (browser)
 
 export function YaegiSmoke() {
   const [code, setCode] = createSignal(DEFAULT_CODE);
-  const yaegi = useYaegiRun({ buildProgram: () => code() });
+  const yaegi = useRuntimeRun({ runtime: "yaegi", buildProgram: () => code() });
 
   return (
     <div class="flex flex-col gap-3">

@@ -26,6 +26,11 @@ const { evalMock, terminateMock } = vi.hoisted(() => ({
 vi.mock("~/runtime", () => ({
   getRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
   terminateRunner: terminateMock,
+  /* The hook imports both runtime accessors at module load even when
+   * the test only exercises the Yaegi branch — stub Zig too so the
+   * import doesn't blow up. Share the mocks; assertions stay valid. */
+  getZigRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
+  terminateZigRunner: terminateMock,
 }));
 
 import { Freeform } from "./Freeform";

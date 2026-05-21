@@ -7,7 +7,7 @@ import { normaliseSubmission } from "~/lib/submission-normalise";
 import { useAutoSubmittingPhase } from "~/lib/use-auto-submitting-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
-import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { useRuntimeRun } from "~/lib/use-runtime-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { InstructionLine } from "../ds/InstructionLine";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
@@ -28,11 +28,10 @@ interface FillBlankLineInputProps {
   /** The exact stdout the substituted canonical should produce when
    *  the learner's input is correct. */
   expectStdout: string;
-  /** Which client-side runtime to grade against. Today: `"yaegi"` for
-   *  the Go track, `"zig"` for the Zig track. Schema's
-   *  `validateFillLineMode` restricts to these. Internal dispatch
-   *  arrives with the use-yaegi-run → use-runtime-run rename in
-   *  Step 5; today this component still only drives Yaegi. */
+  /** Which client-side runtime to grade against. `"yaegi"` for the
+   *  Go track, `"zig"` for the Zig track. Schema's
+   *  `validateFillLineMode` restricts to these. The hook below
+   *  dispatches to the right worker accessor based on this prop. */
   runtime: "yaegi" | "zig";
   /** Alternate submission strings that grade correct even when
    *  Yaegi can't run them (e.g. Go 1.21+ generic-stdlib forms our
@@ -53,7 +52,7 @@ interface FillBlankLineInputProps {
  * input embedded in the canonical scaffold, Run via Yaegi, grade
  * stdout against expectStdout.
  *
- * The run lifecycle lives in `useYaegiRun`; the result panel + run
+ * The run lifecycle lives in `useRuntimeRun`; the result panel + run
  * toolbar are shared components in this directory. Everything left
  * here is fill-line-specific: the input signal, the
  * substitute-at-blank → program text wiring, the Enter-to-Run
@@ -66,15 +65,16 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
 
   const [input, setInput] = createSignal("");
 
-  const yaegi = useYaegiRun({
+  const runner = useRuntimeRun({
+    runtime: props.runtime,
     buildProgram: () => substituteAtBlank(instance(), input()),
   });
 
-  /* Preflight WASM on mount — fill-line is always Yaegi-runtime per
-   * schema, so there's no `runtime === "yaegi"` gate here. Surfaces
-   * the cold-start as a "Booting Go runtime…" badge instead of a
-   * frozen Run button. design-docs/16 F-4. */
-  onMount(() => yaegi.preflight());
+  /* Preflight WASM on mount — fill-line always uses a client-side
+   * runtime per schema, so there's no runtime gate here. Surfaces
+   * the cold-start as a "Booting <lang> runtime…" badge instead of
+   * a frozen Run button. design-docs/16 F-4. */
+  onMount(() => runner.preflight());
 
   /* Submission matches one of the authored alternate canonicals
    * (whitespace-normalised). Used to grade a "perfect" modern answer
@@ -87,7 +87,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
     return props.alternateCanonicals.some((alt) => normaliseSubmission(alt) === target);
   };
   const isCorrect = () => {
-    const r = yaegi.runResult();
+    const r = runner.runResult();
     if (r === null) return false;
     if (r.error === "" && r.stdout === props.expectStdout) return true;
     return matchesAlternateCanonical();
@@ -96,7 +96,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
    * Run result is required to commit a verdict; the OUTER
    * canSubmit (below, on ownPhase) is looser so the user can
    * click Submit without having Run first and trigger auto-Run. */
-  const canSubmit = () => yaegi.runResult() !== null && !yaegi.running() && input().trim() !== "";
+  const canSubmit = () => runner.runResult() !== null && !runner.running() && input().trim() !== "";
 
   /* Targeted wrong-pattern feedback per design-docs/99. When the
    * learner's submission matches an authored distractor's `match`
@@ -116,11 +116,11 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
     onAnother: () => {
       another();
       setInput("");
-      yaegi.clear();
+      runner.clear();
       ownPhase.reset();
     },
     onTryAgain: () => {
-      yaegi.clear();
+      runner.clear();
       ownPhase.reset();
     },
   });
@@ -132,31 +132,32 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
    * "wire input + yaegi into an auto-submitting phase". */
   const ownPhase = useAutoSubmittingPhase({
     phase,
-    runResult: yaegi.runResult,
-    running: yaegi.running,
+    runResult: runner.runResult,
+    running: runner.running,
     isCorrect,
     hasInput: () => input().trim() !== "",
-    startRun: () => void yaegi.run(),
+    startRun: () => void runner.run(),
   });
 
-  const runPanelFocus = useRunResultFocus(yaegi.runResult);
+  const runPanelFocus = useRunResultFocus(runner.runResult);
 
   const toolbar = (
     <div class="flex flex-row gap-3 items-center flex-wrap">
       <RunResetToolbar
-        running={yaegi.running()}
+        running={runner.running()}
         canRun={input().trim() !== ""}
-        onRun={yaegi.run}
-        onReset={yaegi.reset}
-        runtimeStatus={yaegi.runtimeStatus()}
-        bootError={yaegi.bootError()}
-        bootStalled={yaegi.bootStalled()}
+        onRun={runner.run}
+        onReset={runner.reset}
+        runtimeStatus={runner.runtimeStatus()}
+        runtimeLabel={runner.runtimeLabel}
+        bootError={runner.bootError()}
+        bootStalled={runner.bootStalled()}
       />
       {/* Run nudge surfaced only when the learner has typed but
        * hasn't run yet. Submit auto-Runs (design-docs/26 UX ask),
        * but the explicit Run button is still the right path when
        * they want to inspect output before committing. */}
-      <Show when={yaegi.runResult() === null && input().trim() !== "" && !yaegi.running()}>
+      <Show when={runner.runResult() === null && input().trim() !== "" && !runner.running()}>
         <Text tone="muted" size="xs" family="mono">
           ↳ Run to inspect output, or Submit to grade
         </Text>
@@ -218,10 +219,10 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
                * against the previous Run's stdout (design-docs/19
                * F-3). Clearing runResult also drops canSubmit back
                * to false so the learner has to Run again. */
-              yaegi.clear();
+              runner.clear();
             }}
             onEnter={() => {
-              if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
+              if (input().trim() !== "" && !runner.running()) void runner.run();
             }}
           />
         )}
@@ -236,7 +237,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
           if (phase.current() !== "right") insertAtFocused(text);
         }}
         onRun={() => {
-          if (input().trim() !== "" && !yaegi.running()) void yaegi.run();
+          if (input().trim() !== "" && !runner.running()) void runner.run();
         }}
       />
       <InlineCanonicalReveal
@@ -249,7 +250,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
         mode="word"
         forceOpen={() => phase.revealed()}
       />
-      <Show when={yaegi.runResult()}>
+      <Show when={runner.runResult()}>
         {(r) => (
           <RunResultPanel result={r()} expectStdout={props.expectStdout} ref={runPanelFocus.ref} />
         )}

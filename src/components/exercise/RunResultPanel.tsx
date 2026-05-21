@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { FOCUS_RING_CLASS } from "../ds/_internal";
 import { CodePane } from "../ds/CodePane";
 import { Text } from "../ds/Text";
-import type { RunResult } from "~/lib/use-yaegi-run";
+import type { RunResult } from "~/lib/use-runtime-run";
 
 interface RunResultPanelProps {
   result: RunResult;
@@ -23,7 +23,7 @@ interface RunResultPanelProps {
 
 /*
  * Renders the {stdout, stderr, error, durationMs} produced by a
- * useYaegiRun.run() call. Shared between Freeform, FillBlankLineInput,
+ * useRuntimeRun.run() call. Shared between Freeform, FillBlankLineInput,
  * and the dev-only YaegiSmoke probe.
  *
  * Two design decisions worth knowing (both per design-docs/16 F-14

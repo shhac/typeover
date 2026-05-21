@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 import { Button } from "../ds/Button";
 import { Text } from "../ds/Text";
-import type { RuntimeStatus } from "~/lib/use-yaegi-run";
+import type { RuntimeStatus } from "~/lib/use-runtime-run";
 
 interface RunResetToolbarProps {
   running: boolean;
@@ -11,11 +11,16 @@ interface RunResetToolbarProps {
   canRun: boolean;
   onRun: () => void;
   onReset: () => void;
-  /** Optional boot status. When supplied, surfaces a "Booting Go
+  /** Optional boot status. When supplied, surfaces a "Booting <lang>
    *  runtime…" indicator and gates Run while booting. Without it the
    *  toolbar behaves as before (back-compat for any future consumer
    *  that wants to skip the runtime UI). design-docs/16 F-4. */
   runtimeStatus?: RuntimeStatus;
+  /** Human label for the runtime, used in the boot badge copy
+   *  ("Booting <runtimeLabel> runtime…"). Defaults to "Go" for
+   *  back-compat with callers that haven't started threading the
+   *  hook's runtimeLabel through. */
+  runtimeLabel?: string;
   /** Companion to `runtimeStatus`. Surfaces a boot failure message. */
   bootError?: string | null;
   /** True when boot has been stuck on "booting" past the stall
@@ -59,7 +64,7 @@ export function RunResetToolbar(props: RunResetToolbarProps) {
       </Show>
       <Show when={booting() && !props.bootStalled}>
         <Text tone="muted" size="xs" family="mono">
-          ↳ Booting Go runtime… ~2 MB, one-time download
+          ↳ Booting {props.runtimeLabel ?? "Go"} runtime… one-time download
         </Text>
       </Show>
       <Show when={booting() && props.bootStalled}>
