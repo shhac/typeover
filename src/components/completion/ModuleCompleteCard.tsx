@@ -16,6 +16,14 @@ interface ThemeSummary {
 interface ModuleCompleteCardProps {
   moduleId: string;
   moduleTitle: string;
+  /** 1-indexed position of this module in the curriculum. Used to
+   *  honestly frame the celebration ("Module 1 of 7") rather than
+   *  letting "MODULE COMPLETE" oversell a single-module milestone.
+   *  design-docs/16 F-24. */
+  moduleOrder: number;
+  /** Total module count in the curriculum. Pairs with moduleOrder
+   *  for the "N of M" framing. */
+  totalModules: number;
   themes: ThemeSummary[];
   /** Where Continue goes — first exercise of the next module, or
    *  the curriculum index when this was the last module. */
@@ -199,7 +207,9 @@ export function ModuleCompleteCard(props: ModuleCompleteCardProps) {
           }
         >
           <div class="flex flex-col gap-6">
-            <Eyebrow tone="primary">typeover · module complete</Eyebrow>
+            <Eyebrow tone="primary">
+              module {props.moduleOrder} of {props.totalModules} complete
+            </Eyebrow>
             <Heading level={2} size="3xl">
               {props.moduleTitle}
             </Heading>
