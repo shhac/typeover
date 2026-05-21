@@ -1,10 +1,10 @@
 import { createSignal, onMount, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
-import { useExercisePhase, type ExercisePhaseHandle } from "~/lib/exercise-phase";
+import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
 import { normaliseSubmission } from "~/lib/submission-normalise";
-import { useAutoSubmitOnCorrect } from "~/lib/use-auto-submit-on-correct";
+import { useAutoSubmittingPhase } from "~/lib/use-auto-submitting-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
@@ -113,58 +113,27 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       another();
       setInput("");
       yaegi.clear();
-      autoSubmit.reset();
+      ownPhase.reset();
     },
     onTryAgain: () => {
       yaegi.clear();
-      autoSubmit.reset();
+      ownPhase.reset();
     },
   });
 
-  /* Auto-Submit on correct Run + auto-Run on Submit-without-Run.
-   * design-docs/26-ux-asks. The reactive choreography
-   * ("result lands → was it correct → are we still picking →
-   * commit verdict") is encapsulated in `useAutoSubmitOnCorrect`;
-   * this component wires it up + drives the second leg via the
-   * wrapped phase below. */
-  const autoSubmit = useAutoSubmitOnCorrect({
+  /* design-docs/26-ux-asks "smart submit": auto-Run on Submit
+   * when no result is buffered, and auto-Submit when a fresh
+   * Run grades correct. Both halves bundled in
+   * `useAutoSubmittingPhase` so this component reads as
+   * "wire input + yaegi into an auto-submitting phase". */
+  const ownPhase = useAutoSubmittingPhase({
+    phase,
     runResult: yaegi.runResult,
     running: yaegi.running,
     isCorrect,
-    phase,
+    hasInput: () => input().trim() !== "",
+    startRun: () => void yaegi.run(),
   });
-
-  /* The phase exposed to ExerciseShell wraps the inner one so we
-   * can:
-   *  - widen canSubmit (the input + non-running gate; runResult is
-   *    no longer required because Submit auto-Runs if needed),
-   *  - intercept submit() to fire Run when there's no result yet,
-   *    deferring the actual phase.submit() to the createEffect
-   *    above when the Run lands.
-   * Other methods pass through unchanged. */
-  const ownPhase: ExercisePhaseHandle = {
-    submitted: phase.submitted,
-    revealed: phase.revealed,
-    current: phase.current,
-    canSubmit: () =>
-      input().trim() !== "" && !yaegi.running() && phase.current() === "picking",
-    submit: () => {
-      if (yaegi.running()) return;
-      if (input().trim() === "") return;
-      if (yaegi.runResult() === null) {
-        /* No fresh Run — kick one off. The auto-submit effect
-         * commits the verdict if the Run is correct; otherwise
-         * the learner stays in picking with the result panel
-         * visible to inspect and iterate. */
-        void yaegi.run();
-        return;
-      }
-      phase.submit();
-    },
-    tryAgain: phase.tryAgain,
-    nextInstance: phase.nextInstance,
-    revealCorrect: phase.revealCorrect,
-  };
 
   const runPanelFocus = useRunResultFocus(yaegi.runResult);
 
@@ -199,7 +168,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       canonical={instance().canonical}
       hints={props.hints}
       hintValues={instance().values}
-      phase={ownPhase}
+      phase={ownPhase.phase}
       ownsReveal
       successNote={props.successNote}
       extraPickingActions={toolbar}
