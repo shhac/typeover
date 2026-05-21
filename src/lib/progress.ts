@@ -1,4 +1,10 @@
-import { z } from "zod";
+import {
+  emptyProgress,
+  parseProgressResult,
+  safeParseProgress,
+  type ExerciseProgress,
+  type Progress,
+} from "./progress-schema";
 
 /*
  * Local progress storage. Minimal v0 — enough to power "resume" and
@@ -7,7 +13,9 @@ import { z } from "zod";
  * documented in design-docs/11-progress-tracking.md.
  *
  * The four `record*` helpers all follow the same read-modify-write
- * shape, expressed once via `bumpExercise`.
+ * shape, expressed once via `bumpExercise`. Pure parsing + the
+ * Zod schema live in `./progress-schema.ts` so non-I/O consumers
+ * (tests, type-infer) don't pull in the cache + Solid event layer.
  */
 
 export const STORAGE_KEY = "typeover:progress";
@@ -20,70 +28,14 @@ const CORRUPT_KEY_PREFIX = "typeover:progress:corrupt-";
  *  `storage` event for full coverage. design-docs/19 F-20. */
 export const PROGRESS_CHANGED_EVENT = "typeover:progress-changed";
 
-const ExerciseProgressSchema = z.object({
-  firstSeenAt: z.string(),
-  lastSeenAt: z.string(),
-  instancesSeen: z.number(),
-  instancesPassed: z.number(),
-  instancesFailed: z.number(),
-  hintsUsedTotal: z.number(),
-});
-
-const ProgressSchema = z.object({
-  version: z.literal(1),
-  startedAt: z.string(),
-  lastSeenAt: z.string(),
-  exercises: z.record(z.string(), ExerciseProgressSchema),
-});
-
-export type ExerciseProgress = z.infer<typeof ExerciseProgressSchema>;
-export type Progress = z.infer<typeof ProgressSchema>;
+/* Re-export the schema's public types + safe parser so existing
+ * consumers (~/lib/progress imports) continue to work without
+ * touching every call site. */
+export type { ExerciseProgress, Progress };
+export { safeParseProgress };
 
 const now = () => new Date().toISOString();
-
-const empty = (): Progress => ({
-  version: 1,
-  startedAt: now(),
-  lastSeenAt: now(),
-  exercises: {},
-});
-
-/** Parse + validate a raw storage payload into a Progress. Pure —
- *  no localStorage access. Any reject path returns empty(); callers
- *  that need to know *whether* parsing rejected (e.g. to back up the
- *  corrupt raw value) should call `parseProgressResult` instead. */
-export function safeParseProgress(raw: string | null): Progress {
-  const result = parseProgressResult(raw);
-  return result.ok ? result.value : empty();
-}
-
-type ParseResult =
-  | { ok: true; value: Progress }
-  | { ok: false; reason: "empty" | "invalid-json" | "schema-mismatch" };
-
-/** Tagged-result parser. `empty` means the slot was never written
- *  (no backup needed); `invalid-json` and `schema-mismatch` are
- *  corrupt-blob outcomes the caller may want to preserve. */
-/* Small wrapper around JSON.parse so the caller can stay `const`
- * and read top-to-bottom — the previous `let parsed; try {...} catch`
- * smell is the exact shape lens-3 flagged in design-docs/20. */
-const JSON_PARSE_FAILED = Symbol("json-parse-failed");
-function tryJsonParse(raw: string): unknown | typeof JSON_PARSE_FAILED {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return JSON_PARSE_FAILED;
-  }
-}
-
-function parseProgressResult(raw: string | null): ParseResult {
-  if (raw === null) return { ok: false, reason: "empty" };
-  const parsed = tryJsonParse(raw);
-  if (parsed === JSON_PARSE_FAILED) return { ok: false, reason: "invalid-json" };
-  const result = ProgressSchema.safeParse(parsed);
-  if (!result.success) return { ok: false, reason: "schema-mismatch" };
-  return { ok: true, value: result.data };
-}
+const empty = emptyProgress;
 
 /* Module-level cache. Every public reader (getExerciseProgress,
  * summarizeTheme, the test helpers) goes through read(); a single
@@ -110,6 +62,30 @@ export function invalidateProgressCache(): void {
   cachedProgress = null;
 }
 
+/**
+ * Stash the raw corrupt payload under a timestamped backup key,
+ * then reset the main key to an empty Progress. Pulled out of
+ * read() so the corruption-recovery contract is explicit + the
+ * read() body reads as a flat happy-path. design-docs/19 F-1 +
+ * design-docs/18 F-5 follow-up.
+ *
+ * Caller MUST already have verified `reason !== "empty"` (a missing
+ * key is not corruption, just a fresh user) and `raw !== null`
+ * (nothing to back up).
+ *
+ * Critical sequencing: backup first, THEN reset the main key.
+ * Without the reset, every subsequent read() in the same session
+ * re-enters this branch (corrupt blob is still in storage),
+ * spawning one new `typeover:progress:corrupt-<iso>` key per call
+ * — and a single ModuleCompleteCard render fires 100+ reads.
+ */
+function handleCorruptProgress(raw: string): Progress {
+  localStorage.setItem(CORRUPT_KEY_PREFIX + now(), raw);
+  const fresh = empty();
+  write(fresh);
+  return cachedProgress ?? fresh;
+}
+
 function read(): Progress {
   if (cachedProgress !== null) return cachedProgress;
   if (typeof localStorage === "undefined") {
@@ -122,22 +98,8 @@ function read(): Progress {
     cachedProgress = result.value;
     return cachedProgress;
   }
-  /* Back up any non-empty payload that failed validation so a future
-   * migration / forensic pass can recover the learner's history.
-   * design-docs/99 calls this out explicitly: do not silently destroy
-   * progress on a parse failure.
-   *
-   * Critical: after the backup, IMMEDIATELY overwrite the main key
-   * with an empty Progress. Without this, every subsequent read()
-   * in the same session would re-trigger the backup branch (the
-   * corrupt blob is still in storage), spawning one new
-   * `typeover:progress:corrupt-<iso>` key per call — and a single
-   * ModuleCompleteCard render fires 100+ reads. design-docs/19 F-1
-   * documented the unbounded-leak shape this fix closes. */
   if (result.reason !== "empty" && raw !== null) {
-    localStorage.setItem(CORRUPT_KEY_PREFIX + now(), raw);
-    write(empty());
-    return cachedProgress ?? empty();
+    return handleCorruptProgress(raw);
   }
   cachedProgress = empty();
   return cachedProgress;
