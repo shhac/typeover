@@ -1,5 +1,5 @@
 import { createEffect, onCleanup, onMount } from "solid-js";
-import { EditorState, Compartment } from "@codemirror/state";
+import { EditorState, Compartment, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import {
   bracketMatching,
@@ -7,7 +7,6 @@ import {
   syntaxHighlighting,
   indentOnInput,
   indentUnit,
-  StreamLanguage,
 } from "@codemirror/language";
 import {
   defaultKeymap,
@@ -16,8 +15,22 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
-import { go } from "@codemirror/legacy-modes/mode/go";
+import { go } from "@codemirror/lang-go";
+import { javascript } from "@codemirror/lang-javascript";
 import { tags } from "@lezer/highlight";
+
+/** Language packs we support today. Add a value here and the matching
+ *  switch case in `languageExtension` below when adding a third. */
+export type EditorLanguage = "go" | "ts";
+
+function languageExtension(lang: EditorLanguage): Extension {
+  switch (lang) {
+    case "go":
+      return go();
+    case "ts":
+      return javascript({ typescript: true });
+  }
+}
 
 /*
  * Solid wrapper around CodeMirror 6 for the Freeform exercise's
@@ -72,17 +85,31 @@ export interface CodeMirrorEditorHandle {
 
 interface CodeMirrorEditorProps {
   value: string;
-  onValueChange: (value: string) => void;
+  /** Fires on every doc change. Omit for purely read-only display —
+   *  the editor still won't dispatch from external value updates. */
+  onValueChange?: (value: string) => void;
   /** Fired on Cmd/Ctrl+Enter inside the editor. The caller decides
    *  whether to actually Run (Freeform checks canSubmit). */
   onCmdEnter?: () => void;
   /** When true, the editor becomes read-only (success-phase
-   *  lockout). */
+   *  lockout). Differs from `readOnly`: `disabled` still keeps the
+   *  history/keymap stack intact (so a re-enable resumes cleanly);
+   *  `readOnly` strips them for a display-only surface. */
   disabled?: boolean;
+  /** When true, drops the editor's mutating extensions entirely —
+   *  no history, no closeBrackets, no indent-on-input, no line
+   *  numbers, no active-line highlight, no Cmd+Enter binding. The
+   *  result is a syntax-highlighted block that reads as a
+   *  CodeBlock but stays themed with the live editor. Used for
+   *  the TS-source pane in the exercise shell. */
+  readOnly?: boolean;
+  /** Language pack to load. Defaults to "go". */
+  language?: EditorLanguage;
   /** Aria-label for the editor surface (CodeMirror puts it on
    *  the contentDOM). */
   ariaLabel?: string;
-  /** Ref escape hatch for external imperative ops. */
+  /** Ref escape hatch for external imperative ops. Ignored when
+   *  readOnly — there's nothing to focus into / insert into. */
   ref?: (handle: CodeMirrorEditorHandle) => void;
 }
 
@@ -93,11 +120,22 @@ function isTestEnv(): boolean {
   );
 }
 
-/* Plain-textarea fallback used inside the test environment. Mirrors
- * the legacy Freeform textarea closely enough that the existing
- * suite (which dispatches keyboard events on a textarea) keeps
- * working. The production CodeMirror surface ships in browsers. */
+/* Plain-textarea (or <pre> in readOnly mode) fallback used inside
+ * the test environment. CM's contentEditable is brittle in jsdom,
+ * so test paths target the simpler DOM while the production
+ * surface ships in browsers. */
 function TestareaFallback(props: CodeMirrorEditorProps) {
+  if (props.readOnly) {
+    return (
+      <pre
+        class="w-full font-mono text-code p-3 bg-bg-inset border border-border-default rounded-sm leading-relaxed overflow-x-auto"
+        aria-label={props.ariaLabel}
+        data-readonly-fallback="1"
+      >
+        {props.value}
+      </pre>
+    );
+  }
   let el: HTMLTextAreaElement | undefined;
   onMount(() => {
     if (props.ref && el) {
@@ -110,7 +148,7 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
           const before = ta.value.slice(0, start);
           const after = ta.value.slice(end);
           const next = before + text + after;
-          props.onValueChange(next);
+          props.onValueChange?.(next);
           /* Keep the caret after the inserted text on the next
            * tick — Solid hasn't yet propagated `value`. */
           queueMicrotask(() => {
@@ -129,7 +167,7 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
       value={props.value}
       disabled={props.disabled}
       aria-label={props.ariaLabel}
-      onInput={(e) => props.onValueChange(e.currentTarget.value)}
+      onInput={(e) => props.onValueChange?.(e.currentTarget.value)}
       onKeyDown={(e) => {
         if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
           e.preventDefault();
@@ -187,68 +225,84 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
 
   onMount(() => {
     if (!parent) return;
+    const readOnly = props.readOnly === true;
+    const lang = props.language ?? "go";
+    /* Common extensions live in both modes. Editor-only extensions
+     * (history, closeBrackets, indentOnInput, line numbers,
+     * active-line highlight, keymap) drop out under readOnly so the
+     * pane reads as static syntax-highlighted code rather than an
+     * editable editor with disabled affordances. */
+    const baseExtensions: Extension[] = [
+      languageExtension(lang),
+      syntaxHighlighting(syntaxStyle, { fallback: true }),
+      EditorView.contentAttributes.of({
+        "aria-label": props.ariaLabel ?? (lang === "go" ? "Go code" : "TypeScript source"),
+        spellcheck: "false",
+      }),
+      EditorView.theme({
+        "&": {
+          fontFamily:
+            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+          fontSize: "0.875rem",
+          backgroundColor: "var(--color-bg-inset)",
+          color: "var(--color-fg-primary)",
+          borderRadius: "0.125rem",
+          border: "1px solid var(--color-border-default)",
+          minHeight: readOnly ? "auto" : "16rem",
+        },
+        ".cm-scroller": { lineHeight: "1.6" },
+        ".cm-content": { padding: "0.75rem 0" },
+        ".cm-gutters": {
+          backgroundColor: "var(--color-bg-inset)",
+          color: "var(--color-fg-faint)",
+          border: "none",
+        },
+        ".cm-activeLine": { backgroundColor: "rgba(255,255,255,0.02)" },
+        ".cm-activeLineGutter": { backgroundColor: "rgba(255,255,255,0.02)" },
+        "&.cm-focused": readOnly
+          ? { outline: "none" }
+          : { outline: "2px solid var(--color-accent-primary)" },
+      }),
+    ];
+
+    const editorOnly: Extension[] = readOnly
+      ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
+      : [
+          lineNumbers(),
+          history(),
+          bracketMatching(),
+          closeBrackets(),
+          indentOnInput(),
+          indentUnit.of("\t"),
+          highlightActiveLine(),
+          editableCompartment.of(EditorView.editable.of(!props.disabled)),
+          keymap.of([
+            {
+              key: "Mod-Enter",
+              run: () => {
+                props.onCmdEnter?.();
+                return true;
+              },
+            },
+            ...closeBracketsKeymap,
+            ...defaultKeymap,
+            ...historyKeymap,
+            indentWithTab,
+          ]),
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              props.onValueChange?.(update.state.doc.toString());
+            }
+          }),
+        ];
+
     const state = EditorState.create({
       doc: props.value,
-      extensions: [
-        lineNumbers(),
-        history(),
-        bracketMatching(),
-        closeBrackets(),
-        indentOnInput(),
-        indentUnit.of("\t"),
-        highlightActiveLine(),
-        StreamLanguage.define(go),
-        syntaxHighlighting(syntaxStyle, { fallback: true }),
-        editableCompartment.of(EditorView.editable.of(!props.disabled)),
-        keymap.of([
-          {
-            key: "Mod-Enter",
-            run: () => {
-              props.onCmdEnter?.();
-              return true;
-            },
-          },
-          ...closeBracketsKeymap,
-          ...defaultKeymap,
-          ...historyKeymap,
-          indentWithTab,
-        ]),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            props.onValueChange(update.state.doc.toString());
-          }
-        }),
-        EditorView.contentAttributes.of({
-          "aria-label": props.ariaLabel ?? "Go code",
-          spellcheck: "false",
-        }),
-        EditorView.theme({
-          "&": {
-            fontFamily:
-              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-            fontSize: "0.875rem",
-            backgroundColor: "var(--color-bg-inset)",
-            color: "var(--color-fg-primary)",
-            borderRadius: "0.125rem",
-            border: "1px solid var(--color-border-default)",
-            minHeight: "16rem",
-          },
-          ".cm-scroller": { lineHeight: "1.6" },
-          ".cm-content": { padding: "0.75rem 0" },
-          ".cm-gutters": {
-            backgroundColor: "var(--color-bg-inset)",
-            color: "var(--color-fg-faint)",
-            border: "none",
-          },
-          ".cm-activeLine": { backgroundColor: "rgba(255,255,255,0.02)" },
-          ".cm-activeLineGutter": { backgroundColor: "rgba(255,255,255,0.02)" },
-          "&.cm-focused": { outline: "2px solid var(--color-accent-primary)" },
-        }),
-      ],
+      extensions: [...baseExtensions, ...editorOnly],
     });
     view = new EditorView({ state, parent });
 
-    if (props.ref) {
+    if (!readOnly && props.ref) {
       const handle: CodeMirrorEditorHandle = {
         focus: () => view!.focus(),
         insertAtCursor: (text: string) => {
@@ -281,6 +335,10 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
 
   createEffect(() => {
     if (!view) return;
+    /* The editable compartment is only added in editor mode (not
+     * readOnly). Guard so the reconfigure isn't dispatched into a
+     * state that doesn't know the compartment. */
+    if (props.readOnly === true) return;
     view.dispatch({
       effects: editableCompartment.reconfigure(EditorView.editable.of(!props.disabled)),
     });

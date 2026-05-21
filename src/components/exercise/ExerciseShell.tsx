@@ -9,12 +9,12 @@ import {
   type JSX,
 } from "solid-js";
 import { Button, ButtonLink } from "../ds/Button";
-import { CodeBlock } from "../ds/CodeBlock";
 import { Feedback } from "../ds/Feedback";
 import { HintButton } from "../ds/HintButton";
 import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
+import { CodeMirrorEditor } from "./CodeMirrorEditor";
 import {
   getExerciseProgress,
   invalidateProgressCache,
@@ -171,9 +171,19 @@ export function ExerciseShell(props: ExerciseShellProps) {
         </Text>
       </div>
       <Stack gap="sm">
-        <CodeBlock lang="ts" label="source">
-          {props.ts}
-        </CodeBlock>
+        {/* TS-source pane: read-only CodeMirror so syntax tokens
+         * match the live editor below (palette-themed via
+         * design-docs/16 F-19 follow-up). Renders as a static
+         * <pre> inside vitest per the editor's test-env fallback. */}
+        <div class="text-micro uppercase tracking-widest text-fg-muted">
+          TypeScript reference
+        </div>
+        <CodeMirrorEditor
+          value={props.ts}
+          readOnly
+          language="ts"
+          ariaLabel="TypeScript reference snippet"
+        />
       </Stack>
 
       {props.children}
