@@ -236,7 +236,10 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <CodeBlock lang="go" label="your turn — type the line">
+      <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
+        Type the line →
+      </div>
+      <CodeBlock lang="go">
         <For each={instance().blankSegments ?? []}>
           {(seg) => {
             if (seg.kind === "text") return <span>{seg.text}</span>;

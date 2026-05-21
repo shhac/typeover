@@ -10,11 +10,13 @@ interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
    *  (`users.ts`, `main.go`) — anything that would round-trip
    *  through a copy-to-clipboard "filename" path. */
   filename?: string;
-  /** Optional non-filename label for the header (e.g. "your turn —
-   *  type the line"). Renders in the same slot as filename when
-   *  filename is absent. design-docs/17 F-10 split the slot so
-   *  filename and prose-label can't pretend to be the same thing
-   *  to downstream tooling. */
+  /** Optional non-filename label for the header (e.g. a "snippet"
+   *  marker). Renders in the same slot as filename when filename
+   *  is absent. design-docs/17 F-10 split the slot so filename and
+   *  prose-label can't pretend to be the same thing to downstream
+   *  tooling. design-docs/16 F-21 retired the "your turn —" prose
+   *  variants: instructions belong above the CodeBlock, not in the
+   *  filename strip. */
   label?: string;
   /** Show the language label in the corner. */
   showLang?: boolean;

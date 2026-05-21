@@ -121,7 +121,10 @@ export function FillBlankWord(props: FillBlankWordProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <CodeBlock lang="go" label="your turn — fill the blanks">
+      <div class="text-micro uppercase tracking-widest text-fg-muted mb-1.5">
+        Fill the blanks →
+      </div>
+      <CodeBlock lang="go">
         <For each={segments()}>
           {(seg, idx) => {
             if (seg.kind === "text") return <span>{seg.text}</span>;
