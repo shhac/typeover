@@ -160,6 +160,35 @@ are ones that try to USE the generic stdlib (slices.Sort,
 maps.Keys, etc.); those slots either reach for the pre-generics
 equivalent or stay MCQ-recognition.
 
+#### Quirk surfaced 2026-05-21 (Module 5.2 authoring)
+
+`errors.As` works cleanly with STDLIB error types
+(`*strconv.NumError`, `*os.PathError`, `*net.OpError`) but
+FAILS on Yaegi-defined custom error types with messages like
+"`*target must be interface or implement error`" or "`reflect:
+Call using struct { X... } as type error`". The issue is
+Yaegi's reflection bridging — yaegi-internal struct types
+don't satisfy the interface check that `errors.As` runs
+through reflect.
+
+**Workaround:** when authoring an `errors.As` exercise that
+needs to be runnable, use a STDLIB error type as the
+extraction target (slots 7 + 9 of `errors/is-and-as` use
+`*strconv.NumError`). The API shape is identical; the lesson
+lands the same.
+
+For exercises that NEED a custom error type, drop to MCQ /
+recognition only (no `runtime: yaegi`).
+
+**What retires when fixed:** the `*strconv.NumError` lean in
+`errors/is-and-as` slots 7 + 9 can swap to a user-defined
+type. Author flag: grep `errors/is-and-as` for "strconv.NumError"
+and review whether the use is pedagogical (keep) or
+workaround-driven (swap).
+
+`errors.Is` works fine with both stdlib and user-defined
+sentinels — no workaround needed there.
+
 ## What we'd do differently if a Yaegi PR landed
 
 The `alternateCanonicals` infrastructure (shipped commit

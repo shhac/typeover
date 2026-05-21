@@ -1,0 +1,101 @@
+target: go
+themeId: errors/is-and-as
+type: freeform
+order: 8
+prompt: |
+  Build a complete program that demonstrates multiple sentinels
+  + `errors.Is` discrimination through a wrap chain.
+
+  Requirements:
+  1. Two sentinels: `ErrNotFound` and `ErrUnauthorized`,
+     both via `errors.New` at package scope.
+  2. A function `loadUser(id int) error` that returns
+     `ErrNotFound` when `id == 0` and `ErrUnauthorized` when
+     `id < 0`, wrapped with `fmt.Errorf("loadUser: %w", ...)`.
+  3. In `main`: call `loadUser(0)` and `loadUser(-1)`. For
+     each, use `errors.Is` to BRANCH on which sentinel the
+     wrapped error matches, and print accordingly.
+
+  Expected output:
+  ```
+  not found
+  unauthorized
+  ```
+
+  TypeScript reference:
+  ```ts
+  const ErrNotFound = new Error("not found");
+  const ErrUnauthorized = new Error("unauthorized");
+  function loadUser(id: number): Error | null {
+    if (id === 0) return new Error("loadUser: " + ErrNotFound.message, { cause: ErrNotFound });
+    if (id < 0) return new Error("loadUser: " + ErrUnauthorized.message, { cause: ErrUnauthorized });
+    return null;
+  }
+  // walk .cause to match
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const ErrNotFound = new Error("not found");
+    const ErrUnauthorized = new Error("unauthorized");
+    function loadUser(id: number): Error | null {
+      if (id === 0) return new Error("loadUser: " + ErrNotFound.message, { cause: ErrNotFound });
+      if (id < 0) return new Error("loadUser: " + ErrUnauthorized.message, { cause: ErrUnauthorized });
+      return null;
+    }
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    )
+
+    var (
+    	ErrNotFound     = errors.New("not found")
+    	ErrUnauthorized = errors.New("unauthorized")
+    )
+
+    func loadUser(id int) error {
+    	if id == 0 {
+    		return fmt.Errorf("loadUser: %w", ErrNotFound)
+    	}
+    	if id < 0 {
+    		return fmt.Errorf("loadUser: %w", ErrUnauthorized)
+    	}
+    	return nil
+    }
+
+    func describe(err error) {
+    	if errors.Is(err, ErrNotFound) {
+    		fmt.Println("not found")
+    		return
+    	}
+    	if errors.Is(err, ErrUnauthorized) {
+    		fmt.Println("unauthorized")
+    		return
+    	}
+    	fmt.Println("ok")
+    }
+
+    func main() {
+    	describe(loadUser(0))
+    	describe(loadUser(-1))
+    }
+expectStdout: |
+  not found
+  unauthorized
+hints:
+  - "Three pieces: two sentinels (grouped `var (...)` block is idiomatic), `loadUser` returning each sentinel wrapped, and a `describe` helper using `errors.Is` to branch."
+  - "Group sentinels with `var ( ErrA = ...; ErrB = ... )` — idiomatic single block. Then in main, call `describe(loadUser(0))` and `describe(loadUser(-1))`."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Drills multi-sentinel discrimination — the real-world shape
+  of "what kind of error was this?" branching. The `describe`
+  helper isolates the matching logic; in production code it'd
+  often be a switch-like cascade or a `switch true { case ... }`
+  pattern.
+
+  Yaegi-verified.

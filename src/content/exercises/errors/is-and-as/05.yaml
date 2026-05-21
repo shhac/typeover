@@ -1,0 +1,36 @@
+target: go
+themeId: errors/is-and-as
+type: fill-word
+order: 5
+prompt: |
+  Type the `errors` package function for TYPE extraction (find
+  an error of a specific type in a wrap chain and bind it to a
+  variable). Two letters, capitalised.
+generator:
+  kind: template
+  vars:
+    fn: ["As"]
+  ts: |-
+    // TS: walk err.cause chain, check `instanceof PathError`, narrow.
+  canonical: |-
+    var pe *PathError
+    if errors.${fn}(err, &pe) {
+    	use(pe.Path)
+    }
+blanks: [fn]
+hints:
+  - "Function on `errors`. Counterpart to `Is`. Two characters."
+  - "Same letters as the keyword for type conversion (\"...as PathError\")."
+  - "`As`."
+runtime: none
+notes: |
+  Pairs with slot 4 (`Is`). The errors package's two-function
+  surface for handling wrapped errors:
+
+    errors.Is(err, target) → bool      (identity match)
+    errors.As(err, &target) → bool      (type extraction)
+
+  Both walk the chain via the `Unwrap() error` interface. Both
+  are the answer to "I have a wrapped error, did it have X
+  inside?" — the difference is whether X is a sentinel value
+  (Is) or a concrete type (As).

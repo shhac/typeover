@@ -1,0 +1,29 @@
+target: go
+themeId: errors/is-and-as
+type: fill-word
+order: 4
+prompt: |
+  Type the `errors` package function for IDENTITY matching
+  (sentinel error in a wrap chain). Two letters, capitalised.
+generator:
+  kind: template
+  vars:
+    fn: ["Is"]
+  ts: |-
+    // TS: e === ErrA (one layer); for deep chains, walk e.cause manually.
+  canonical: |-
+    if errors.${fn}(err, ErrNotFound) {
+    	return err
+    }
+blanks: [fn]
+hints:
+  - "Function on `errors`. Counterpart to `As`. Two characters."
+  - "Same letters as the question word: \"Is this THIS error?\"."
+  - "`Is`."
+runtime: none
+notes: |
+  Tiny drill: type `Is`. Pairs with slot 5 (`As`). The
+  two-function naming (one verb, one verb) is the cleanest
+  mnemonic — same package, different question:
+  - Is: "is this THIS error?" (identity)
+  - As: "is this an error AS this type?" (extraction)

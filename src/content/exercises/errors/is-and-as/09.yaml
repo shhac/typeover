@@ -1,0 +1,80 @@
+target: go
+themeId: errors/is-and-as
+type: freeform
+order: 9
+prompt: |
+  Theme 5.2 capstone — `errors.As` extracting a stdlib typed
+  error from a WRAPPED chain.
+
+  Build a complete program that:
+  1. Calls `strconv.Atoi("not-a-number")` (returns a wrapped
+     `*strconv.NumError`).
+  2. WRAPS the result with `fmt.Errorf("parse: %w", err)`
+     to demonstrate one additional layer.
+  3. Uses `errors.As` to extract the `*strconv.NumError` out
+     of the wrap chain.
+  4. Prints the `Func` field, the `Num` field, and the inner
+     `Err` of the extracted NumError.
+
+  Expected output:
+  ```
+  Atoi
+  not-a-number
+  invalid syntax
+  ```
+
+  TypeScript reference:
+  ```ts
+  // TS analog: walk e.cause chain, narrow by instanceof. Manual.
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS has no built-in walk-chain-by-type — you'd write the loop manually.
+  canonical: |-
+    package main
+
+    import (
+    	"errors"
+    	"fmt"
+    	"strconv"
+    )
+
+    func main() {
+    	_, err := strconv.Atoi("not-a-number")
+    	wrapped := fmt.Errorf("parse: %w", err)
+    	var numErr *strconv.NumError
+    	if errors.As(wrapped, &numErr) {
+    		fmt.Println(numErr.Func)
+    		fmt.Println(numErr.Num)
+    		fmt.Println(numErr.Err)
+    	}
+    }
+expectStdout: |
+  Atoi
+  not-a-number
+  invalid syntax
+hints:
+  - "Three pieces: produce the inner error via `strconv.Atoi`, wrap with `fmt.Errorf`, then `errors.As(wrapped, &numErr)` to extract. Print numErr.Func, .Num, .Err."
+  - "`errors.As(wrapped, &numErr)` walks past the `fmt.Errorf` wrap and finds the inner `*strconv.NumError`."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  THE `errors.As` capstone. Uses stdlib `*strconv.NumError` to
+  sidestep Yaegi's user-defined-type limitation (design-docs/30).
+  The lesson — "extract a typed error from a possibly-wrapped
+  chain and read its structured fields" — fully exercised
+  even though the example uses a stdlib type.
+
+  Authoring note: chose `strconv.Atoi("not-a-number")` because
+  it reliably produces a wrapped `*strconv.NumError` with all
+  three fields populated (`Func`, `Num`, `Err`). Other stdlib
+  errors with structure could substitute (`*os.PathError`,
+  `*net.OpError`) but NumError is the smallest, most-portable
+  example with multiple fields to demonstrate the
+  structured-error idea.
+
+  With this slot, theme 5.2 (is-and-as) is COMPLETE. Module 5:
+  2 of 5 themes done. Themes 5.3 (type-assertions), 5.4
+  (packages-and-imports), 5.5 (modules-and-gomod) remain.
