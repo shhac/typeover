@@ -99,7 +99,24 @@ export function BlankInput(props: BlankInputProps) {
       class={cn(
         "inline-block px-1.5 py-0.5 bg-bg-base font-mono text-code",
         "border rounded-sm outline-none align-baseline",
-        "w-[14ch] max-w-full",
+        /* Width strategy (design-docs/19 F-3 follow-up):
+         *   - `min-w-[14ch]` is the anti-leak floor — short answers
+         *     don't render visibly shorter than long ones, so a
+         *     learner can't infer the canonical's length from the
+         *     blank's width.
+         *   - `field-sizing-content` lets supported browsers grow
+         *     the input width to fit the learner's TYPED content,
+         *     so a 20-char answer doesn't truncate to 14ch the way
+         *     the prior fixed-width did (caught by the 2026-05-21
+         *     playtest screenshot of fill-line variables/07).
+         *   - `max-w-full` caps the grown width at the parent
+         *     container, so a runaway answer doesn't push the
+         *     surrounding code off-screen.
+         *   - Browsers without field-sizing support fall back to
+         *     `w-[14ch]` (the prior shipped behavior); newer
+         *     browsers — Chrome 123+, Firefox 138+, Safari 18.4+ —
+         *     get the grow-with-content behavior automatically. */
+        "w-[14ch] min-w-[14ch] max-w-full field-sizing-content",
         inputClass[state()],
       )}
     />
