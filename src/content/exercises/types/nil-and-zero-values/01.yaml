@@ -1,0 +1,65 @@
+target: go
+themeId: types/nil-and-zero-values
+type: mcq
+order: 1
+prompt: |
+  Every Go type has a defined zero value — what `var x T`
+  produces without an initialiser. Match the type to its zero
+  value. (Themes 3.1 + 3.3 covered struct and pointer zero
+  values; this slot is the canonical reference table.)
+
+  Pick the line that's CORRECT — only one matches its type's
+  actual zero value.
+generator:
+  kind: variant
+  variants:
+    - id: int
+      ts: 'let x: number;  // x === undefined'
+      canonical: "var x int  // x is 0"
+      distractors:
+        - "var x int  // x is nil"
+        - "var x int  // x is undefined"
+        - "var x int  // x is 0.0 (always float-shaped)"
+    - id: string
+      ts: 'let s: string;  // s === undefined'
+      canonical: 'var s string  // s is "" (empty string)'
+      distractors:
+        - "var s string  // s is nil"
+        - "var s string  // s is undefined"
+        - 'var s string  // s is " " (single space)'
+    - id: slice
+      ts: 'let xs: number[];  // xs === undefined'
+      canonical: "var xs []int  // xs is nil (nil slice, len 0, cap 0)"
+      distractors:
+        - "var xs []int  // xs is [] (empty slice with backing array)"
+        - "var xs []int  // xs is undefined"
+        - "var xs []int  // xs is [0] (one-element zero slice)"
+hints:
+  - "Three families: numeric → 0 / 0.0; string → empty string; pointer / interface / slice / map / channel / func → nil; struct → struct with every field at its own zero. No type has `undefined` as its zero value — Go has no undefined."
+  - "For `int`: 0. For `string`: \"\". For `[]int`: nil (a nil slice — len 0, cap 0, no backing array)."
+  - "Pick the canonical that matches the variant's type."
+runtime: none
+notes: |
+  Theme 3.4 opener. The zero-value table is canonical Go
+  reference material — every learner needs it as a lookup. This
+  MCQ gives them three representative cases (numeric, string,
+  slice) per instance.
+
+  Distractors target the three common confusions:
+    1. `nil` everywhere — overgeneralising from pointers/slices.
+       `int` is NOT nil; numeric types zero to 0.
+    2. `undefined` — TS-keyword leak; Go has no `undefined`.
+    3. Type-shape confusion — e.g. `0.0` for int (always float
+       shape), `" "` for string (visible vs invisible), or `[0]`
+       for slice (length-1 vs length-0).
+
+  The nil slice DOES vs DOESN'T have a backing array — both
+  forms (nil and empty) are common in Go but they DIFFER: a
+  nil slice prints as `[]`, an empty `[]int{}` also prints as
+  `[]`, but `==` against nil distinguishes them. The "nil with
+  no backing array" framing in the canonical is the formally
+  correct one; the empty `[]int{}` distractor is the common
+  conflation.
+
+  Slot 2 will pin "which types are nil-able"; slot 3 will hit
+  the nil-interface trap (the headline gotcha).
