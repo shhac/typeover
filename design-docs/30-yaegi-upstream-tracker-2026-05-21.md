@@ -112,6 +112,12 @@ Re-probed today to make sure nothing has slipped:
   of Module 6 prep): `sync.WaitGroup`, `sync.Mutex`,
   `sync.Once`, `sync.RWMutex`, `sync.Map` all import-and-use
   cleanly. NOT in the original vendored set; added today.
+- **`time` package** ✓ (probed 2026-05-21 — vendored as part
+  of Module 6.3 prep): `time.After`, `time.Now`,
+  `time.Millisecond`/`Second` constants, `time.Duration`
+  arithmetic all work. NOT in the original vendored set;
+  added today. Unlocks the canonical select+timeout idiom
+  used in `concurrency/select` slot 8.
 
 ### sync package vendored 2026-05-21
 

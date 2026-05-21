@@ -1,0 +1,42 @@
+target: go
+themeId: concurrency/select
+type: mcq
+order: 2
+prompt: |
+  Pick the statement that's TRUE about `select` semantics.
+generator:
+  kind: variant
+  variants:
+    - id: random-among-ready
+      ts: |-
+        // TS: Promise.race resolves with the FIRST settled promise —
+        // deterministic ordering by settle time.
+        // Go: select picks at RANDOM among the ready cases — no
+        // priority order between cases.
+      canonical: "If multiple cases are ready, `select` chooses ONE AT RANDOM. The order of the `case` lines does not impose a priority."
+      distractors:
+        - "Cases are tried top-to-bottom; the first ready one wins. Order = priority."
+        - "All ready cases execute concurrently in their own goroutines; the select returns when all complete."
+        - "Only the LAST ready case executes; earlier ones are discarded silently."
+hints:
+  - "Think about what would happen if Go gave priority to top cases — channel-2 could starve forever if channel-1 stays busy."
+  - "Random among ready. No priority. Use `default` for non-blocking."
+  - "Random selection among ready cases."
+runtime: none
+notes: |
+  The randomisation is deliberate — prevents starvation if
+  one channel is always ready and another only occasionally.
+  If you want priority, you write a nested select with the
+  high-priority case in an outer select that has a default
+  branch.
+
+  Distractors:
+    1. "Top-to-bottom priority" — common assumption from
+       switch's behaviour. select EXPLICITLY breaks this
+       for fairness.
+    2. "All ready cases run concurrently" — false; select
+       picks exactly ONE per evaluation.
+    3. "Last ready wins" — invented.
+
+  This MCQ defuses the "I'll just put X first to give it
+  priority" mistake.
