@@ -111,5 +111,29 @@ describe("substitute", () => {
         "real=42, literal=${x}",
       );
     });
+
+    /* Edge case: consecutive backslashes. Our regex uses a
+     * single-char negative lookbehind `(?<!\\)`, so any backslash
+     * directly before `${...}` skips substitution — including the
+     * second backslash in `\\${name}` (two raw backslashes). This
+     * documents the current behavior rather than the "ideal"
+     * even-vs-odd-backslash disambiguation; if a real exercise
+     * author ever needs `\\${name}` to mean "literal backslash +
+     * substituted name", upgrade the regex (atomic group or
+     * positive lookbehind with parity) and revisit these tests. */
+    it("treats any pre-$ backslash as an escape (no odd/even disambiguation)", () => {
+      // Two raw backslashes followed by ${x}:
+      // \\${x} → regex sees `$` preceded by `\` → no match.
+      // Unescape strips the LAST `\${` → emits one fewer backslash.
+      expect(substitute("\\\\${x}", { x: "42" })).toBe("\\${x}");
+    });
+
+    it("survives a long mixed string with both forms", () => {
+      const tmpl =
+        'console.log(`got \\${got}, want \\${want}`); fmt.Println(${actual})';
+      expect(substitute(tmpl, { actual: "actual" })).toBe(
+        'console.log(`got ${got}, want ${want}`); fmt.Println(actual)',
+      );
+    });
   });
 });
