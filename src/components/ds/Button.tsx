@@ -8,8 +8,6 @@ type Size = "sm" | "md" | "lg";
 interface ButtonShape {
   variant?: Variant;
   size?: Size;
-  /** Use uppercase mono label (terminal feel). Default off for airier UI. */
-  terminal?: boolean;
 }
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>, ButtonShape {}
@@ -44,8 +42,7 @@ const sizeClass: Record<Size, string> = {
 function buttonClasses(shape: ButtonShape & { class?: string }): string {
   return cn(
     "inline-flex items-center justify-center gap-2 rounded-sm transition-colors",
-    "disabled:opacity-50 disabled:cursor-not-allowed",
-    shape.terminal ? "font-mono uppercase tracking-wider" : "font-sans font-medium",
+    "disabled:opacity-50 disabled:cursor-not-allowed font-sans font-medium",
     variantClass[shape.variant ?? "secondary"],
     sizeClass[shape.size ?? "md"],
     shape.class,
@@ -53,7 +50,7 @@ function buttonClasses(shape: ButtonShape & { class?: string }): string {
 }
 
 export function Button(props: ParentProps<ButtonProps>) {
-  const [local, rest] = splitProps(props, ["variant", "size", "terminal", "class", "children"]);
+  const [local, rest] = splitProps(props, ["variant", "size", "class", "children"]);
   return (
     <button
       type="button"
@@ -61,7 +58,6 @@ export function Button(props: ParentProps<ButtonProps>) {
       class={buttonClasses({
         variant: local.variant,
         size: local.size,
-        terminal: local.terminal,
         class: local.class,
       })}
     >
@@ -81,14 +77,13 @@ export function Button(props: ParentProps<ButtonProps>) {
  * 2026-05-20 per design-docs/17 + 18 review.
  */
 export function ButtonLink(props: ParentProps<ButtonLinkProps>) {
-  const [local, rest] = splitProps(props, ["variant", "size", "terminal", "class", "children"]);
+  const [local, rest] = splitProps(props, ["variant", "size", "class", "children"]);
   return (
     <a
       {...rest}
       class={buttonClasses({
         variant: local.variant,
         size: local.size,
-        terminal: local.terminal,
         class: local.class,
       })}
     >
