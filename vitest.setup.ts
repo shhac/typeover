@@ -46,4 +46,12 @@ beforeEach(() => {
    * Vitest resets localStorage above but the module cache persists
    * across tests, so we have to clear it explicitly. */
   __resetProgressCacheForTests();
+  /* Marker that CodeMirrorEditor checks to fall back to a plain
+   * textarea inside tests. CM's contentEditable is brittle inside
+   * jsdom and the editor's internals aren't what Freeform tests
+   * are asserting on — they care about the gesture wiring
+   * (Cmd+Enter, value mutation), which the fallback preserves. */
+  if (typeof document !== "undefined") {
+    document.documentElement.setAttribute("data-codemirror-test", "1");
+  }
 });

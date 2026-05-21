@@ -4,8 +4,8 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
-import { handleAutoIndentEnter, insertAtFocused } from "~/lib/textarea-insert";
 import { useYaegiRun } from "~/lib/use-yaegi-run";
+import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "./CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
 import { RunResetToolbar } from "./RunResetToolbar";
@@ -46,20 +46,27 @@ func main() {
 `;
 
 /*
- * v0 freeform exercise — textarea editor, Run button, stdout-match
+ * v0 freeform exercise — CodeMirror editor, Run button, stdout-match
  * grading. The run lifecycle (running / runResult / run / reset)
  * lives in `useYaegiRun`; the result panel + run toolbar are shared
  * components in this directory. Everything left here is the
- * Freeform-specific shell: the textarea seed and the
+ * Freeform-specific shell: the editor seed and the
  * canSubmit/isCorrect predicates.
  *
- * CodeMirror integration (#23) replaces the textarea later;
- * everything else stays.
+ * The editor surface is a CodeMirror 6 wrapper (`CodeMirrorEditor`)
+ * that ships Go syntax highlighting + bracket-pair + matching +
+ * tab-indent + history + Cmd/Ctrl-Enter Run binding. Replaced the
+ * plain textarea per design-docs/16 F-19. The wrapper falls back
+ * to a plain textarea inside vitest because CodeMirror's
+ * contentEditable is brittle under jsdom and the gestures the
+ * suite asserts on (Cmd+Enter Run, edit invalidates Run result,
+ * value mutation) survive the fallback unchanged.
  */
 export function Freeform(props: FreeformProps) {
   const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
 
   const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
+  let editorHandle: CodeMirrorEditorHandle | undefined;
 
   const yaegi = useYaegiRun({ buildProgram: () => code() });
 
@@ -138,60 +145,36 @@ export function Freeform(props: FreeformProps) {
       nextExerciseHref={props.nextExerciseHref}
       themeHref={props.themeHref}
     >
-      <textarea
-        class="font-mono text-sm bg-bg-inset text-fg-primary p-3 rounded-sm border border-border-default min-h-[200px] outline-none focus:border-accent-primary"
-        spellcheck={false}
-        autocomplete="off"
-        autocapitalize="off"
-        autocorrect="off"
+      <CodeMirrorEditor
+        ariaLabel="Go program for freeform exercise"
         value={code()}
-        onInput={(e) => {
-          setCode(e.currentTarget.value);
+        onValueChange={(next) => {
+          setCode(next);
           /* Editing invalidates the last Run's grade. Without
            * clearing, Submit could grade fresh garbage against
            * the previous Run's stdout (design-docs/19 F-3). */
           yaegi.clear();
         }}
-        onKeyDown={(e) => {
-          /* Cmd+Enter (Mac) / Ctrl+Enter (Win/Linux) triggers Run
-           * directly from inside the textarea. Mirrors the
-           * modifier-Enter idiom in most code editors (VS Code,
-           * Jupyter, etc.). Checked BEFORE the auto-indent handler
-           * because the auto-indent only fires on bare Enter and
-           * would short-circuit if we let it run first. design-
-           * docs/30 — freeform-UX user ask. */
-          if (
-            (e.key === "Enter" || e.key === "NumpadEnter") &&
-            (e.metaKey || e.ctrlKey) &&
-            !e.shiftKey &&
-            !e.altKey
-          ) {
-            e.preventDefault();
-            if (props.runtime === "yaegi" && !yaegi.running() && code().trim() !== "") {
-              void yaegi.run();
-            }
-            return;
-          }
-          /* Auto-indent: Enter on an indented line opens the next
-           * line at the same indent. Shift+Enter (and other modified
-           * Enters) fall through to a bare newline. */
-          if (handleAutoIndentEnter(e.currentTarget, e)) {
-            /* insertAtSelection has already fired an `input` event,
-             * but Solid's onInput won't run from a synthetic dispatch
-             * here — sync the signal directly. */
-            setCode(e.currentTarget.value);
+        onCmdEnter={() => {
+          if (props.runtime === "yaegi" && !yaegi.running() && code().trim() !== "") {
+            void yaegi.run();
           }
         }}
         disabled={phase.current() === "right"}
+        ref={(h) => {
+          editorHandle = h;
+        }}
       />
       {/* Mobile-only Go-symbol bar docked above the soft keyboard.
-       * Inserts at the textarea caret via insertAtFocused (reads
-       * document.activeElement); the embedded Run shortcut fires
-       * the same Yaegi run as the toolbar button so a mobile
-       * learner doesn't have to dismiss the keyboard to submit. */}
+       * Routed through the editor handle so the bar's `{` / `:=`
+       * chips insert at the CodeMirror caret (the legacy
+       * insertAtFocused read document.activeElement which doesn't
+       * resolve to the CM contentDOM cleanly). The Run shortcut
+       * still fires the same Yaegi run as the toolbar button. */}
       <MobileKeyBar
         onInsert={(text) => {
-          if (phase.current() !== "right") insertAtFocused(text);
+          if (phase.current() === "right") return;
+          editorHandle?.insertAtCursor(text);
         }}
         /* Mirror the toolbar's runtime gate. Today the schema permits
          * `runtime: "yaegi" | "server"` for freeform; only "yaegi"
