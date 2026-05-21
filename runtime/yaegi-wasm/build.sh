@@ -18,7 +18,7 @@ mkdir -p "$OUT_DIR"
 
 cd "$HERE"
 
-echo "→ Building yaegi.wasm (minimal stdlib: fmt strings strconv errors math sort slices maps sync time)"
+echo "→ Building yaegi.wasm (minimal stdlib: fmt strings strconv errors math sort slices maps sync time context)"
 GOOS=js GOARCH=wasm go build \
   -ldflags="-s -w" \
   -trimpath \

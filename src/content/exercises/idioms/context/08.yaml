@@ -1,0 +1,66 @@
+target: go
+themeId: idioms/context
+type: freeform
+order: 8
+prompt: |
+  Build the canonical `context.WithTimeout` shape — a
+  context that auto-cancels after a duration.
+
+  1. `ctx, cancel := context.WithTimeout(context.Background(),
+     30 * time.Millisecond)`.
+  2. `defer cancel()`.
+  3. `select`:
+     - `case <-ctx.Done():` print `timeout:` + `ctx.Err()`.
+     - `case <-time.After(200 * time.Millisecond):` print
+       `did long work`.
+
+  The timeout (30ms) is much shorter than the long-work
+  branch (200ms), so the ctx.Done case fires first.
+
+  Expected output: `timeout: context deadline exceeded`.
+
+  Note `ctx.Err()` returns `context.DeadlineExceeded` here
+  (different sentinel than `context.Canceled`) because the
+  context was cancelled by its TIMEOUT, not an explicit
+  cancel call.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: AbortSignal.timeout(30) + fetch(url, { signal: ... });
+  canonical: |-
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"time"
+    )
+
+    func main() {
+    	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+    	defer cancel()
+    	select {
+    	case <-ctx.Done():
+    		fmt.Println("timeout:", ctx.Err())
+    	case <-time.After(200 * time.Millisecond):
+    		fmt.Println("did long work")
+    	}
+    }
+expectStdout: |
+  timeout: context deadline exceeded
+hints:
+  - "Three pieces: WithTimeout derivation + defer cancel, then a two-case select with ctx.Done first."
+  - "WithTimeout takes (parent, duration); ALWAYS defer cancel after."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  THE production timeout pattern — every Go HTTP client,
+  DB driver, RPC framework uses a variant. Note the
+  asymmetry from theme 6.3 slot 8: there, `time.After`
+  WAS the timeout primitive; here `context.WithTimeout`
+  is — and `time.After` plays the role of "long work."
+
+  In real code the alternative case would be the real
+  work (`<-resultChan`); here we simulate it with another
+  time.After so we don't need a worker goroutine.

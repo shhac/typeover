@@ -1,0 +1,42 @@
+target: go
+themeId: idioms/context
+type: fill-word
+order: 4
+prompt: |
+  Type the method on `context.Context` that returns the
+  channel which closes on cancellation. Receive from this
+  channel in a `select` to detect cancellation.
+generator:
+  kind: template
+  vars:
+    word:
+      - "Done"
+  ts: |-
+    // TS: signal.aborted / signal.addEventListener("abort", ...)
+  canonical: |-
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    )
+
+    func main() {
+    	ctx, cancel := context.WithCancel(context.Background())
+    	cancel()
+    	<-ctx.${word}()
+    	fmt.Println("cancelled")
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Four letters, capitalised (exported). Same English word as `finish`."
+  - "`Done`."
+  - "`Done`."
+notes: |
+  Pin the method name. Same word as `sync.WaitGroup.Done()`
+  (theme 6.4 slot 5) but very different mechanic — here
+  it's a CHANNEL CLOSE signal, not a counter decrement.
+
+  This slot is runnable: the cancel call closes the Done
+  channel; `<-ctx.Done()` returns immediately; we print.

@@ -118,6 +118,13 @@ Re-probed today to make sure nothing has slipped:
   arithmetic all work. NOT in the original vendored set;
   added today. Unlocks the canonical select+timeout idiom
   used in `concurrency/select` slot 8.
+- **`context` package** ✓ (probed 2026-05-21 — vendored as
+  part of Module 7.3 prep): `context.Background`,
+  `context.WithCancel`, `context.WithTimeout`,
+  `ctx.Done()`, `ctx.Err()` (returns `context.Canceled` /
+  `context.DeadlineExceeded` sentinels) all work. NOT in
+  the original vendored set; added today. Unlocks all of
+  Theme 7.3 (idioms/context).
 
 ### sync package vendored 2026-05-21
 
