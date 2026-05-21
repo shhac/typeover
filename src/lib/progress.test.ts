@@ -80,7 +80,7 @@ describe("progress storage — malformed inputs", () => {
   });
 });
 
-describe("progress storage — corrupt-blob backup (task #37)", () => {
+describe("progress storage — corrupt-blob backup", () => {
   /* Pinned per design-docs/99 — when a non-null payload fails to
    * parse, we copy the raw value to typeover:progress:corrupt-<ts>
    * before resetting, so a future migration / forensic pass can

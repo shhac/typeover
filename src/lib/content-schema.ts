@@ -76,9 +76,10 @@ type Ctx = z.RefinementCtx;
 
 /** fill-word / fill-line must declare which template vars become
  *  input slots, and each blank must reference a declared var on a
- *  template generator. Without this the component falls into the
- *  iter-4/6 vacuous-truth guard and renders an un-submittable
- *  exercise — catch at content-config time, not runtime. */
+ *  template generator. Without this the component would render an
+ *  un-submittable exercise (empty blanks list triggers a
+ *  vacuous-truth pass in the all-blanks-filled check) — catch at
+ *  content-config time, not runtime. */
 function validateFillBlanks(ex: Exercise, ctx: Ctx): void {
   if (ex.type !== "fill-word" && ex.type !== "fill-line") return;
   if (!ex.blanks || ex.blanks.length === 0) {
@@ -185,8 +186,8 @@ function validateBlanksOnlyForFill(ex: Exercise, ctx: Ctx): void {
 /** Freeform requires expectStdout AND a non-"none" runtime — without
  *  expectStdout Submit has no oracle, and without a runtime there's
  *  nothing to execute against. Mirror rule: expectStdout on any type
- *  other than freeform / fill-line is meaningless (the fill-line
- *  opt-in to MODE B is handled by validateFillLineMode). */
+ *  other than freeform / fill-line is meaningless — the fill-line
+ *  requirement is enforced separately by validateFillLineMode. */
 function validateRunnableExpectStdout(ex: Exercise, ctx: Ctx): void {
   if (ex.type === "freeform") {
     if (ex.expectStdout === undefined) {

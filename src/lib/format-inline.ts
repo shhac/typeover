@@ -47,8 +47,7 @@ export function formatInline(text: string): string {
   /* Order matters: escape first (content is trusted but defence in
    * depth), then code spans (can legitimately contain `*` literals,
    * so process before the bold pass), then bold. */
-  let s = escapeHtml(text);
-  s = s.replace(INLINE_CODE_RE, (_m, code: string) => `<code>${code}</code>`);
-  s = s.replace(BOLD_RE, (_m, body: string) => `<strong>${body}</strong>`);
-  return s;
+  return escapeHtml(text)
+    .replace(INLINE_CODE_RE, (_m, code: string) => `<code>${code}</code>`)
+    .replace(BOLD_RE, (_m, body: string) => `<strong>${body}</strong>`);
 }

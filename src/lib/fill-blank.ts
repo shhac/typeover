@@ -34,10 +34,10 @@ export function extractBlankPositions(segments: readonly FillSegment[]): BlankPo
  * a (filled, correct) pair so the component can drive both Submit's
  * disabled state and the isCorrect predicate from one source of truth.
  *
- * The vacuous-truth guard — empty positions → both false — pins the
- * iter-4 fix (commit 7fc01bc). `Array.prototype.every` returns true on
- * an empty array, which would silently auto-pass any fill-word
- * exercise authored with `blanks: []`.
+ * The vacuous-truth guard — empty positions → both false — is
+ * load-bearing. `Array.prototype.every` returns true on an empty
+ * array, which would silently auto-pass any fill-word exercise
+ * authored with `blanks: []`.
  */
 export function evaluateBlanks(
   positions: readonly BlankPosition[],

@@ -4,10 +4,9 @@ import type { FillSegment } from "./generator";
 
 /*
  * Tests for the FillBlankWord pure helpers. The "empty positions → both
- * false" guard pins iter-4's auto-pass fix (commit 7fc01bc): without
- * it, `Array.prototype.every` returns true on an empty positions list,
- * silently auto-passing any fill-word exercise authored with
- * `blanks: []`.
+ * false" guard exists because `Array.prototype.every` returns true on
+ * an empty positions list — without the guard, a fill-word exercise
+ * authored with `blanks: []` would silently auto-pass with no input.
  */
 
 const text = (s: string): FillSegment => ({ kind: "text", text: s });
@@ -50,9 +49,9 @@ describe("evaluateBlanks", () => {
   ];
 
   it("returns { allFilled: false, allCorrect: false } for empty positions (vacuous-truth guard)", () => {
-    /* Pinned per iter-4 fix (commit 7fc01bc). Array.prototype.every
-     * on [] returns true; without the guard, a fill-word exercise
-     * authored with blanks: [] would auto-pass with no input. */
+    /* Array.prototype.every on [] returns true; without the guard,
+     * a fill-word exercise authored with blanks: [] would auto-pass
+     * with no input. */
     expect(evaluateBlanks([], {})).toEqual({
       allFilled: false,
       allCorrect: false,

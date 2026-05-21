@@ -46,7 +46,8 @@ export function pickFrom<T>(rng: () => number, items: readonly T[]): T {
   return items[Math.floor(rng() * items.length)]!;
 }
 
-/** Shuffle in place using a deterministic RNG (Fisher-Yates). */
+/** Return a shuffled copy of `items` using a deterministic RNG
+ *  (Fisher-Yates). Source is not mutated. */
 export function shuffle<T>(rng: () => number, items: T[]): T[] {
   const arr = [...items];
   for (let i = arr.length - 1; i > 0; i--) {

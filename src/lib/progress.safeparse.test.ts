@@ -4,8 +4,9 @@ import { safeParseProgress } from "./progress";
 /*
  * Pure unit tests for the parse/validate path. These previously had
  * to round-trip through localStorage in progress.test.ts; now they
- * test the function directly so a future Zod swap (task #37) lands
- * with no test reshuffling.
+ * test the function directly. Parser is Zod-backed (see
+ * `ProgressSchema` in progress.ts) — corrupt or shape-mismatched
+ * blobs route through `read()` to a timestamped backup key.
  */
 
 describe("safeParseProgress", () => {

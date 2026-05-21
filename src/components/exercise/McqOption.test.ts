@@ -3,10 +3,9 @@ import { optionCellState } from "./McqOption";
 
 /*
  * 16-row truth table over {selected, submitted, revealed, isCorrect}.
- * Pins iter-6's "learner controls reveal" fix (commit 0ebb26c) — a
- * regression to the old behaviour (auto-revealing the canonical on wrong
- * submit) would fail the `submitted && !selected && isCorrect → neutral`
- * row.
+ * Pins the "learner controls reveal" contract — a regression to
+ * auto-revealing the canonical on wrong submit would fail the
+ * `submitted && !selected && isCorrect → neutral` row.
  */
 
 type Bool = boolean;
@@ -30,7 +29,7 @@ const TABLE: Row[] = [
 
   /* submitted, not revealed */
   { selected: F, submitted: T, revealed: F, isCorrect: F, expected: "neutral" },
-  /* iter-6 fix: canonical NOT auto-lit on wrong submit */
+  /* learner-controls-reveal contract: canonical NOT auto-lit on wrong submit */
   { selected: F, submitted: T, revealed: F, isCorrect: T, expected: "neutral" },
   { selected: T, submitted: T, revealed: F, isCorrect: F, expected: "showIncorrect" },
   { selected: T, submitted: T, revealed: F, isCorrect: T, expected: "showCorrect" },
