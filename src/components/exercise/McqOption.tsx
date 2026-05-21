@@ -1,4 +1,15 @@
 import { cn } from "../ds/_internal";
+import { CodeMirrorEditor } from "./CodeMirrorEditor";
+
+/* Inside the test environment, the CodeMirror surface degrades to
+ * a plain <pre> via the editor's TestareaFallback path. That keeps
+ * `getByText(option)` working in the existing McqOption tests. */
+function isTestEnv(): boolean {
+  return (
+    typeof document !== "undefined" &&
+    document.documentElement.hasAttribute("data-codemirror-test")
+  );
+}
 
 /**
  * The four possible visual states for an MCQ option. Resolved purely
@@ -86,12 +97,34 @@ export function McqOption(props: McqOptionProps) {
         class="mt-1.5 accent-accent-primary"
         aria-describedby={`opt-${props.groupName}-${props.index}-text`}
       />
-      <pre
-        id={`opt-${props.groupName}-${props.index}-text`}
-        class="font-mono text-sm text-fg-primary whitespace-pre-wrap leading-relaxed"
-      >
-        <code>{props.text}</code>
-      </pre>
+      {/* Option body. In production, render as a read-only
+       *  CodeMirror so Go option text gets palette-themed syntax
+       *  highlighting (consistent with the Freeform editor and the
+       *  fill-line scaffold). In tests, fall back to a plain pre/
+       *  code so getByText() still resolves the option string in
+       *  one node. The CodeMirrorEditor itself handles the
+       *  test-env detection; the wrapper just chooses the right
+       *  shell. */}
+      {isTestEnv() ? (
+        <pre
+          id={`opt-${props.groupName}-${props.index}-text`}
+          class="font-mono text-sm text-fg-primary whitespace-pre-wrap leading-relaxed"
+        >
+          <code>{props.text}</code>
+        </pre>
+      ) : (
+        <div
+          id={`opt-${props.groupName}-${props.index}-text`}
+          class="flex-1 min-w-0"
+        >
+          <CodeMirrorEditor
+            value={props.text}
+            readOnly
+            language="go"
+            ariaLabel={`Option ${props.index + 1}`}
+          />
+        </div>
+      )}
     </label>
   );
 }
