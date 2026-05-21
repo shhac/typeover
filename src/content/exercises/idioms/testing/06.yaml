@@ -1,0 +1,88 @@
+target: go
+themeId: idioms/testing
+type: fill-line
+order: 6
+prompt: |
+  Yaegi can't import the `testing` package, so this slot
+  uses a TINY MOCK `T` that mirrors `*testing.T`'s
+  `Errorf` method. The shape is identical — pretend it IS
+  `*testing.T` for the lesson.
+
+  Write the `if got != want { ... }` line that calls
+  `t.Errorf("got %d, want %d", got, want)`. The scaffold
+  sets `got := 1+1` and `want := 2`, so the equality
+  holds and the body is skipped — no error is printed.
+
+  Expected output: `PASS` (printed by main after the
+  test function returns without errors).
+generator:
+  kind: template
+  vars:
+    line:
+      - 'if got != want { t.Errorf("got %d, want %d", got, want) }'
+  ts: |-
+    // TS: if (got !== want) console.error("got", got, "want", want);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type T struct{ failed bool }
+
+    func (t *T) Errorf(format string, args ...any) {
+    	t.failed = true
+    	fmt.Printf(format, args...)
+    	fmt.Println()
+    }
+
+    func TestAdd(t *T) {
+    	got := 1 + 1
+    	want := 2
+    	${line}
+    }
+
+    func main() {
+    	t := &T{}
+    	TestAdd(t)
+    	if t.failed {
+    		fmt.Println("FAIL")
+    	} else {
+    		fmt.Println("PASS")
+    	}
+    }
+  distractors:
+    - match: 'if got == want { t.Errorf("got %d, want %d", got, want) }'
+      explain: |-
+        Inverted condition — would report failure when the
+        values ARE equal. Idiomatic check is "fail when
+        UNequal": `if got != want { t.Errorf(...) }`.
+    - match: 'if got != want { fmt.Println("got", got, "want", want) }'
+      explain: |-
+        Uses `fmt.Println` instead of `t.Errorf`. In a real
+        test, the test runner needs the failure signal that
+        only T's methods provide; bare prints aren't seen
+        as failures.
+    - match: 't.Errorf("got %d, want %d", got, want)'
+      explain: |-
+        Reports failure unconditionally — no `if` guard. The
+        idiom is conditional: only report on mismatch.
+expectStdout: |
+  PASS
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Three pieces: `if`, the `got != want` condition, and the t.Errorf call with format string + got + want."
+  - "`if got != want { t.Errorf(\"got %d, want %d\", got, want) }`."
+  - "See canonical."
+notes: |
+  Drills the canonical Go test assertion idiom from MCQ
+  slot 3. The mock T (`type T struct{ failed bool }` with
+  an `Errorf` method) lets us run the lesson under Yaegi.
+  In a real `_test.go` file, `*testing.T` provides
+  Errorf with the same signature — students can lift the
+  pattern directly.
+
+  Yaegi caveat: the `testing` package isn't extractable
+  via `yaegi extract` because it's coupled to the
+  `go test` runner. The mock-T pattern is the workaround
+  documented in design-docs/30.

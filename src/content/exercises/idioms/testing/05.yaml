@@ -1,0 +1,43 @@
+target: go
+themeId: idioms/testing
+type: fill-word
+order: 5
+prompt: |
+  Type the method on `*testing.T` that reports a failure
+  WITH a printf-style format string. (Counterpart to bare
+  `t.Error(args...)`.)
+generator:
+  kind: template
+  vars:
+    word:
+      - "Errorf"
+  ts: |-
+    // TS: expect(got).toBe(want); — has its own diff formatting.
+  canonical: |-
+    // _test.go shape (not runnable directly):
+
+    package mypkg
+
+    import "testing"
+
+    func TestAdd(t *testing.T) {
+    	got := 1 + 1
+    	want := 3 // intentionally wrong
+    	if got != want {
+    		t.${word}("got %d, want %d", got, want)
+    	}
+    }
+runtime: none
+blanks: [word]
+hints:
+  - "Six letters, capitalised. Same shape as `fmt.Errorf` — verb + `f` suffix for format-string variant."
+  - "`Errorf`."
+  - "`Errorf`."
+notes: |
+  Pin the method name. The `f` suffix is Go's universal
+  convention for printf-style format-string variants
+  (`fmt.Printf`, `fmt.Errorf`, `t.Errorf`, `t.Fatalf`,
+  `t.Logf`).
+
+  `t.Error` (no `f`) takes `args ...any` and prints them
+  space-separated; `t.Errorf` takes a format string + args.

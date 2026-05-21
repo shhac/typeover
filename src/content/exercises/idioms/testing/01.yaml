@@ -1,0 +1,40 @@
+target: go
+themeId: idioms/testing
+type: mcq
+order: 1
+prompt: |
+  Pick the **file naming convention** that the Go toolchain
+  recognises as a test file. (Run `go test ./...` and only
+  these files participate.)
+
+  TypeScript: convention is `.test.ts` or `__tests__/...`;
+  enforced by your test runner config. Go's rule is baked
+  into `go test`.
+generator:
+  kind: variant
+  variants:
+    - id: underscore-test-go
+      ts: |-
+        // TS: foo.test.ts (jest/vitest convention).
+        // Go: foo_test.go — underscore-test-go suffix.
+      canonical: "foo_test.go"
+      distractors:
+        - "test_foo.go"
+        - "foo.test.go"
+        - "foo_spec.go"
+hints:
+  - "Original filename + `_test` suffix + `.go`. Same name root as the file under test, with one extra underscore-prefixed segment."
+  - "`foo_test.go`."
+  - "`foo_test.go`."
+runtime: none
+notes: |
+  Theme 7.4 opener. `go test` discovers tests by filename
+  suffix `_test.go` and by function name prefix `Test`
+  (slot 2). Both are mandatory; lower-case test functions
+  in `_test.go` are skipped silently.
+
+  Distractors:
+    1. `test_foo.go` — Python convention (`test_*.py`); Go's
+       suffix goes at the END.
+    2. `foo.test.go` — TS / JS dotted-segment convention.
+    3. `foo_spec.go` — Ruby's `_spec.rb` habit.

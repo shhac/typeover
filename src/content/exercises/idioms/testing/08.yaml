@@ -1,0 +1,89 @@
+target: go
+themeId: idioms/testing
+type: freeform
+order: 8
+prompt: |
+  Demonstrate the **table-driven test** pattern — Go's
+  canonical shape for testing the same function against
+  multiple inputs. Uses the same mock-T as slots 6 + 7.
+
+  1. Function under test: `func add(a, b int) int { return
+     a + b }`.
+  2. Table: `cases := []struct{ name string; a, b, want
+     int }{ ... }` with two cases: `{"one+one", 1, 1, 2}`
+     and `{"two+three", 2, 3, 5}`.
+  3. In `TestAdd`, loop over cases. For each, compute
+     `got := add(c.a, c.b)` and `if got != c.want { t.
+     Errorf("%s: got %d, want %d", c.name, got, c.want) }`.
+  4. Main prints PASS if no failures, FAIL otherwise.
+
+  Both cases pass.
+
+  Expected output: `PASS`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: test.each([[1,1,2],[2,3,5]])('add %i+%i', (a, b, want) => { expect(add(a,b)).toBe(want) })
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type T struct{ failed bool }
+
+    func (t *T) Errorf(format string, args ...any) {
+    	t.failed = true
+    	fmt.Printf(format, args...)
+    	fmt.Println()
+    }
+
+    func add(a, b int) int { return a + b }
+
+    func TestAdd(t *T) {
+    	cases := []struct {
+    		name    string
+    		a, b    int
+    		want    int
+    	}{
+    		{"one+one", 1, 1, 2},
+    		{"two+three", 2, 3, 5},
+    	}
+    	for _, c := range cases {
+    		got := add(c.a, c.b)
+    		if got != c.want {
+    			t.Errorf("%s: got %d, want %d", c.name, got, c.want)
+    		}
+    	}
+    }
+
+    func main() {
+    	t := &T{}
+    	TestAdd(t)
+    	if t.failed {
+    		fmt.Println("FAIL")
+    	} else {
+    		fmt.Println("PASS")
+    	}
+    }
+expectStdout: |
+  PASS
+hints:
+  - "Four pieces: the function under test, the table struct + slice of cases, the loop+check inside TestAdd, the main scaffolding."
+  - "Anonymous struct type inside the slice declaration: `[]struct{name string; a, b, want int}{...}`."
+  - "See canonical."
+runtime: yaegi
+notes: |
+  Table-driven testing is THE pattern in Go test suites.
+  Used in 90%+ of stdlib tests. Two big wins:
+
+  1. **Add a case → one struct literal**, no copy-paste of
+     test boilerplate.
+  2. **Per-case name** lets the runner's `-run` flag filter
+     specific cases (real testing.T also offers `t.Run(c.
+     name, ...)` for nested subtests + parallel execution).
+
+  Mock-T avoids the `testing` import; the SHAPE is
+  identical to production. In a real `_test.go` this would
+  use `t.Run(c.name, func(t *testing.T) { ... })` for
+  per-case isolation.

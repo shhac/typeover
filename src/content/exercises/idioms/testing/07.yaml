@@ -1,0 +1,84 @@
+target: go
+themeId: idioms/testing
+type: fill-line
+order: 7
+prompt: |
+  Write the `t.Errorf` call inside an if-block that triggers
+  when `got != want`. The test deliberately compares
+  `got := 1 + 1` against `want := 3` (wrong) so the
+  failure path fires and the formatted message prints.
+
+  Expected output:
+  ```
+  got 2, want 3
+  FAIL
+  ```
+
+  Uses the same mock-T scaffold as slot 6.
+generator:
+  kind: template
+  vars:
+    line:
+      - 't.Errorf("got %d, want %d", got, want)'
+  ts: |-
+    // TS: console.error("got", got, "want", want);
+  canonical: |-
+    package main
+
+    import "fmt"
+
+    type T struct{ failed bool }
+
+    func (t *T) Errorf(format string, args ...any) {
+    	t.failed = true
+    	fmt.Printf(format, args...)
+    	fmt.Println()
+    }
+
+    func TestAdd(t *T) {
+    	got := 1 + 1
+    	want := 3
+    	if got != want {
+    		${line}
+    	}
+    }
+
+    func main() {
+    	t := &T{}
+    	TestAdd(t)
+    	if t.failed {
+    		fmt.Println("FAIL")
+    	} else {
+    		fmt.Println("PASS")
+    	}
+    }
+  distractors:
+    - match: 't.Errorf("got = ", got, ", want = ", want)'
+      explain: |-
+        Errorf takes a FORMAT string + args; passing values
+        interleaved with comma-separated strings doesn't
+        work. Use `%v` / `%d` placeholders, then values.
+    - match: 't.Error("got %d, want %d", got, want)'
+      explain: |-
+        `t.Error` doesn't do format substitution — it prints
+        args space-separated. Use `t.Errorf` for format
+        strings.
+    - match: 'fmt.Printf("got %d, want %d", got, want)'
+      explain: |-
+        Prints but doesn't mark the test as failed. In a
+        real test framework the test runner needs
+        `t.Errorf` (or similar) to know about the failure.
+expectStdout: |
+  got 2, want 3
+  FAIL
+runtime: yaegi
+blanks: [line]
+hints:
+  - "Format string with `%d` placeholders, two args: `t.Errorf(\"got %d, want %d\", got, want)`."
+  - "`t.Errorf(\"got %d, want %d\", got, want)`."
+  - "`t.Errorf(\"got %d, want %d\", got, want)`."
+notes: |
+  Drills `t.Errorf`'s format-string shape (slot 5 pinned
+  the method name; this pins its CALL pattern). Distractor
+  bank covers the two most common shape errors plus the
+  fmt.Printf-instead-of-t.Errorf bypass.
