@@ -87,17 +87,25 @@ func runWithCapture(code string) (string, string, error) {
 		return "", "", fmt.Errorf("interp.Use(symbols): %w", err)
 	}
 
-	var panicErr error
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				panicErr = fmt.Errorf("panic: %v", r)
-			}
-		}()
-		_, panicErr = i.Eval(code)
-	}()
+	err := evalRecovered(i, code)
+	return stdoutBuf.String(), stderrBuf.String(), err
+}
 
-	return stdoutBuf.String(), stderrBuf.String(), panicErr
+// evalRecovered runs `i.Eval(code)` and turns any runtime panic in
+// the interpreted program into an error. Mirrors the Zig worker's
+// `runWasi` shape in `src/runtime/zig-worker.ts` — both languages
+// return a single value-or-error from "execute user code", with the
+// language-runtime's failure mode (Go panic / Zig trap) folded into
+// that error. Keeps `runWithCapture` flat: build the interpreter,
+// call this, return buffers + err.
+func evalRecovered(i *interp.Interpreter, code string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+	_, err = i.Eval(code)
+	return err
 }
 
 // withFmtOverrides returns a shallow copy of the symbol map with the
