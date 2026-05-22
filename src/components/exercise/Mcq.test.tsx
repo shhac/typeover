@@ -17,9 +17,10 @@ import type { GeneratorSpec } from "~/lib/generator-schema";
  * progress.test.ts and prove the hooks wire through end-to-end.
  */
 
-const STORAGE_KEY = "typeover:progress";
+import { HINTS, makeProgressReader } from "./__test__/progress-helpers";
+
 const EX_ID = "test/mcq";
-const HINTS: readonly [string, string, string] = ["c1", "c2", "c3"];
+const { slot } = makeProgressReader(EX_ID);
 
 /** Template generator with predictable substitutions: canonical
  *  always renders to "x := 1" given vars.x = ["1"]. */
@@ -35,25 +36,6 @@ const renderMcq = () =>
   render(() => (
     <Mcq exerciseId={EX_ID} prompt="Translate to idiomatic Go." generator={GEN} hints={HINTS} />
   ));
-
-const readProgress = () => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === null
-    ? null
-    : (JSON.parse(raw) as {
-        exercises: Record<
-          string,
-          {
-            instancesSeen: number;
-            instancesPassed: number;
-            instancesFailed: number;
-            hintsUsedTotal: number;
-          }
-        >;
-      });
-};
-
-const slot = () => readProgress()?.exercises[EX_ID];
 
 /** The canonical text after substitution. */
 const CANONICAL_TEXT = "x := 1";

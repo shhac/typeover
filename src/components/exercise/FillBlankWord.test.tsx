@@ -13,9 +13,10 @@ import type { GeneratorSpec } from "~/lib/generator-schema";
  * regression surface.
  */
 
-const STORAGE_KEY = "typeover:progress";
+import { HINTS, makeProgressReader } from "./__test__/progress-helpers";
+
 const EX_ID = "test/fill-word";
-const HINTS: readonly [string, string, string] = ["c1", "c2", "c3"];
+const { slot } = makeProgressReader(EX_ID);
 
 /** Two-blank template. With vars: { a: ["1"], b: ["2"] } and
  *  blanks: ["a", "b"], the canonical renders to:
@@ -46,25 +47,6 @@ const renderFBW = (generator: GeneratorSpec = TWO_BLANK_GEN, blanks: string[] = 
       hints={HINTS}
     />
   ));
-
-const readProgress = () => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === null
-    ? null
-    : (JSON.parse(raw) as {
-        exercises: Record<
-          string,
-          {
-            instancesSeen: number;
-            instancesPassed: number;
-            instancesFailed: number;
-            hintsUsedTotal: number;
-          }
-        >;
-      });
-};
-
-const slot = () => readProgress()?.exercises[EX_ID];
 
 const inputs = (container: HTMLElement): HTMLInputElement[] =>
   Array.from(container.querySelectorAll('input[type="text"]'));

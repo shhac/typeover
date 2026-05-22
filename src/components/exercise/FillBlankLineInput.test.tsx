@@ -40,10 +40,10 @@ vi.mock("~/runtime", () => ({
 }));
 
 import { FillBlankLineInput } from "./FillBlankLineInput";
+import { HINTS, makeProgressReader } from "./__test__/progress-helpers";
 
-const STORAGE_KEY = "typeover:progress";
 const EX_ID = "test/fill-line";
-const HINTS: readonly [string, string, string] = ["c1", "c2", "c3"];
+const { slot } = makeProgressReader(EX_ID);
 
 /** Single-blank template. With vars: { line: ["doubled := count * 2"] }
  *  and blanks: ["line"], the canonical's blank-segment expected
@@ -79,25 +79,6 @@ const renderFBL = () =>
       runtime="yaegi"
     />
   ));
-
-const readProgress = () => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === null
-    ? null
-    : (JSON.parse(raw) as {
-        exercises: Record<
-          string,
-          {
-            instancesSeen: number;
-            instancesPassed: number;
-            instancesFailed: number;
-            hintsUsedTotal: number;
-          }
-        >;
-      });
-};
-
-const slot = () => readProgress()?.exercises[EX_ID];
 
 const lineInput = (container: HTMLElement): HTMLInputElement => {
   const el = container.querySelector('input[type="text"]');

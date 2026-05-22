@@ -39,10 +39,10 @@ vi.mock("~/runtime", () => ({
 }));
 
 import { Freeform } from "./Freeform";
+import { HINTS, makeProgressReader } from "./__test__/progress-helpers";
 
-const STORAGE_KEY = "typeover:progress";
 const EX_ID = "test/freeform";
-const HINTS: readonly [string, string, string] = ["c1", "c2", "c3"];
+const { slot } = makeProgressReader(EX_ID);
 const EXPECTED_STDOUT = "hello\n";
 
 /** Minimal freeform generator — no template vars; the canonical is
@@ -76,25 +76,6 @@ const renderFF = () =>
       runtime="yaegi"
     />
   ));
-
-const readProgress = () => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === null
-    ? null
-    : (JSON.parse(raw) as {
-        exercises: Record<
-          string,
-          {
-            instancesSeen: number;
-            instancesPassed: number;
-            instancesFailed: number;
-            hintsUsedTotal: number;
-          }
-        >;
-      });
-};
-
-const slot = () => readProgress()?.exercises[EX_ID];
 
 const textarea = (container: HTMLElement): HTMLTextAreaElement => {
   const el = container.querySelector("textarea");
