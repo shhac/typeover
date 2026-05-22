@@ -27,6 +27,7 @@ import {
   paramsForExercise,
   themeHref,
 } from "~/lib/curriculum";
+import { LANG_DISPLAY } from "~/lib/lang";
 import { formatBlock } from "~/lib/format-block";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
@@ -47,7 +48,6 @@ interface Props {
 const { entry } = Astro.props;
 const ex = entry.data;
 const lang = ex.target;
-const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
 const langLabel = LANG_DISPLAY[lang];
 
 const [modules, themes, exercises] = await Promise.all([

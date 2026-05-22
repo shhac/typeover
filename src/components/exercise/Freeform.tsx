@@ -70,27 +70,19 @@ export function Freeform(props: FreeformProps) {
   const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
   let editorHandle: CodeMirrorEditorHandle | undefined;
 
-  /* The hook can't drive `"server"` — that's the SSR fallback path
-   * we haven't wired yet. Snap to "yaegi" so the hook constructs
-   * cleanly; the Run button + mobile-bar Run handler below disable
-   * themselves when `props.runtime` isn't a client-side runtime, so
-   * the unused Yaegi accessor never actually fires. When server
-   * runtime lands, swap this to a real dispatcher (or refactor the
-   * page-level gate to skip rendering Freeform entirely for
-   * "server"). */
-  const hookRuntime = props.runtime === "server" ? "yaegi" : props.runtime;
-  const isClientRuntime = props.runtime === "yaegi" || props.runtime === "zig";
+  /* The hook accepts `props.runtime` verbatim. When it's `"server"`
+   * the hook returns `canRun: false` and every side-effect method
+   * is a no-op; we gate Run + Cmd-Enter + the mobile-bar handler on
+   * `runner.canRun` rather than re-deriving the rule. When the SSR
+   * fallback path lands, the hook learns how to drive it and
+   * `canRun` flips true without any component-side change. */
+  const runner = useRuntimeRun({ runtime: props.runtime, buildProgram: () => code() });
 
-  const runner = useRuntimeRun({ runtime: hookRuntime, buildProgram: () => code() });
-
-  /* Preflight the worker on mount for client-side runtimes. Hides the
-   * brotli'd WASM cold-start behind a visible "Booting <lang>
-   * runtime…" badge instead of a frozen-looking Run button on first
-   * click. MCQ / fill-word pages skip this hook entirely so they
-   * never pay the WASM cost. design-docs/16 F-4. */
-  onMount(() => {
-    if (isClientRuntime) runner.preflight();
-  });
+  /* Preflight the worker on mount. `preflight()` is a no-op when
+   * canRun is false, so no per-runtime gate needed at the call
+   * site. Hides the brotli'd WASM cold-start behind a visible
+   * "Booting <lang> runtime…" badge. design-docs/16 F-4. */
+  onMount(() => runner.preflight());
 
   const isCorrect = () => {
     const r = runner.runResult();
@@ -116,7 +108,7 @@ export function Freeform(props: FreeformProps) {
     <div class="flex flex-row gap-3 items-center flex-wrap">
       <RunResetToolbar
         running={runner.running()}
-        canRun={isClientRuntime}
+        canRun={runner.canRun}
         onRun={runner.run}
         onReset={runner.reset}
         runtimeStatus={runner.runtimeStatus()}
@@ -169,7 +161,7 @@ export function Freeform(props: FreeformProps) {
           runner.clear();
         }}
         onCmdEnter={() => {
-          if (isClientRuntime && !runner.running() && code().trim() !== "") {
+          if (runner.canRun && !runner.running() && code().trim() !== "") {
             void runner.run();
           }
         }}
@@ -195,7 +187,7 @@ export function Freeform(props: FreeformProps) {
          * future server-runtime exercise would silently invoke
          * runner.run via the mobile bar even though the toolbar Run
          * is disabled. */
-        onRun={isClientRuntime ? () => void runner.run() : undefined}
+        onRun={runner.canRun ? () => void runner.run() : undefined}
       />
       <InlineCanonicalReveal
         submission={code}

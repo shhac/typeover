@@ -17,6 +17,7 @@ import Accordion from "~/components/ds/Accordion.astro";
 import ThemeCard from "~/components/curriculum/ThemeCard.astro";
 import { buildCurriculumTree, exerciseHref, summariseCoverage } from "~/lib/curriculum";
 import { targetSchema } from "~/lib/content-schema";
+import { LANG_DISPLAY } from "~/lib/lang";
 import { formatInline } from "~/lib/format-inline";
 
 /**
@@ -47,7 +48,6 @@ const coveragePct =
     ? 0
     : Math.round((coverage.themesCovered / coverage.totalThemes) * 100);
 
-const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
 const langDisplay = LANG_DISPLAY[lang];
 const moduleCount = modules.length;
 const moduleCountWord = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"][

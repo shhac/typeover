@@ -4,6 +4,7 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import { Container, Heading, Panel, Stack, Text } from "~/components/ds";
 import { ModuleCompleteCard } from "~/components/completion/ModuleCompleteCard";
 import { byOrder, exerciseHref, langHref, paramsForModule } from "~/lib/curriculum";
+import { LANG_DISPLAY } from "~/lib/lang";
 
 /*
  * Module-completion screen. Reached from the last exercise of the
@@ -83,7 +84,6 @@ const continueLabel = nextModule && nextModuleFirstExercise
 
 const siteOrigin = import.meta.env.SITE ?? "https://typeover.paulie.app";
 
-const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
 const shareTemplate = `Just finished {moduleTitle} on typeover — ${LANG_DISPLAY[lang]} for TypeScript devs. {themeCount} themes, {exerciseCount} exercises down.`;
 ---
 

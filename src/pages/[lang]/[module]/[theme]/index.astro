@@ -22,6 +22,7 @@ import {
   moduleHref,
   paramsForTheme,
 } from "~/lib/curriculum";
+import { LANG_DISPLAY } from "~/lib/lang";
 import { formatInline } from "~/lib/format-inline";
 import { formatBlock } from "~/lib/format-block";
 
@@ -42,7 +43,6 @@ interface Props {
 
 const { theme } = Astro.props;
 const lang = theme.data.target;
-const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
 const langLabel = LANG_DISPLAY[lang];
 
 const [modules, exercises] = await Promise.all([

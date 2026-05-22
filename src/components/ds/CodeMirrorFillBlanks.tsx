@@ -7,6 +7,7 @@ import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import type { FillSegment } from "~/lib/generator-runtime";
+import { LANG_DISPLAY } from "~/lib/lang";
 
 /*
  * Fill-blanks surface — a read-only CodeMirror editor whose blanks
@@ -67,10 +68,11 @@ const LANGUAGE_EXTENSION: Record<FillBlanksLanguage, () => Extension> = {
   zig: () => zigLanguage,
 };
 
-const LANGUAGE_LABEL: Record<FillBlanksLanguage, string> = {
-  go: "Go",
-  zig: "Zig",
-};
+/* `LANG_DISPLAY` is keyed by Target (`"go" | "zig"`) which matches
+ * `FillBlanksLanguage` exactly today — schema-validated. If the
+ * schema's target enum and this component's language enum ever
+ * diverge, the assignment surfaces a TS error here. */
+const LANGUAGE_LABEL: Record<FillBlanksLanguage, string> = LANG_DISPLAY;
 
 /* The widget owns its mount lifecycle: toDOM creates a host span,
  * mounts the caller-supplied JSX via Solid's standalone render, and

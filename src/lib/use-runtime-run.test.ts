@@ -19,23 +19,28 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /* vi.mock is hoisted to the top of the file, so the mock factory
  * can't close over locals. Use vi.hoisted() to create the spy refs
- * inside the same hoisted phase. */
-const { evalMock, readyMock, terminateMock } = vi.hoisted(() => ({
-  evalMock: vi.fn(),
-  readyMock: vi.fn(),
-  terminateMock: vi.fn(),
-}));
+ * inside the same hoisted phase.
+ *
+ * Distinct spies per runtime — the lifecycle tests use the Yaegi
+ * pair (`evalMock` / `readyMock` / `terminateMock`) by default
+ * because the historic suite was written against `runtime: "yaegi"`;
+ * the runtime-selection block below uses both pairs to verify the
+ * hook dispatches to the right worker. */
+const { evalMock, readyMock, terminateMock, zigEvalMock, zigReadyMock, zigTerminateMock } =
+  vi.hoisted(() => ({
+    evalMock: vi.fn(),
+    readyMock: vi.fn(),
+    terminateMock: vi.fn(),
+    zigEvalMock: vi.fn(),
+    zigReadyMock: vi.fn(),
+    zigTerminateMock: vi.fn(),
+  }));
 
 vi.mock("~/runtime", () => ({
   getRunner: () => ({ eval: evalMock, ready: readyMock }),
   terminateRunner: terminateMock,
-  /* Zig accessors needed because use-runtime-run imports both; the
-   * hook only invokes the one that matches its `runtime` arg, but
-   * the module-level imports resolve eagerly. Use the same mock
-   * objects so tests can assert against them when a future case
-   * exercises the Zig branch. */
-  getZigRunner: () => ({ eval: evalMock, ready: readyMock }),
-  terminateZigRunner: terminateMock,
+  getZigRunner: () => ({ eval: zigEvalMock, ready: zigReadyMock }),
+  terminateZigRunner: zigTerminateMock,
 }));
 
 import { useRuntimeRun } from "./use-runtime-run";
@@ -48,6 +53,10 @@ beforeEach(() => {
   readyMock.mockReset();
   readyMock.mockResolvedValue(undefined);
   terminateMock.mockReset();
+  zigEvalMock.mockReset();
+  zigReadyMock.mockReset();
+  zigReadyMock.mockResolvedValue(undefined);
+  zigTerminateMock.mockReset();
 });
 
 let disposers: Array<() => void> = [];
@@ -400,5 +409,56 @@ describe("useRuntimeRun — generation-tagged settlements", () => {
     await inFlight;
     /* runResult stays cleared — the stale settlement was discarded. */
     expect(h.runResult()).toBeNull();
+  });
+});
+
+describe("useRuntimeRun — runtime selection", () => {
+  /* The hook chooses {get, terminate} accessors from RUNTIME_ACCESSORS
+   * by indexing on `args.runtime`. Distinct spies per runtime catch
+   * a regression that hard-codes `RUNTIME_ACCESSORS.yaegi` or
+   * accidentally maps both branches to the same accessor pair —
+   * neither would fail any test in the lifecycle block above
+   * because the historical mock shared one set of spies. */
+
+  function setupZig(buildProgram: () => string = () => 'const std = @import("std");') {
+    let handle!: ReturnType<typeof useRuntimeRun>;
+    createRoot((dispose) => {
+      handle = useRuntimeRun({ runtime: "zig", buildProgram });
+      disposers.push(dispose);
+    });
+    return handle;
+  }
+
+  it("dispatches eval() to getZigRunner when runtime is zig", async () => {
+    zigEvalMock.mockResolvedValueOnce({ stdout: "z", stderr: "", error: "" });
+    const h = setupZig();
+    await h.run();
+    expect(zigEvalMock).toHaveBeenCalledTimes(1);
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("dispatches eval() to getRunner when runtime is yaegi", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: "g", stderr: "", error: "" });
+    const h = setup();
+    await h.run();
+    expect(evalMock).toHaveBeenCalledTimes(1);
+    expect(zigEvalMock).not.toHaveBeenCalled();
+  });
+
+  it("reset() dispatches terminate to the matching runtime", () => {
+    const h = setupZig();
+    h.reset();
+    expect(zigTerminateMock).toHaveBeenCalledTimes(1);
+    expect(terminateMock).not.toHaveBeenCalled();
+  });
+
+  it("runtimeLabel and runtimeTarget reflect the selected runtime", () => {
+    const yaegi = setup();
+    expect(yaegi.runtimeLabel).toBe("Go");
+    expect(yaegi.runtimeTarget).toBe("go");
+
+    const zig = setupZig();
+    expect(zig.runtimeLabel).toBe("Zig");
+    expect(zig.runtimeTarget).toBe("zig");
   });
 });

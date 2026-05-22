@@ -1,5 +1,7 @@
 import { createSignal } from "solid-js";
+import type { Target } from "./content-schema";
 import { getRunner, getZigRunner, terminateRunner, terminateZigRunner } from "~/runtime";
+import { LANG_DISPLAY } from "./lang";
 
 /*
  * Headless lifecycle for any component that runs learner code via a
@@ -31,17 +33,34 @@ import { getRunner, getZigRunner, terminateRunner, terminateZigRunner } from "~/
  * sees its own result silently clobbered by the older rejection.
  */
 
-/** Client-side runtimes the hook knows how to drive. Server-side
- *  fallback (Vercel function) isn't wired yet; freeform exercises
- *  with `runtime: "server"` short-circuit at the page level. */
+/** Client-side runtimes the hook actually drives. Each maps to a
+ *  Web Worker accessor in `RUNTIME_ACCESSORS` below. */
 export type ClientRuntime = "yaegi" | "zig";
 
-/** Human-facing label per runtime. Surfaced through the handle so
- *  shared UI (toolbar boot badge) renders the right language name
- *  without each component owning the mapping. */
+/** Wider runtime set the hook *accepts* — includes `"server"` for
+ *  the future SSR-fallback path. The hook can't drive `"server"`
+ *  today (no worker exists for it), so `canRun` below is `false`
+ *  in that branch and Run-button consumers gate on it. Lets the
+ *  consuming component pass `props.runtime` through verbatim
+ *  without a snap-default. */
+export type AcceptedRuntime = ClientRuntime | "server";
+
+/** Which curriculum-target language each runtime grades. Drives
+ *  both the display label (via `LANG_DISPLAY`) and any per-language
+ *  UI dispatch in consumers (e.g. picking the right CodeMirror
+ *  grammar). Single map; the label is a derived value. */
+export const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
+  yaegi: "go",
+  zig: "zig",
+};
+
+/** Human-facing label per runtime. Derived from RUNTIME_TARGET +
+ *  LANG_DISPLAY so the display strings live in one place
+ *  (LANG_DISPLAY). Surfaced through the handle so the shared
+ *  toolbar boot badge renders the right name. */
 export const RUNTIME_LABELS: Record<ClientRuntime, string> = {
-  yaegi: "Go",
-  zig: "Zig",
+  yaegi: LANG_DISPLAY[RUNTIME_TARGET.yaegi],
+  zig: LANG_DISPLAY[RUNTIME_TARGET.zig],
 };
 
 /* Internal — keep the {get, terminate} pair per runtime so the
@@ -89,6 +108,11 @@ export interface RuntimeRunHandle {
   bootStalled: () => boolean;
   /** Display name of the runtime, for the boot badge ("Go" / "Zig"). */
   runtimeLabel: string;
+  /** The curriculum-target language this runtime grades (`"go"` for
+   *  Yaegi, `"zig"` for Zig). Lets consumers thread the right
+   *  language slug to per-language UI (CodeMirror grammar, aria
+   *  labels) without re-deriving the mapping. */
+  runtimeTarget: Target;
   /** Assemble + send the program. Idempotent under racing clicks.
    *  Kicks off preflight if the runtime hasn't been booted yet. */
   run: () => Promise<void>;
@@ -99,13 +123,22 @@ export interface RuntimeRunHandle {
   clear: () => void;
   /** Proactively trigger the WASM load so the first Run doesn't pay
    *  the cold-start latency. Safe to call from onMount; idempotent
-   *  (subsequent calls during boot are no-ops). */
+   *  (subsequent calls during boot are no-ops). When `canRun` is
+   *  false (server runtime), this is a no-op. */
   preflight: () => void;
+  /** Whether the hook can actually execute `run()` against this
+   *  runtime. False when `args.runtime === "server"` — the SSR-
+   *  fallback isn't wired today, and the consumer Run button should
+   *  disable itself off this flag rather than re-deriving the rule. */
+  canRun: boolean;
 }
 
 interface UseRuntimeRunArgs {
-  /** Which client-side runtime to drive. */
-  runtime: ClientRuntime;
+  /** Which runtime to grade against. `"yaegi"` and `"zig"` map to
+   *  in-browser Web Workers; `"server"` is accepted but not yet
+   *  driven (the hook's `canRun` is false and all the side-effect
+   *  methods are no-ops for that branch). */
+  runtime: AcceptedRuntime;
   /** Called inside run() to produce the program text. Lets the hook
    *  stay agnostic to whether the program is the learner's raw input
    *  (Freeform), a substituted scaffold (FillBlankLineInput), or
@@ -121,8 +154,19 @@ interface UseRuntimeRunArgs {
 const BOOT_STALL_MS = 5000;
 
 export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
-  const accessors = RUNTIME_ACCESSORS[args.runtime];
-  const runtimeLabel = RUNTIME_LABELS[args.runtime];
+  /* `"server"` is accepted but unsupported: the hook returns a
+   * degenerate handle (canRun: false, side-effect methods are
+   * no-ops). Falls back to the Go display + target so a freeform
+   * page that renders against a server-runtime exercise still has
+   * sensible chrome — the Run button will be disabled via
+   * `runner.canRun`, so the labels never matter to the learner. */
+  const canRun = args.runtime !== "server";
+  /* TS doesn't narrow `args.runtime` through the const above; use a
+   * type guard so the indexed lookups stay safe. */
+  const clientRuntime: ClientRuntime = args.runtime === "server" ? "yaegi" : args.runtime;
+  const accessors = RUNTIME_ACCESSORS[clientRuntime];
+  const runtimeLabel = RUNTIME_LABELS[clientRuntime];
+  const runtimeTarget = RUNTIME_TARGET[clientRuntime];
 
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
@@ -160,6 +204,9 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
   };
 
   function preflight(): void {
+    /* Server runtime is accepted but undriven — no worker to warm,
+     * no status to advance. Caller's UI gates Run on `canRun`. */
+    if (!canRun) return;
     /* Idempotent — every state except "uninit" already represents an
      * in-flight or settled boot, so a re-call is a no-op. After
      * reset() flips status back to "uninit", a subsequent preflight()
@@ -199,6 +246,11 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
   }
 
   async function run(): Promise<void> {
+    /* Server runtime → no-op. Consumers gate the Run button on
+     * `canRun`, but the hook also guards here so a stray
+     * `void runner.run()` from elsewhere (mobile key bar, Cmd-Enter)
+     * doesn't try to dereference undefined accessors. */
+    if (!canRun) return;
     if (running()) return;
     /* If the consumer never called preflight(), boot lazily — Run is
      * still the canonical trigger for the first WASM load. */
@@ -233,6 +285,8 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
   }
 
   function reset(): void {
+    /* Server runtime → no worker to terminate; reset is a no-op. */
+    if (!canRun) return;
     /* Hard-reset the runtime when the learner's code looks stuck.
      * Each runtime is single-threaded inside its worker, so an
      * infinite loop blocks subsequent calls until the worker is
@@ -271,9 +325,11 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     bootError,
     bootStalled,
     runtimeLabel,
+    runtimeTarget,
     run,
     reset,
     clear,
     preflight,
+    canRun,
   };
 }
