@@ -1,0 +1,59 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line. The program should print two lines
+  of output — `first` then `second` — with each line on its own.
+  You can do it in one `writeStreamingAll` call by putting a `\n`
+  between the two words AND another `\n` at the end. With
+  `expectStdout` of `first\nsecond\n`, the run grades you correct.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'try std.Io.File.stdout().writeStreamingAll(init.io, "first\nsecond\n");'
+  ts: |-
+    console.log("first");
+    console.log("second");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+    }
+  distractors:
+    - match: 'try std.Io.File.stdout().writeStreamingAll(init.io, "first second\n");'
+      explain: |-
+        That puts both words on one line separated by a space.
+        `expectStdout` is `first\nsecond\n` — two lines, each
+        terminated by `\n`. Embed a `\n` between `first` and
+        `second` instead of a space.
+    - match: 'std.Io.File.stdout().writeStreamingAll(init.io, "first\nsecond\n");'
+      explain: |-
+        The call needs a `try` prefix — `writeStreamingAll` returns
+        an error union, and the enclosing function's `!void`
+        means an unhandled return value is a compile error.
+    - match: 'console.log("first\nsecond");'
+      explain: |-
+        `console.log` is TypeScript — Zig has no `console`. Use
+        `std.Io.File.stdout().writeStreamingAll(init.io, …)`.
+expectStdout: |
+  first
+  second
+runtime: zig
+blanks: [line]
+hints:
+  - "One call to `writeStreamingAll` with a string that has TWO newlines: one between `first` and `second`, one after `second`. Don't forget the `try` prefix."
+  - "Shape: `try std.Io.File.stdout().writeStreamingAll(init.io, \"<bytes>\");`. The bytes are the literal string with `\\n` inside."
+  - 'Type `try std.Io.File.stdout().writeStreamingAll(init.io, "first\nsecond\n");`'
+notes: |
+  Second fill-line. Drills the same writeStreamingAll mechanic as
+  slot 03 but with embedded newlines as the new wrinkle — learner
+  now has to think about the bytes they're putting on stdout, not
+  just the call shape.
+
+  Distractors cover the three predictable wrong shapes:
+   - Wrong delimiter (space instead of `\n`).
+   - Missing `try` (already covered in 03's distractors; reinforced).
+   - TS leakage (also in 03).

@@ -1,0 +1,43 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that prints, on three separate
+  lines:
+
+      ready
+      set
+      go
+
+  Use two or three calls to `writeStreamingAll` — your choice.
+  The run grades against the expected stdout.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("ready");
+    console.log("set");
+    console.log("go");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        try std.Io.File.stdout().writeStreamingAll(init.io, "ready\nset\ngo\n");
+    }
+expectStdout: |
+  ready
+  set
+  go
+runtime: zig
+hints:
+  - "You have two structural choices: (a) one writeStreamingAll with `\"ready\\nset\\ngo\\n\"` as the bytes, or (b) three separate `try ... writeStreamingAll(init.io, \"ready\\n\")` etc. Either passes the grader."
+  - "Skeleton (one-call version): `const std = @import(\"std\");` then `pub fn main(init: std.process.Init) !void { try std.Io.File.stdout().writeStreamingAll(init.io, \"<bytes>\"); }`. The bytes are `\"ready\\nset\\ngo\\n\"`."
+  - 'One-call program:\n\n```zig\nconst std = @import("std");\n\npub fn main(init: std.process.Init) !void {\n    try std.Io.File.stdout().writeStreamingAll(init.io, "ready\nset\ngo\n");\n}\n```'
+notes: |
+  Second freeform. Same shape as slot 08 but with multi-line output
+  to drill the embedded-newline mechanic from slot 07. The prompt
+  explicitly lets the learner pick between one call or three —
+  both produce the same stdout, and the grader doesn't care which
+  shape they used. Reinforces that the grading oracle is OUTPUT,
+  not code shape.

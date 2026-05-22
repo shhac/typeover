@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: mcq
+order: 5
+prompt: |
+  TypeScript reaches for `console.log` to write a line to stdout.
+  Zig has two surfaces that look like candidates: `std.debug.print`
+  (for ad-hoc debug output to stderr) and the stdout `File` handle.
+  Pick the call that writes `hello` to STDOUT, with proper error
+  propagation, using only Zig stdlib APIs the playground compiler
+  supports.
+generator:
+  kind: template
+  vars:
+    msg: ['"hello\n"']
+  ts: |-
+    console.log(${msg});
+  canonical: |-
+    try std.Io.File.stdout().writeStreamingAll(init.io, ${msg});
+  distractors:
+    - "std.debug.print(${msg}, .{});"
+    - "console.log(${msg});"
+    - "std.Io.File.stdout().writeStreamingAll(init.io, ${msg});"
+hints:
+  - "`std.debug.print` writes to stderr, not stdout — and the playground stdlib doesn't always link it cleanly. `console.log` is TypeScript; Zig has nothing similar. And remember: the call can fail, so it needs a `try` prefix."
+  - "Three pieces: get the writer with `std.Io.File.stdout()`, call `.writeStreamingAll(init.io, <bytes>)`, prefix with `try`."
+  - "`try std.Io.File.stdout().writeStreamingAll(init.io, \"hello\\n\");`"
+runtime: none
+notes: |
+  Recognition of the right stdout idiom for the playground runtime.
+  Three distractors cover the three failure modes:
+   - `std.debug.print(...)`: real Zig API, but writes to STDERR and
+     has playground-compatibility issues.
+   - `console.log(...)`: TS reflex; there's no `console` in Zig.
+   - missing `try`: the call itself is correct but the error-union
+     return value would be discarded — Zig flags this at compile.
+
+  Pair with slot 03 (fill-line of the same call) so the learner
+  first recognises the right shape (this slot), then types it.

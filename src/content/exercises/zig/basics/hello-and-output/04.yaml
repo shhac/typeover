@@ -1,0 +1,40 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: mcq
+order: 4
+prompt: |
+  TypeScript's entry point is `function main() { ... }` (or just
+  module-top code). Zig's `main` has a specific signature that
+  modern programs are expected to use — pick the one that's
+  callable from the compiler-generated runtime AND lets you
+  `try` an I/O call.
+generator:
+  kind: template
+  vars:
+    name: [main]
+  ts: |-
+    function ${name}() { /* ... */ }
+  canonical: |-
+    pub fn ${name}(init: std.process.Init) !void { /* ... */ }
+  distractors:
+    - "pub fn ${name}() void { /* ... */ }"
+    - "fn ${name}(init: std.process.Init) !void { /* ... */ }"
+    - "pub fn ${name}(init: std.process.Init) void { /* ... */ }"
+hints:
+  - "Three things have to line up: it has to be `pub` so the runtime can call it, it has to take an `init: std.process.Init` so you can hand `init.io` to writer calls, and the return type needs the `!` (error union) so a `try` inside the body propagates instead of being a compile error."
+  - "The shape is `pub fn main(init: std.process.Init) !void { ... }`. Drop any of those three pieces and either the runtime can't call it, you can't use `init.io`, or you can't `try`."
+  - "`pub fn main(init: std.process.Init) !void { /* ... */ }`"
+runtime: none
+notes: |
+  Recognition of the modern Zig entry-point signature. Distractors
+  call out the three load-bearing pieces individually:
+   - Missing `pub` — runtime can't see it; binary won't link.
+   - Missing `Init` parameter — body has no way to obtain `init.io`,
+     so all I/O calls fail to compile.
+   - Missing `!` on the return type — `try` in the body is a
+     compile error because `try` requires an error-union return
+     in the enclosing function.
+
+  Reusing `name: [main]` in the template keeps the substitution
+  visible without offering false flexibility — the entry point is
+  literally always called `main`.

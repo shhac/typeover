@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that prints exactly:
+
+      hello world
+
+  followed by a newline, to stdout. You'll need the `@import`, the
+  modern entry-point signature, and one call to write the string.
+  The Run button will compile + execute your code; Submit grades
+  the stdout against the expected output.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("hello world");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        try std.Io.File.stdout().writeStreamingAll(init.io, "hello world\n");
+    }
+expectStdout: |
+  hello world
+runtime: zig
+hints:
+  - "Three load-bearing pieces: import the stdlib with `@import(\"std\")` bound to a `const`, declare main with `pub fn main(init: std.process.Init) !void`, and inside it call `try std.Io.File.stdout().writeStreamingAll(init.io, ...)` with the bytes you want printed."
+  - "Skeleton: `const std = @import(\"std\");` then `pub fn main(init: std.process.Init) !void { try ... }`. The bytes to print are `\"hello world\\n\"` — the trailing `\\n` matters because `expectStdout` ends with a newline."
+  - 'The full program:\n\n```zig\nconst std = @import("std");\n\npub fn main(init: std.process.Init) !void {\n    try std.Io.File.stdout().writeStreamingAll(init.io, "hello world\n");\n}\n```'
+notes: |
+  First Zig freeform exercise. Synthesises every concept from slots
+  01-07: `@import`, the entry-point signature, the stdout File
+  handle, `writeStreamingAll`, `try`. The learner has to assemble
+  the full program from memory (with the hints as a safety net).
+
+  Hint 3 spells out the entire program — same convention as Go
+  freeforms.

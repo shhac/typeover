@@ -1,0 +1,42 @@
+target: zig
+themeId: zig/basics/hello-and-output
+type: fill-word
+order: 6
+prompt: |
+  Fill the missing keyword. The `writeStreamingAll` call returns an
+  error union — leaving the return value uncaught is a compile
+  error. The keyword you need propagates the error up to the
+  enclosing function's `!void` return.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "try"
+  ts: |-
+    console.log("hi");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${keyword} std.Io.File.stdout().writeStreamingAll(init.io, "hi\n");
+    }
+  distractors:
+    - "await"
+    - "throw"
+    - "catch"
+blanks: [keyword]
+hints:
+  - "Zig's error-union mechanism is closest to Rust's `?` operator — propagate on error, unwrap on success. The keyword is short, three letters, and lives at the start of the statement."
+  - "It's `try`. Reads as: `try <call-that-might-fail>;`."
+  - "`try`"
+runtime: none
+notes: |
+  Drill the `try` keyword in isolation. The scaffold shows the full
+  program shape (good for context — they've seen this in slots 02,
+  03, 05). Distractors are the three most likely wrong reflexes:
+   - `await` — TS / JS / Python reflex for asynchrony.
+   - `throw` — TS / JS reflex for raising an error (Zig's `try` is
+     the opposite — propagate instead of raise).
+   - `catch` — handle instead of propagate. Wrong direction here
+     because the enclosing function's return type is `!void`,
+     meaning errors should bubble out.
