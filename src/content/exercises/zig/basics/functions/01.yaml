@@ -1,0 +1,44 @@
+target: zig
+themeId: zig/basics/functions
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `function add(a: number, b: number): number`.
+  Zig drops the `function` keyword for `fn`, puts the return type
+  AFTER the param list (no colon), and uses Zig-specific widths.
+  Pick the Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: add
+      ts: "function add(a: number, b: number): number { return a + b; }"
+      canonical: "fn add(a: i32, b: i32) i32 { return a + b; }"
+      distractors:
+        - "fn add(a: i32, b: i32): i32 { return a + b; }"
+        - "function add(a: i32, b: i32) i32 { return a + b; }"
+        - "fn add(a: i32, b: i32) -> i32 { return a + b; }"
+    - id: greet
+      ts: "function greet(name: string): string { return name; }"
+      canonical: "fn greet(name: []const u8) []const u8 { return name; }"
+      distractors:
+        - "fn greet(name: string) string { return name; }"
+        - "fn greet(name: []const u8): []const u8 { return name; }"
+        - "fn greet(name: []const u8) -> []const u8 { return name; }"
+hints:
+  - "Three shifts from TS: `function` → `fn`, return type comes AFTER the param list (no colon between them), and the types are Zig-specific (`i32`, `[]const u8`)."
+  - "Shape: `fn <name>(<params>) <ReturnType> { <body> }`."
+  - "For the add variant: `fn add(a: i32, b: i32) i32 { return a + b; }`."
+runtime: none
+notes: |
+  First functions exercise. Drills three shifts at once:
+   - `function` → `fn`.
+   - Return type position (no colon, right after the params).
+   - Width-typed numerics (`i32`).
+
+  Distractors cover:
+   - Colon before return type (TS reflex).
+   - `function` keyword (TS reflex).
+   - `-> ReturnType` (Rust / OCaml arrow reflex).
+
+  Variant pair (numeric add, string greet) shows the shape is
+  uniform across return types.

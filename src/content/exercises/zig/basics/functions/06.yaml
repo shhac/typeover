@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/basics/functions
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig function signature. The function `add`
+  takes two `i32` parameters and returns their sum (as `i32`).
+  With the right signature, calling `add(2, 3)` from main prints
+  `5` to stdout.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn add(a: i32, b: i32) i32 {"
+  ts: |-
+    function add(a: number, b: number): number {
+        return a + b;
+    }
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+        return a + b;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const sum = add(2, 3);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{sum});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "function add(a: i32, b: i32): i32 {"
+      explain: |-
+        Two TS reflexes: the keyword is `fn` (not `function`),
+        and there's no colon between the param list and the
+        return type.
+    - match: "fn add(a: i32, b: i32): i32 {"
+      explain: |-
+        Drop the colon before the return type. Zig puts the
+        return type right after the param list: `fn add(...) i32 {`.
+    - match: "fn add(a: i32, b: i32) -> i32 {"
+      explain: |-
+        That's Rust's arrow. Zig writes the return type without
+        any arrow: `fn add(a: i32, b: i32) i32 {`.
+expectStdout: |
+  5
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `fn` keyword, function name, parameter list with type-after-name (`a: i32`), then the return type with NO colon, NO arrow — just `i32 {`."
+  - "Shape: `fn add(a: i32, b: i32) i32 {`. No `function`, no colon before `i32`, no `->`."
+  - "`fn add(a: i32, b: i32) i32 {`"
+notes: |
+  First fill-line for functions. Distractors drill the three
+  most likely shape mistakes: `function` keyword, colon before
+  return, arrow before return.

@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/basics/functions
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword that declares a function. Two letters,
+  same as Rust — but NOT the TypeScript / JavaScript full word.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "fn"
+  ts: |-
+    function multiply(a: number, b: number): number {
+        return a * b;
+    }
+  canonical: |-
+    ${keyword} multiply(a: i32, b: i32) i32 {
+        return a * b;
+    }
+  distractors:
+    - "function"
+    - "func"
+    - "def"
+blanks: [keyword]
+hints:
+  - "Two letters, lowercase, same as Rust."
+  - "Starts with `f`."
+  - "`fn`"
+runtime: none
+notes: |
+  Drill the `fn` keyword. Distractors:
+   - `function` — TS / JS reflex.
+   - `func` — Go reflex.
+   - `def` — Python / Ruby reflex.

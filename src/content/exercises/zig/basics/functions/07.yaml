@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/basics/functions
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the call to `greet` that passes the
+  string `"world"`. The function returns a slice, which is then
+  printed (followed by `\n`). With the right call, the program
+  prints `hello, world` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'const message = greet("world");'
+  ts: |-
+    const message = greet("world");
+    console.log(message);
+  canonical: |-
+    const std = @import("std");
+
+    fn greet(name: []const u8) []const u8 {
+        _ = name;
+        return "hello, world";
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        try std.Io.File.stdout().writeStreamingAll(init.io, message);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: 'var message = greet("world");'
+      explain: |-
+        `var` makes `message` mutable, but it's never reassigned —
+        use `const`.
+    - match: 'const message: []const u8 = greet("world");'
+      explain: |-
+        The annotation is harmless but unnecessary. Zig infers
+        the type from the function's return type, so plain
+        `const message = greet("world");` is the idiomatic shape.
+    - match: 'const message = greet"world";'
+      explain: |-
+        Missing parens around the call argument. Zig requires
+        function-call parens even when there's a single string
+        literal: `greet("world")`.
+expectStdout: |
+  hello, world
+runtime: zig
+blanks: [line]
+hints:
+  - "Shape: `const <name> = <fn-call>(<args>);`. For this exercise: `const message = greet(\"world\");`."
+  - "Two pieces: `const message` (the binding never changes — const-default reflex), then `= greet(\"world\");` (paren-wrapped argument, trailing semicolon)."
+  - "`const message = greet(\"world\");`"
+notes: |
+  Drill the function-call shape (and the const-default reflex
+  applied to function return values). The function body itself
+  is in the scaffold so the learner focuses on the call site.

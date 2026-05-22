@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/basics
+title: Functions
+order: 5
+prerequisites: []
+intro: |
+  Zig functions look like TS with the type annotations shifted: `fn name(param: Type) ReturnType { ... }`. Visibility is opt-in via `pub fn` — top-level functions are private by default. Zig has no tuple-return; multi-return uses a struct (the Zig idiom) or out-params. Function-level errors come later in the `errors` module; here we focus on the value-returning shape.

@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/basics/functions
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing visibility modifier. The function will be
+  called from another module, so it has to be exported. Three
+  letters in Zig — shorter than most C-family languages.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "pub"
+  ts: |-
+    export function area(w: number, h: number): number {
+        return w * h;
+    }
+  canonical: |-
+    ${keyword} fn area(w: i32, h: i32) i32 {
+        return w * h;
+    }
+  distractors:
+    - "export"
+    - "public"
+    - "extern"
+blanks: [keyword]
+hints:
+  - "Three letters, lowercase. Same as the package-management tool's name. Shorthand for `public`."
+  - "Starts with `p`."
+  - "`pub`"
+runtime: none
+notes: |
+  Drill the `pub` modifier. Distractors:
+   - `export` — TS / JS reflex.
+   - `public` — Java / C# reflex (full word).
+   - `extern` — Rust / C reflex (FFI, not visibility).

@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/basics/functions
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Defines a function `square(x: i32) i32` that returns `x * x`.
+   2. From `main`, calls `square(7)` and prints the result
+      followed by a newline.
+
+  Expected stdout: `49`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function square(x: number): number {
+        return x * x;
+    }
+    console.log(square(7));
+  canonical: |-
+    const std = @import("std");
+
+    fn square(x: i32) i32 {
+        return x * x;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const result = square(7);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{result});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  49
+runtime: zig
+hints:
+  - "Two pieces: the function `fn square(x: i32) i32 { return x * x; }` declared at module scope, then a call inside `main` whose result feeds bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn square(x: i32) i32 {\n    return x * x;\n}\n\npub fn main(init: std.process.Init) !void {\n    const result = square(7);\n    var buf: [16]u8 = undefined;\n    const printed = try std.fmt.bufPrint(&buf, \"{d}\\n\", .{result});\n    try std.Io.File.stdout().writeStreamingAll(init.io, printed);\n}\n```"
+  - 'Full program is the skeleton in hint 2. The function is private (no `pub`) — Zig functions are private by default.'
+notes: |
+  First functions freeform. Synthesises slot 04 (`fn` keyword)
+  and slot 06 (function signature shape) with the bufPrint
+  integer-formatting pattern from variables/08.
+
+  Function is intentionally private (no `pub`) — `pub` is for
+  cross-module callability; `main` calls it from the same file,
+  so private is correct.

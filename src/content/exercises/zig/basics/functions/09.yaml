@@ -1,0 +1,60 @@
+target: zig
+themeId: zig/basics/functions
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that returns TWO values via a
+  struct, then prints both fields:
+
+   1. Define a struct `Stats` with fields `min: i32` and
+      `max: i32`.
+   2. Define a function `bounds(a: i32, b: i32) Stats` that
+      returns the smaller in `min` and the larger in `max`.
+   3. From `main`, call `bounds(3, 7)` and print exactly:
+      ```
+      min=3 max=7
+      ```
+
+  (No trailing characters past the newline.)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Stats = { min: number; max: number };
+    function bounds(a: number, b: number): Stats {
+        return a < b
+            ? { min: a, max: b }
+            : { min: b, max: a };
+    }
+    const r = bounds(3, 7);
+    console.log(`min=${r.min} max=${r.max}`);
+  canonical: |-
+    const std = @import("std");
+
+    const Stats = struct { min: i32, max: i32 };
+
+    fn bounds(a: i32, b: i32) Stats {
+        return if (a < b)
+            Stats{ .min = a, .max = b }
+        else
+            Stats{ .min = b, .max = a };
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const r = bounds(3, 7);
+        var buf: [32]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "min={d} max={d}\n", .{ r.min, r.max });
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  min=3 max=7
+runtime: zig
+hints:
+  - "Three pieces: declare the struct (`const Stats = struct { min: i32, max: i32 };`), declare the function with `Stats` as return type, return struct literals with `.field = ...` syntax."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst Stats = struct { min: i32, max: i32 };\n\nfn bounds(a: i32, b: i32) Stats {\n    return if (a < b) Stats{ .min = a, .max = b } else Stats{ .min = b, .max = a };\n}\n\npub fn main(init: std.process.Init) !void {\n    const r = bounds(3, 7);\n    // bufPrint(\"min={d} max={d}\\n\", .{ r.min, r.max }) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance from earlier exercises. Note `if` is an EXPRESSION in Zig (like `switch`), so it can be a return value directly.'
+notes: |
+  Last basics/functions slot. Synthesises slot 03 (multi-return
+  via struct) end-to-end with `if` as an expression — first hint
+  of the "almost everything is an expression in Zig" rule. Module
+  2 (types) digs deeper into structs.

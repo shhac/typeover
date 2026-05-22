@@ -1,0 +1,50 @@
+target: zig
+themeId: zig/basics/functions
+type: mcq
+order: 3
+prompt: |
+  TypeScript returns multiple values as a tuple `[a, b]`. Zig has
+  no tuples for this — the idiom is to define a `struct` and
+  return that. The fields are named, which makes the call site
+  read better. Pick the Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function divmod(a: number, b: number): [number, number] {
+        return [Math.trunc(a / b), a % b];
+    }
+  canonical: |-
+    const DivResult = struct { quotient: i32, remainder: i32 };
+
+    fn divmod(a: i32, b: i32) DivResult {
+        return DivResult{ .quotient = @divTrunc(a, b), .remainder = @mod(a, b) };
+    }
+  distractors:
+    - |-
+      fn divmod(a: i32, b: i32) [i32, i32] {
+          return [@divTrunc(a, b), @mod(a, b)];
+      }
+    - |-
+      fn divmod(a: i32, b: i32) (i32, i32) {
+          return (@divTrunc(a, b), @mod(a, b));
+      }
+    - |-
+      fn divmod(a: i32, b: i32) i32, i32 {
+          return @divTrunc(a, b), @mod(a, b);
+      }
+hints:
+  - "Three pieces: declare a `struct` for the multi-value shape (`const DivResult = struct { quotient: i32, remainder: i32 };`), return the struct type as the return type (`fn divmod(...) DivResult`), and construct an instance with `.quotient = ...` field initializers."
+  - "Shape:\n```zig\nconst DivResult = struct { quotient: i32, remainder: i32 };\nfn divmod(...) DivResult { return DivResult{ .quotient = ..., .remainder = ... }; }\n```"
+  - "Full canonical:\n```zig\nconst DivResult = struct { quotient: i32, remainder: i32 };\nfn divmod(a: i32, b: i32) DivResult {\n    return DivResult{ .quotient = @divTrunc(a, b), .remainder = @mod(a, b) };\n}\n```"
+runtime: none
+notes: |
+  Drill the multi-return idiom. Distractors:
+   - `[i32, i32]` — TS array-tuple reflex.
+   - `(i32, i32)` — Python / Rust tuple reflex.
+   - `i32, i32` (bare list) — invalid.
+
+  Zig's struct-as-multi-return is verbose by TS standards but
+  the field names propagate through the call site (`r.quotient`
+  vs `r[0]`), which is a readability win. Real codebases lean on
+  this heavily.

@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/basics/functions
+type: mcq
+order: 2
+prompt: |
+  Zig's functions are PRIVATE by default — the `pub` keyword opts
+  in to public visibility (callable from other modules). `main` is
+  always `pub fn` because the runtime calls it. Pick the
+  declaration for a function that's part of this module's public
+  API.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    export function utf8Length(s: string): number {
+        return s.length;
+    }
+  canonical: |-
+    pub fn utf8Length(s: []const u8) usize {
+        return s.len;
+    }
+  distractors:
+    - |-
+      export fn utf8Length(s: []const u8) usize {
+          return s.len;
+      }
+    - |-
+      public fn utf8Length(s: []const u8) usize {
+          return s.len;
+      }
+    - |-
+      fn pub utf8Length(s: []const u8) usize {
+          return s.len;
+      }
+hints:
+  - "Zig's visibility opt-in is `pub` BEFORE `fn`. Two letters short, three letters long: `pub fn`."
+  - "Shape: `pub fn <name>(<params>) <ReturnType> { ... }`. The `pub` always comes first."
+  - "`pub fn utf8Length(s: []const u8) usize { return s.len; }`"
+runtime: none
+notes: |
+  Drill the `pub fn` shape. Distractors:
+   - `export fn` — TS / JS reflex (`export function`).
+   - `public fn` — Java / C# reflex (full word).
+   - `fn pub` — wrong order.
+
+  Note: slices have `.len` (a u-pointer-width integer), which is
+  why the return type is `usize`. Not strictly a functions topic
+  but unavoidable given the example.
