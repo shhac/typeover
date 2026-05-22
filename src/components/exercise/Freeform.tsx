@@ -151,7 +151,9 @@ export function Freeform(props: FreeformProps) {
       themeHref={props.themeHref}
     >
       <CodeMirrorEditor
-        ariaLabel="Go program for freeform exercise"
+        ariaLabel={`${runner.runtimeLabel} program for freeform exercise`}
+        language={runner.runtimeTarget === "zig" ? "zig" : "go"}
+        canonical={instance().canonical}
         value={code()}
         onValueChange={(next) => {
           setCode(next);

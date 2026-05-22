@@ -6,12 +6,14 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { go } from "@codemirror/lang-go";
 import { javascript } from "@codemirror/lang-javascript";
+import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
+import { zigCompletionExtension } from "~/lib/zig-completions";
 
 /** Language packs we support today. Add a value here and the matching
- *  switch case in `languageExtension` below when adding a third. */
-export type EditorLanguage = "go" | "ts";
+ *  switch case in `languageExtension` below when adding a new one. */
+export type EditorLanguage = "go" | "ts" | "zig";
 
 function languageExtension(lang: EditorLanguage): Extension {
   switch (lang) {
@@ -19,6 +21,10 @@ function languageExtension(lang: EditorLanguage): Extension {
       return go();
     case "ts":
       return javascript({ typescript: true });
+    case "zig":
+      /* `zigLanguage` is an `LRLanguage` value (not a constructor
+       * like lang-go's `go()`); use directly as the extension. */
+      return zigLanguage;
   }
 }
 
@@ -98,6 +104,15 @@ interface CodeMirrorEditorProps {
   /** Aria-label for the editor surface (CodeMirror puts it on
    *  the contentDOM). */
   ariaLabel?: string;
+  /** Optional canonical (reference solution) source string. When
+   *  `language === "zig"`, identifiers extracted from this string
+   *  seed the in-scope completer so the dropdown can suggest
+   *  names the exercise has shown but the learner hasn't yet
+   *  typed in the editor. Surfacing identifiers doesn't give the
+   *  answer away — assembling them into the right call chain is
+   *  the part the learner still does. Ignored for other
+   *  languages. */
+  canonical?: string;
   /** Ref escape hatch for external imperative ops. Ignored when
    *  readOnly — there's nothing to focus into / insert into. */
   ref?: (handle: CodeMirrorEditorHandle) => void;
@@ -184,10 +199,12 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
      * active-line highlight, keymap) drop out under readOnly so the
      * pane reads as static syntax-highlighted code rather than an
      * editable editor with disabled affordances. */
+    const defaultAriaLabel =
+      lang === "go" ? "Go code" : lang === "zig" ? "Zig code" : "TypeScript source";
     const baseExtensions: Extension[] = [
       languageExtension(lang),
       EditorView.contentAttributes.of({
-        "aria-label": props.ariaLabel ?? (lang === "go" ? "Go code" : "TypeScript source"),
+        "aria-label": props.ariaLabel ?? defaultAriaLabel,
         spellcheck: "false",
       }),
       ...codemirrorThemeExtensions({
@@ -197,6 +214,13 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
         caret: !readOnly,
       }),
     ];
+
+    /* Zig-specific completion sources (member-prefix dotted-path
+     * discovery + in-scope token completion seeded by the
+     * canonical, if any). Only relevant when the editor is
+     * editable AND the language is Zig. */
+    const zigCompletion: Extension[] =
+      lang === "zig" && !readOnly ? [zigCompletionExtension({ canonical: props.canonical })] : [];
 
     const editorOnly: Extension[] = readOnly
       ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
@@ -209,6 +233,7 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
           indentUnit.of("\t"),
           highlightActiveLine(),
           editableCompartment.of(EditorView.editable.of(!props.disabled)),
+          ...zigCompletion,
           keymap.of([
             {
               key: "Mod-Enter",
