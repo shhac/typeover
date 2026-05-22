@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/errors/error-sets
+type: mcq
+order: 1
+prompt: |
+  TypeScript reaches for a class hierarchy (`class NotFoundError
+  extends Error`) or a string-tag union (`{ kind: "not-found" }`)
+  to enumerate possible errors. Zig has dedicated syntax — an
+  `error{...}` set bound to a const. Pick the right Zig
+  translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type ParseError = "Empty" | "BadDigit";
+  canonical: |-
+    const ParseError = error{ Empty, BadDigit };
+  distractors:
+    - "const ParseError: error = { Empty, BadDigit };"
+    - "const ParseError = enum { Empty, BadDigit };"
+    - "error ParseError { Empty, BadDigit };"
+hints:
+  - "Two pieces: `const <Name> = error{ <Variants> };`. The `error{ ... }` is a type expression; bind it to a `const`."
+  - "Shape: `const <Name> = error{ V1, V2, ... };`."
+  - "`const ParseError = error{ Empty, BadDigit };`"
+runtime: none
+notes: |
+  First error-sets exercise. Drills the `error{...}` shape.
+  Distractors:
+   - C-style colon-typed declaration — wrong; error is a type
+     expression, not a typed value.
+   - `enum` — Zig keyword but different purpose; enum variants
+     aren't error values.
+   - C-style `error TypeName { ... }` — wrong; needs `const`
+     binding.

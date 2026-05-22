@@ -1,0 +1,11 @@
+target: zig
+title: Errors
+order: 4
+summary: |
+  Zig errors are first-class values from a finite set declared
+  per-API. `error{ Empty, BadInput }` declares a set; `!T` is the
+  error-union return type. `try` is sugar for "propagate-on-error,
+  unwrap-on-success." `catch` handles. There's no exception
+  hierarchy, no try/catch ladder, no fall-through — every error
+  case is named, every callsite is explicit. Builds on Module 3:
+  `errdefer` finally makes sense in its native habitat.

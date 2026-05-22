@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/errors/error-sets
+type: mcq
+order: 3
+prompt: |
+  Two error sets can be COMBINED with the `||` operator — the
+  result is the union of both. Pick the right composed type.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TypeScript: type Both = A | B; */
+  canonical: |-
+    const ReadError = error{ NotFound };
+    const ParseError = error{ Empty, BadDigit };
+    const AnyError = ReadError || ParseError;
+  distractors:
+    - "const AnyError = ReadError | ParseError;"
+    - "const AnyError = error{ ReadError, ParseError };"
+    - "const AnyError = ReadError + ParseError;"
+hints:
+  - "One operator: `||`. Reads as \"OR\" — \"errors from this set OR errors from that set.\""
+  - "Shape: `const <Combined> = <Set1> || <Set2>;`."
+  - "`const AnyError = ReadError || ParseError;`"
+runtime: none
+notes: |
+  Drill the `||` error-set composition operator. Distractors:
+   - `|` (single bar) — TS reflex (TS unions use one bar).
+   - Nested error set — wrong; would put the SET NAMES as
+     error variants, not include their variants.
+   - `+` — not an error-set operator.
+
+  Composing sets is one tool; in practice the more common
+  pattern is to let the compiler INFER the set from a
+  function's body (`!T` with no explicit set). That's the
+  Module 4 theme 3 topic.

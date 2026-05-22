@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/errors/error-sets
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that defines `LookupError =
+  error{ NotFound };`, a function `find(idx: usize) LookupError!i32`
+  that returns `idx * 10` when `idx < 3` else `error.NotFound`,
+  and from `main` calls `find(2)` and prints the result followed
+  by a newline.
+
+  Expected stdout: `20`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type LookupError = "NotFound";
+    function find(i: number): number {
+        if (i < 3) return i * 10;
+        throw new Error("NotFound");
+    }
+    console.log(find(2));
+  canonical: |-
+    const std = @import("std");
+
+    const LookupError = error{ NotFound };
+
+    fn find(idx: usize) LookupError!i32 {
+        if (idx < 3) return @as(i32, @intCast(idx * 10));
+        return error.NotFound;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const n = try find(2);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  20
+runtime: zig
+hints:
+  - "Three pieces: declare `LookupError = error{ NotFound };`, declare `fn find(idx: usize) LookupError!i32` (return is the error-union type), use `return error.NotFound;` on the failure path."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst LookupError = error{ NotFound };\n\nfn find(idx: usize) LookupError!i32 {\n    if (idx < 3) return @as(i32, @intCast(idx * 10));\n    return error.NotFound;\n}\n\npub fn main(init: std.process.Init) !void {\n    const n = try find(2);\n    // bufPrint(\"{d}\\n\", .{n}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. `@intCast(idx * 10)` narrows the usize multiplication back to i32 for the return type.'
+notes: |
+  First error-sets freeform. Synthesises set declaration,
+  raise, and propagation via `try`.

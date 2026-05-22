@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/error-sets
+type: mcq
+order: 2
+prompt: |
+  Once you've declared an error set, you raise a value from it
+  with `error.<Variant>`. Pick the right return statement for a
+  function that hits the empty-input case.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    if (s.length === 0) throw new EmptyError();
+  canonical: |-
+    if (s.len == 0) return error.Empty;
+  distractors:
+    - "if (s.len == 0) return ParseError.Empty;"
+    - "if (s.len == 0) throw error.Empty;"
+    - "if (s.len == 0) return .Empty;"
+hints:
+  - "Two pieces: `return error.<Variant>;` — note the leading `error.` prefix (NOT the type-name prefix `ParseError.`)."
+  - "Shape: `return error.<Variant>;`. The `error` keyword tells the compiler to look up the variant across the function's declared error-union type."
+  - "`return error.Empty;`"
+runtime: none
+notes: |
+  Drill `error.Empty`. Distractors:
+   - `ParseError.Empty` — close, but Zig uses the global
+     `error.` namespace for raising; the compiler narrows by
+     return-type context.
+   - `throw` — TS / Java reflex.
+   - `.Empty` (leading-dot shorthand) — works for enum
+     variants but not for error variants in a `return`.

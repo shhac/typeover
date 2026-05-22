@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/errors/error-sets
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing prefix used at a RAISE site to refer to an
+  error variant. Same word as the type keyword. Read as
+  `<prefix>.Empty` — the prefix locates the variant in the
+  ambient error namespace.
+generator:
+  kind: template
+  vars:
+    prefix:
+      - "error"
+  ts: |-
+    throw new EmptyError();
+  canonical: |-
+    return ${prefix}.Empty;
+  distractors:
+    - "ParseError"
+    - "throw"
+    - "raise"
+blanks: [prefix]
+hints:
+  - "Five letters, same as the type keyword."
+  - "Starts with `e`."
+  - "`error`"
+runtime: none
+notes: |
+  Drill the `error.<Variant>` raise-site convention.
+  Distractors:
+   - `ParseError` (the type name) — works in some contexts but
+     `error.` is the canonical raise-site prefix.
+   - `throw` — TS reflex.
+   - `raise` — Python / Ruby reflex.

@@ -1,0 +1,59 @@
+target: zig
+themeId: zig/errors/error-sets
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — return `error.Empty` when the
+  input slice is empty. With the right line, the program catches
+  the error and prints `EMPTY` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if (s.len == 0) return error.Empty;"
+  ts: |-
+    if (s.length === 0) throw new EmptyError();
+  canonical: |-
+    const std = @import("std");
+
+    const ParseError = error{ Empty };
+
+    fn parse(s: []const u8) ParseError!i32 {
+        ${line}
+        return @as(i32, s[0] - '0');
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const result = parse("") catch |err| switch (err) {
+            error.Empty => @as(i32, -1),
+        };
+        const msg: []const u8 = if (result == -1) "EMPTY" else "OK";
+        try std.Io.File.stdout().writeStreamingAll(init.io, msg);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "if (s.len == 0) return ParseError.Empty;"
+      explain: |-
+        Close — but the canonical raise prefix is `error.`,
+        not the set name. Use `return error.Empty;`.
+    - match: "if (s.len == 0) throw error.Empty;"
+      explain: |-
+        `throw` is TS. Zig uses `return error.<Variant>;`.
+    - match: "if (s.len == 0) return .Empty;"
+      explain: |-
+        Leading-dot shorthand works for enum variants but NOT
+        for error variants in a return statement. Use
+        `error.Empty`.
+expectStdout: |
+  EMPTY
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `if (s.len == 0)` guard, `return error.Empty;` body."
+  - "Shape: `if (<condition>) return error.<Variant>;`."
+  - "`if (s.len == 0) return error.Empty;`"
+notes: |
+  Drill the `return error.<Variant>;` pattern in a runnable
+  program. The caller's `catch |err| switch (err) { ... }`
+  block demonstrates basic handling — full coverage of catch
+  is the next theme.

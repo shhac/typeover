@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/errors/error-sets
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that composes TWO error sets:
+
+   1. Define `IoError = error{ Closed };` and `ParseError =
+      error{ Empty };`.
+   2. Compose them: `const AnyError = IoError || ParseError;`.
+   3. Define `fn check(c: u8) AnyError!void` that returns
+      `error.Closed` when c is 0, `error.Empty` when c is the
+      newline byte, else returns void.
+   4. From `main`, call `check('a')` with `try`, then print
+      `ok` + newline.
+
+  Expected stdout: `ok`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TS would compose with `type AnyError = IoError | ParseError;` */
+  canonical: |-
+    const std = @import("std");
+
+    const IoError = error{ Closed };
+    const ParseError = error{ Empty };
+    const AnyError = IoError || ParseError;
+
+    fn check(c: u8) AnyError!void {
+        if (c == 0) return error.Closed;
+        if (c == '\n') return error.Empty;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        try check('a');
+        try std.Io.File.stdout().writeStreamingAll(init.io, "ok\n");
+    }
+expectStdout: |
+  ok
+runtime: zig
+hints:
+  - "Three pieces: two `error{...}` sets, combine via `||`, then a function whose return type is the composed set with payload `void` (no value on success, possibly one of two errors)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst IoError = error{ Closed };\nconst ParseError = error{ Empty };\nconst AnyError = IoError || ParseError;\n\nfn check(c: u8) AnyError!void {\n    if (c == 0) return error.Closed;\n    if (c == '\\n') return error.Empty;\n}\n\npub fn main(init: std.process.Init) !void {\n    try check('a');\n    try std.Io.File.stdout().writeStreamingAll(init.io, \"ok\\n\");\n}\n```"
+  - "Full program is the skeleton. The `'a'` input hits neither guard, so `check` returns `void` (success); `try` succeeds; the program prints `ok`."
+notes: |
+  Closes error-sets. Drills set composition end-to-end with
+  the `!void` shorthand for "no value on success, error or
+  nothing on failure."

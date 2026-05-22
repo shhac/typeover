@@ -1,0 +1,58 @@
+target: zig
+themeId: zig/errors/error-sets
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — declare the `ParseError` set with
+  two variants, `Empty` and `BadDigit`. With the right
+  declaration, the program prints `7` (parsing the first
+  character of `"7"`).
+generator:
+  kind: template
+  vars:
+    line:
+      - "const ParseError = error{ Empty, BadDigit };"
+  ts: |-
+    type ParseError = "Empty" | "BadDigit";
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+
+    fn parse(s: []const u8) ParseError!i32 {
+        if (s.len == 0) return error.Empty;
+        if (s[0] < '0' or s[0] > '9') return error.BadDigit;
+        return @as(i32, s[0] - '0');
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const n = try parse("7");
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const ParseError = enum { Empty, BadDigit };"
+      explain: |-
+        `enum` declares named values, not errors. Use `error{...}`.
+    - match: "const ParseError: error = { Empty, BadDigit };"
+      explain: |-
+        Wrong shape — error is a TYPE EXPRESSION (`error{...}`),
+        not a typed value. Drop the `: error` annotation and put
+        the braces after the keyword.
+    - match: "const ParseError = error.{ Empty, BadDigit };"
+      explain: |-
+        Extra dot. The type expression is `error{ ... }`, no
+        leading `.` between `error` and `{`.
+expectStdout: |
+  7
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const ParseError =`, `error{ Empty, BadDigit }`, semicolon."
+  - "Shape: `const <Name> = error{ <Variants> };`."
+  - "`const ParseError = error{ Empty, BadDigit };`"
+notes: |
+  First runnable error-sets slot. The function declares
+  `ParseError!i32` — returns either an i32 or one of the two
+  error variants. The `"7"` input takes the success path.
