@@ -83,6 +83,3 @@ export function paramsForModule(id: string): { lang: string; module: string } | 
   if (!lang || !module) return null;
   return { lang, module };
 }
-
-/** Pull the lang slug off a collection ID (`go/foundations/...` → `"go"`). */
-export const langOf = (id: string): string => id.split("/")[0] ?? "";

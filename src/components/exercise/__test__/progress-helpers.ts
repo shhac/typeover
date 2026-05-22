@@ -18,9 +18,10 @@
 
 import { STORAGE_KEY as PROGRESS_STORAGE_KEY } from "~/lib/progress";
 
-/** Re-exported so tests don't need a separate import for the
- *  storage key when seeding fixtures directly. */
-export const STORAGE_KEY = PROGRESS_STORAGE_KEY;
+/* Mirror of the storage key from `~/lib/progress`. Internal; tests
+ * that need to seed fixtures directly should import the key from
+ * the source module. */
+const STORAGE_KEY = PROGRESS_STORAGE_KEY;
 
 /** Conventional three-tier hint tuple every exercise component
  *  expects. The values are placeholders the tests don't assert on;
@@ -43,10 +44,11 @@ export interface RawProgress {
   exercises: Record<string, ProgressSlot>;
 }
 
-/** Read whatever the recorder wrote to localStorage. Returns `null`
- *  when no record exists yet (fresh test). The test suite's
- *  `vitest.setup.ts` clears localStorage between cases. */
-export function readProgress(): RawProgress | null {
+/* Read whatever the recorder wrote to localStorage. Returns `null`
+ * when no record exists yet (fresh test). The test suite's
+ * `vitest.setup.ts` clears localStorage between cases. Internal;
+ * callers consume `makeProgressReader().readProgress` instead. */
+function readProgress(): RawProgress | null {
   const raw = localStorage.getItem(STORAGE_KEY);
   return raw === null ? null : (JSON.parse(raw) as RawProgress);
 }

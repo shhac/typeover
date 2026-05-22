@@ -159,7 +159,6 @@ export function summariseCoverage(tree: readonly ModuleNode[]): CoverageSummary 
 export {
   exerciseHref,
   langHref,
-  langOf,
   moduleCompleteHref,
   moduleHref,
   paramsForExercise,
@@ -175,9 +174,12 @@ export {
   lastExerciseOfPreviousTheme,
   loadExerciseContext,
   loadThemeContext,
-  type ExerciseContext,
-  type ThemeContext,
 } from "./curriculum-nav";
+
+/* `ExerciseContext` / `ThemeContext` types are still exported by
+ * `curriculum-nav.ts` itself; the umbrella re-export is dropped
+ * because no caller imports the type through this barrel today.
+ * Direct consumers should import from `~/lib/curriculum-nav`. */
 
 /* loadLangCollections + LangCollections aren't re-exported here
  * because their `getCollection` runtime import from `astro:content`
