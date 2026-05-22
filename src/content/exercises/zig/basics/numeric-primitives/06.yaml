@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — the widening cast that promotes
+  `small: u8` to `u32`. With the right cast, the program prints
+  `200` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const big: u32 = @as(u32, small);"
+  ts: |-
+    const small: number = 200;
+    const big: number = small;
+    console.log(big);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const small: u8 = 200;
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{big});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const big: u32 = small;"
+      explain: |-
+        Zig refuses implicit widening. The bare assignment is a
+        compile error — wrap with `@as(u32, small)` to make the
+        cast explicit.
+    - match: "const big: u32 = (u32) small;"
+      explain: |-
+        C-style cast syntax doesn't exist in Zig. Use
+        `@as(<target>, <expr>)`.
+    - match: "const big: u32 = small as u32;"
+      explain: |-
+        `as` is TypeScript / Rust syntax. In Zig, casts go through
+        the `@as(<target>, <expr>)` builtin.
+expectStdout: |
+  200
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const big: u32 =`, then `@as(u32, small);`."
+  - "Shape: `const big: u32 = @as(u32, small);`."
+  - "`const big: u32 = @as(u32, small);`"
+notes: |
+  First numeric-primitives fill-line. Drills the @as cast in a
+  runnable context. The bufPrint + writeStreamingAll dance is
+  unchanged from variables/06.

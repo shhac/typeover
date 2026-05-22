@@ -1,0 +1,43 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: mcq
+order: 2
+prompt: |
+  In TypeScript, mixing `number` widths is invisible — they're
+  all `number`. In Zig, mixing widths is a compile error unless
+  you explicitly cast. Pick the line that compiles.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const small: number = 10;
+    const big: number = small;
+  canonical: |-
+    const small: u8 = 10;
+    const big: u32 = @as(u32, small);
+  distractors:
+    - |-
+      const small: u8 = 10;
+      const big: u32 = small;
+    - |-
+      const small: u8 = 10;
+      const big: u32 = (u32) small;
+    - |-
+      const small: u8 = 10;
+      const big: u32 = small as u32;
+hints:
+  - "Zig requires an explicit cast when widening (or narrowing) between integer widths. The cast builtin is `@as(T, x)` — wraps the value in `@as(<target-type>, <expr>)`."
+  - "Shape: `@as(<TargetType>, <expr>)`. For widening u8 → u32: `@as(u32, small)`."
+  - "`const big: u32 = @as(u32, small);`"
+runtime: none
+notes: |
+  Drill the `@as` cast builtin. Distractors:
+   - Bare assignment — would compile in TS, but Zig refuses
+     because the widths don't match.
+   - `(u32) small` — C-style cast; doesn't exist in Zig.
+   - `small as u32` — TS / Rust reflex; Zig has no `as`
+     operator.
+
+  Note: `@as` is for widening + general type-coercion. Narrowing
+  uses `@intCast(x)` (the target type is inferred from context),
+  drilled in slot 03.

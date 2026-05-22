@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the narrowing cast from `i64` to
+  `i32`. The target type is inferred from the binding's `: i32`
+  annotation, so the builtin's argument is just the value.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const small: i32 = @intCast(big);"
+  ts: |-
+    const big: number = 42;
+    const small: number = big;
+    console.log(small);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const big: i64 = 42;
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{small});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const small: i32 = @as(i32, big);"
+      explain: |-
+        `@as` widens but refuses to narrow. For narrowing use
+        `@intCast(<expr>)` — the target type is inferred from
+        the binding's annotation (`: i32`).
+    - match: "const small: i32 = big;"
+      explain: |-
+        Zig refuses implicit narrowing. Use `@intCast(big)` to
+        say "I know this might be lossy; do it anyway."
+    - match: "const small: i32 = @intCast(i32, big);"
+      explain: |-
+        `@intCast` takes ONE argument (the expression). The
+        target type is inferred from context. `@intCast(big)`,
+        not `@intCast(i32, big)`.
+expectStdout: |
+  42
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const small: i32 =`, then `@intCast(big);`. Note `@intCast` takes a SINGLE argument — the target type comes from the binding's type annotation."
+  - "Shape: `const small: i32 = @intCast(big);`."
+  - "`const small: i32 = @intCast(big);`"
+notes: |
+  Mirror of slot 06 for the narrowing direction. The "@intCast
+  takes ONE arg" rule trips up TypeScript / Rust developers used
+  to passing the target type explicitly.

@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that mixes integer widths:
+   1. Declares `big: i64 = 1000`.
+   2. Narrows it to an `i32` via `@intCast`.
+   3. Prints the narrowed value followed by a newline.
+
+  Expected stdout: `1000`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const big = 1000;
+    const narrow = big;
+    console.log(narrow);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const big: i64 = 1000;
+        const narrow: i32 = @intCast(big);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{narrow});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  1000
+runtime: zig
+hints:
+  - "Three pieces: `const big: i64 = 1000;`, `const narrow: i32 = @intCast(big);` (target inferred from annotation), then bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const big: i64 = 1000;\n    const narrow: i32 = @intCast(big);\n    // bufPrint(\"{d}\\n\", .{narrow}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the standard bufPrint/writeStreamingAll dance. The `: i32` annotation on `narrow` is load-bearing — it tells @intCast which width to narrow to.'
+notes: |
+  Mirror of slot 08 in the narrowing direction. Closes Module 1
+  theme 6 — the no-implicit-conversion rule + both cast
+  directions are now drilled with runnable canonicals.

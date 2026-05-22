@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing builtin name. The line widens a `u8` value to
+  a `u32` by explicit cast. The builtin starts with `@`, takes
+  the target type and the expression as arguments.
+generator:
+  kind: template
+  vars:
+    builtin:
+      - "@as"
+  ts: |-
+    const wide: number = narrow; // implicit in TS
+  canonical: |-
+    const wide: u32 = ${builtin}(u32, narrow);
+  distractors:
+    - "@cast"
+    - "@convert"
+    - "@coerce"
+blanks: [builtin]
+hints:
+  - "Two characters total: the `@` prefix and two letters. Same as TS / Rust's keyword for type assertions / casts."
+  - "Starts with `@a`."
+  - "`@as`"
+runtime: none
+notes: |
+  Drill the `@as` builtin. Distractors are plausible-sounding
+  builtins that don't exist:
+   - `@cast` — common guess; Zig uses `@as` instead.
+   - `@convert` — too generic; doesn't exist.
+   - `@coerce` — describes what's happening but isn't the name.

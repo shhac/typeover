@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: mcq
+order: 1
+prompt: |
+  TypeScript has one numeric type — `number` — for everything.
+  Zig has many: signed integers (`i8` to `i128`), unsigned
+  integers (`u8` to `u128`), pointer-sized (`isize` / `usize`),
+  and floats (`f32` / `f64`). Pick the right Zig width for each
+  scenario.
+generator:
+  kind: variant
+  variants:
+    - id: byte-count
+      ts: "const byteCount: number = 255; // 0..=255"
+      canonical: "const byteCount: u8 = 255;"
+      distractors:
+        - "const byteCount: i8 = 255;"
+        - "const byteCount: u32 = 255;"
+        - "const byteCount: number = 255;"
+    - id: temperature
+      ts: "const tempC: number = -40; // can be negative"
+      canonical: "const tempC: i32 = -40;"
+      distractors:
+        - "const tempC: u32 = -40;"
+        - "const tempC: f64 = -40;"
+        - "const tempC: number = -40;"
+    - id: ratio
+      ts: "const ratio: number = 0.5; // fractional"
+      canonical: "const ratio: f64 = 0.5;"
+      distractors:
+        - "const ratio: i32 = 0.5;"
+        - "const ratio: u32 = 0.5;"
+        - "const ratio: float = 0.5;"
+hints:
+  - "Three axes to pick from: signed-vs-unsigned (need negatives → signed), width (how big can the value get?), int-vs-float (any fractional part → float). Zig has no generic `number` or `int`."
+  - "For byte-count (0..=255 fits in 8 unsigned bits): `u8`. For temperature (can go negative): `i32`. For a fractional ratio: `f64`."
+  - "byte-count → `const byteCount: u8 = 255;`; temperature → `const tempC: i32 = -40;`; ratio → `const ratio: f64 = 0.5;`."
+runtime: none
+notes: |
+  Drill the "pick a width" reflex. Distractors per variant:
+   - byte-count: `i8` (won't fit 255 — signed max is 127), `u32`
+     (wider than needed; usable but wasteful), `number` (TS).
+   - temperature: `u32` (can't represent negatives), `f64`
+     (would work but floats for integers is a code smell),
+     `number` (TS).
+   - ratio: `i32` / `u32` (integers can't hold 0.5), `float`
+     (Java / C reflex — Zig spells it `f32` / `f64`).

@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: mcq
+order: 3
+prompt: |
+  When narrowing (a wider integer to a smaller one), `@as` won't
+  work — the compiler refuses to silently lose bits. Zig has a
+  dedicated builtin for "I know this might be lossy; let me do
+  it anyway." Pick the right line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const big: number = 42;
+    const small: number = big;
+  canonical: |-
+    const big: i64 = 42;
+    const small: i32 = @intCast(big);
+  distractors:
+    - "const small: i32 = @as(i32, big);"
+    - "const small: i32 = (i32) big;"
+    - "const small: i32 = big.toInt32();"
+hints:
+  - "Narrowing has its own builtin: `@intCast(x)`. The target type is inferred from context (here, the `const small: i32 = ...` annotation tells the compiler which width to narrow to). NOT `@as`, which is for widening / non-lossy coercions."
+  - "Shape: `@intCast(<expr>)`. For narrowing i64 → i32: `@intCast(big)` with `: i32` on the binding."
+  - "`const small: i32 = @intCast(big);`"
+runtime: none
+notes: |
+  Drill the @intCast builtin. Distractors:
+   - `@as(i32, big)` — works for widening, but compile-errors
+     for narrowing (won't silently drop bits).
+   - `(i32) big` — C-style cast; not a thing in Zig.
+   - `big.toInt32()` — TS / Java method reflex; Zig has no
+     method-style cast.
+
+  Runtime behaviour: `@intCast` panics in debug mode if the
+  value doesn't fit; in release modes the behaviour depends on
+  the build mode. For "I want truncation" use `@truncate(x)`
+  instead — that's beyond Module 1's scope.

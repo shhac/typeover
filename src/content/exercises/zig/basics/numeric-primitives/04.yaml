@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/basics/numeric-primitives
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing type name. The variable holds a pointer-sized
+  unsigned integer — the natural type for sizes, lengths, and
+  array indices. Five letters.
+generator:
+  kind: template
+  vars:
+    type:
+      - "usize"
+  ts: |-
+    const len: number = items.length;
+  canonical: |-
+    const len: ${type} = items.len;
+  distractors:
+    - "size_t"
+    - "u32"
+    - "uint"
+blanks: [type]
+hints:
+  - "Five letters, lowercase, starts with `u`. Pointer-sized — width matches the target architecture (32 or 64 bits). Used for `.len` on slices."
+  - "`u` then `size`."
+  - "`usize`"
+runtime: none
+notes: |
+  Drill the `usize` type name. Distractors:
+   - `size_t` — C reflex.
+   - `u32` — close but ARCH-DEPENDENT; `usize` is the right
+     idiom for sizes/lengths.
+   - `uint` — Go / C# reflex (no width).
+
+  Slice `.len` returns `usize`; this is reinforced in
+  strings-as-slices (theme 1.7).
