@@ -2,21 +2,26 @@
 import type { CollectionEntry } from "astro:content";
 import { Badge, Heading, Panel, Stack, Text } from "~/components/ds";
 import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
-import { exerciseHref, themeHref, truncateIntro } from "~/lib/curriculum";
+import { themeHref, truncateIntro } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
 
 /*
  * Theme overview card used in the curriculum grid on /go and
  * /go/<module>. Pulled out of two near-identical hand-rolled
  * Panel-Stack-Stack-Badge blocks (design-docs/20 FW-3) so the
- * card's shape — title link, intro snippet, ready badge,
- * overview + start anchors — lives in one place.
+ * card's shape — title link, intro snippet, ready badge, single
+ * "begin →" anchor — lives in one place.
  *
- * The two routes diverged only on which "module.order" they read
- * (module.data.order vs moduleData.order, identical value); both
- * call sites now pass the parent module's order as a prop.
+ * Funnel design (2026-05-22): the card has a SINGLE call-to-
+ * action pointing at the theme's landing page (not the first
+ * exercise). The landing's intro panel gives the learner context
+ * before they're dropped into an exercise; its own
+ * "start with exercise 01 →" CTA does the second-click. Prior
+ * shape had both "overview" (→ landing) and "start →" (→ first
+ * exercise) and the prominent accent-coloured "start" link
+ * bypassed the blurb. design-docs/29 (TBD).
  *
- * `ThemeProgressChip` (reused from the theme-overview page) is
+ * `ThemeProgressChip` (reused from the theme landing page) is
  * mounted inline when the parent has authored exercises. Renders
  * nothing when passed=0, so anonymous visitors see the unstarted
  * card unchanged; returning learners see a "3 / 9 passed" chip
@@ -27,8 +32,9 @@ interface Props {
   /** The parent module's order (the "1" in "1.2"). */
   moduleOrder: number;
   theme: CollectionEntry<"themes">;
-  /** First exercise in this theme, when authored. Absent for
-   *  scaffolded themes — the "start →" anchor hides in that case. */
+  /** First exercise in this theme, when authored. Used as the
+   *  presence indicator for the "begin" CTA — themes without any
+   *  authored exercises render as "coming" and skip the action. */
   firstExercise: CollectionEntry<"exercises"> | undefined;
   exerciseCount: number;
   /** All exercise IDs in this theme, sorted by order. Forwarded
@@ -39,8 +45,8 @@ interface Props {
 }
 
 const { moduleOrder, theme, firstExercise, exerciseCount, exerciseIds } = Astro.props;
-const overviewHref = themeHref(theme.id);
-const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
+const landingHref = themeHref(theme.id);
+const hasExercises = firstExercise !== undefined;
 ---
 
 <Panel padding="default" tone="default">
@@ -51,7 +57,7 @@ const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
       </Text>
       <Heading level={3} size="lg">
         <a
-          href={overviewHref}
+          href={landingHref}
           class="hover:text-accent-primary transition-colors"
         >
           {theme.data.title}
@@ -68,18 +74,12 @@ const startHref = firstExercise ? exerciseHref(firstExercise.id) : null;
       {exerciseIds.length > 0 && (
         <ThemeProgressChip client:only="solid-js" exerciseIds={exerciseIds} />
       )}
-      <a
-        href={overviewHref}
-        class="text-fg-muted hover:text-fg-primary font-mono text-sm"
-      >
-        overview
-      </a>
-      {startHref && (
+      {hasExercises && (
         <a
-          href={startHref}
+          href={landingHref}
           class="text-accent-primary hover:underline font-mono text-sm"
         >
-          start →
+          begin →
         </a>
       )}
     </Stack>
