@@ -3,14 +3,15 @@ themeId: zig/basics/numeric-primitives
 type: fill-line
 order: 6
 prompt: |
-  Type the missing Zig line — the widening cast that promotes
-  `small: u8` to `u32`. With the right cast, the program prints
-  `200` followed by a newline.
+  Type the missing Zig line — widen `small: u8` to `u32`. Hint:
+  this is SAFE widening (every u8 value fits in a u32). Zig
+  allows the simple form here — no cast required. With the
+  right line, the program prints `200` followed by a newline.
 generator:
   kind: template
   vars:
     line:
-      - "const big: u32 = @as(u32, small);"
+      - "const big: u32 = small;"
   ts: |-
     const small: number = 200;
     const big: number = small;
@@ -26,28 +27,48 @@ generator:
         try std.Io.File.stdout().writeStreamingAll(init.io, printed);
     }
   distractors:
-    - match: "const big: u32 = small;"
+    - match: "const big: u32 = @as(u32, small);"
       explain: |-
-        Zig refuses implicit widening. The bare assignment is a
-        compile error — wrap with `@as(u32, small)` to make the
-        cast explicit.
+        Works, but unnecessary for safe widening. Zig's
+        no-implicit rule is about LOSSY conversions —
+        narrowing (`@intCast`) and sign-flips. Same-sign,
+        wider-target conversions like `u8 → u32` are
+        implicit. Reserve `@as` for cases where the target
+        type isn't obvious from context.
     - match: "const big: u32 = (u32) small;"
       explain: |-
-        C-style cast syntax doesn't exist in Zig. Use
-        `@as(<target>, <expr>)`.
+        C-style cast syntax doesn't exist in Zig. Use bare
+        assignment (when the widening is safe) or
+        `@as(<target>, <expr>)` (when you want explicit
+        clarity).
     - match: "const big: u32 = small as u32;"
       explain: |-
-        `as` is TypeScript / Rust syntax. In Zig, casts go through
-        the `@as(<target>, <expr>)` builtin.
+        `as` is TypeScript / Rust syntax. Zig has no `as`
+        keyword; for an explicit cast use `@as(<target>,
+        <expr>)`, though for `u8 → u32` no cast is needed.
 expectStdout: |
   200
 runtime: zig
 blanks: [line]
 hints:
-  - "Three pieces: `const big: u32 =`, then `@as(u32, small);`."
-  - "Shape: `const big: u32 = @as(u32, small);`."
-  - "`const big: u32 = @as(u32, small);`"
+  - "Three pieces: `const big: u32 =`, then `small;`. The annotation `: u32` on the binding tells the compiler the target type, and Zig coerces `small` (`u8`) to that target safely."
+  - "Shape: `const <name>: <wider-type> = <narrower-value>;`. No cast, no builtin."
+  - "`const big: u32 = small;`"
 notes: |
-  First numeric-primitives fill-line. Drills the @as cast in a
-  runnable context. The bufPrint + writeStreamingAll dance is
-  unchanged from variables/06.
+  Slot teaches SAFE IMPLICIT WIDENING — fixed per the M1
+  validator's C2 finding. Zig 0.16 allows
+  same-sign-larger-width coercions implicitly (u8→u32,
+  i8→i32, u8→i32 where sign broadening is also safe). The
+  previous canonical (`@as(u32, small)`) taught a workaround
+  as if it were required.
+
+  Distractor #1 (`@as`) is correctly identified as
+  "harmless but unnecessary" rather than wrong — the slot's
+  purpose now is to land "Zig's no-implicit rule is about
+  LOSSY, not all, conversions." Slot 07 keeps `@intCast`
+  for narrowing (which IS the case where the explicit cast
+  is required).
+
+  Probed against the actual Zig WASM compiler before
+  commit: `const big: u32 = small;` compiles cleanly when
+  `small: u8 = 200`.

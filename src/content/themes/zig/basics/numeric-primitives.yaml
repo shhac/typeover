@@ -4,4 +4,4 @@ title: Numeric primitives
 order: 6
 prerequisites: []
 intro: |
-  TypeScript has one numeric type — `number` — that swallows everything from booleans to billions. Zig is the opposite: every integer width is explicit (`i8`, `i16`, `i32`, `i64`, `u8`, `u32`, `usize`), every float too (`f32`, `f64`). The big rule: NO implicit numeric conversion. Mixing widths without an explicit cast is a compile error. `@as(T, x)` for widening; `@intCast(x)` for narrowing (where the target type is inferred from context).
+  TypeScript has one numeric type — `number` — that swallows everything from booleans to billions. Zig is the opposite: every integer width is explicit (`i8`, `i16`, `i32`, `i64`, `u8`, `u32`, `usize`), every float too (`f32`, `f64`). The big rule: NO IMPLICIT LOSSY conversion. Safe widening is allowed (`u8` → `u32`, `i8` → `i32`); but narrowing or sign-changing conversions need an explicit cast. `@as(T, x)` is for explicit-clarity coercion (and for forcing a comptime literal to a specific runtime type); `@intCast(x)` is for narrowing — the target type is inferred from context.

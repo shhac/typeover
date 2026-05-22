@@ -3,31 +3,42 @@ themeId: zig/basics/numeric-primitives
 type: fill-word
 order: 5
 prompt: |
-  Fill the missing builtin name. The line widens a `u8` value to
-  a `u32` by explicit cast. The builtin starts with `@`, takes
-  the target type and the expression as arguments.
+  Fill the missing builtin name. The line forces the integer
+  literal `200` to a specific runtime type (`u8`) — useful when
+  the target type isn't obvious from context. Three characters
+  total: `@` prefix + two letters. Same as TS / Rust's keyword
+  for type assertions.
 generator:
   kind: template
   vars:
     builtin:
       - "@as"
   ts: |-
-    const wide: number = narrow; // implicit in TS
+    const byte = 200 as number;
   canonical: |-
-    const wide: u32 = ${builtin}(u32, narrow);
+    const byte = ${builtin}(u8, 200);
   distractors:
     - "@cast"
     - "@convert"
     - "@coerce"
 blanks: [builtin]
 hints:
-  - "Two characters total: the `@` prefix and two letters. Same as TS / Rust's keyword for type assertions / casts."
+  - "Three characters total: the `@` prefix and two letters. Same word as TS / Rust's keyword for type assertions."
   - "Starts with `@a`."
   - "`@as`"
 runtime: none
 notes: |
-  Drill the `@as` builtin. Distractors are plausible-sounding
-  builtins that don't exist:
-   - `@cast` — common guess; Zig uses `@as` instead.
+  Drill the `@as` builtin name + its real role: forcing a
+  comptime literal to a specific runtime type. Distractors are
+  plausible-sounding builtins that don't exist:
+   - `@cast` — common guess; Zig uses `@as`.
    - `@convert` — too generic; doesn't exist.
-   - `@coerce` — describes what's happening but isn't the name.
+   - `@coerce` — describes the action but isn't the name.
+
+  Per the M1 validator's C2 finding: the previous canonical
+  shape (`const wide: u32 = @as(u32, narrow);`) implied `@as`
+  was REQUIRED for safe widening. The new scenario (forcing a
+  comptime literal's runtime type) is one of `@as`'s genuine
+  use cases. The slot still drills the builtin's NAME — what
+  the slot is for — without the misleading "you need this
+  cast" framing.

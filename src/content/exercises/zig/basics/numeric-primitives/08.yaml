@@ -6,7 +6,8 @@ prompt: |
   Write a complete Zig program that:
    1. Declares `a: u8 = 10` and `b: u8 = 20`.
    2. Computes their sum (the sum fits in u8 — no overflow).
-   3. Widens the result to a `u32` via `@as`.
+   3. Stores the result in a `u32` (Zig coerces the u8 to u32
+      implicitly because the widening is safe — no cast).
    4. Prints the `u32` value followed by a newline.
 
   Expected stdout: `30`.
@@ -24,7 +25,7 @@ generator:
         const a: u8 = 10;
         const b: u8 = 20;
         const sum: u8 = a + b;
-        const wide: u32 = @as(u32, sum);
+        const wide: u32 = sum;
         var buf: [16]u8 = undefined;
         const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{wide});
         try std.Io.File.stdout().writeStreamingAll(init.io, printed);
@@ -33,11 +34,14 @@ expectStdout: |
   30
 runtime: zig
 hints:
-  - "Four pieces in order: declare both u8 vars, sum them (same-width arithmetic is fine), widen the sum with `@as(u32, sum)`, then bufPrint + writeStreamingAll."
-  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const a: u8 = 10;\n    const b: u8 = 20;\n    const sum: u8 = a + b;\n    const wide: u32 = @as(u32, sum);\n    // bufPrint(\"{d}\\n\", .{wide}) + writeStreamingAll\n}\n```"
-  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Same-width arithmetic (u8 + u8 → u8) is allowed without cast; the cast only appears at the widening step.'
+  - "Four pieces in order: declare both u8 vars, sum them (same-width arithmetic is fine), assign to a `u32` binding (no cast needed — implicit widening), then bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const a: u8 = 10;\n    const b: u8 = 20;\n    const sum: u8 = a + b;\n    const wide: u32 = sum;\n    // bufPrint(\"{d}\\n\", .{wide}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Same-width arithmetic (u8 + u8 → u8) keeps the u8 type; the assignment to `wide: u32` then implicitly widens.'
 notes: |
-  Drills the "same-width arithmetic is fine; mixing widths needs
-  cast" rule. Sum is intentionally well-within u8 range so the
-  exercise doesn't surface overflow handling (that's a Module 2
-  topic).
+  Drills two rules together:
+   - Same-width arithmetic stays at that width (u8 + u8 → u8).
+   - Implicit widening (u8 → u32) requires no cast.
+
+  Per the M1 validator's C2 finding: previous canonical used
+  `@as(u32, sum)`, teaching unnecessary friction. The bare
+  assignment is the idiomatic shape for safe widening.
