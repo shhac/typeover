@@ -1,63 +1,58 @@
 target: zig
 themeId: zig/basics/hello-and-output
-type: fill-line
+type: mcq
 order: 3
 prompt: |
-  Type the Zig line that writes `hello from zig` followed by a
-  newline to stdout. The program imports `std` and uses the modern
-  entry-point signature `pub fn main(init: std.process.Init) !void`
-  — your line is the body. With the right call, running the
-  program prints `hello from zig` on one line.
+  Look at the canonical entry point: `pub fn main(init:
+  std.process.Init) !void`. Why does the function take that
+  `init` parameter? The Zig 0.16 runtime hands it in for a
+  specific reason — pick the right one.
 generator:
   kind: template
-  vars:
-    line:
-      - 'try std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");'
+  vars: {}
   ts: |-
-    console.log("hello from zig");
+    /* TypeScript's entry point takes no runtime-capability
+     * parameter; everything (console, fetch, fs) is implicitly
+     * available. */
   canonical: |-
-    const std = @import("std");
-
-    pub fn main(init: std.process.Init) !void {
-        ${line}
-    }
+    /* `init` carries the runtime capabilities the program
+     * needs to do I/O. Calls like `std.Io.File.stdout()`
+     * return a handle, and methods on that handle take
+     * `init.io` as their first argument — that's the I/O
+     * capability the runtime grants. Without `init`, there's
+     * no way to call into stdout, stderr, or the allocator. */
   distractors:
-    - match: 'std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");'
-      explain: |-
-        The call itself looks right, but the `writeStreamingAll` can
-        fail — that's what the `!` in `!void` is for. Prefix the
-        statement with `try` so a failed write propagates instead of
-        being silently dropped.
-    - match: 'console.log("hello from zig");'
-      explain: |-
-        Zig has no `console`. Use `std.Io.File.stdout()` to get the
-        stdout handle, then call its writer methods.
-    - match: 'std.debug.print("hello from zig\n", .{});'
-      explain: |-
-        `std.debug.print` writes to STDERR, not stdout, and the
-        playground compiler's stdlib doesn't always link it through
-        cleanly. Use the stdout File handle: `std.Io.File.stdout().writeStreamingAll(...)`.
-expectStdout: |
-  hello from zig
-runtime: zig
-blanks: [line]
+    - |-
+      /* `init` is the program's command-line arguments
+       * (equivalent to `process.argv` in Node). */
+    - |-
+      /* `init` marks the function as the program's entry
+       * point — Zig wouldn't recognise `main` without it. */
+    - |-
+      /* `init` is a leftover from Zig's older async story
+       * and will be removed in a future version. */
 hints:
-  - "Three things to get right: (1) call `std.Io.File.stdout()` to get the writer, (2) the method is `writeStreamingAll(init.io, <bytes>)` — it needs the I/O capability `init.io` as the first arg, and (3) prefix with `try` because the write can fail."
-  - "The shape is `try std.Io.File.stdout().writeStreamingAll(init.io, \"<your string>\");`. Don't forget the newline `\\n` inside the string — `expectStdout` wants `hello from zig\\n`."
-  - 'Type `try std.Io.File.stdout().writeStreamingAll(init.io, "hello from zig\n");`'
+  - "Walk through how the canonical actually uses `init`: it appears once, as the first argument to `writeStreamingAll(init.io, ...)`. That's the clue — `init` carries something the I/O call needs."
+  - "Methods on `std.Io.File.stdout()` need an I/O capability to do their work; `init.io` is that capability. The Zig 0.16 runtime hands it in via the entry-point's parameter."
+  - "It carries the runtime capabilities (most notably `init.io`) that I/O calls need."
+runtime: none
 notes: |
-  First runnable Zig exercise. Graded by stdout match through the
-  Zig WASM worker.
+  Recognition / synthesis exercise — the learner has already
+  TYPED `init.io` (slot 06's fill-line) and now reasons about
+  WHY it's there. Distractors model three real misconceptions:
 
-  The canonical is anchored to the smoke-test-validated API shape
-  (`std.Io.File.stdout().writeStreamingAll(init.io, ...)` +
-  `pub fn main(init: std.process.Init) !void`) — verified to compile
-  + run under the zigtools/playground patched Zig 0.16 compiler.
+   - `init` as command-line args — plausible if you map from
+     `int main(int argc, char **argv)` in C or `process.argv`
+     in Node, but argv lives elsewhere in Zig (and isn't part
+     of the entry-point signature).
+   - `init` as a magic entry-point marker — common reflex
+     (decorators in TS, `@main` in Rust). Actually it's just a
+     parameter; what makes `main` the entry point is the
+     symbol name + `pub`.
+   - `init` as legacy async — anchors a learner who's seen
+     Zig 0.13's older API and assumes the new one is
+     transitional. It isn't; `Init` is the 0.16+ shape.
 
-  Distractors call out the three most likely wrong approaches:
-   - Missing `try` (compiles to an error-discard warning but
-     silently drops failed writes)
-   - `console.log` (TS leakage)
-   - `std.debug.print` (writes to stderr and our compiler may not
-     link it cleanly — surfacing the gotcha here lets the learner
-     hit it once with an explanation instead of debugging it later)
+  Replaces the previous slot 05 (recognition-after-production
+  of the writeStreamingAll line — which was anti-progressive
+  per the M1 validator).

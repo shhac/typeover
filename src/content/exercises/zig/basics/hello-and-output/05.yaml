@@ -1,39 +1,42 @@
 target: zig
 themeId: zig/basics/hello-and-output
-type: mcq
+type: fill-word
 order: 5
 prompt: |
-  TypeScript reaches for `console.log` to write a line to stdout.
-  Zig has two surfaces that look like candidates: `std.debug.print`
-  (for ad-hoc debug output to stderr) and the stdout `File` handle.
-  Pick the call that writes `hello` to STDOUT, with proper error
-  propagation, using only Zig stdlib APIs the playground compiler
-  supports.
+  Fill the missing keyword. The `writeStreamingAll` call returns an
+  error union — leaving the return value uncaught is a compile
+  error. The keyword you need propagates the error up to the
+  enclosing function's `!void` return.
 generator:
   kind: template
   vars:
-    msg: ['"hello\n"']
+    keyword:
+      - "try"
   ts: |-
-    console.log(${msg});
+    console.log("hi");
   canonical: |-
-    try std.Io.File.stdout().writeStreamingAll(init.io, ${msg});
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${keyword} std.Io.File.stdout().writeStreamingAll(init.io, "hi\n");
+    }
   distractors:
-    - "std.debug.print(${msg}, .{});"
-    - "console.log(${msg});"
-    - "std.Io.File.stdout().writeStreamingAll(init.io, ${msg});"
+    - "await"
+    - "throw"
+    - "catch"
+blanks: [keyword]
 hints:
-  - "`std.debug.print` writes to stderr, not stdout — and the playground stdlib doesn't always link it cleanly. `console.log` is TypeScript; Zig has nothing similar. And remember: the call can fail, so it needs a `try` prefix."
-  - "Three pieces: get the writer with `std.Io.File.stdout()`, call `.writeStreamingAll(init.io, <bytes>)`, prefix with `try`."
-  - "`try std.Io.File.stdout().writeStreamingAll(init.io, \"hello\\n\");`"
+  - "Zig's error-union mechanism is closest to Rust's `?` operator — propagate on error, unwrap on success. The keyword is short, three letters, and lives at the start of the statement."
+  - "It's `try`. Reads as: `try <call-that-might-fail>;`."
+  - "`try`"
 runtime: none
 notes: |
-  Recognition of the right stdout idiom for the playground runtime.
-  Three distractors cover the three failure modes:
-   - `std.debug.print(...)`: real Zig API, but writes to STDERR and
-     has playground-compatibility issues.
-   - `console.log(...)`: TS reflex; there's no `console` in Zig.
-   - missing `try`: the call itself is correct but the error-union
-     return value would be discarded — Zig flags this at compile.
-
-  Pair with slot 03 (fill-line of the same call) so the learner
-  first recognises the right shape (this slot), then types it.
+  Drill the `try` keyword in isolation. The scaffold shows the full
+  program shape (good for context — they've seen this in slots 02,
+  03, 05). Distractors are the three most likely wrong reflexes:
+   - `await` — TS / JS / Python reflex for asynchrony.
+   - `throw` — TS / JS reflex for raising an error (Zig's `try` is
+     the opposite — propagate instead of raise).
+   - `catch` — handle instead of propagate. Wrong direction here
+     because the enclosing function's return type is `!void`,
+     meaning errors should bubble out.
