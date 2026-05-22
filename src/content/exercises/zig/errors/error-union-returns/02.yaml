@@ -42,5 +42,7 @@ notes: |
    - Plain `void` — can't return errors.
    - `!bool` — encodes a flag where one isn't needed; ambiguous
      between "no error means ok" and "true means ok."
-   - `error.Empty` as a type — wrong; `error.X` is a VALUE,
-     not a type.
+   - `error.Empty` as a return type — `error.Empty` is a VALUE
+     of the single-variant set `error{Empty}`. For a return
+     type you'd write `error{Empty}!void` (or just `!void`
+     for an inferred set).

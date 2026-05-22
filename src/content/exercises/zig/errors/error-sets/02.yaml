@@ -18,15 +18,17 @@ generator:
     - "if (s.len == 0) throw error.Empty;"
     - "if (s.len == 0) return .Empty;"
 hints:
-  - "Two pieces: `return error.<Variant>;` — note the leading `error.` prefix (NOT the type-name prefix `ParseError.`)."
-  - "Shape: `return error.<Variant>;`. The `error` keyword tells the compiler to look up the variant across the function's declared error-union type."
+  - "Two pieces: `return error.<Variant>;`. The `error.` prefix is the canonical raise form — the compiler resolves the set from the function's return type."
+  - "Shape: `return error.<Variant>;`. `ParseError.Empty` also works (qualified form) but `error.Empty` is the form you'll see everywhere in the stdlib."
   - "`return error.Empty;`"
 runtime: none
 notes: |
   Drill `error.Empty`. Distractors:
-   - `ParseError.Empty` — close, but Zig uses the global
-     `error.` namespace for raising; the compiler narrows by
-     return-type context.
-   - `throw` — TS / Java reflex.
+   - `ParseError.Empty` — also legal in Zig 0.16 (qualified
+     form), but less idiomatic. The `error.<Variant>` prefix
+     is the form the langref + stdlib use; the compiler
+     resolves which set's variant this is from return-type
+     context.
+   - `throw` — TS / Java reflex; Zig has no `throw`.
    - `.Empty` (leading-dot shorthand) — works for enum
      variants but not for error variants in a `return`.

@@ -4,4 +4,4 @@ title: Error sets
 order: 1
 prerequisites: [zig/basics/functions]
 intro: |
-  An error set is a finite enumeration of named errors — declared as error{ Empty, BadDigit, ... }. Different APIs declare their own sets; the compiler tracks which errors a function can return as part of the type. error{} is the bottom set (no errors); the inferred set anyerror is the top (matches anything). A function returning ErrSet!T means: either T (success) or one of ErrSet's variants (failure). Composition is via the |  operator — ErrA || ErrB makes a set covering both.
+  An error set is a finite enumeration of named errors — declared as error{ Empty, BadDigit, ... }. Different APIs declare their own sets; the compiler tracks which errors a function can return as part of the type. error{} is the bottom set (no errors); the inferred set anyerror is the top (matches anything). A function returning ErrSet!T means: either T (success) or one of ErrSet's variants (failure). Composition is via the `||` operator — `ErrA || ErrB` makes a set covering both.

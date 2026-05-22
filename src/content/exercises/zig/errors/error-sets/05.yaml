@@ -29,7 +29,9 @@ runtime: none
 notes: |
   Drill the `error.<Variant>` raise-site convention.
   Distractors:
-   - `ParseError` (the type name) — works in some contexts but
-     `error.` is the canonical raise-site prefix.
-   - `throw` — TS reflex.
+   - `ParseError` (the type name) — also legal: `return
+     ParseError.Empty;` compiles. Less idiomatic; the
+     stdlib + langref use `error.<Variant>` because the
+     compiler resolves the set from context.
+   - `throw` — TS reflex; Zig has no `throw`.
    - `raise` — Python / Ruby reflex.

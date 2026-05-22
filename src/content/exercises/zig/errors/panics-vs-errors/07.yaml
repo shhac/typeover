@@ -36,9 +36,12 @@ generator:
         plain `void`; use `@panic`.
     - match: "if (n < 0) std.debug.panic(\"negative input\");"
       explain: |-
-        `std.debug.panic` exists but the recommended teaching
-        idiom is the builtin `@panic` — terser, no import
-        chain.
+        `std.debug.panic` is a real Zig function but it has a
+        DIFFERENT signature — it takes a format string + args
+        tuple, like `std.debug.panic("got {d}", .{n})`. The
+        builtin `@panic("msg")` takes a single `[]const u8`.
+        For a literal-string abort, `@panic` is the right
+        tool.
 expectStdout: |
   ok
 runtime: zig

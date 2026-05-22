@@ -56,3 +56,12 @@ notes: |
   composition — the lesson is that `try` chains across
   function boundaries without you having to spell out the
   combined set.
+
+  Connection back to Module 3 (memory): if a `!T` function
+  ALLOCATES on the success path, `errdefer alloc.free(buf);`
+  is the right tool to schedule cleanup on the propagation
+  path (taught at `memory/defer-and-errdefer/07` and
+  `memory/ownership-conventions/08`). The combination —
+  `errdefer` for the allocation owner + `try` for the
+  caller — is the canonical factory pattern.
+
