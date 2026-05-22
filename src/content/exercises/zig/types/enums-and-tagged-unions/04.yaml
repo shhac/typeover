@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword. The line declares a named set of
+  distinct values — Zig's analogue to TS string-literal unions.
+  Four letters, same as Java / C# / Rust.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "enum"
+  ts: |-
+    type Color = "red" | "green" | "blue";
+  canonical: |-
+    const Color = ${keyword} { red, green, blue };
+  distractors:
+    - "type"
+    - "union"
+    - "variant"
+blanks: [keyword]
+hints:
+  - "Four letters, lowercase. Same as Java / C# / Rust."
+  - "Starts with `e`."
+  - "`enum`"
+runtime: none
+notes: |
+  Drill the `enum` keyword. Distractors:
+   - `type` — TS reflex.
+   - `union` — Zig keyword but wrong purpose (tagged sum types).
+   - `variant` — generic / wrong word.

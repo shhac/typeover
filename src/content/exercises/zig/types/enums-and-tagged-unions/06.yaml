@@ -1,0 +1,61 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — bind `c` to the enum variant
+  `green` of `Color`, using the leading-dot shorthand. With the
+  right binding, the program prints `GREEN` (mapped via switch)
+  followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const c: Color = .green;"
+  ts: |-
+    const c: Color = "green";
+    const name = c === "red" ? "RED" : c === "green" ? "GREEN" : "BLUE";
+    console.log(name);
+  canonical: |-
+    const std = @import("std");
+
+    const Color = enum { red, green, blue };
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        const name: []const u8 = switch (c) {
+            .red => "RED",
+            .green => "GREEN",
+            .blue => "BLUE",
+        };
+        try std.Io.File.stdout().writeStreamingAll(init.io, name);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "const c: Color = \"green\";"
+      explain: |-
+        Zig enum variants are not strings. Use the leading-dot
+        shorthand: `.green` (or the qualified `Color.green`).
+    - match: "const c: Color = green;"
+      explain: |-
+        A bare `green` would refer to a `green` value in scope.
+        Add the leading dot to mark it as a `Color` variant:
+        `.green`.
+    - match: "const c = Color.green;"
+      explain: |-
+        Works mechanically (fully-qualified form) but isn't the
+        idiomatic shape. The leading-dot form is preferred when
+        the type is annotated on the binding: `const c: Color =
+        .green;`.
+expectStdout: |
+  GREEN
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const c: Color =` (annotation gives the compiler the type), `.green;` (leading dot says \"this is one of Color's variants\")."
+  - "Shape: `const <name>: <EnumType> = .<variant>;`."
+  - "`const c: Color = .green;`"
+notes: |
+  First runnable enum slot. Drills the leading-dot variant
+  shorthand. Switch arms also use `.variant => ...` for the same
+  reason.

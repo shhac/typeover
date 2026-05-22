@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/types
+title: Enums and tagged unions
+order: 2
+prerequisites: []
+intro: |
+  TypeScript reaches for string-literal unions (`"red" | "green" | "blue"`) for enums and discriminated unions (`{ kind: "circle", radius: 5 } | { kind: "square", side: 3 }`) for sum types. Zig has dedicated syntax for both: `enum { red, green, blue }` for named values, and `union(enum) { circle: i32, square: i32 }` for sum types where each variant carries a payload. The compiler enforces switch exhaustiveness on both — you can't miss a case.

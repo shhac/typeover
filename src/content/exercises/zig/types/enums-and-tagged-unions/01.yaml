@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes string-literal unions for enums:
+  `type Color = "red" | "green" | "blue";`. Zig has dedicated
+  `enum` syntax. Pick the Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Color = "red" | "green" | "blue";
+  canonical: |-
+    const Color = enum { red, green, blue };
+  distractors:
+    - "enum Color { red, green, blue };"
+    - "const Color = enum(red, green, blue);"
+    - "type Color = enum { red | green | blue };"
+hints:
+  - "Three pieces: bind with `const`, type expression on the right (`enum { ... }`), variants are comma-separated identifiers (NOT strings, NOT bar-separated)."
+  - "Shape: `const <Name> = enum { variant1, variant2, ... };`."
+  - "`const Color = enum { red, green, blue };`"
+runtime: none
+notes: |
+  First enums exercise. Drills the `const Name = enum { ... };`
+  shape. Distractors:
+   - C-style `enum Color { ... }` — no const binding.
+   - Parens instead of braces.
+   - TS `type Name = enum { ... }` with bar separators.
+
+  Note: Zig enum variants are bare identifiers, not strings. The
+  compiler may store them as integers (0, 1, 2, ...) or you can
+  pick the backing integer type explicitly (`enum(u8) { ... }`).
+  That's a Module 5 (comptime) topic.

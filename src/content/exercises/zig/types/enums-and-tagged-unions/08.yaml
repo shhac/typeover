@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Defines an enum `Status` with variants `ok`, `pending`,
+      `failed`.
+   2. Declares `const s: Status = .pending;`.
+   3. Switches on `s` to map each variant to its uppercase name
+      (`"OK"`, `"PENDING"`, `"FAILED"`).
+   4. Prints the result followed by a newline.
+
+  Expected stdout: `PENDING`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Status = "ok" | "pending" | "failed";
+    const s: Status = "pending";
+    const name = s === "ok" ? "OK" : s === "pending" ? "PENDING" : "FAILED";
+    console.log(name);
+  canonical: |-
+    const std = @import("std");
+
+    const Status = enum { ok, pending, failed };
+
+    pub fn main(init: std.process.Init) !void {
+        const s: Status = .pending;
+        const name: []const u8 = switch (s) {
+            .ok => "OK",
+            .pending => "PENDING",
+            .failed => "FAILED",
+        };
+        try std.Io.File.stdout().writeStreamingAll(init.io, name);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  PENDING
+runtime: zig
+hints:
+  - "Three pieces: enum at module scope, bind via leading-dot, switch returns a `[]const u8` (annotation needed so all three arm strings unify under one type)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst Status = enum { ok, pending, failed };\n\npub fn main(init: std.process.Init) !void {\n    const s: Status = .pending;\n    const name: []const u8 = switch (s) {\n        .ok => \"OK\",\n        .pending => \"PENDING\",\n        .failed => \"FAILED\",\n    };\n    // write name then \"\\n\"\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls (name + newline).'
+notes: |
+  Drills enum + switch exhaustiveness end-to-end. Note the
+  `const name: []const u8 = switch (s) { ... };` shape — Zig
+  switch is an expression assigned directly to a const, same
+  pattern as basics/conditionals slot 07.

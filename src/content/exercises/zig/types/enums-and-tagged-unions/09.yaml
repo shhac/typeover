@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that uses a tagged union with
+  payload capture in a switch:
+   1. Defines `Shape = union(enum) { circle: i32, square: i32 };`.
+   2. Declares `const s: Shape = .{ .square = 4 };`.
+   3. Switches on `s` to compute: for `.circle`, twice the
+      radius; for `.square`, side × side. Bind the chosen value
+      to `const r: i32`.
+   4. Prints `r` followed by a newline.
+
+  Expected stdout: `16`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Shape = { kind: "circle"; r: number } | { kind: "square"; s: number };
+    const s: Shape = { kind: "square", s: 4 };
+    const r = s.kind === "circle" ? s.r * 2 : s.s * s.s;
+    console.log(r);
+  canonical: |-
+    const std = @import("std");
+
+    const Shape = union(enum) {
+        circle: i32,
+        square: i32,
+    };
+
+    pub fn main(init: std.process.Init) !void {
+        const s: Shape = .{ .square = 4 };
+        const r: i32 = switch (s) {
+            .circle => |radius| radius * 2,
+            .square => |side| side * side,
+        };
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{r});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  16
+runtime: zig
+hints:
+  - "Four pieces: tagged-union declaration, construction with `.{ .variant = payload }`, switch with payload-capture (`.variant => |name| <expr>`), bufPrint."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst Shape = union(enum) {\n    circle: i32,\n    square: i32,\n};\n\npub fn main(init: std.process.Init) !void {\n    const s: Shape = .{ .square = 4 };\n    const r: i32 = switch (s) {\n        .circle => |radius| radius * 2,\n        .square => |side| side * side,\n    };\n    // bufPrint(\"{d}\\n\", .{r}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint. Note: payload capture (`|radius|`, `|side|`) is the same syntactic shape as for-loops and if-on-optionals from Module 1.'
+notes: |
+  Closes the enums-and-tagged-unions theme. Drills three Zig
+  syntactic shapes in concert: union(enum), `.{ .variant =
+  payload }` construction, and switch-with-payload-capture.
+
+  The payload-capture pipes (`|radius|`, `|side|`) reuse the
+  syntactic shape introduced in basics/while-and-for (for-loops)
+  and basics/optionals (if-on-optional) — same shape, third
+  context.

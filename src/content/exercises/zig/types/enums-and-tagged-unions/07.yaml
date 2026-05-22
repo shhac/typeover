@@ -1,0 +1,64 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — declare `s` as a `Shape` union
+  with the `circle` variant carrying radius 5. With the right
+  binding, the program prints `10` (radius × 2) followed by a
+  newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const s: Shape = .{ .circle = 5 };"
+  ts: |-
+    const s: Shape = { kind: "circle", radius: 5 };
+    const r = s.kind === "circle" ? s.radius * 2 : s.side * s.side;
+    console.log(r);
+  canonical: |-
+    const std = @import("std");
+
+    const Shape = union(enum) {
+        circle: i32,
+        square: i32,
+    };
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        const r: i32 = switch (s) {
+            .circle => |radius| radius * 2,
+            .square => |side| side * side,
+        };
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{r});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const s: Shape = .circle(5);"
+      explain: |-
+        Call-syntax doesn't construct unions. Use the
+        struct-literal shape: `.{ .circle = 5 }`.
+    - match: "const s: Shape = Shape.circle = 5;"
+      explain: |-
+        Two issues: assignment doesn't construct, and the
+        variant + payload need to live inside a struct literal
+        `.{ .variant = payload }`.
+    - match: "const s: Shape = { circle: 5 };"
+      explain: |-
+        TS-flavoured. The Zig union-literal shape is
+        `.{ .variant = payload }` — leading dot, field-style
+        initializer with another dot before the variant name.
+expectStdout: |
+  10
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const s: Shape =` annotates the type, then `.{ .circle = 5 };` is an anonymous-struct-literal that the compiler coerces to the right `Shape` variant. Note: TWO dots — one for the outer literal, one for the field name."
+  - "Shape: `const s: <UnionType> = .{ .<variant> = <payload> };`."
+  - "`const s: Shape = .{ .circle = 5 };`"
+notes: |
+  Drills the union-construction shape — the trickiest Zig-vs-TS
+  difference in this theme. The leading `.{...}` is the
+  anonymous-struct shorthand; the inner `.circle` selects the
+  variant; `= 5` is the payload.

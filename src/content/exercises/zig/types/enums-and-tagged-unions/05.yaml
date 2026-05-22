@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing keyword to declare a tagged union (a sum type
+  with payloads, auto-tagged). Zig spells this as a compound
+  keyword: `<this>(enum) { ... }`.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "union"
+  ts: |-
+    type Shape = { kind: "circle"; r: number } | { kind: "square"; s: number };
+  canonical: |-
+    const Shape = ${keyword}(enum) { circle: i32, square: i32 };
+  distractors:
+    - "variant"
+    - "sum"
+    - "oneof"
+blanks: [keyword]
+hints:
+  - "Five letters, lowercase. Same as C / C++ for an untagged union — Zig adds the `(enum)` parameter to make it tagged."
+  - "Starts with `u`."
+  - "`union`"
+runtime: none
+notes: |
+  Drill the `union` keyword. Distractors:
+   - `variant` — Rust internal term (`variant` is a word used
+     for arms, not the keyword).
+   - `sum` — type-theory word, not a Zig keyword.
+   - `oneof` — protobuf reflex.

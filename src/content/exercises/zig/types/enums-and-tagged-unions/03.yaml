@@ -1,0 +1,51 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: mcq
+order: 3
+prompt: |
+  TypeScript builds discriminated unions with object literals:
+  `{ kind: "circle", radius: number } | { kind: "square", side:
+  number }`. Zig's `union(enum)` is the direct equivalent: each
+  variant carries its own payload, tagged automatically. Pick
+  the right Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Shape =
+        | { kind: "circle"; radius: number }
+        | { kind: "square"; side: number };
+  canonical: |-
+    const Shape = union(enum) {
+        circle: i32,
+        square: i32,
+    };
+  distractors:
+    - |-
+      const Shape = union { circle: i32, square: i32 };
+    - |-
+      const Shape = enum {
+          circle: i32,
+          square: i32,
+      };
+    - |-
+      const Shape = struct {
+          kind: enum { circle, square },
+          payload: i32,
+      };
+hints:
+  - "Two pieces: keyword is `union(enum)` (parenthesised `enum` — that's what gives the auto-generated tag), and each variant declares its payload type with `: i32` after the variant name."
+  - "Shape:\n```zig\nconst Shape = union(enum) {\n    circle: i32,\n    square: i32,\n};\n```"
+  - "`const Shape = union(enum) { circle: i32, square: i32, };`"
+runtime: none
+notes: |
+  Drill the `union(enum)` shape. Distractors:
+   - Plain `union { ... }` — untagged; not the safe variant.
+   - `enum { circle: i32 }` — wrong keyword; enum has no payload.
+   - Manual tag + payload struct — what you'd write WITHOUT
+     `union(enum)`. The keyword is a shorthand for exactly this
+     hand-rolled shape.
+
+  Each variant's payload can be a different type — `union(enum) {
+  ok: i32, err: []const u8 }` is valid. We use the same i32 here
+  for simplicity.

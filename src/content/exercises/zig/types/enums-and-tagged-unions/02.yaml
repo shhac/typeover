@@ -1,0 +1,34 @@
+target: zig
+themeId: zig/types/enums-and-tagged-unions
+type: mcq
+order: 2
+prompt: |
+  TypeScript reads an enum variant as a string literal (`"red"`).
+  Zig reads a variant as `EnumName.variant` (full) or `.variant`
+  (when the type is inferred from context — like an annotation
+  or a match arm). Pick the right binding.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const c: Color = "red";
+  canonical: |-
+    const c: Color = .red;
+  distractors:
+    - "const c: Color = \"red\";"
+    - "const c: Color = red;"
+    - "const c: Color = Color::red;"
+hints:
+  - "Two pieces: type annotation gives the compiler the enum type, then the leading dot tells it \"this is one of MY variants\". `.red` reads as \"red, contextually a Color.\""
+  - "Shape: `const c: <EnumType> = .<variant>;`."
+  - "`const c: Color = .red;`"
+runtime: none
+notes: |
+  Drill the leading-dot shorthand. Distractors:
+   - String literal — TS reflex; Zig variants aren't strings.
+   - Bare identifier — would refer to a `red` in scope, not
+     a Color variant.
+   - `Color::red` — Rust reflex.
+
+  The leading-dot form is the idiomatic shape; the fully-qualified
+  `Color.red` also works but is wordier and rarer in real code.
