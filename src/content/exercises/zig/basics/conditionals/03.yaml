@@ -1,0 +1,58 @@
+target: zig
+themeId: zig/basics/conditionals
+type: mcq
+order: 3
+prompt: |
+  Here's where Zig diverges from TypeScript: Zig's `switch` is an
+  EXPRESSION, not a statement. It evaluates to a value you can
+  assign or return directly — like a ternary scaled up. Pick the
+  idiomatic Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: label
+      ts: |-
+        let label: string;
+        if (x === 1) label = "one";
+        else if (x === 2) label = "two";
+        else label = "other";
+      canonical: |-
+        const label: []const u8 = switch (x) {
+            1 => "one",
+            2 => "two",
+            else => "other",
+        };
+      distractors:
+        - |-
+          var label: []const u8 = undefined;
+          switch (x) {
+              1 => { label = "one"; },
+              2 => { label = "two"; },
+              else => { label = "other"; },
+          }
+        - |-
+          const label = switch (x) {
+              case 1: "one";
+              case 2: "two";
+              default: "other";
+          };
+        - |-
+          const label: []const u8 = switch (x) {
+              1: "one",
+              2: "two",
+              else: "other",
+          };
+hints:
+  - "Two pieces: `switch (x) { ... }` is an expression, and each arm uses `pattern => value,` (fat arrow + comma — NOT `case` + `:`)."
+  - "Shape:\n```zig\nconst label: []const u8 = switch (x) {\n    1 => \"one\",\n    2 => \"two\",\n    else => \"other\",\n};\n```"
+  - "`const label: []const u8 = switch (x) { 1 => \"one\", 2 => \"two\", else => \"other\", };`"
+runtime: none
+notes: |
+  Recognition of `switch` as expression. Distractors hit the three
+  predictable wrong reflexes:
+   - Statement-style switch — mechanically works but throws away
+     the expression value (and requires `var label = undefined`
+     which is itself a code smell).
+   - C `case x:` / `default:` syntax — Zig uses `=>` not `:`.
+   - Mixing `1: "one"` (colon) with `else: "other"` — wrong
+     separator (should be `=>`).

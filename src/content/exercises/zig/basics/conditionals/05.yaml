@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/basics/conditionals
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing keyword. The line evaluates a value against
+  multiple patterns and returns a string. In Zig this construct is
+  an expression, not a statement.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "switch"
+  ts: |-
+    const label = x === 1 ? "one" : x === 2 ? "two" : "other";
+  canonical: |-
+    const label: []const u8 = ${keyword} (x) {
+        1 => "one",
+        2 => "two",
+        else => "other",
+    };
+  distractors:
+    - "match"
+    - "case"
+    - "when"
+blanks: [keyword]
+hints:
+  - "Six letters, same as the C / TypeScript keyword for branching on a single value against multiple constants."
+  - "It starts with `s`. TypeScript / Java / C all use the same word."
+  - "`switch`"
+runtime: none
+notes: |
+  Drill the `switch` keyword. Distractors:
+   - `match` — Rust / OCaml / Scala reflex.
+   - `case` — Pascal / SQL reflex.
+   - `when` — Kotlin reflex.

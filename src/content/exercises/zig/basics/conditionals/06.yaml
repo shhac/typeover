@@ -1,0 +1,56 @@
+target: zig
+themeId: zig/basics/conditionals
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — the `if` condition that picks
+  which message to print. The variable `n` is 5 (positive), so
+  the if-branch fires and the program prints `positive`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if (n > 0) {"
+  ts: |-
+    if (n > 0) {
+        console.log("positive");
+    } else {
+        console.log("non-positive");
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const n: i32 = 5;
+        ${line}
+            try std.Io.File.stdout().writeStreamingAll(init.io, "positive\n");
+        } else {
+            try std.Io.File.stdout().writeStreamingAll(init.io, "non-positive\n");
+        }
+    }
+  distractors:
+    - match: "if n > 0 {"
+      explain: |-
+        Zig requires parens around the condition — unlike Go.
+        Wrap `n > 0` in parens: `if (n > 0) {`.
+    - match: "if (n > 0) then {"
+      explain: |-
+        Zig has no `then` keyword. The body starts right after
+        the closing paren: `if (n > 0) { ... }`.
+    - match: "if (n > 0):"
+      explain: |-
+        Python-style colons aren't used in Zig. The body uses
+        braces: `if (n > 0) { ... }`.
+expectStdout: |
+  positive
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: keyword `if`, parens around the condition `(n > 0)`, opening brace `{`. No `then`, no Go-style no-parens, no colon."
+  - "Shape: `if (n > 0) {`. The closing brace, `else`, and `}` are already in the scaffold."
+  - "`if (n > 0) {`"
+notes: |
+  First fill-line for conditionals. The blank includes the opening
+  brace so the learner sees the full line shape. Distractors hit
+  the three obvious wrong reflexes — Go (no parens), SQL/Pascal
+  (`then`), Python (colon).

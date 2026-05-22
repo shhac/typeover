@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/basics/conditionals
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword. The condition's first branch handles
+  the positive case; the second branch should handle every other
+  case. Same keyword as TypeScript and most C-family languages.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "else"
+  ts: |-
+    if (x > 0) { sign = 1; } else { sign = 0; }
+  canonical: |-
+    if (x > 0) { sign = 1; } ${keyword} { sign = 0; }
+  distractors:
+    - "elif"
+    - "otherwise"
+    - "default"
+blanks: [keyword]
+hints:
+  - "Four letters, identical to TypeScript and JavaScript."
+  - "It's the same keyword you'd use after an `if` in TS."
+  - "`else`"
+runtime: none
+notes: |
+  Drill the `else` keyword. Distractors:
+   - `elif` — Python reflex.
+   - `otherwise` — Haskell / Ruby reflex.
+   - `default` — switch-case reflex (right concept, wrong
+     context).

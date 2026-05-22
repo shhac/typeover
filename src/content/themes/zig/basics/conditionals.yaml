@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/basics
+title: "Conditionals (if and switch)"
+order: 3
+prerequisites: []
+intro: |
+  Zig's `if` looks like TypeScript's: parens around the condition, optional braces around the body. The catch: Zig has no truthy values — the condition must be `bool`. `switch` is an expression in Zig (not a statement), so it can be assigned directly. The TS reflex matches Zig here more cleanly than it matches Go.

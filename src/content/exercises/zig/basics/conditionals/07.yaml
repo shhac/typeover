@@ -1,0 +1,61 @@
+target: zig
+themeId: zig/basics/conditionals
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the `switch` expression that maps
+  the value `2` to a label. With the correct line, the program
+  prints `two` and a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'const label: []const u8 = switch (x) {'
+  ts: |-
+    const x = 2;
+    const label = x === 1 ? "one" : x === 2 ? "two" : "other";
+    console.log(label);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const x: i32 = 2;
+        ${line}
+            1 => "one",
+            2 => "two",
+            else => "other",
+        };
+        try std.Io.File.stdout().writeStreamingAll(init.io, label);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: 'var label: []const u8 = switch (x) {'
+      explain: |-
+        The value is assigned exactly once at declaration time;
+        use `const`, not `var`. The Zig idiom is "default to
+        const; reach for var only when you must mutate."
+    - match: 'const label = switch (x) {'
+      explain: |-
+        The type annotation `: []const u8` is needed — without it,
+        each arm returns a different pointer type and the compiler
+        can't pick the common type for `label`. Adding the
+        annotation tells the compiler to coerce each arm to
+        `[]const u8`.
+    - match: 'const label: []const u8 = match (x) {'
+      explain: |-
+        Zig's keyword is `switch`, not `match` (that's Rust /
+        OCaml / Scala).
+expectStdout: |
+  two
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: keyword `const` (the binding is immutable), name `label`, type `[]const u8` (the arms return string literals), then `= switch (x) {`."
+  - "Shape: `const label: []const u8 = switch (x) {`. The arms and closing brace are in the scaffold."
+  - "`const label: []const u8 = switch (x) {`"
+notes: |
+  First runnable switch-as-expression. The type annotation on
+  `label` is load-bearing — without it the compiler can't pick a
+  common type for the three `[]const u8` arms. This is one of the
+  cases where Zig's explicit-types-everywhere bites: TS's ternary
+  inference doesn't transfer.

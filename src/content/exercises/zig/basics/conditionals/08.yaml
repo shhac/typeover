@@ -1,0 +1,45 @@
+target: zig
+themeId: zig/basics/conditionals
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Declares a `const n: i32 = -3;`.
+   2. Prints one of `negative`, `zero`, or `positive` based on
+      `n`'s sign (followed by a newline).
+
+  For `n = -3` the expected stdout is `negative` on its own
+  line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n = -3;
+    if (n < 0) console.log("negative");
+    else if (n === 0) console.log("zero");
+    else console.log("positive");
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const n: i32 = -3;
+        if (n < 0) {
+            try std.Io.File.stdout().writeStreamingAll(init.io, "negative\n");
+        } else if (n == 0) {
+            try std.Io.File.stdout().writeStreamingAll(init.io, "zero\n");
+        } else {
+            try std.Io.File.stdout().writeStreamingAll(init.io, "positive\n");
+        }
+    }
+expectStdout: |
+  negative
+runtime: zig
+hints:
+  - "Three branches: `if (n < 0)`, `else if (n == 0)`, `else` (positive). Each branch has its own `try ... writeStreamingAll(init.io, \"<label>\\n\");` line."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const n: i32 = -3;\n    if (n < 0) {\n        // print \"negative\\n\"\n    } else if (n == 0) {\n        // print \"zero\\n\"\n    } else {\n        // print \"positive\\n\"\n    }\n}\n```"
+  - 'Full program: as in the canonical — each branch calls `try std.Io.File.stdout().writeStreamingAll(init.io, "<sign>\n")`.'
+notes: |
+  First conditionals freeform. Drills the if / else if / else
+  chain end-to-end with stdout output. Closes the loop on slot 02
+  (which recognised the shape) and slot 06 (which typed one
+  branch).

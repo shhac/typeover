@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/basics/conditionals
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `if (cond) { ... }` with parens around the
+  condition. Zig keeps the parens — a pleasant surprise after Go,
+  which drops them. Pick the Zig translation of this TS condition.
+generator:
+  kind: variant
+  variants:
+    - id: positive
+      ts: "if (x > 0) { result = 1; }"
+      canonical: "if (x > 0) { result = 1; }"
+      distractors:
+        - "if x > 0 { result = 1; }"
+        - "if (x > 0) then { result = 1; }"
+        - "if (x > 0): result = 1;"
+    - id: equal
+      ts: "if (n == 0) { return; }"
+      canonical: "if (n == 0) { return; }"
+      distractors:
+        - "if n == 0 { return; }"
+        - "if (n.equals(0)) { return; }"
+        - "if (n === 0) { return; }"
+    - id: not
+      ts: "if (!ready) { wait(); }"
+      canonical: "if (!ready) { wait(); }"
+      distractors:
+        - "if not ready { wait(); }"
+        - "if (ready == false) { wait(); }"
+        - "if (!ready) then { wait(); }"
+hints:
+  - "Zig's `if` looks identical to TypeScript's: `if (<bool>) { <body> }`. Parens around the condition are REQUIRED (unlike Go); braces around the body are required when the body is multiple statements."
+  - "Shape: `if (<bool-expr>) { <body> }`. The body braces stay; the condition parens stay."
+  - "For the positive variant: `if (x > 0) { result = 1; }`."
+runtime: none
+notes: |
+  First conditionals exercise. The hook is "the TS shape transfers
+  directly" — Zig's syntax matches TS more than Go does here.
+  Distractors hit:
+   - Go reflex (no parens around condition).
+   - Pascal / SQL reflex (`then` keyword).
+   - TS strict-equality `===` — Zig uses `==` (the trick is that
+     Zig's `==` is strict; there's no loose-equality form to
+     contrast with).
+
+  Three variants exercise the same shape across different
+  comparison operators (`>`, `==`, `!`).

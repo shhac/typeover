@@ -1,0 +1,71 @@
+target: zig
+themeId: zig/basics/conditionals
+type: mcq
+order: 2
+prompt: |
+  TypeScript chains conditions with `else if`. Zig keeps the same
+  shape — `else if`, two words, with the same parenthesised
+  condition. Pick the Zig translation.
+generator:
+  kind: template
+  vars:
+    a: ["x > 0", "score >= 100", "n < 0"]
+    b: ["x < 0", "score >= 50", "n > 0"]
+    body1: ["return 1;", "rank = \"gold\";", "kind = \"neg\";"]
+    body2: ["return -1;", "rank = \"silver\";", "kind = \"pos\";"]
+    body3: ["return 0;", "rank = \"bronze\";", "kind = \"zero\";"]
+  ts: |-
+    if (${a}) {
+        ${body1}
+    } else if (${b}) {
+        ${body2}
+    } else {
+        ${body3}
+    }
+  canonical: |-
+    if (${a}) {
+        ${body1}
+    } else if (${b}) {
+        ${body2}
+    } else {
+        ${body3}
+    }
+  distractors:
+    - |-
+      if (${a}) {
+          ${body1}
+      } elif (${b}) {
+          ${body2}
+      } else {
+          ${body3}
+      }
+    - |-
+      if (${a}) {
+          ${body1}
+      } else {
+          if (${b}) {
+              ${body2}
+          } else {
+              ${body3}
+          }
+      }
+    - |-
+      if ${a} {
+          ${body1}
+      } else if ${b} {
+          ${body2}
+      } else {
+          ${body3}
+      }
+hints:
+  - "Zig writes `else if`, exactly as TypeScript does — two words, not `elif` (Python), not nested `else { if (...) }` (which works but isn't idiomatic), not no-parens (Go)."
+  - "Shape: `if (a) { ... } else if (b) { ... } else { ... }`. Each `else if` keeps its parenthesised condition."
+  - "First variant: `if (x > 0) { return 1; } else if (x < 0) { return -1; } else { return 0; }`."
+runtime: none
+notes: |
+  Drill the `else if` chain shape. Distractors:
+   - `elif` — Python reflex (single-word).
+   - Nested `else { if (...) }` — mechanically equivalent but
+     bloats the indentation. Zig's compiler doesn't care; the
+     idiom does.
+   - No-parens — Go reflex.

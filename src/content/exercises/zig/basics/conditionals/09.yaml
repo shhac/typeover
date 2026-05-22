@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/basics/conditionals
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that uses a `switch` expression
+  to map a status code to a label, then prints the label.
+
+   - `code = 200` → print `ok`
+   - any other code → print `unknown`
+
+  For the canonical, set `code = 200` and produce expected stdout
+  `ok` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const code = 200;
+    const label = code === 200 ? "ok" : "unknown";
+    console.log(label);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const code: i32 = 200;
+        const label: []const u8 = switch (code) {
+            200 => "ok",
+            else => "unknown",
+        };
+        try std.Io.File.stdout().writeStreamingAll(init.io, label);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  ok
+runtime: zig
+hints:
+  - "Two switch arms: `200 => \"ok\",` and `else => \"unknown\",`. The result is bound to `const label: []const u8` (the type annotation matters — without it the compiler can't pick the common arm type)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const code: i32 = 200;\n    const label: []const u8 = switch (code) {\n        200 => \"ok\",\n        else => \"unknown\",\n    };\n    try std.Io.File.stdout().writeStreamingAll(init.io, label);\n    try std.Io.File.stdout().writeStreamingAll(init.io, \"\\n\");\n}\n```"
+  - 'Full program: as in the canonical. Two `writeStreamingAll` calls — one for the label, one for the trailing newline; could also be combined by including `\n` in the `"ok"` arm.'
+notes: |
+  Second conditionals freeform. Synthesises slot 03 (switch
+  recognition) + slot 07 (one-line typed switch) into a runnable
+  program. Two writeStreamingAll calls (label + newline) keep the
+  code shape clear; combining them into one call would also pass
+  the grader.
+
+  Implementation note: `else` arm is required in Zig switches —
+  exhaustiveness is enforced. Without it the compiler error reads
+  "unhandled value" rather than letting code silently miss cases.
