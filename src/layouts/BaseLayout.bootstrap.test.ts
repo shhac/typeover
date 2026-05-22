@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { DENSITIES, PALETTES, RADII, STYLES, STYLE_DEFAULT_PALETTE, THEMES } from "~/lib/theme";
-import { appearanceBootstrapScript } from "./appearance-bootstrap.inline";
-import { runtimePrefetchScript } from "~/lib/runtime-prefetch-script";
 
 /*
  * BaseLayout's inline pre-paint bootstrap script duplicates every
@@ -18,43 +19,49 @@ import { runtimePrefetchScript } from "~/lib/runtime-prefetch-script";
  * design-docs/18 F-2.
  */
 
-describe("appearanceBootstrapScript — enum coverage", () => {
-  /* Drift guards on the inline pre-paint bootstrap. The script
-   * lives in `./appearance-bootstrap.inline.ts` and the layout
-   * inlines the exported string verbatim. The lists below have to
-   * stay in sync with the enums in `~/lib/{theme,appearance}.ts`;
-   * a new value in either side without updating the other fails
-   * these assertions. */
-  it.each(THEMES)("theme literal %s appears in bootstrap", (value) => {
-    expect(appearanceBootstrapScript).toContain(`"${value}"`);
+const here = dirname(fileURLToPath(import.meta.url));
+const layoutPath = join(here, "BaseLayout.astro");
+
+async function bootstrapSource(): Promise<string> {
+  return readFile(layoutPath, "utf8");
+}
+
+describe("BaseLayout bootstrap — enum coverage", () => {
+  it.each(THEMES)("theme literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
   });
 
-  it.each(DENSITIES)("density literal %s appears in bootstrap", (value) => {
-    expect(appearanceBootstrapScript).toContain(`"${value}"`);
+  it.each(DENSITIES)("density literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
   });
 
-  it.each(RADII)("radius literal %s appears in bootstrap", (value) => {
-    expect(appearanceBootstrapScript).toContain(`"${value}"`);
+  it.each(RADII)("radius literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
   });
 
-  it.each(STYLES)("style literal %s appears in bootstrap", (value) => {
-    expect(appearanceBootstrapScript).toContain(`"${value}"`);
+  it.each(STYLES)("style literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
   });
 
-  it.each(PALETTES)("palette literal %s appears in bootstrap", (value) => {
-    expect(appearanceBootstrapScript).toContain(`"${value}"`);
+  it.each(PALETTES)("palette literal %s appears in bootstrap", async (value) => {
+    const src = await bootstrapSource();
+    expect(src).toContain(`"${value}"`);
   });
 
-  it("every style maps to a default palette that bootstrap can resolve", () => {
+  it("every style maps to a default palette that bootstrap can resolve", async () => {
     /* Drift guard — if theme.ts changes the default for a style, the
      * bootstrap's literal map must follow. Check every (style →
      * default-palette) pair appears as an object-literal pair in the
      * bootstrap source. */
+    const src = await bootstrapSource();
     for (const [style, palette] of Object.entries(STYLE_DEFAULT_PALETTE)) {
-      expect(
-        appearanceBootstrapScript,
-        `expected bootstrap to contain "${style}: \\"${palette}\\""`,
-      ).toMatch(new RegExp(`${style}:\\s*"${palette}"`));
+      expect(src, `expected bootstrap to contain "${style}: \\"${palette}\\""`).toMatch(
+        new RegExp(`${style}:\\s*"${palette}"`),
+      );
     }
   });
 });
@@ -69,42 +76,43 @@ describe("appearanceBootstrapScript — enum coverage", () => {
  * idempotence flag, the prefetch behaviour quietly degrades into
  * a per-event link injection — sanity in the source, not at runtime.
  */
-describe("runtimePrefetchScript hover/focus prefetch body", () => {
-  /* The script body now lives in `~/lib/runtime-prefetch-script` so
-   * we assert against the imported constant directly — no file I/O,
-   * no path resolution. The BaseLayout still inlines it verbatim via
-   * `<script is:inline set:html={runtimePrefetchScript} />`. */
-  it('injects a <link rel="prefetch"> with the right shape', () => {
-    expect(runtimePrefetchScript).toMatch(/link\.rel\s*=\s*"prefetch"/);
+describe("BaseLayout hover/focus runtime prefetch", () => {
+  it('injects a <link rel="prefetch"> with the right shape', async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/link\.rel\s*=\s*"prefetch"/);
     /* prefetch href is parameterised (Yaegi for /go anchors, zig.wasm
-     * for /zig anchors); both target paths must appear as string
+     * for /zig anchors); verify both target paths appear as string
      * literals in the inline script body. */
-    expect(runtimePrefetchScript).toContain("/yaegi/yaegi.wasm");
-    expect(runtimePrefetchScript).toContain("/zig/zig.wasm");
-    expect(runtimePrefetchScript).toMatch(/link\.crossOrigin\s*=\s*"anonymous"/);
+    expect(src).toContain("/yaegi/yaegi.wasm");
+    expect(src).toContain("/zig/zig.wasm");
+    expect(src).toMatch(/link\.crossOrigin\s*=\s*"anonymous"/);
   });
 
-  it("respects saveData + effectiveType slow-2g network signals", () => {
-    expect(runtimePrefetchScript).toMatch(/saveData/);
-    expect(runtimePrefetchScript).toMatch(/slow-2g/);
+  it("respects saveData + effectiveType slow-2g network signals", async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/saveData/);
+    expect(src).toMatch(/slow-2g/);
   });
 
-  it("is idempotent — fires at most once per page load", () => {
+  it("is idempotent — fires at most once per page load", async () => {
     /* The closure-local `fired` flag is the load-bearing guard. */
-    expect(runtimePrefetchScript).toMatch(/var fired = false/);
-    expect(runtimePrefetchScript).toMatch(/if \(fired\) return/);
+    const src = await bootstrapSource();
+    expect(src).toMatch(/var fired = false/);
+    expect(src).toMatch(/if \(fired\) return/);
   });
 
-  it("listens on pointerover, focusin, and touchstart", () => {
+  it("listens on pointerover, focusin, and touchstart", async () => {
     /* Three signals cover desktop hover, keyboard focus, and the
      * mobile tap-before-navigation moment. */
-    expect(runtimePrefetchScript).toMatch(/addEventListener\("pointerover"/);
-    expect(runtimePrefetchScript).toMatch(/addEventListener\("focusin"/);
-    expect(runtimePrefetchScript).toMatch(/addEventListener\("touchstart"/);
+    const src = await bootstrapSource();
+    expect(src).toMatch(/addEventListener\("pointerover"/);
+    expect(src).toMatch(/addEventListener\("focusin"/);
+    expect(src).toMatch(/addEventListener\("touchstart"/);
   });
 
-  it("fires on /go/* and /zig/* anchors", () => {
-    expect(runtimePrefetchScript).toMatch(/'a\[href\^="\/go\/"\]'/);
-    expect(runtimePrefetchScript).toMatch(/'a\[href\^="\/zig\/"\]'/);
+  it("fires on /go/* and /zig/* anchors", async () => {
+    const src = await bootstrapSource();
+    expect(src).toMatch(/'a\[href\^="\/go\/"\]'/);
+    expect(src).toMatch(/'a\[href\^="\/zig\/"\]'/);
   });
 });

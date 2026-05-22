@@ -48,12 +48,38 @@ const preloadWasm: { href: string } | null = path.startsWith("/go/")
     : null;
 const isExerciseRoute = preloadWasm !== null;
 
-/* Inline pre-bundle script bodies. Both ship as strings so we can
- * write them verbatim via `<script is:inline set:html={…}>` and
- * regex-test against the constants rather than scraping the
- * layout's front-matter. */
-import { runtimePrefetchScript } from "~/lib/runtime-prefetch-script";
-import { appearanceBootstrapScript } from "./appearance-bootstrap.inline";
+/* Inline script body: prefetches the runtime WASM on first hover /
+ * focus / touch over an in-curriculum link from off-route pages.
+ * Picks the right runtime by sniffing the anchor's href prefix. */
+const runtimePrefetchScript = `(function () {
+  var fired = false;
+  function ok() {
+    var c = navigator.connection;
+    if (c && c.saveData) return false;
+    if (c && c.effectiveType === "slow-2g") return false;
+    return true;
+  }
+  function prefetch(href) {
+    if (fired) return;
+    if (!ok()) return;
+    fired = true;
+    var link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "fetch";
+    link.href = href;
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+  function handler(e) {
+    var t = e.target;
+    if (!t || typeof t.closest !== "function") return;
+    if (t.closest('a[href^="/go/"]')) prefetch("/yaegi/yaegi.wasm");
+    else if (t.closest('a[href^="/zig/"]')) prefetch("/zig/zig.wasm");
+  }
+  document.addEventListener("pointerover", handler, { passive: true });
+  document.addEventListener("focusin", handler, { passive: true });
+  document.addEventListener("touchstart", handler, { passive: true });
+})();`;
 ---
 
 <!doctype html>
@@ -71,7 +97,77 @@ import { appearanceBootstrapScript } from "./appearance-bootstrap.inline";
      * small; any growth lives in src/lib/theme.ts. See
      * design-docs/13-themes.md + 14-stylistic-themes.md.
      */}
-    <script is:inline set:html={appearanceBootstrapScript}></script>
+    <script is:inline>
+      (() => {
+        try {
+          var pinnedTheme = localStorage.getItem("typeover:theme");
+          var theme =
+            pinnedTheme === "dark" || pinnedTheme === "light"
+              ? pinnedTheme
+              : window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+          document.documentElement.dataset.theme = theme;
+
+          var pinnedDensity = localStorage.getItem("typeover:density");
+          document.documentElement.dataset.density =
+            pinnedDensity === "compact" ||
+            pinnedDensity === "normal" ||
+            pinnedDensity === "airy"
+              ? pinnedDensity
+              : "normal";
+
+          var pinnedRadius = localStorage.getItem("typeover:radius");
+          document.documentElement.dataset.radius =
+            pinnedRadius === "sharp" ||
+            pinnedRadius === "normal" ||
+            pinnedRadius === "rounded" ||
+            pinnedRadius === "pill"
+              ? pinnedRadius
+              : "normal";
+
+          var pinnedStyle = localStorage.getItem("typeover:style");
+          var style =
+            pinnedStyle === "terminal" ||
+            pinnedStyle === "cardboard" ||
+            pinnedStyle === "textbook" ||
+            pinnedStyle === "glass" ||
+            pinnedStyle === "islands"
+              ? pinnedStyle
+              : "terminal";
+          document.documentElement.dataset.style = style;
+
+          /* Palette resolution per design-docs/22 — `default` (or
+           * absent) follows the active style's default; a specific
+           * palette ID persists across style switches. The list
+           * below must stay in sync with PALETTES + STYLE_DEFAULT_PALETTE
+           * in src/lib/theme.ts — bootstrap.test asserts every
+           * literal appears. */
+          var styleDefaultPalette = {
+            terminal: "phosphor-amber",
+            cardboard: "warm-paper",
+            textbook: "parchment-ink",
+            glass: "aurora-amber",
+            islands: "desk-felt",
+          };
+          var palettes = [
+            "phosphor-amber", "phosphor-green", "ice-blue", "tape-reel",
+            "warm-paper", "kraft", "manila", "newsprint", "calfskin",
+            "parchment-ink", "pelican", "almanac", "e-reader", "slate-rule",
+            "aurora-amber", "glacier-blue", "lavender-mist", "monochrome",
+            "desk-felt", "app-store", "dark-wood", "studio-grey", "sunlit-pine",
+          ];
+          var pinnedPalette = localStorage.getItem("typeover:palette");
+          document.documentElement.dataset.palette =
+            pinnedPalette && pinnedPalette !== "default" && palettes.indexOf(pinnedPalette) >= 0
+              ? pinnedPalette
+              : styleDefaultPalette[style];
+        } catch (_) {
+          /* localStorage unavailable (incognito quota / SSR / etc.) —
+           * fall through to the CSS @theme defaults. */
+        }
+      })();
+    </script>
     <link rel="canonical" href={pageUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {preloadWasm && (
