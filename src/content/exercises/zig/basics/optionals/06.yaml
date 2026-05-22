@@ -34,9 +34,10 @@ generator:
         keyword `orelse`.
     - match: "const value: i32 = maybeCount || 99;"
       explain: |-
-        `||` is JavaScript's truthy-default. Zig's `||` is
-        boolean OR — different semantics, doesn't unwrap
-        optionals.
+        `||` is not a Zig operator. Zig writes boolean OR as
+        the keyword `or`, and `||` is reserved for error-set
+        composition (`ErrA || ErrB`). For an optional default,
+        use `orelse`.
     - match: "const value: ?i32 = maybeCount orelse 99;"
       explain: |-
         The result of `orelse` is the inner type, not optional.

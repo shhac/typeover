@@ -33,11 +33,11 @@ generator:
       explain: |-
         `var` makes `message` mutable, but it's never reassigned —
         use `const`.
-    - match: 'const message: []const u8 = greet("world");'
+    - match: 'let message = greet("world");'
       explain: |-
-        The annotation is harmless but unnecessary. Zig infers
-        the type from the function's return type, so plain
-        `const message = greet("world");` is the idiomatic shape.
+        `let` is TypeScript's mutable-binding keyword. Zig uses
+        `const` (immutable, the default) or `var` (mutable).
+        Here the value never changes — use `const`.
     - match: 'const message = greet"world";'
       explain: |-
         Missing parens around the call argument. Zig requires
