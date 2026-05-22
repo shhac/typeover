@@ -1,0 +1,31 @@
+target: zig
+themeId: zig/memory/arraylist
+type: mcq
+order: 2
+prompt: |
+  TypeScript's `nums.push(10)` extends the array. Zig's
+  equivalent on `std.ArrayList` is `.append(...)` — but the
+  allocator must be passed in (unmanaged convention). Pick
+  the right call.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    nums.push(10);
+  canonical: |-
+    try nums.append(alloc, 10);
+  distractors:
+    - "nums.append(alloc, 10);"
+    - "try nums.push(alloc, 10);"
+    - "try nums.append(10);"
+hints:
+  - "Three pieces: `try` (the call can fail — allocator might OOM), method name `append`, then `(alloc, 10)` — allocator first, value second."
+  - "Shape: `try <list>.append(<allocator>, <value>);`."
+  - "`try nums.append(alloc, 10);`"
+runtime: none
+notes: |
+  Drill `try .append(alloc, value)`. Distractors:
+   - Missing `try` — uncaught error union.
+   - `.push` — TS / JS reflex.
+   - Missing allocator arg — unmanaged convention requires
+     it on every mutating call.

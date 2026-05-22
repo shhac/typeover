@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/memory/arraylist
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — append the integer 30 to the
+  list. The program then prints `30` (the last item). With the
+  right call, the printed value is the appended one.
+generator:
+  kind: template
+  vars:
+    line:
+      - "try nums.append(alloc, 30);"
+  ts: |-
+    nums.push(30);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        var nums: std.ArrayList(i32) = .empty;
+        defer nums.deinit(alloc);
+        try nums.append(alloc, 10);
+        try nums.append(alloc, 20);
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{nums.items[2]});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "nums.append(alloc, 30);"
+      explain: |-
+        Missing `try`. `.append` can fail (allocator OOM) —
+        the error union has to be acknowledged.
+    - match: "try nums.push(alloc, 30);"
+      explain: |-
+        `.push` is TS / JS. Zig's method is `.append`.
+    - match: "try nums.append(30);"
+      explain: |-
+        Missing the allocator argument. Unmanaged ArrayList
+        wants `<list>.append(<allocator>, <value>)`.
+expectStdout: |
+  30
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `try`, `nums.append`, `(alloc, 30)`, semicolon."
+  - "Shape: `try <list>.append(<allocator>, <value>);`."
+  - "`try nums.append(alloc, 30);`"
+notes: |
+  Drill the `.append(alloc, value)` call shape in a runnable
+  context. Reinforces "every mutating ArrayList call takes the
+  allocator."

@@ -1,0 +1,50 @@
+target: zig
+themeId: zig/memory/arraylist
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that builds an ArrayList of
+  three i32 values (1, 2, 3), then prints the SUM (= 6)
+  followed by a newline.
+
+  Use `std.ArrayList(i32)` with `.empty` init and per-call
+  allocator.
+
+  Expected stdout: `6`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const nums = [1, 2, 3];
+    let total = 0;
+    for (const v of nums) total += v;
+    console.log(total);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        var nums: std.ArrayList(i32) = .empty;
+        defer nums.deinit(alloc);
+        try nums.append(alloc, 1);
+        try nums.append(alloc, 2);
+        try nums.append(alloc, 3);
+        var total: i32 = 0;
+        for (nums.items) |v| {
+            total += v;
+        }
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{total});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  6
+runtime: zig
+hints:
+  - "Five pieces: empty-init the list, `defer deinit(alloc)`, three appends, then `for (nums.items) |v|` accumulate."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const alloc = std.heap.page_allocator;\n    var nums: std.ArrayList(i32) = .empty;\n    defer nums.deinit(alloc);\n    try nums.append(alloc, 1);\n    try nums.append(alloc, 2);\n    try nums.append(alloc, 3);\n    var total: i32 = 0;\n    for (nums.items) |v| total += v;\n    // bufPrint(\"{d}\\n\", .{total}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. `for (nums.items) |v|` iterates the slice — same payload-capture pattern as basics/while-and-for/09.'
+notes: |
+  First ArrayList freeform. Synthesises slot 06 (init), slot
+  07 (append), slot 04 (items) into a runnable summation
+  program.

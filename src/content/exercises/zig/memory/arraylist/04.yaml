@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/memory/arraylist
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing field name. The ArrayList exposes its live
+  elements via this `[]T` slice — used for length, iteration,
+  and direct indexing. Five letters.
+generator:
+  kind: template
+  vars:
+    field:
+      - "items"
+  ts: |-
+    const n = nums.length;
+  canonical: |-
+    const n: usize = nums.${field}.len;
+  distractors:
+    - "elements"
+    - "data"
+    - "slice"
+blanks: [field]
+hints:
+  - "Five letters, lowercase, plural — same word you'd use for \"things in a shopping cart\"."
+  - "Starts with `i`."
+  - "`items`"
+runtime: none
+notes: |
+  Drill `.items`. Distractors:
+   - `elements` — too long.
+   - `data` — generic.
+   - `slice` — describes the type, not the field.

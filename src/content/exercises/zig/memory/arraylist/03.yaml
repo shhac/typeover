@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/memory/arraylist
+type: mcq
+order: 3
+prompt: |
+  TypeScript reads `.length` to get a list's size and indexes
+  with `[i]`. Zig's ArrayList exposes the live elements via
+  the `.items` slice — and you use `.items.len` for length,
+  `.items[i]` for indexing. Pick the right access.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n = nums.length;
+    const first = nums[0];
+  canonical: |-
+    const n: usize = nums.items.len;
+    const first: i32 = nums.items[0];
+  distractors:
+    - |-
+      const n: usize = nums.len;
+      const first: i32 = nums[0];
+    - |-
+      const n: usize = nums.length;
+      const first: i32 = nums.items[0];
+    - |-
+      const n: usize = nums.size();
+      const first: i32 = nums.at(0);
+hints:
+  - "One mental shift: ArrayList is a struct that EXPOSES a slice as `.items`. The slice is where you read length (`.items.len`) and index (`.items[i]`)."
+  - "Shape: `<list>.items.len` for length, `<list>.items[<i>]` for indexing."
+  - "`nums.items.len` for length, `nums.items[0]` for index."
+runtime: none
+notes: |
+  Drill `.items` access. Distractors:
+   - Direct `.len`/index on the list itself — wrong; the list
+     is a struct, the slice is `.items`.
+   - `.length` — TS reflex.
+   - `.size()` / `.at(0)` — Java/C++ Vector reflexes.

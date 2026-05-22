@@ -1,0 +1,40 @@
+target: zig
+themeId: zig/memory/arraylist
+type: mcq
+order: 1
+prompt: |
+  TypeScript reaches for `const nums: number[] = []` to start
+  an empty growable list. Zig's `std.ArrayList(T)` is the same
+  idea — but in Zig 0.16 it's an unmanaged container, so you
+  start with the `.empty` literal and pass the allocator on
+  each mutating call. Pick the right initialization.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const nums: number[] = [];
+  canonical: |-
+    var nums: std.ArrayList(i32) = .empty;
+    defer nums.deinit(alloc);
+  distractors:
+    - |-
+      var nums = std.ArrayList(i32).init(alloc);
+      defer nums.deinit();
+    - |-
+      var nums: std.ArrayList(i32) = .{};
+      defer nums.deinit(alloc);
+    - |-
+      const nums: std.ArrayList(i32) = .empty;
+      defer nums.deinit(alloc);
+hints:
+  - "Three pieces: type annotation `: std.ArrayList(i32)`, value `.empty` (an enum-literal-like declared on the type), and a `defer nums.deinit(alloc);` immediately. Note: `var`, not `const` — appending mutates."
+  - "Shape: `var <name>: std.ArrayList(T) = .empty;` then `defer <name>.deinit(<allocator>);`."
+  - "`var nums: std.ArrayList(i32) = .empty;` then `defer nums.deinit(alloc);`."
+runtime: none
+notes: |
+  First ArrayList exercise. Drills the empty-literal initialization.
+  Distractors:
+   - `.init(alloc)` — old Zig 0.13 API; removed in 0.16.
+   - `.{}` empty struct literal — won't compile because the
+     fields `items` and `capacity` are required.
+   - `const nums` — must be `var` (deinit + append mutate).

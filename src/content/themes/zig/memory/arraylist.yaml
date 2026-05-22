@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/memory
+title: ArrayList
+order: 3
+prerequisites: []
+intro: |
+  ArrayList(T) is Zig's growable slice — your TypeScript Array equivalent. In Zig 0.16 it's an unmanaged container by API convention: you initialize with the .empty literal, pass the allocator on every mutating call (append, insert, etc.), and call .deinit(allocator) to release. items is a []T view into the live elements; the capacity is hidden. The benefit of unmanaged: no per-list allocator pointer overhead, and the list type is a plain struct you can store in a hash map's value.

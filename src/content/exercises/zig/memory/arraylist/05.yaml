@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/memory/arraylist
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing method name. The ArrayList exposes this for
+  adding a value to the end. Same name as Go's slice helper.
+  Six letters.
+generator:
+  kind: template
+  vars:
+    method:
+      - "append"
+  ts: |-
+    nums.push(10);
+  canonical: |-
+    try nums.${method}(alloc, 10);
+  distractors:
+    - "push"
+    - "add"
+    - "insert"
+blanks: [method]
+hints:
+  - "Six letters, lowercase, same word Go uses for slice growth."
+  - "Starts with `a`."
+  - "`append`"
+runtime: none
+notes: |
+  Drill `.append`. Distractors:
+   - `push` — JS / TS reflex.
+   - `add` — Java reflex.
+   - `insert` — works for arbitrary positions; `append` is
+     end-only and the right method here.

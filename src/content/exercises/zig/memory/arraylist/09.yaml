@@ -1,0 +1,43 @@
+target: zig
+themeId: zig/memory/arraylist
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that builds an `ArrayList(u8)`
+  (a growable byte buffer), appends the bytes of `"world"`
+  one at a time, then prints `nums.items` (the live byte
+  slice) followed by a newline.
+
+  Expected stdout: `world`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const bytes: number[] = [];
+    for (const b of [...new TextEncoder().encode("world")]) bytes.push(b);
+    console.log(new TextDecoder().decode(new Uint8Array(bytes)));
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        var nums: std.ArrayList(u8) = .empty;
+        defer nums.deinit(alloc);
+        for ("world") |b| {
+            try nums.append(alloc, b);
+        }
+        try std.Io.File.stdout().writeStreamingAll(init.io, nums.items);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  world
+runtime: zig
+hints:
+  - "Three pieces: `ArrayList(u8) = .empty;` + `defer deinit(alloc)`, then `for (\"world\") |b| try nums.append(alloc, b);` to copy each byte, then write `nums.items` (a `[]u8` slice) directly to stdout."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const alloc = std.heap.page_allocator;\n    var nums: std.ArrayList(u8) = .empty;\n    defer nums.deinit(alloc);\n    for (\"world\") |b| try nums.append(alloc, b);\n    // writeStreamingAll(nums.items), writeStreamingAll(\"\\n\")\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls. The `for ("world") |b|` iterates over each byte of the string literal — `"world"` coerces to `[]const u8`, and the for-loop sees u8 bytes.'
+notes: |
+  Last memory/arraylist slot. Drills the "ArrayList(u8) as a
+  growable byte buffer" idiom — a common pattern for building
+  output incrementally. Module 6 (stdlib) revisits this with
+  the `Writer` adapter.

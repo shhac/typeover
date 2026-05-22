@@ -1,0 +1,56 @@
+target: zig
+themeId: zig/memory/arraylist
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — initialize `nums` as an empty
+  `std.ArrayList(i32)`, then defer its release. The program
+  appends one value (10) and prints the resulting length (1).
+generator:
+  kind: template
+  vars:
+    line:
+      - "var nums: std.ArrayList(i32) = .empty;"
+  ts: |-
+    const nums: number[] = [];
+    nums.push(10);
+    console.log(nums.length);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        ${line}
+        defer nums.deinit(alloc);
+        try nums.append(alloc, 10);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{nums.items.len});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "var nums = std.ArrayList(i32).init(alloc);"
+      explain: |-
+        The `.init(alloc)` API was removed in Zig 0.16. The
+        new shape is `var nums: std.ArrayList(i32) = .empty;`
+        with the allocator passed on each mutating call.
+    - match: "var nums: std.ArrayList(i32) = .{};"
+      explain: |-
+        Empty struct literal fails because `items` and
+        `capacity` are required fields. Use `.empty` (a
+        declared on-type constant that fills them with zero
+        values) instead.
+    - match: "const nums: std.ArrayList(i32) = .empty;"
+      explain: |-
+        Must be `var` — both `.deinit` and `.append` mutate
+        the list.
+expectStdout: |
+  1
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `var nums:`, type `std.ArrayList(i32)`, value `= .empty;`."
+  - "Shape: `var <name>: std.ArrayList(T) = .empty;`."
+  - "`var nums: std.ArrayList(i32) = .empty;`"
+notes: |
+  First runnable ArrayList slot. Drills the empty-literal +
+  defer deinit + append + items.len chain.
