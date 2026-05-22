@@ -36,11 +36,16 @@ generator:
         const; reach for var only when you must mutate."
     - match: 'const label = switch (x) {'
       explain: |-
-        The type annotation `: []const u8` is needed — without it,
-        each arm returns a different pointer type and the compiler
-        can't pick the common type for `label`. Adding the
-        annotation tells the compiler to coerce each arm to
-        `[]const u8`.
+        Without the `: []const u8` annotation on `label`, the
+        compiler has to pick a result type from the switch arms
+        — and each arm's literal has a slightly different
+        underlying type (`*const [3:0]u8`, `*const [3:0]u8`,
+        `*const [5:0]u8`, all string-literal pointer types with
+        different byte counts). The annotation tells the
+        compiler the target — `[]const u8` — and it coerces
+        each arm accordingly. Whether this is strictly required
+        depends on context; for fill-line teaching the explicit
+        annotation is the safe shape.
     - match: 'const label: []const u8 = match (x) {'
       explain: |-
         Zig's keyword is `switch`, not `match` (that's Rust /

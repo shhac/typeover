@@ -4,9 +4,10 @@ type: freeform
 order: 9
 prompt: |
   Write a complete Zig program that:
-   1. Declares a slice `fruits` containing `"apple"`, `"pear"`,
-      `"plum"` (in that order).
-   2. Iterates over the slice with `for (...) |item|`.
+   1. Declares a fixed-length array `fruits` containing
+      `"apple"`, `"pear"`, `"plum"` using
+      `[_][]const u8{ ... }` (the `[_]` infers the count).
+   2. Iterates over the array with `for (...) |item|`.
    3. Prints each fruit followed by a newline.
 
   Expected stdout (exactly):
@@ -39,11 +40,11 @@ expectStdout: |
   plum
 runtime: zig
 hints:
-  - "Two pieces: declare the slice with `const fruits = [_][]const u8{ \"apple\", \"pear\", \"plum\" };` (the `[_]` lets the compiler infer the length), then iterate with `for (fruits) |f| { ... }`."
+  - "Two pieces: declare the array with `const fruits = [_][]const u8{ \"apple\", \"pear\", \"plum\" };` (the `[_]` lets the compiler infer the length; the resulting type is the fixed-length array `[3][]const u8`), then iterate with `for (fruits) |f| { ... }`. The for-loop accepts both arrays and slices."
   - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const fruits = [_][]const u8{ \"apple\", \"pear\", \"plum\" };\n    for (fruits) |f| {\n        // print f followed by \\n\n    }\n}\n```"
   - 'Full program: as in the skeleton — inside the loop body, two `writeStreamingAll` calls (one for `f`, one for `"\n"`).'
 notes: |
-  Second while-and-for freeform. Drills the `for (slice) |item|`
+  Second while-and-for freeform. Drills the `for (collection) |item|`
   shape end-to-end. The `[_][]const u8{...}` initializer is the
   new wrinkle — `[_]` tells the compiler "infer the length from
   the initializer," which is the idiomatic shape for inline

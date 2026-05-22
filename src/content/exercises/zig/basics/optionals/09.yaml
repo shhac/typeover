@@ -3,40 +3,49 @@ themeId: zig/basics/optionals
 type: freeform
 order: 9
 prompt: |
-  Write a complete Zig program demonstrating the `orelse` default
-  on a null optional:
-   1. Declares `const maybe: ?i32 = null;`.
-   2. Uses `orelse` to default to `100`.
+  Write a complete Zig program demonstrating the `orelse`
+  default on a PRESENT optional (the opposite of slot 06's
+  null-path case):
+   1. Declares `const maybe: ?i32 = 7;` (a present value).
+   2. Uses `orelse` with a fallback of `100`.
    3. Prints the result followed by a newline.
 
-  Expected stdout: `100` on its own line.
+  Because `maybe` is present, `orelse` picks the inner value
+  (not the fallback). Expected stdout: `7` on its own line.
 generator:
   kind: template
   vars: {}
   ts: |-
-    const maybe: number | null = null;
+    const maybe: number | null = 7;
     const value = maybe ?? 100;
     console.log(value);
   canonical: |-
     const std = @import("std");
 
     pub fn main(init: std.process.Init) !void {
-        const maybe: ?i32 = null;
+        const maybe: ?i32 = 7;
         const value: i32 = maybe orelse 100;
         var buf: [16]u8 = undefined;
         const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{value});
         try std.Io.File.stdout().writeStreamingAll(init.io, printed);
     }
 expectStdout: |
-  100
+  7
 runtime: zig
 hints:
-  - "Three pieces: `const maybe: ?i32 = null;`, `const value: i32 = maybe orelse 100;` (NOT `?i32` — orelse strips the optional), then bufPrint + writeStreamingAll."
-  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const maybe: ?i32 = null;\n    const value: i32 = maybe orelse 100;\n    // bufPrint(\"{d}\\n\", .{value}) + writeStreamingAll\n}\n```"
-  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Because `maybe` is null, the orelse picks the default — 100.'
+  - "Three pieces: `const maybe: ?i32 = 7;` (note the value `7`, not `null`), `const value: i32 = maybe orelse 100;` (the orelse fallback is unused when the optional has a value), then bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const maybe: ?i32 = 7;\n    const value: i32 = maybe orelse 100;\n    // bufPrint(\"{d}\\n\", .{value}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Because `maybe` is the present value 7, `orelse` returns 7 (the fallback is unused). Compare with slot 06 — same `orelse` expression, null instead of 7 → fallback 99 wins.'
 notes: |
   Last basics/optionals slot. Closes Module 1 — the full basics
-  module is now end-to-end exerciseable. Drills `orelse` with the
-  null-path case (slot 06 was also null-path; the slot still
-  serves as a different scaffold and bufPrint exercise for the
-  same idiom).
+  module is now end-to-end exerciseable.
+
+  Drills the PRESENT-value path through `orelse`: when the
+  optional has a value, that value wins; the fallback is never
+  evaluated. Pair with slot 06 (null-path) — together they
+  cover both branches of the `orelse` expression.
+
+  Per the M1 validator's Q20 finding: previously slots 06 and
+  09 both drilled the null-path (with different scaffolds),
+  leaving the present-value branch unexplored. Fixed by
+  inverting slot 09's input.

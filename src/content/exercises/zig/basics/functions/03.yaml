@@ -3,10 +3,11 @@ themeId: zig/basics/functions
 type: mcq
 order: 3
 prompt: |
-  TypeScript returns multiple values as a tuple `[a, b]`. Zig has
-  no tuples for this — the idiom is to define a `struct` and
-  return that. The fields are named, which makes the call site
-  read better. Pick the Zig translation.
+  TypeScript returns multiple values as a tuple `[a, b]`. Zig
+  technically has anonymous tuples too (`struct { i32, i32 }`),
+  but the idiomatic shape for multi-return is a NAMED struct —
+  the field names make the call site read better (`r.quotient`
+  vs `r[0]`). Pick the Zig translation.
 generator:
   kind: template
   vars: {}
