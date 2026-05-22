@@ -27,16 +27,19 @@ import { defineAppearanceAxis } from "./appearance-axis";
 export {
   /* shape (radius) */
   RADII,
+  RADIUS_LABELS,
   RADIUS_STORAGE_KEY,
   currentRadius,
   setRadius,
   /* density */
   DENSITIES,
+  DENSITY_LABELS,
   DENSITY_STORAGE_KEY,
   currentDensity,
   setDensity,
   /* style */
   STYLES,
+  STYLE_LABELS,
   STYLE_STORAGE_KEY,
   currentStyle,
   setStyle,
@@ -116,3 +119,29 @@ export function setTheme(choice: ThemeChoice): void {
   }
   themeAxis.set(choice);
 }
+
+/** Human-facing labels + one-line descriptions for each theme
+ *  choice. Lives next to the values so adding/renaming a theme is
+ *  a single-file edit. Mirrors the `PALETTE_LABELS` pattern in
+ *  `./palette.ts`. Consumed by the settings picker
+ *  (`AppearancePicker.tsx`) — which projects this into
+ *  `RadioOption<ThemeChoice>` shape — and by the toast announcer
+ *  for the "Theme: <label>" friendly message. */
+export const THEME_LABELS: Record<ThemeChoice, { label: string; description: string }> = {
+  system: {
+    label: "System",
+    description: "Follow your OS light/dark preference.",
+  },
+  dark: {
+    label: "Dark",
+    description: "Near-black surfaces, amber accent. Default.",
+  },
+  light: {
+    label: "Light",
+    description: "Off-white surfaces, darkened accents for AA contrast.",
+  },
+};
+
+/** Render order for the theme radio group. The picker iterates this
+ *  array and looks each value up in `THEME_LABELS`. */
+export const THEME_CHOICES: readonly ThemeChoice[] = ["system", "dark", "light"];

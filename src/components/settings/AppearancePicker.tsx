@@ -14,11 +14,15 @@ import {
   currentPaletteChoice,
   currentRadius,
   currentStyle,
+  DENSITIES,
+  DENSITY_LABELS,
   type DensityId,
   type PaletteChoice,
   PALETTE_HOME_STYLE,
   PALETTE_LABELS,
   PALETTES,
+  RADII,
+  RADIUS_LABELS,
   type RadiusId,
   reapplyDefaultPaletteForCurrentStyle,
   setDensity,
@@ -26,10 +30,13 @@ import {
   setRadius,
   setStyle,
   setTheme,
+  STYLES,
+  STYLE_LABELS,
   type StyleId,
   STYLE_DEFAULT_PALETTE,
   type ThemeChoice,
 } from "~/lib/theme";
+import { THEME_CHOICES, THEME_LABELS } from "~/lib/theme";
 
 /*
  * Five radio groups, one per appearance axis (theme, density,
@@ -47,92 +54,27 @@ import {
  * the right radio without a hydration flicker.
  */
 
-const THEME_OPTIONS: RadioOption<ThemeChoice>[] = [
-  {
-    value: "system",
-    label: "System",
-    description: "Follow your OS light/dark preference.",
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    description: "Near-black surfaces, amber accent. Default.",
-  },
-  {
-    value: "light",
-    label: "Light",
-    description: "Off-white surfaces, darkened accents for AA contrast.",
-  },
-];
+/* Project each axis's `Record<EnumId, {label, description}>` into the
+ * `RadioOption<EnumId>` shape RadioGroup wants. Single helper, used
+ * four times below. The value-ordering comes from the canonical
+ * values arrays (`THEME_CHOICES`, `DENSITIES`, `STYLES`, `RADII`) —
+ * so adding a value lands in the lib file (single edit site) and
+ * the picker picks it up via that array's iteration. */
+function toRadioOptions<T extends string>(
+  values: readonly T[],
+  labels: Record<T, { label: string; description: string }>,
+): RadioOption<T>[] {
+  return values.map((value) => ({
+    value,
+    label: labels[value].label,
+    description: labels[value].description,
+  }));
+}
 
-const DENSITY_OPTIONS: RadioOption<DensityId>[] = [
-  {
-    value: "compact",
-    label: "Compact",
-    description: "Tighter spacing. Bloomberg-terminal nostalgia.",
-  },
-  {
-    value: "normal",
-    label: "Normal",
-    description: "The default. Airy Linear-style breathing room.",
-  },
-  {
-    value: "airy",
-    label: "Airy",
-    description: "More whitespace. Reads like an essay.",
-  },
-];
-
-const STYLE_OPTIONS: RadioOption<StyleId>[] = [
-  {
-    value: "terminal",
-    label: "Terminal",
-    description: "Bloomberg-meets-airy-Linear. Flat, hairline-only, mono. Default.",
-  },
-  {
-    value: "cardboard",
-    label: "Cardboard",
-    description: "Warm paper grain on panels. Reads like a notebook.",
-  },
-  {
-    value: "textbook",
-    label: "Textbook",
-    description: "Serif headings + amber left-rule. Annotated-page feel.",
-  },
-  {
-    value: "glass",
-    label: "Glass",
-    description: "Translucent panels with subtle backdrop blur where supported.",
-  },
-  {
-    value: "islands",
-    label: "Islands",
-    description: "Distinct floating cards with stronger drop shadows.",
-  },
-];
-
-const RADIUS_OPTIONS: RadioOption<RadiusId>[] = [
-  {
-    value: "sharp",
-    label: "Sharp",
-    description: "Near-square corners. Terminal feel.",
-  },
-  {
-    value: "normal",
-    label: "Normal",
-    description: "Subtle 2–4px corners. Default.",
-  },
-  {
-    value: "rounded",
-    label: "Rounded",
-    description: "Friendlier 4–12px corners.",
-  },
-  {
-    value: "pill",
-    label: "Pill",
-    description: "Generously curved — 8–24px. Small elements pill out.",
-  },
-];
+const THEME_OPTIONS = toRadioOptions(THEME_CHOICES, THEME_LABELS);
+const DENSITY_OPTIONS = toRadioOptions(DENSITIES, DENSITY_LABELS);
+const STYLE_OPTIONS = toRadioOptions(STYLES, STYLE_LABELS);
+const RADIUS_OPTIONS = toRadioOptions(RADII, RADIUS_LABELS);
 
 /** Find an option's user-facing label for a given enum value, falling
  *  back to the raw value if the option list is out of date. Used by
