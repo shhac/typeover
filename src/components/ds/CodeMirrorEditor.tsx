@@ -1,5 +1,5 @@
-import { createEffect, onCleanup, onMount } from "solid-js";
-import { EditorState, Compartment, type Extension } from "@codemirror/state";
+import { onMount } from "solid-js";
+import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import { bracketMatching, indentOnInput, indentUnit } from "@codemirror/language";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -8,6 +8,7 @@ import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import { cmLanguageExtension, type CmLanguage } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
+import { useCodeMirror } from "~/lib/use-codemirror";
 
 /** Language packs the editor supports. Alias of `CmLanguage`, kept
  *  as a named export so existing consumers (Freeform, FillBlank
@@ -168,93 +169,104 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
   );
 }
 
+/* Aria labels per language. Used as the contentDOM default when the
+ * caller doesn't supply one. */
+const ARIA_LABEL_BY_LANG: Record<EditorLanguage, string> = {
+  go: "Go code",
+  ts: "TypeScript source",
+  zig: "Zig code",
+};
+
+/* Map editor language → completion language. Returns null for
+ * languages without a curated member map (the TS pane is read-only
+ * and doesn't need completion). */
+function toCompletionLanguage(lang: EditorLanguage): CompletionLanguage | null {
+  return lang === "zig" ? "zig" : lang === "go" ? "go" : null;
+}
+
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   if (isCodeMirrorTestEnv()) return TestareaFallback(props);
 
   /* oxlint-disable-next-line no-unassigned-vars — Solid ref binding. */
   let parent: HTMLDivElement | undefined;
-  let view: EditorView | undefined;
-  const editableCompartment = new Compartment();
+  const readOnly = props.readOnly === true;
+  const lang = props.language ?? "go";
 
-  onMount(() => {
-    if (!parent) return;
-    const readOnly = props.readOnly === true;
-    const lang = props.language ?? "go";
-    /* Common extensions live in both modes. Editor-only extensions
-     * (history, closeBrackets, indentOnInput, line numbers,
-     * active-line highlight, keymap) drop out under readOnly so the
-     * pane reads as static syntax-highlighted code rather than an
-     * editable editor with disabled affordances. */
-    const defaultAriaLabel =
-      lang === "go" ? "Go code" : lang === "zig" ? "Zig code" : "TypeScript source";
-    const baseExtensions: Extension[] = [
-      cmLanguageExtension(lang),
-      EditorView.contentAttributes.of({
-        "aria-label": props.ariaLabel ?? defaultAriaLabel,
-        spellcheck: "false",
-      }),
-      ...codemirrorThemeExtensions({
-        minHeight: readOnly ? "auto" : "16rem",
-        contentPadding: "0.75rem 0",
-        surfaceFocusOutline: !readOnly,
-        caret: !readOnly,
-      }),
-    ];
+  useCodeMirror({
+    parent: () => parent,
+    initialDoc: props.value,
+    /* Sync external `value` changes only when the editor is
+     * editable. Read-only display mode is one-shot — the caller
+     * doesn't expect to mutate via the value prop after mount. */
+    value: readOnly ? undefined : () => props.value,
+    /* Toggle editability when `disabled` flips. Only relevant in
+     * editor mode (readOnly mode never adds the compartment). */
+    editable: readOnly ? undefined : () => !props.disabled,
+    buildExtensions: (editableCompartment) => {
+      const completionLang = toCompletionLanguage(lang);
+      const completion: Extension[] =
+        completionLang && !readOnly
+          ? [completionExtension({ language: completionLang, canonical: props.canonical })]
+          : [];
 
-    /* Completion sources (member-prefix dotted-path discovery +
-     * in-scope token completion seeded by the canonical, if any).
-     * Wired for languages with curated member maps (Zig + Go);
-     * skipped for the TS pane (which is read-only anyway). */
-    const completionLang: CompletionLanguage | null =
-      lang === "zig" ? "zig" : lang === "go" ? "go" : null;
-    const completion: Extension[] =
-      completionLang && !readOnly
-        ? [completionExtension({ language: completionLang, canonical: props.canonical })]
-        : [];
+      const baseExtensions: Extension[] = [
+        cmLanguageExtension(lang),
+        EditorView.contentAttributes.of({
+          "aria-label": props.ariaLabel ?? ARIA_LABEL_BY_LANG[lang],
+          spellcheck: "false",
+        }),
+        ...codemirrorThemeExtensions({
+          minHeight: readOnly ? "auto" : "16rem",
+          contentPadding: "0.75rem 0",
+          surfaceFocusOutline: !readOnly,
+          caret: !readOnly,
+        }),
+      ];
 
-    const editorOnly: Extension[] = readOnly
-      ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
-      : [
-          lineNumbers(),
-          history(),
-          bracketMatching(),
-          closeBrackets(),
-          indentOnInput(),
-          indentUnit.of("\t"),
-          highlightActiveLine(),
-          editableCompartment.of(EditorView.editable.of(!props.disabled)),
-          ...completion,
-          keymap.of([
-            {
-              key: "Mod-Enter",
-              run: () => {
-                props.onCmdEnter?.();
-                return true;
+      /* Editor-only extensions (history, closeBrackets, indent-on-
+       * input, line numbers, active-line highlight, keymap) drop
+       * out under readOnly so the pane reads as static syntax-
+       * highlighted code rather than an editable editor with
+       * disabled affordances. */
+      const editorOnly: Extension[] = readOnly
+        ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
+        : [
+            lineNumbers(),
+            history(),
+            bracketMatching(),
+            closeBrackets(),
+            indentOnInput(),
+            indentUnit.of("\t"),
+            highlightActiveLine(),
+            editableCompartment.of(EditorView.editable.of(!props.disabled)),
+            ...completion,
+            keymap.of([
+              {
+                key: "Mod-Enter",
+                run: () => {
+                  props.onCmdEnter?.();
+                  return true;
+                },
               },
-            },
-            ...closeBracketsKeymap,
-            ...defaultKeymap,
-            ...historyKeymap,
-            indentWithTab,
-          ]),
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              props.onValueChange?.(update.state.doc.toString());
-            }
-          }),
-        ];
+              ...closeBracketsKeymap,
+              ...defaultKeymap,
+              ...historyKeymap,
+              indentWithTab,
+            ]),
+            EditorView.updateListener.of((update) => {
+              if (update.docChanged) {
+                props.onValueChange?.(update.state.doc.toString());
+              }
+            }),
+          ];
 
-    const state = EditorState.create({
-      doc: props.value,
-      extensions: [...baseExtensions, ...editorOnly],
-    });
-    view = new EditorView({ state, parent });
-
-    if (!readOnly && props.ref) {
+      return [...baseExtensions, ...editorOnly];
+    },
+    onView: (view) => {
+      if (readOnly || !props.ref) return;
       const handle: CodeMirrorEditorHandle = {
-        focus: () => view!.focus(),
+        focus: () => view.focus(),
         insertAtCursor: (text: string) => {
-          if (!view) return;
           const { from, to } = view.state.selection.main;
           view.dispatch({
             changes: { from, to, insert: text },
@@ -263,36 +275,8 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
         },
       };
       props.ref(handle);
-    }
+    },
   });
-
-  /* Keep CM in sync with externally-changed `value` (e.g. Reveal
-   * canonical sets the code from outside). Skip when the value
-   * matches what CM already holds — avoids re-dispatching during
-   * the normal onValueChange cycle. */
-  createEffect(() => {
-    if (!view) return;
-    const incoming = props.value;
-    const current = view.state.doc.toString();
-    if (incoming !== current) {
-      view.dispatch({
-        changes: { from: 0, to: current.length, insert: incoming },
-      });
-    }
-  });
-
-  createEffect(() => {
-    if (!view) return;
-    /* The editable compartment is only added in editor mode (not
-     * readOnly). Guard so the reconfigure isn't dispatched into a
-     * state that doesn't know the compartment. */
-    if (props.readOnly === true) return;
-    view.dispatch({
-      effects: editableCompartment.reconfigure(EditorView.editable.of(!props.disabled)),
-    });
-  });
-
-  onCleanup(() => view?.destroy());
 
   return <div ref={parent} />;
 }

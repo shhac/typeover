@@ -1,10 +1,11 @@
-import { For, onCleanup, onMount, type JSX } from "solid-js";
+import { For, type JSX } from "solid-js";
 import { render } from "solid-js/web";
 import { EditorState } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType } from "@codemirror/view";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import { cmLanguageExtension } from "~/lib/codemirror-lang";
+import { useCodeMirror } from "~/lib/use-codemirror";
 import type { FillSegment } from "~/lib/generator-runtime";
 import { LANG_DISPLAY } from "~/lib/lang";
 
@@ -126,7 +127,7 @@ class BlankWidget extends WidgetType {
  * segments array — matches the existing fill-word convention so
  * the same blank var appearing twice produces two independent
  * widgets (e.g. `${x} == ${x}`). */
-interface BlankPosition {
+export interface BlankPosition {
   from: number;
   to: number;
   slotIdx: number;
@@ -134,7 +135,7 @@ interface BlankPosition {
   expected: string;
 }
 
-function buildDocAndRanges(segments: readonly FillSegment[]): {
+export function buildDocAndRanges(segments: readonly FillSegment[]): {
   doc: string;
   blankRanges: BlankPosition[];
 } {
@@ -193,35 +194,31 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
 
   /* oxlint-disable-next-line no-unassigned-vars — Solid ref binding. */
   let parent: HTMLDivElement | undefined;
-  let view: EditorView | undefined;
+  const { doc, blankRanges } = buildDocAndRanges(props.segments);
+  const lang = props.language ?? "go";
 
-  onMount(() => {
-    if (!parent) return;
-    const { doc, blankRanges } = buildDocAndRanges(props.segments);
-
-    /* The decoration set is computed once on mount — the segments
-     * structure is static for a given exercise instance (Reshuffle
-     * remounts the component). Re-derivation per state change is
-     * unnecessary. */
-    const widgets = blankRanges.map((b) =>
-      Decoration.replace({
-        widget: new BlankWidget(b.slotIdx, b.varName, b.expected, props.renderBlank),
-        inclusive: false,
-      }).range(b.from, b.to),
-    );
-    const decorationSet = Decoration.set(widgets);
-    const decorationField = EditorView.decorations.of(decorationSet);
-    const atomicField = EditorView.atomicRanges.of(() => decorationSet);
-
-    const lang = props.language ?? "go";
-    const state = EditorState.create({
-      doc,
-      extensions: [
+  useCodeMirror({
+    parent: () => parent,
+    initialDoc: doc,
+    /* Read-only scaffold: no value-sync, no editable-toggle. The
+     * segments are static for a given exercise instance (Reshuffle
+     * remounts the component). */
+    buildExtensions: () => {
+      /* The decoration set is computed once on mount — same
+       * reasoning. Re-derivation per state change is unnecessary. */
+      const widgets = blankRanges.map((b) =>
+        Decoration.replace({
+          widget: new BlankWidget(b.slotIdx, b.varName, b.expected, props.renderBlank),
+          inclusive: false,
+        }).range(b.from, b.to),
+      );
+      const decorationSet = Decoration.set(widgets);
+      return [
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
         cmLanguageExtension(lang),
-        decorationField,
-        atomicField,
+        EditorView.decorations.of(decorationSet),
+        EditorView.atomicRanges.of(() => decorationSet),
         EditorView.contentAttributes.of({
           "aria-label": props.ariaLabel ?? `Fill-the-blanks ${LANGUAGE_LABEL[lang]} snippet`,
           spellcheck: "false",
@@ -232,12 +229,9 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
           surfaceFocusOutline: false,
           caret: false,
         }),
-      ],
-    });
-    view = new EditorView({ state, parent });
+      ];
+    },
   });
-
-  onCleanup(() => view?.destroy());
 
   return <div ref={parent} />;
 }

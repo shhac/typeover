@@ -1,5 +1,4 @@
-import { createEffect, onCleanup, onMount } from "solid-js";
-import { EditorState, Compartment, Prec, type Extension } from "@codemirror/state";
+import { EditorState, Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { history, historyKeymap } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
@@ -7,6 +6,7 @@ import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import { cmLanguageExtension } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
+import { useCodeMirror } from "~/lib/use-codemirror";
 import { cn } from "../ds/_internal";
 
 /**
@@ -158,119 +158,76 @@ function BlankInputFallback(props: BlankInputProps, state: () => InputState) {
 function BlankInputCodeMirror(props: BlankInputProps, state: () => InputState) {
   /* oxlint-disable-next-line no-unassigned-vars — Solid ref binding. */
   let parent: HTMLSpanElement | undefined;
-  let view: EditorView | undefined;
-  const editableCompartment = new Compartment();
 
-  /* Strip newlines from any transaction's changes — fill-line and
-   * fill-word are single-line by definition. Paste of multi-line
-   * content collapses to single-line content. Replace the whole
-   * doc with the cleaned version so CM's history stays
-   * single-step (not "type + then strip"). */
-  const singleLineFilter = EditorState.transactionFilter.of((tr) => {
-    if (!tr.docChanged) return tr;
-    const newDoc = tr.newDoc.toString();
-    if (!newDoc.includes("\n")) return tr;
-    return {
-      changes: { from: 0, to: tr.startState.doc.length, insert: newDoc.replaceAll("\n", "") },
-    };
-  });
-
-  onMount(() => {
-    if (!parent) return;
-
-    const languageExt: Extension = cmLanguageExtension(props.language ?? "go");
-    const completionExt: Extension[] = props.language
-      ? [completionExtension({ language: props.language, canonical: props.canonical })]
-      : [];
-
-    const state0 = EditorState.create({
-      doc: props.value,
-      extensions: [
-        languageExt,
-        singleLineFilter,
-        history(),
-        closeBrackets(),
-        ...completionExt,
-        editableCompartment.of(EditorView.editable.of(!props.locked)),
-        /* Enter on the blank fires `onEnter` (Run / next-blank) —
-         * Prec.high so it wins over CM's default newline insert
-         * (which the transactionFilter would strip anyway, but
-         * binding here means the keystroke never tries to insert
-         * in the first place). */
-        Prec.high(
-          keymap.of([
-            {
-              key: "Enter",
-              run: () => {
-                props.onEnter?.();
-                return true;
-              },
+  useCodeMirror({
+    parent: () => parent,
+    initialDoc: props.value,
+    value: () => props.value,
+    editable: () => !props.locked,
+    buildExtensions: (editableCompartment) => [
+      cmLanguageExtension(props.language ?? "go"),
+      singleLineFilter,
+      history(),
+      closeBrackets(),
+      ...(props.language
+        ? [completionExtension({ language: props.language, canonical: props.canonical })]
+        : []),
+      editableCompartment.of(EditorView.editable.of(!props.locked)),
+      /* Enter on the blank fires `onEnter` (Run / next-blank) —
+       * Prec.high so it wins over CM's default newline insert
+       * (which the transactionFilter would strip anyway, but
+       * binding here means the keystroke never tries to insert
+       * in the first place). */
+      Prec.high(
+        keymap.of([
+          {
+            key: "Enter",
+            run: () => {
+              props.onEnter?.();
+              return true;
             },
-          ]),
-        ),
-        keymap.of([...closeBracketsKeymap, ...historyKeymap]),
-        EditorView.contentAttributes.of({
-          "aria-label": `fill-in blank ${props.varName}`,
-          spellcheck: "false",
-          autocomplete: "off",
-          autocapitalize: "off",
-          autocorrect: "off",
-        }),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            props.onInput(update.state.doc.toString());
-          }
-        }),
-        /* Single-line theme: no line numbers, no active-line
-         * highlight, minimal padding, content hugs its width. */
-        ...codemirrorThemeExtensions({
-          minHeight: "auto",
-          contentPadding: "0.125rem 0.375rem",
-          surfaceFocusOutline: false,
-          caret: true,
-        }),
-        /* Inline display + content-hug so the editor sits naturally
-         * in the surrounding scaffold like an `<input>` did. */
-        EditorView.theme({
-          "&": {
-            display: "inline-block",
-            verticalAlign: "baseline",
-            minWidth: "14ch",
-            maxWidth: "100%",
           },
-          ".cm-scroller": { overflowX: "auto", overflowY: "hidden" },
-          ".cm-content": { whiteSpace: "pre", padding: "0" },
-          ".cm-line": { padding: "0" },
-        }),
-      ],
-    });
-
-    view = new EditorView({ state: state0, parent });
-    if (props.ref) props.ref(view.contentDOM);
+        ]),
+      ),
+      keymap.of([...closeBracketsKeymap, ...historyKeymap]),
+      EditorView.contentAttributes.of({
+        "aria-label": `fill-in blank ${props.varName}`,
+        spellcheck: "false",
+        autocomplete: "off",
+        autocapitalize: "off",
+        autocorrect: "off",
+      }),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          props.onInput(update.state.doc.toString());
+        }
+      }),
+      /* Single-line theme: no line numbers, no active-line
+       * highlight, minimal padding, content hugs its width. */
+      ...codemirrorThemeExtensions({
+        minHeight: "auto",
+        contentPadding: "0.125rem 0.375rem",
+        surfaceFocusOutline: false,
+        caret: true,
+      }),
+      /* Inline display + content-hug so the editor sits naturally
+       * in the surrounding scaffold like an `<input>` did. */
+      EditorView.theme({
+        "&": {
+          display: "inline-block",
+          verticalAlign: "baseline",
+          minWidth: "14ch",
+          maxWidth: "100%",
+        },
+        ".cm-scroller": { overflowX: "auto", overflowY: "hidden" },
+        ".cm-content": { whiteSpace: "pre", padding: "0" },
+        ".cm-line": { padding: "0" },
+      }),
+    ],
+    onView: (view) => {
+      if (props.ref) props.ref(view.contentDOM);
+    },
   });
-
-  /* Sync external `value` changes (e.g. parent setState resets) into
-   * the editor's doc. Skip when the values already match to avoid
-   * cursor-jump loops with the updateListener above. */
-  createEffect(() => {
-    const v = props.value;
-    if (!view) return;
-    const current = view.state.doc.toString();
-    if (current === v) return;
-    view.dispatch({
-      changes: { from: 0, to: current.length, insert: v },
-    });
-  });
-
-  /* Toggle editability when `locked` flips. */
-  createEffect(() => {
-    if (!view) return;
-    view.dispatch({
-      effects: editableCompartment.reconfigure(EditorView.editable.of(!props.locked)),
-    });
-  });
-
-  onCleanup(() => view?.destroy());
 
   return (
     <span
@@ -288,3 +245,18 @@ function BlankInputCodeMirror(props: BlankInputProps, state: () => InputState) {
     />
   );
 }
+
+/* Single-line transaction filter — strips newlines from any
+ * transaction's changes. fill-line + fill-word are single-line by
+ * definition; paste of multi-line content collapses to a single
+ * line. Replace the whole doc with the cleaned version so CM's
+ * history stays single-step (not "type + then strip"). Hoisted
+ * out of `BlankInputCodeMirror` because it's stateless. */
+const singleLineFilter = EditorState.transactionFilter.of((tr) => {
+  if (!tr.docChanged) return tr;
+  const newDoc = tr.newDoc.toString();
+  if (!newDoc.includes("\n")) return tr;
+  return {
+    changes: { from: 0, to: tr.startState.doc.length, insert: newDoc.replaceAll("\n", "") },
+  };
+});
