@@ -8,6 +8,8 @@ import {
   loadExerciseContext,
   loadThemeContext,
   paramsForExercise,
+  paramsForModule,
+  paramsForTheme,
   summariseCoverage,
   themeHref,
   truncateIntro,
@@ -182,6 +184,58 @@ describe("paramsForExercise", () => {
     expect(paramsForExercise("go/foundations//01")).toBeNull();
     expect(paramsForExercise("/foundations/variables/01")).toBeNull();
     expect(paramsForExercise("go/foundations/variables/")).toBeNull();
+  });
+});
+
+describe("paramsForTheme", () => {
+  it("splits a well-formed id into lang/module/theme", () => {
+    expect(paramsForTheme("go/foundations/variables")).toEqual({
+      lang: "go",
+      module: "foundations",
+      theme: "variables",
+    });
+    expect(paramsForTheme("zig/basics/hello-and-output")).toEqual({
+      lang: "zig",
+      module: "basics",
+      theme: "hello-and-output",
+    });
+  });
+
+  it("returns null when the id has the wrong number of parts", () => {
+    expect(paramsForTheme("foundations/variables")).toBeNull(); // 2 parts (pre-reorg shape)
+    expect(paramsForTheme("foundations")).toBeNull(); // 1 part
+    expect(paramsForTheme("a/b/c/d")).toBeNull(); // 4 parts (exercise shape)
+    expect(paramsForTheme("")).toBeNull();
+  });
+
+  it("returns null when any part is empty", () => {
+    expect(paramsForTheme("go//variables")).toBeNull();
+    expect(paramsForTheme("/foundations/variables")).toBeNull();
+    expect(paramsForTheme("go/foundations/")).toBeNull();
+  });
+});
+
+describe("paramsForModule", () => {
+  it("splits a well-formed id into lang/module", () => {
+    expect(paramsForModule("go/foundations")).toEqual({
+      lang: "go",
+      module: "foundations",
+    });
+    expect(paramsForModule("zig/basics")).toEqual({
+      lang: "zig",
+      module: "basics",
+    });
+  });
+
+  it("returns null when the id has the wrong number of parts", () => {
+    expect(paramsForModule("foundations")).toBeNull(); // 1 part (pre-reorg shape)
+    expect(paramsForModule("a/b/c")).toBeNull(); // 3 parts (theme shape)
+    expect(paramsForModule("")).toBeNull();
+  });
+
+  it("returns null when any part is empty", () => {
+    expect(paramsForModule("go/")).toBeNull();
+    expect(paramsForModule("/foundations")).toBeNull();
   });
 });
 

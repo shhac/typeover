@@ -489,4 +489,69 @@ describe("legacy ID migration (lang prefix)", () => {
      * so a future migration can decide what to do with it. */
     expect(persisted.exercises["weird-bare-key"]).toBeDefined();
   });
+
+  it("rewrites every legacy id in a single pass", () => {
+    /* Pin the for-of loop's "process every entry" contract. A
+     * regression that short-circuits after the first migration
+     * would silently leave the rest of the learner's progress
+     * stranded. */
+    seedLegacy({
+      "foundations/variables/01": slot("2025-02-01T00:00:00.000Z"),
+      "foundations/loops/03": slot("2025-02-02T00:00:00.000Z"),
+      "types/structs/05": slot("2025-02-03T00:00:00.000Z"),
+    });
+    /* One read triggers one migration pass. */
+    getExerciseProgress("go/foundations/variables/01");
+    const persisted = readRaw() as RawProgress;
+    expect(persisted.exercises["go/foundations/variables/01"]).toBeDefined();
+    expect(persisted.exercises["go/foundations/loops/03"]).toBeDefined();
+    expect(persisted.exercises["go/types/structs/05"]).toBeDefined();
+    /* All three legacy keys are gone. */
+    expect(persisted.exercises["foundations/variables/01"]).toBeUndefined();
+    expect(persisted.exercises["foundations/loops/03"]).toBeUndefined();
+    expect(persisted.exercises["types/structs/05"]).toBeUndefined();
+  });
+
+  it("migration is one-shot — a second read does not re-write", () => {
+    /* Pin the "migration runs exactly once per cache-cold session"
+     * contract. After the first read writes the rewritten blob
+     * back, subsequent reads must hit the cached migrated value
+     * and skip the migration branch entirely. A regression that
+     * re-runs the migration on every read would re-`setItem` and
+     * thrash any listener subscribed to the change event. */
+    seedLegacy({ "foundations/variables/01": slot("2025-02-01T00:00:00.000Z") });
+    /* Spy on setItem to count the writes. The first read should
+     * fire exactly one write (the migration). Three subsequent
+     * reads should fire none. */
+    const spy = vi.spyOn(localStorage, "setItem");
+    getExerciseProgress("go/foundations/variables/01");
+    const writesAfterMigration = spy.mock.calls.length;
+    expect(writesAfterMigration).toBeGreaterThanOrEqual(1);
+    getExerciseProgress("go/foundations/variables/01");
+    getExerciseProgress("go/foundations/loops/05");
+    getExerciseProgress("go/types/structs/02");
+    /* No additional writes from re-reads. */
+    expect(spy.mock.calls.length).toBe(writesAfterMigration);
+    spy.mockRestore();
+  });
+
+  it("preserves the top-level lastSeenAt — migration is a key-rewrite, not a touch", () => {
+    /* The Progress envelope has its own `lastSeenAt` separate from
+     * the per-exercise slots. The migration's job is to rewrite
+     * exercise keys; it must not stamp the envelope, otherwise
+     * `lastTouchedExerciseId` and any time-based analytics would
+     * see a phantom "session" at migration time. */
+    const envelopeTs = "2024-12-31T23:59:59.000Z";
+    const blob: RawProgress = {
+      version: 1,
+      startedAt: "2024-01-01T00:00:00.000Z",
+      lastSeenAt: envelopeTs,
+      exercises: { "foundations/variables/01": slot("2025-02-01T00:00:00.000Z") },
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
+    getExerciseProgress("go/foundations/variables/01");
+    const persisted = readRaw() as RawProgress;
+    expect(persisted.lastSeenAt).toBe(envelopeTs);
+    expect(persisted.startedAt).toBe("2024-01-01T00:00:00.000Z");
+  });
 });

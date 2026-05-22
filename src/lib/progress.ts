@@ -5,6 +5,7 @@ import {
   type ExerciseProgress,
   type Progress,
 } from "./progress-schema";
+import { migrateLegacyIds } from "./progress-migrations";
 import { nowIso } from "./now-iso";
 
 /*
@@ -108,50 +109,10 @@ function read(): Progress {
   return cachedProgress;
 }
 
-/** One-shot migration: rewrite legacy 3-segment exercise IDs
- *  (`<module>/<theme>/<index>`) to the multi-language 4-segment form
- *  (`go/<module>/<theme>/<index>`). The only language at the time of
- *  the reorg was Go, so legacy keys always belong to that track.
- *
- *  Returns the SAME reference when nothing changed, so the caller can
- *  skip the write back to localStorage. When at least one key was
- *  rewritten, returns a new Progress with the merged map.
- *
- *  Conflict policy: if both a legacy `foundations/variables/01` AND a
- *  modern `go/foundations/variables/01` exist (rare — would mean the
- *  learner ran a build between the schema bump and the content reorg),
- *  the modern entry wins. Doesn't surface a backup; the data isn't
- *  precious enough to warrant a separate stash key. */
-function migrateLegacyIds(p: Progress): Progress {
-  let migratedCount = 0;
-  const exercises: Record<string, ExerciseProgress> = { ...p.exercises };
-  for (const [id, slot] of Object.entries(p.exercises)) {
-    if (!needsLegacyPrefix(id)) continue;
-    const newId = `go/${id}`;
-    if (newId in exercises) {
-      /* Modern entry already exists — drop the legacy one rather than
-       * clobbering a newer record with an older one. */
-      delete exercises[id];
-    } else {
-      exercises[newId] = slot;
-      delete exercises[id];
-    }
-    migratedCount++;
-  }
-  if (migratedCount === 0) return p;
-  return { ...p, exercises };
-}
-
-function needsLegacyPrefix(id: string): boolean {
-  const parts = id.split("/");
-  if (parts.length !== 3) return false;
-  /* Reject empty segments — those are corrupt rather than legacy. */
-  if (parts.some((s) => s === "")) return false;
-  /* Defensive: if a 3-segment id somehow starts with a known lang
-   * slug, leave it alone (it's malformed but not "legacy Go"). */
-  if (parts[0] === "go" || parts[0] === "zig") return false;
-  return true;
-}
+/* Migrations live in `./progress-migrations` so the storage module
+ * stays focused on cache + IO. `read()` above calls `migrateLegacyIds`
+ * inline. When the next migration lands, it gets a sibling export
+ * there + one more call in the read pipeline. */
 
 /** Pure serializer. Caller is responsible for updating `p.lastSeenAt`
  *  before calling; write() doesn't touch timestamps. */
