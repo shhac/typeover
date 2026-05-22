@@ -22,9 +22,9 @@
     "runtime:verify": "node runtime/yaegi-wasm/verify-runnable.mjs",
     "runtime:zig:build": "bash runtime/zig-wasm/build.sh",
     "runtime:zig:smoke": "node runtime/zig-wasm/smoke.mjs",
-    "content:lint": "node scripts/content-lint.mjs",
-    "content:new": "node scripts/content-new-theme.mjs",
-    "content:report": "node scripts/content-report.mjs"
+    "content:lint": "node scripts/content-lint.ts",
+    "content:new": "node scripts/content-new-theme.ts",
+    "content:report": "node scripts/content-report.ts"
   },
   "dependencies": {
     "@andrewbranch/untar.js": "^1.0.3",

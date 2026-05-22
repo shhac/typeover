@@ -1,6 +1,6 @@
 /*
  * Authoring-progress report. Cheaper than the lint:
- * `content-lint.mjs` answers "is the content graph valid?"; this
+ * `content-lint.ts` answers "is the content graph valid?"; this
  * answers "how much have we written, and what's left?". Run with
  *
  *   pnpm content:report
@@ -31,33 +31,56 @@ const contentRoot = join(repoRoot, "src", "content");
  *  but ≥ 1). Themes with zero exercises are flagged `empty`. */
 const SLOT_TARGET = 9;
 
+interface ModuleData {
+  target: string;
+  title: string;
+  order: number;
+  summary: string;
+}
+interface ThemeData {
+  target: string;
+  moduleId: string;
+  title: string;
+  order: number;
+}
+interface ExerciseData {
+  target: string;
+  themeId: string;
+  order: number;
+}
+
+interface RawEntry<T> {
+  data: T;
+  path: string;
+}
+
 /** Load + parse every YAML under a content sub-tree. */
-async function loadCollection(subdir) {
-  const out = [];
+async function loadCollection<T>(subdir: string): Promise<RawEntry<T>[]> {
+  const out: RawEntry<T>[] = [];
   for await (const path of glob(join(contentRoot, subdir, "**/*.yaml"))) {
-    const data = parse(await readFile(path, "utf8"));
+    const data = parse(await readFile(path, "utf8")) as T;
     out.push({ data, path });
   }
   return out;
 }
 
 const [modulesRaw, themesRaw, exercisesRaw] = await Promise.all([
-  loadCollection("modules"),
-  loadCollection("themes"),
-  loadCollection("exercises"),
+  loadCollection<ModuleData>("modules"),
+  loadCollection<ThemeData>("themes"),
+  loadCollection<ExerciseData>("exercises"),
 ]);
 
 /* Module / theme IDs match Astro's collection IDs:
  *   modules/<lang>/<module>.yaml      → `<lang>/<module>`
  *   themes/<lang>/<module>/<theme>.yaml → `<lang>/<module>/<theme>`
  * Mirrors how astro:content + the lint identify entries. */
-function moduleId(path) {
-  const rel = relative(join(contentRoot, "modules"), path);
-  return rel.slice(0, -".yaml".length).split(sep).join("/");
+function moduleId(path: string): string {
+  const r = relative(join(contentRoot, "modules"), path);
+  return r.slice(0, -".yaml".length).split(sep).join("/");
 }
-function themeId(path) {
-  const rel = relative(join(contentRoot, "themes"), path);
-  return rel.slice(0, -".yaml".length).split(sep).join("/");
+function themeId(path: string): string {
+  const r = relative(join(contentRoot, "themes"), path);
+  return r.slice(0, -".yaml".length).split(sep).join("/");
 }
 
 const modules = modulesRaw
@@ -69,7 +92,7 @@ const themes = themesRaw
   .sort((a, b) => a.data.order - b.data.order);
 
 /** Group exercises by theme ID. */
-const exercisesByTheme = new Map();
+const exercisesByTheme = new Map<string, ExerciseData[]>();
 for (const { data } of exercisesRaw) {
   const arr = exercisesByTheme.get(data.themeId) ?? [];
   arr.push(data);
@@ -77,7 +100,7 @@ for (const { data } of exercisesRaw) {
 }
 
 /** Per-theme bookkeeping for the table + summary. */
-function classify(count) {
+function classify(count: number): { mark: string; label: string } {
   if (count === 0) return { mark: "○", label: "empty" };
   if (count < SLOT_TARGET) return { mark: "·", label: `WIP (${count}/${SLOT_TARGET})` };
   return { mark: "✓", label: "complete" };
@@ -87,11 +110,7 @@ function classify(count) {
 
 console.log("# content report\n");
 
-const moduleSummary = {
-  complete: 0,
-  partial: 0,
-  empty: 0,
-};
+const moduleSummary = { complete: 0, partial: 0, empty: 0 };
 const themeSummary = { complete: 0, wip: 0, empty: 0 };
 let totalExercises = 0;
 let themesWithContent = 0;

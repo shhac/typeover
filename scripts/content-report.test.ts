@@ -15,7 +15,7 @@ import { describe, expect, it } from "vitest";
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
-const scriptPath = join(here, "content-report.mjs");
+const scriptPath = join(here, "content-report.ts");
 const repoRoot = join(here, "..");
 
 function runReport(): string {
