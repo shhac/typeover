@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@solidjs/testing-library";
-import { describe, expect, it } from "vitest";
-import { FillBlankWord } from "./FillBlankWord";
+import { beforeEach, describe, expect, it } from "vitest";
+import { FillBlankWord, nextEmptySlot } from "./FillBlankWord";
 import type { GeneratorSpec } from "~/lib/generator-schema";
 
 /*
@@ -202,5 +202,43 @@ describe("<FillBlankWord> — vacuous-truth guard (blanks: [])", () => {
     expect(inputs(container)).toHaveLength(0);
     const submit = getByText("Submit") as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
+  });
+});
+
+describe("nextEmptySlot", () => {
+  const filled = new Set<number>();
+  const hasValue = (slot: number) => filled.has(slot);
+
+  beforeEach(() => filled.clear());
+
+  it("returns the slot after `from` when it's empty", () => {
+    filled.add(1);
+    expect(nextEmptySlot([1, 2, 3], 1, hasValue)).toBe(2);
+  });
+
+  it("wraps past the end to find an earlier empty slot", () => {
+    filled.add(2);
+    filled.add(3);
+    /* from=3 (last); only 1 is empty. Wrap to find it. */
+    expect(nextEmptySlot([1, 2, 3], 3, hasValue)).toBe(1);
+  });
+
+  it("returns null when every slot is filled", () => {
+    filled.add(1);
+    filled.add(2);
+    filled.add(3);
+    expect(nextEmptySlot([1, 2, 3], 1, hasValue)).toBeNull();
+  });
+
+  it("returns the only empty slot when called from itself with others filled", () => {
+    filled.add(1);
+    filled.add(3);
+    /* from=1 (filled), iterate: 2 (empty) → return 2. */
+    expect(nextEmptySlot([1, 2, 3], 1, hasValue)).toBe(2);
+  });
+
+  it("handles `from` not present in the ordered list (indexOf -1)", () => {
+    /* currentRank = -1, iteration starts at orderedSlots[0]. */
+    expect(nextEmptySlot([10, 20], 999, hasValue)).toBe(10);
   });
 });

@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@solidjs/testing-library";
 import { describe, expect, it, vi } from "vitest";
-import { GO_KEYS, MobileKeyBar } from "./MobileKeyBar";
+import { DEFAULT_CODE_KEYS, MobileKeyBar } from "./MobileKeyBar";
 
 /*
  * MobileKeyBar — DS-layer mobile symbol bar. Tests pin the
@@ -17,10 +17,10 @@ describe("<MobileKeyBar> — structure", () => {
     expect(bar!.getAttribute("aria-label")).toBe("Code symbols");
   });
 
-  it("renders one button per key in GO_KEYS by default", () => {
+  it("renders one button per key in DEFAULT_CODE_KEYS by default", () => {
     const { container } = render(() => <MobileKeyBar onInsert={() => {}} />);
     const buttons = container.querySelectorAll('[role="toolbar"] button');
-    expect(buttons.length).toBe(GO_KEYS.length);
+    expect(buttons.length).toBe(DEFAULT_CODE_KEYS.length);
   });
 
   it("hides on desktop via lg:hidden", () => {

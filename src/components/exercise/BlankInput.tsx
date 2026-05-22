@@ -164,16 +164,16 @@ function BlankInputCodeMirror(props: BlankInputProps, state: () => InputState) {
 
   /* Strip newlines from any transaction's changes — fill-line and
    * fill-word are single-line by definition. Paste of multi-line
-   * content becomes single-line content. */
+   * content collapses to single-line content. Replace the whole
+   * doc with the cleaned version so CM's history stays
+   * single-step (not "type + then strip"). */
   const singleLineFilter = EditorState.transactionFilter.of((tr) => {
     if (!tr.docChanged) return tr;
     const newDoc = tr.newDoc.toString();
     if (!newDoc.includes("\n")) return tr;
-    /* Replace the whole doc with the same content sans newlines.
-     * Builds a fresh transaction to keep history sane. */
-    return [
-      { changes: { from: 0, to: tr.startState.doc.length, insert: newDoc.replace(/\n/g, "") } },
-    ];
+    return {
+      changes: { from: 0, to: tr.startState.doc.length, insert: newDoc.replaceAll("\n", "") },
+    };
   });
 
   onMount(() => {

@@ -75,9 +75,6 @@ export function insertAtFocused(text: string): void {
 }
 
 function insertIntoCodeMirror(content: HTMLElement, text: string): void {
-  /* eslint-disable-next-line @typescript-eslint/no-require-imports — runtime require pattern unused; we import statically. */
-  // (See the static import below the function body; this function
-  // assumes `viewFromDOM` is in scope.)
   const view = viewFromDOM(content);
   if (!view) return;
   const { from, to } = view.state.selection.main;

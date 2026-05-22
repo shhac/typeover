@@ -4,13 +4,18 @@ import { useKeyboardInset } from "~/lib/use-keyboard-inset";
 import { cn } from "./_internal";
 
 /*
- * MobileKeyBar — sticky Go-symbol bar docked above the mobile
+ * MobileKeyBar — sticky code-symbol bar docked above the mobile
  * software keyboard. design-docs/08 + 99.
  *
- * Why this exists: every Go symbol (`{`, `}`, `:=`, `&`, `*`,
+ * Why this exists: every code symbol (`{`, `}`, `:=`, `&`, `*`,
  * `\t`) is 2-3 taps deep on stock iOS/Android keyboards. The bar
  * surfaces them as one-tap inserts so freeform code editing on a
  * phone is actually usable, not theoretically supported.
+ *
+ * Used by Go AND Zig exercise surfaces today — most chips
+ * (`{`, `}`, `(`, `)`, etc.) are universal punctuation; `:=` is
+ * Go-specific but doesn't hurt Zig learners to see (they'll
+ * never type it).
  *
  * Two ergonomic decisions worth knowing:
  *
@@ -54,10 +59,11 @@ export interface KeySpec {
   ariaLabel?: string;
 }
 
-/** Default key set for Go-on-mobile. Authors don't reinvent it
- *  per caller — they can override via the `keys` prop when a
- *  different surface (e.g. a future SQL editor) wants its own. */
-export const GO_KEYS: readonly KeySpec[] = [
+/** Default key set for code-on-mobile. Universal-ish punctuation
+ *  that fits both Go and Zig exercise surfaces. Authors don't
+ *  reinvent it per caller — they can override via the `keys`
+ *  prop when a different surface wants its own. */
+export const DEFAULT_CODE_KEYS: readonly KeySpec[] = [
   { label: "Tab", insert: "  ", ariaLabel: "tab (two spaces)" },
   { label: "{", insert: "{", ariaLabel: "open brace" },
   { label: "}", insert: "}", ariaLabel: "close brace" },
@@ -77,7 +83,7 @@ export const GO_KEYS: readonly KeySpec[] = [
 ];
 
 interface MobileKeyBarProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /** Override the key set. Defaults to GO_KEYS. */
+  /** Override the key set. Defaults to DEFAULT_CODE_KEYS. */
   keys?: readonly KeySpec[];
   /** Called with the `insert` string when a key is tapped. The
    *  caller forwards to `insertAtSelection(textarea, text)` (or
@@ -89,7 +95,7 @@ interface MobileKeyBarProps extends JSX.HTMLAttributes<HTMLDivElement> {
 
 export function MobileKeyBar(props: MobileKeyBarProps) {
   const [local, rest] = splitProps(props, ["keys", "onInsert", "onRun", "class"]);
-  const keys = () => local.keys ?? GO_KEYS;
+  const keys = () => local.keys ?? DEFAULT_CODE_KEYS;
   const inset = useKeyboardInset();
 
   /* In-flow spacer matches the bar's height so the fixed bar

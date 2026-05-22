@@ -13,7 +13,7 @@ export { HintButton } from "./HintButton";
 export { InstructionLine } from "./InstructionLine";
 export { Kbd } from "./Kbd";
 export { LangCrumbs } from "./LangCrumbs";
-export { GO_KEYS, MobileKeyBar, type KeySpec } from "./MobileKeyBar";
+export { DEFAULT_CODE_KEYS, MobileKeyBar, type KeySpec } from "./MobileKeyBar";
 export { NavLink, NAV_LINK_CLASS } from "./NavLink";
 export { Panel } from "./Panel";
 export { PALETTE_CHIP_COLORS, PaletteChip } from "./PaletteChip";

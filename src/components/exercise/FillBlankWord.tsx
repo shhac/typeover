@@ -9,6 +9,30 @@ import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
 import { CodeMirrorFillBlanks } from "../ds/CodeMirrorFillBlanks";
 
+/**
+ * Find the next empty slot in cyclic order starting AFTER `from`,
+ * wrapping past the end back to the start. Returns the slot index,
+ * or `null` if every slot has a value.
+ *
+ * Extracted from `handleEnter` for testability (this is the cyclic-
+ * focus logic that drives Enter-jumps-to-next-blank). Pure: takes
+ * an `orderedSlots` array + a `hasValue` probe, returns the next
+ * empty.
+ */
+export function nextEmptySlot(
+  orderedSlots: readonly number[],
+  from: number,
+  hasValue: (slot: number) => boolean,
+): number | null {
+  const currentRank = orderedSlots.indexOf(from);
+  for (let i = 1; i <= orderedSlots.length; i++) {
+    const candidate = orderedSlots[(currentRank + i) % orderedSlots.length];
+    if (candidate === undefined) continue;
+    if (!hasValue(candidate)) return candidate;
+  }
+  return null;
+}
+
 interface FillBlankWordProps {
   exerciseId: string;
   prompt: string;
@@ -73,20 +97,11 @@ export function FillBlankWord(props: FillBlankWordProps) {
       phase.submit();
       return;
     }
-    /* Find the next empty blank, searching forward from the slot
-     * after the current one and wrapping. */
     const positions = blankPositions();
     if (positions.length === 0) return;
     const orderedSlots = positions.map((p) => p.idx);
-    const currentRank = orderedSlots.indexOf(currentSlotIdx);
-    for (let i = 1; i <= orderedSlots.length; i++) {
-      const candidate = orderedSlots[(currentRank + i) % orderedSlots.length];
-      if (candidate === undefined) continue;
-      if (valueFor(candidate) === "") {
-        inputRefs.get(candidate)?.focus();
-        return;
-      }
-    }
+    const target = nextEmptySlot(orderedSlots, currentSlotIdx, (slot) => valueFor(slot) !== "");
+    if (target !== null) inputRefs.get(target)?.focus();
   }
 
   /* Per design-docs/12 P1: Clear empties inputs AND resets
@@ -133,7 +148,6 @@ export function FillBlankWord(props: FillBlankWordProps) {
       <CodeMirrorFillBlanks
         segments={segments()}
         language={props.target ?? "go"}
-        ariaLabel={`Fill-the-blanks ${props.target === "zig" ? "Zig" : "Go"} snippet`}
         renderBlank={(slotIdx, varName, expected) => (
           <BlankInput
             slotIdx={slotIdx}
