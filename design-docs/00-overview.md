@@ -14,6 +14,7 @@ from these files alone.
 | 03 | [stack.md](03-stack.md) | Why Astro + Solid + Tailwind + Vercel + pnpm? |
 | 04 | [runtime-strategy.md](04-runtime-strategy.md) | How do we run Go in the browser? Yaegi tradeoff and fallback. |
 | 04a | [runtime-matrix.md](04a-runtime-matrix.md) | POC outcome: 18/20 snippets pass, runtime-tier matrix for authoring. |
+| 04b | [zig-runtime.md](04b-zig-runtime.md) | How do we run Zig in the browser? Real-compiler-in-WASM via zigtools. |
 | 05 | [design-system.md](05-design-system.md) | What does typeover look like, and what's the design-system contract? |
 | 06 | [voice-and-feedback.md](06-voice-and-feedback.md) | How does typeover speak to learners? Failure UX, hints, reveals. |
 | 07 | [release.md](07-release.md) | When does typeover go public? Maintenance shape, sharing posture. |
@@ -25,6 +26,7 @@ from these files alone.
 | # | Doc | Question it answers |
 |---|---|---|
 | 10 | [curriculum-go.md](10-curriculum-go.md) | Full Go curriculum, top-down outline with iterative validation. |
+| 10b | [curriculum-zig.md](10b-curriculum-zig.md) | Zig curriculum spine, first slice, and the slot queue for next sessions. |
 | 11 | [progress-tracking.md](11-progress-tracking.md) | What state we keep about each learner; gamification-ready schema. |
 | 12 | [test-plan.md](12-test-plan.md) | Critical-path test checklist for when Vitest lands. |
 | 13 | [themes.md](13-themes.md) | Theme catalogue + the data-theme swap mechanism. |
