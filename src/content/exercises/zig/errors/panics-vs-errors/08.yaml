@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that demonstrates the
+  errors-for-expected-failures rule.
+
+   1. Define `fn safeDiv(a: i32, b: i32) !i32` returning
+      `error.DivByZero` for `b == 0`, else `@divTrunc(a, b)`.
+   2. From `main`, call `safeDiv(20, 4)` with `try` and print
+      the result + newline.
+
+  Expected stdout: `5`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function safeDiv(a: number, b: number): number {
+        if (b === 0) throw new Error("DivByZero");
+        return Math.trunc(a / b);
+    }
+    console.log(safeDiv(20, 4));
+  canonical: |-
+    const std = @import("std");
+
+    fn safeDiv(a: i32, b: i32) !i32 {
+        if (b == 0) return error.DivByZero;
+        return @divTrunc(a, b);
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const r = try safeDiv(20, 4);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{r});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  5
+runtime: zig
+hints:
+  - "Three pieces: `fn safeDiv(a: i32, b: i32) !i32`, the `if (b == 0) return error.DivByZero;` guard, `return @divTrunc(a, b);`. main calls with `try`."
+  - "Skeleton:\n```zig\nfn safeDiv(a: i32, b: i32) !i32 {\n    if (b == 0) return error.DivByZero;\n    return @divTrunc(a, b);\n}\n```"
+  - 'Full program: above + the standard main + bufPrint/writeStreamingAll. 20 / 4 = 5; success path.'
+notes: |
+  First panics-vs-errors freeform. Models the
+  "expected failure → error" rule end-to-end. Contrast with
+  slot 09 which uses panic for an impossible-by-invariant
+  branch.

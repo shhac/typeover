@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing builtin name (without the `@`). Takes a
+  `[]const u8` message and aborts the program. Five letters,
+  lowercase.
+generator:
+  kind: template
+  vars:
+    builtin:
+      - "panic"
+  ts: |-
+    throw new Error("kaboom");
+  canonical: |-
+    @${builtin}("kaboom");
+  distractors:
+    - "throw"
+    - "abort"
+    - "die"
+blanks: [builtin]
+hints:
+  - "Five letters, lowercase. The `@` is already in the scaffold; you're filling just the name."
+  - "Starts with `p`."
+  - "`panic`"
+runtime: none
+notes: |
+  Drill `panic`. Distractors:
+   - `throw` — TS reflex.
+   - `abort` — C reflex.
+   - `die` — Perl reflex.

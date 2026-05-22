@@ -1,0 +1,55 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program using `unreachable` to mark a
+  switch arm that can't fire (by program invariant):
+
+   1. Define `fn parity(n: i32) []const u8` returning `"even"`
+      when `@mod(n, 2) == 0`, `"odd"` when `== 1`, else
+      `unreachable` (impossible since modulus is 0 or 1).
+   2. From `main`, call `parity(4)` and print + newline.
+
+  Expected stdout: `even`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parity(n: number): string {
+        const r = ((n % 2) + 2) % 2;
+        if (r === 0) return "even";
+        if (r === 1) return "odd";
+        throw new Error("unreachable");
+    }
+    console.log(parity(4));
+  canonical: |-
+    const std = @import("std");
+
+    fn parity(n: i32) []const u8 {
+        return switch (@mod(n, 2)) {
+            0 => "even",
+            1 => "odd",
+            else => unreachable,
+        };
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const p = parity(4);
+        try std.Io.File.stdout().writeStreamingAll(init.io, p);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  even
+runtime: zig
+hints:
+  - "Three pieces: `switch (@mod(n, 2))` with arms `0 => \"even\"`, `1 => \"odd\"`, and `else => unreachable`. The function doesn't need `!T` — the contract excludes failure."
+  - "Skeleton:\n```zig\nfn parity(n: i32) []const u8 {\n    return switch (@mod(n, 2)) {\n        0 => \"even\",\n        1 => \"odd\",\n        else => unreachable,\n    };\n}\n```"
+  - 'Full program: above + main + two writeStreamingAll calls. `@mod(4, 2)` is `0`, picks the `"even"` arm; the `else` is dead but the compiler needs it for exhaustiveness.'
+notes: |
+  Closes Module 4. Drills `unreachable` end-to-end:
+   - Function contract: input is i32, output is `[]const u8`.
+   - Invariant: `@mod(n, 2)` is `0` or `1`.
+   - Result: the `else` arm is dead by construction; mark it
+     as such with `unreachable`. No error union, no panic
+     ceremony.

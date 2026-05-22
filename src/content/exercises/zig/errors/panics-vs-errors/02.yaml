@@ -1,0 +1,59 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: mcq
+order: 2
+prompt: |
+  Now flip the scenario: the function maintains an INVARIANT
+  the caller can't violate (it was a digit moments ago; the
+  caller already validated). The `else` branch is "this can't
+  happen" — a programmer bug if reached. Pick the right shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function digitLabel(c: number): string {
+        if (c >= 48 && c <= 57) return "digit";
+        throw new Error("unreachable");  // bug if hit
+    }
+  canonical: |-
+    fn digitLabel(c: u8) []const u8 {
+        return switch (c) {
+            '0'...'9' => "digit",
+            else => unreachable,
+        };
+    }
+  distractors:
+    - |-
+      fn digitLabel(c: u8) ![]const u8 {
+          return switch (c) {
+              '0'...'9' => "digit",
+              else => error.NotDigit,
+          };
+      }
+    - |-
+      fn digitLabel(c: u8) []const u8 {
+          return switch (c) {
+              '0'...'9' => "digit",
+              else => @panic("not digit"),
+          };
+      }
+    - |-
+      fn digitLabel(c: u8) []const u8 {
+          if (c >= '0' and c <= '9') return "digit";
+      }
+hints:
+  - "If the caller has already proven the input is valid, the function shouldn't burden its API with an error union. Use `unreachable` to mark the impossible branch — it costs nothing in release mode and panics with a clear message in debug."
+  - "Shape: `else => unreachable,` inside the switch."
+  - "`fn digitLabel(c: u8) []const u8 { return switch (c) { '0'...'9' => \"digit\", else => unreachable }; }`"
+runtime: none
+notes: |
+  Drill `unreachable` for "by invariant, impossible."
+  Distractors:
+   - Returning an error — burdens callers with handling a
+     case the function's contract already excludes.
+   - `@panic("not digit")` — works but requires a message;
+     `unreachable` is the canonical noiseless form when the
+     compiler can prove (or you're asserting) the branch is
+     dead.
+   - Missing `else` — the compiler refuses to leave a switch
+     non-exhaustive.

@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — a guard that bypasses panic when
+  the input is valid. The program prints `ok` (the value 5 is
+  non-negative, so the panic is NOT hit).
+generator:
+  kind: template
+  vars:
+    line:
+      - "if (n < 0) @panic(\"negative input\");"
+  ts: |-
+    if (n < 0) throw new Error("negative input");
+  canonical: |-
+    const std = @import("std");
+
+    fn assertNonNeg(n: i32) void {
+        ${line}
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        assertNonNeg(5);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "ok\n");
+    }
+  distractors:
+    - match: "if (n < 0) panic(\"negative input\");"
+      explain: |-
+        Missing the `@` builtin prefix — `panic` alone isn't
+        the builtin. Use `@panic(\"...\")`.
+    - match: "if (n < 0) return error.Negative;"
+      explain: |-
+        `return error.X` requires the function to return an
+        error union (`!void`, etc.). The function here returns
+        plain `void`; use `@panic`.
+    - match: "if (n < 0) std.debug.panic(\"negative input\");"
+      explain: |-
+        `std.debug.panic` exists but the recommended teaching
+        idiom is the builtin `@panic` — terser, no import
+        chain.
+expectStdout: |
+  ok
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `if (n < 0)`, `@panic(\"negative input\");`."
+  - "Shape: `if (<bad-condition>) @panic(\"<message>\");`."
+  - "`if (n < 0) @panic(\"negative input\");`"
+notes: |
+  Drill `@panic` as the abort tool in a guard position. The
+  test path doesn't hit the panic, so we observe the
+  function continuing normally; if you changed `5` to `-1`
+  the runtime would abort with `negative input`.

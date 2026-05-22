@@ -1,0 +1,55 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: mcq
+order: 1
+prompt: |
+  TypeScript reaches for `throw new Error(...)` for both
+  expected failures AND programmer bugs. Zig splits them: real
+  failures use error unions; programmer bugs (impossible
+  conditions) abort the program. Pick the right shape for a
+  function whose CALLER might reasonably handle the failure
+  case (empty input is a normal possibility).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function first(s: string): number {
+        if (s.length === 0) throw new Error("Empty");
+        return s.charCodeAt(0);
+    }
+  canonical: |-
+    fn first(s: []const u8) !u8 {
+        if (s.len == 0) return error.Empty;
+        return s[0];
+    }
+  distractors:
+    - |-
+      fn first(s: []const u8) u8 {
+          if (s.len == 0) @panic("Empty");
+          return s[0];
+      }
+    - |-
+      fn first(s: []const u8) u8 {
+          if (s.len == 0) unreachable;
+          return s[0];
+      }
+    - |-
+      fn first(s: []const u8) !u8 {
+          if (s.len == 0) @panic("Empty");
+          return s[0];
+      }
+hints:
+  - "Empty input is something a caller might reasonably encounter — not a programmer bug. Return an ERROR (via `!T` + `return error.Empty;`), don't panic."
+  - "Shape: `fn <name>(<params>) !<Payload> { if (bad) return error.<Variant>; ... }`."
+  - "`fn first(s: []const u8) !u8 { if (s.len == 0) return error.Empty; return s[0]; }`"
+runtime: none
+notes: |
+  First panics-vs-errors exercise. Drills the
+  "expected-failure → error" rule. Distractors:
+   - `@panic` on a normal failure path — too aggressive;
+     callers can't recover.
+   - `unreachable` — even more wrong; reads as "this can't
+     happen" when it definitely can.
+   - `!u8` with `@panic` — mixing the two abstractions; the
+     bang says "callers should handle this," the panic says
+     "actually no, abort."

@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing single-word marker used to mark a switch
+  arm (or branch) that, by program invariant, cannot be
+  reached. Eleven letters, lowercase.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "unreachable"
+  ts: |-
+    /* TS analogue: throw new Error("unreachable"); */
+  canonical: |-
+    else => ${keyword},
+  distractors:
+    - "panic"
+    - "abort"
+    - "never"
+blanks: [keyword]
+hints:
+  - "Eleven letters, lowercase, English word for \"can't be reached.\""
+  - "Starts with `u`."
+  - "`unreachable`"
+runtime: none
+notes: |
+  Drill `unreachable`. Distractors:
+   - `panic` — verb but no Zig keyword; the builtin is
+     `@panic`.
+   - `abort` — C reflex.
+   - `never` — TS-like reflex (the `never` bottom type).

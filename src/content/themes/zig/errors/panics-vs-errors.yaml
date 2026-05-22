@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/errors
+title: Panics vs errors
+order: 4
+prerequisites: []
+intro: |
+  Errors are for conditions the caller should be expected to handle (bad input, out of memory, missing file). Panics are for conditions that indicate a programmer bug — invariants that must hold but didn't. @panic(msg) aborts the program with a message; unreachable is a no-message hint to the compiler that a code path can't be entered (in debug builds, hitting one panics with reached unreachable; in release builds it's UB). The discipline: errors for expected failures, panics for impossible-by-design conditions.

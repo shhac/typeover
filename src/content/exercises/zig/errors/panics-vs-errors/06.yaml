@@ -1,0 +1,60 @@
+target: zig
+themeId: zig/errors/panics-vs-errors
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — the `else` arm of a switch that
+  marks the branch as impossible by invariant. With the right
+  line, the program prints `digit` (the `'7'` input takes the
+  matching arm).
+generator:
+  kind: template
+  vars:
+    line:
+      - "else => unreachable,"
+  ts: |-
+    /* TS: default: throw new Error("unreachable"); */
+  canonical: |-
+    const std = @import("std");
+
+    fn label(c: u8) []const u8 {
+        return switch (c) {
+            '0'...'9' => "digit",
+            ${line}
+        };
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const m = label('7');
+        try std.Io.File.stdout().writeStreamingAll(init.io, m);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "else => @panic(\"not a digit\"),"
+      explain: |-
+        Works mechanically, but `unreachable` is the cleaner
+        marker for "impossible by invariant" — no message
+        needed, lower release-mode cost, clearer intent.
+    - match: "else => error.NotDigit,"
+      explain: |-
+        Returning an error would force the function to be
+        `![]const u8`, burdening callers with handling a case
+        the contract already excludes.
+    - match: "else => null,"
+      explain: |-
+        `null` only works if the return type is optional
+        (`?[]const u8`). The annotation here is plain
+        `[]const u8`.
+expectStdout: |
+  digit
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `else =>`, `unreachable`, comma."
+  - "Shape: `else => unreachable,` inside a switch."
+  - "`else => unreachable,`"
+notes: |
+  First runnable panics-vs-errors slot. `unreachable` reads as
+  "the caller has already ensured this branch can't happen."
+  In debug builds, accidentally hitting it would panic with
+  `reached unreachable`.
