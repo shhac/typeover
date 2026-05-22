@@ -1,0 +1,60 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig signature — declare `divide(a: i32,
+  b: i32)` to return an inferred error union over `i32`. With
+  the right signature, the program prints `5` (10 ÷ 2) followed
+  by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn divide(a: i32, b: i32) !i32 {"
+  ts: |-
+    function divide(a: number, b: number): number {
+        if (b === 0) throw new Error("DivByZero");
+        return Math.trunc(a / b);
+    }
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+        if (b == 0) return error.DivByZero;
+        return @divTrunc(a, b);
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const r = try divide(10, 2);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{r});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "fn divide(a: i32, b: i32) i32 {"
+      explain: |-
+        Missing the `!`. The body's `return error.DivByZero`
+        won't compile because the return type doesn't allow
+        errors.
+    - match: "fn divide(a: i32, b: i32) error!i32 {"
+      explain: |-
+        Bare `error` isn't a set name. For an inferred set,
+        write just `!i32`; for an explicit set, write
+        `<SetName>!i32`.
+    - match: "fn divide(a: i32, b: i32): !i32 {"
+      explain: |-
+        Drop the colon before the return type — Zig puts the
+        return type right after the params, no colon.
+expectStdout: |
+  5
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `fn divide`, parameter list `(a: i32, b: i32)`, return type `!i32` (bang prefix), opening brace `{`."
+  - "Shape: `fn <name>(<params>) !<PayloadType> {`."
+  - "`fn divide(a: i32, b: i32) !i32 {`"
+notes: |
+  First runnable error-union-returns slot. The `!i32` return
+  type forces the call site (`try divide(10, 2)`) to consume
+  the error union.

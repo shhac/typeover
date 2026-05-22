@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing single character that marks a function's
+  return type as an error union. Same character TypeScript uses
+  to assert "definitely not null" — but in Zig it precedes the
+  type, not follows it.
+generator:
+  kind: template
+  vars:
+    sigil:
+      - "!"
+  ts: |-
+    function divide(a: number, b: number): number { ... }
+  canonical: |-
+    fn divide(a: i32, b: i32) ${sigil}i32 { ... }
+  distractors:
+    - "?"
+    - "*"
+    - "&"
+blanks: [sigil]
+hints:
+  - "One character. Same as the negation operator in TS / C; reads as \"or error.\""
+  - "Same character used in `!void` and `!T`."
+  - "`!`"
+runtime: none
+notes: |
+  Drill the `!` sigil for error unions. Distractors:
+   - `?` — optionals, not errors.
+   - `*` — pointer sigil.
+   - `&` — address-of, not a type sigil.
+
+  Each sigil in Zig means exactly one thing; the lesson
+  recurs throughout the curriculum.

@@ -1,0 +1,58 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that mixes inferred and
+  explicit error unions, demonstrating that they compose:
+
+   1. Define `fn doubled(n: i32) !i32` (inferred set) returning
+      `error.Negative` for `n < 0`, else `n * 2`.
+   2. Define `fn pipeline(n: i32) !i32` (also inferred) that
+      `try`s `doubled(n)`, then returns the result + 1.
+   3. From `main`, `try pipeline(5)`, print the result.
+
+  Expected stdout: `11` (5 → 10 → 11).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function doubled(n: number): number {
+        if (n < 0) throw new Error("Negative");
+        return n * 2;
+    }
+    function pipeline(n: number): number {
+        return doubled(n) + 1;
+    }
+    console.log(pipeline(5));
+  canonical: |-
+    const std = @import("std");
+
+    fn doubled(n: i32) !i32 {
+        if (n < 0) return error.Negative;
+        return n * 2;
+    }
+
+    fn pipeline(n: i32) !i32 {
+        const d = try doubled(n);
+        return d + 1;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const r = try pipeline(5);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{r});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  11
+runtime: zig
+hints:
+  - "Two `!i32` functions: `doubled` raises `error.Negative` on a guard, `pipeline` calls it with `try` (propagating the error up). Inferred sets compose automatically — `pipeline`'s inferred set includes `error.Negative` because the body propagates it."
+  - "Skeleton:\n```zig\nfn doubled(n: i32) !i32 {\n    if (n < 0) return error.Negative;\n    return n * 2;\n}\n\nfn pipeline(n: i32) !i32 {\n    const d = try doubled(n);\n    return d + 1;\n}\n```"
+  - 'Full program: above + the standard main that `try`s pipeline and prints. Three layers of `try` (pipeline -> doubled -> main) propagate the same error without ceremony.'
+notes: |
+  Last error-union-returns slot. Drills inferred-set
+  composition — the lesson is that `try` chains across
+  function boundaries without you having to spell out the
+  combined set.

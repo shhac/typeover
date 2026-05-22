@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig signature — `validate` takes a slice
+  and returns `!void`. With the right signature, the program
+  prints `ok` (because validate succeeds for non-empty input).
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn validate(s: []const u8) !void {"
+  ts: |-
+    function validate(s: string): void {
+        if (s.length === 0) throw new Error("empty");
+    }
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+        if (s.len == 0) return error.Empty;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        try validate("hi");
+        try std.Io.File.stdout().writeStreamingAll(init.io, "ok\n");
+    }
+  distractors:
+    - match: "fn validate(s: []const u8) void {"
+      explain: |-
+        Missing the `!`. Without it the body's
+        `return error.Empty` won't compile.
+    - match: "fn validate(s: []const u8) !bool {"
+      explain: |-
+        `!bool` is a different shape — "either an error or a
+        boolean." For a check that has no useful success
+        value, use `!void`.
+    - match: "fn validate(s: []const u8) error!void {"
+      explain: |-
+        Bare `error` isn't a set name. For an inferred set,
+        omit it: `!void`.
+expectStdout: |
+  ok
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `fn validate`, parameter list, return type `!void`, opening brace."
+  - "Shape: `fn <name>(<params>) !void {`."
+  - "`fn validate(s: []const u8) !void {`"
+notes: |
+  Drill `!void` in a runnable program. Note `try validate(\"hi\")`
+  in main — even functions returning `!void` need their error
+  consumed.

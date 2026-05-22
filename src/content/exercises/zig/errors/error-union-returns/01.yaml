@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `function divide(a: number, b: number): number`
+  and reaches for `throw` to signal failure. Zig encodes
+  failability in the RETURN TYPE itself: prefix the return
+  type with `!` to mark it as an error union. Pick the right
+  signature.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function divide(a: number, b: number): number {
+        if (b === 0) throw new Error("div-by-zero");
+        return Math.trunc(a / b);
+    }
+  canonical: |-
+    fn divide(a: i32, b: i32) !i32 {
+        if (b == 0) return error.DivByZero;
+        return @divTrunc(a, b);
+    }
+  distractors:
+    - |-
+      fn divide(a: i32, b: i32) i32 {
+          if (b == 0) return error.DivByZero;
+          return @divTrunc(a, b);
+      }
+    - |-
+      fn divide(a: i32, b: i32) Result(i32) {
+          if (b == 0) return error.DivByZero;
+          return @divTrunc(a, b);
+      }
+    - |-
+      fn divide(a: i32, b: i32) error!i32 {
+          if (b == 0) return error.DivByZero;
+          return @divTrunc(a, b);
+      }
+hints:
+  - "One character makes the difference: `!` BEFORE the return type. With no explicit set on the left, the compiler INFERS the error set from the function body."
+  - "Shape: `fn <name>(<params>) !<ReturnType> { ... }`."
+  - "`fn divide(a: i32, b: i32) !i32 { ... }`"
+runtime: none
+notes: |
+  First error-union-returns exercise. Drills the `!T` shorthand
+  + inferred error sets. Distractors:
+   - No `!` — body's `return error.DivByZero` won't compile
+     (return type doesn't allow errors).
+   - `Result(i32)` — Rust reflex; Zig has no `Result` wrapper.
+   - `error!i32` — `error` alone isn't a set name; for an
+     inferred set, just write `!i32`. For an explicit set,
+     write `<SetName>!i32`.

@@ -1,0 +1,52 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program with an explicit-set error
+  union return:
+
+   1. Define `ParseError = error{ BadDigit };`.
+   2. Define `fn parseDigit(c: u8) ParseError!i32` returning
+      `c - '0'` (as i32) when c is `'0'..='9'`, else
+      `error.BadDigit`.
+   3. From `main`, `try parseDigit('7')` and print the result
+      + newline.
+
+  Expected stdout: `7`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseDigit(c: string): number {
+        if (c < "0" || c > "9") throw new Error("BadDigit");
+        return c.charCodeAt(0) - "0".charCodeAt(0);
+    }
+    console.log(parseDigit("7"));
+  canonical: |-
+    const std = @import("std");
+
+    const ParseError = error{ BadDigit };
+
+    fn parseDigit(c: u8) ParseError!i32 {
+        if (c < '0' or c > '9') return error.BadDigit;
+        return @as(i32, c - '0');
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const d = try parseDigit('7');
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{d});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  7
+runtime: zig
+hints:
+  - "Three pieces: declare `ParseError = error{ BadDigit };`, declare `fn parseDigit(c: u8) ParseError!i32 { ... }` (note the SET NAME before the bang), call with `try`."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst ParseError = error{ BadDigit };\n\nfn parseDigit(c: u8) ParseError!i32 {\n    if (c < '0' or c > '9') return error.BadDigit;\n    return @as(i32, c - '0');\n}\n\npub fn main(init: std.process.Init) !void {\n    const d = try parseDigit('7');\n    // bufPrint(\"{d}\\n\", .{d}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. Note the explicit `ParseError!i32` — useful when you want to expose the error set as part of the API.'
+notes: |
+  First error-union-returns freeform. Drills the EXPLICIT set
+  form (`SetName!T`) end-to-end. Contrasts with the inferred
+  form in slots 06-07.

@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing payload type for a function that fails-or-
+  returns-nothing. Four letters, lowercase — Zig's name for the
+  unit type.
+generator:
+  kind: template
+  vars:
+    type:
+      - "void"
+  ts: |-
+    function validate(s: string): void { ... }
+  canonical: |-
+    fn validate(s: []const u8) !${type} { ... }
+  distractors:
+    - "unit"
+    - "none"
+    - "null"
+blanks: [type]
+hints:
+  - "Four letters, lowercase, same as C / Java / TS."
+  - "Starts with `v`."
+  - "`void`"
+runtime: none
+notes: |
+  Drill `void` as the payload type. Distractors:
+   - `unit` — Rust / OCaml reflex.
+   - `none` — too generic.
+   - `null` — value, not type.

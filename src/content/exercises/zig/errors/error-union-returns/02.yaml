@@ -1,0 +1,46 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: mcq
+order: 2
+prompt: |
+  When a function CAN fail but has no meaningful success value
+  (a validator, a writer, a "check this and return"), the
+  return type is `!void` — either nothing (success) or an
+  error. Pick the right signature.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function validate(s: string): void {
+        if (s.length === 0) throw new Error("empty");
+    }
+  canonical: |-
+    fn validate(s: []const u8) !void {
+        if (s.len == 0) return error.Empty;
+    }
+  distractors:
+    - |-
+      fn validate(s: []const u8) void {
+          if (s.len == 0) return error.Empty;
+      }
+    - |-
+      fn validate(s: []const u8) !bool {
+          if (s.len == 0) return error.Empty;
+          return true;
+      }
+    - |-
+      fn validate(s: []const u8) error.Empty {
+          if (s.len == 0) return error.Empty;
+      }
+hints:
+  - "Two pieces: `!void` (error union over `void` — \"either no value, or an error\")."
+  - "Shape: `fn <name>(<params>) !void { ... }`."
+  - "`fn validate(s: []const u8) !void { if (s.len == 0) return error.Empty; }`"
+runtime: none
+notes: |
+  Drill `!void`. Distractors:
+   - Plain `void` — can't return errors.
+   - `!bool` — encodes a flag where one isn't needed; ambiguous
+     between "no error means ok" and "true means ok."
+   - `error.Empty` as a type — wrong; `error.X` is a VALUE,
+     not a type.

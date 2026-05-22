@@ -1,0 +1,34 @@
+target: zig
+themeId: zig/errors/error-union-returns
+type: mcq
+order: 3
+prompt: |
+  When you DO want to pin down which errors a function can
+  return — for documentation, for API stability, for narrower
+  catch handlers — name the error set BEFORE the bang. Pick
+  the right signature.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type ParseError = "BadDigit";
+    function parse(s: string): number /* throws ParseError */ { ... }
+  canonical: |-
+    const ParseError = error{ BadDigit };
+    fn parse(s: []const u8) ParseError!i32 { ... }
+  distractors:
+    - "fn parse(s: []const u8) ParseError | i32 { ... }"
+    - "fn parse(s: []const u8) i32!ParseError { ... }"
+    - "fn parse(s: []const u8) ParseError<i32> { ... }"
+hints:
+  - "Three pieces: set name, bang, payload type — in that order. Reads as `ParseError or i32`."
+  - "Shape: `fn <name>(<params>) <ErrorSet>!<PayloadType> { ... }`."
+  - "`fn parse(s: []const u8) ParseError!i32 { ... }`"
+runtime: none
+notes: |
+  Drill the explicit-set `Set!T` form. Distractors:
+   - `Set | T` — TS union reflex.
+   - `T!Set` — wrong order; bang goes between set and payload,
+     with set on the left.
+   - `Set<T>` — Rust `Result<T, E>` reflex with the type
+     parameter on the wrong side.
