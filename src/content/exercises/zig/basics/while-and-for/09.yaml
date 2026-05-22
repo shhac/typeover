@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that:
+   1. Declares a slice `fruits` containing `"apple"`, `"pear"`,
+      `"plum"` (in that order).
+   2. Iterates over the slice with `for (...) |item|`.
+   3. Prints each fruit followed by a newline.
+
+  Expected stdout (exactly):
+  ```
+  apple
+  pear
+  plum
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const fruits = ["apple", "pear", "plum"];
+    for (const f of fruits) {
+        console.log(f);
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const fruits = [_][]const u8{ "apple", "pear", "plum" };
+        for (fruits) |f| {
+            try std.Io.File.stdout().writeStreamingAll(init.io, f);
+            try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+        }
+    }
+expectStdout: |
+  apple
+  pear
+  plum
+runtime: zig
+hints:
+  - "Two pieces: declare the slice with `const fruits = [_][]const u8{ \"apple\", \"pear\", \"plum\" };` (the `[_]` lets the compiler infer the length), then iterate with `for (fruits) |f| { ... }`."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const fruits = [_][]const u8{ \"apple\", \"pear\", \"plum\" };\n    for (fruits) |f| {\n        // print f followed by \\n\n    }\n}\n```"
+  - 'Full program: as in the skeleton — inside the loop body, two `writeStreamingAll` calls (one for `f`, one for `"\n"`).'
+notes: |
+  Second while-and-for freeform. Drills the `for (slice) |item|`
+  shape end-to-end. The `[_][]const u8{...}` initializer is the
+  new wrinkle — `[_]` tells the compiler "infer the length from
+  the initializer," which is the idiomatic shape for inline
+  literal slices.
+
+  Module 2 (types) revisits arrays-vs-slices in more depth; this
+  slot just plants the seed.

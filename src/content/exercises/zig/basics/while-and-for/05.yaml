@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing keyword for the iteration loop. The construct
+  is the same as TypeScript's `for...of` keyword — three letters,
+  lowercase.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "for"
+  ts: |-
+    for (const c of items) {
+        log(c);
+    }
+  canonical: |-
+    ${keyword} (items) |c| {
+        log(c);
+    }
+  distractors:
+    - "each"
+    - "iter"
+    - "while"
+blanks: [keyword]
+hints:
+  - "Three letters, same as TypeScript / Java / C."
+  - "Starts with `f`."
+  - "`for`"
+runtime: none
+notes: |
+  Drill the `for` keyword for iteration. Distractors:
+   - `each` — jQuery / Ruby reflex.
+   - `iter` — Rust method-style reflex (`.iter()`).
+   - `while` — wrong keyword for iteration; `while` is for
+     conditions.

@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that uses a `while` loop with the
+  step-on-continue syntax (`while (cond) : (step) { ... }`) to
+  print the numbers 1, 2, 3 — each on its own line.
+
+  Expected stdout (exactly):
+  ```
+  1
+  2
+  3
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    for (let i = 1; i <= 3; i++) {
+        console.log(i);
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        var i: i32 = 1;
+        while (i <= 3) : (i += 1) {
+            var buf: [16]u8 = undefined;
+            const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{i});
+            try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+        }
+    }
+expectStdout: |
+  1
+  2
+  3
+runtime: zig
+hints:
+  - "Three pieces: declare `var i: i32 = 1;` BEFORE the loop, then `while (i <= 3) : (i += 1) { ... }` with a bufPrint inside the body to format the integer."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    var i: i32 = 1;\n    while (i <= 3) : (i += 1) {\n        var buf: [16]u8 = undefined;\n        const printed = try std.fmt.bufPrint(&buf, \"{d}\\n\", .{i});\n        try std.Io.File.stdout().writeStreamingAll(init.io, printed);\n    }\n}\n```"
+  - 'Full program is the skeleton in hint 2. Note the `buf` and `printed` need to be declared INSIDE the loop body (or just before it) — declaring inside the body re-uses the stack on each iteration.'
+notes: |
+  First while-and-for freeform. Synthesises slot 06 (while header)
+  with the bufPrint integer-formatting pattern from variables/08.
+  The learner has to glue four things together: declaration,
+  while-with-step, bufPrint, writeStreamingAll.

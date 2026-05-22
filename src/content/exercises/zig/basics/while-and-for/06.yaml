@@ -1,0 +1,56 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — the `while` loop header that counts
+  `i` from 0 up to (but not including) 3, incrementing by 1 on
+  each iteration. With the right line, the program prints `tick`
+  three times, each on its own line.
+generator:
+  kind: template
+  vars:
+    line:
+      - "while (i < 3) : (i += 1) {"
+  ts: |-
+    for (let i = 0; i < 3; i++) {
+        console.log("tick");
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        var i: i32 = 0;
+        ${line}
+            try std.Io.File.stdout().writeStreamingAll(init.io, "tick\n");
+        }
+    }
+  distractors:
+    - match: "while (i < 3) { i += 1;"
+      explain: |-
+        That puts the step inside the body, before the print. Zig's
+        idiom is to put the step in the loop header: `while (cond) :
+        (step) { body }`. The step-on-continue form means a `continue`
+        inside the body still triggers the step.
+    - match: "for (i = 0; i < 3; i += 1) {"
+      explain: |-
+        Zig has no three-clause `for`. Use `while (cond) : (step) {`
+        instead, with `i` declared as `var` before the loop.
+    - match: "while (i < 3) :: (i += 1) {"
+      explain: |-
+        Single colon, not double: `while (cond) : (step) { ... }`.
+expectStdout: |
+  tick
+  tick
+  tick
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `while (i < 3)`, then ` : (i += 1)` (single colon + parenthesised step expression), then `{` to open the body."
+  - "Shape: `while (cond) : (step) {`. For this exercise: `while (i < 3) : (i += 1) {`."
+  - "`while (i < 3) : (i += 1) {`"
+notes: |
+  First runnable while-and-for slot. The colon-continuation
+  syntax `: (step)` is Zig-specific and worth a dedicated drill
+  because it's the C-style `for` replacement most TypeScript devs
+  haven't seen.

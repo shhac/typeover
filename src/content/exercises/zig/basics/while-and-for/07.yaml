@@ -1,0 +1,56 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the `for` loop header that iterates
+  over the `colors` slice and binds each element as `c`. The body
+  prints each colour followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "for (colors) |c| {"
+  ts: |-
+    for (const c of colors) {
+        console.log(c);
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const colors = [_][]const u8{ "red", "green", "blue" };
+        ${line}
+            try std.Io.File.stdout().writeStreamingAll(init.io, c);
+            try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+        }
+    }
+  distractors:
+    - match: "for (const c of colors) {"
+      explain: |-
+        That's the TypeScript `for...of` syntax. Zig uses
+        payload-capture: the binding goes in `|...|` AFTER the
+        slice: `for (colors) |c| {`.
+    - match: "for (c of colors) {"
+      explain: |-
+        Still TypeScript-flavoured. The Zig form is
+        `for (<slice>) |<binding>| { ... }`.
+    - match: "for (colors) (c) {"
+      explain: |-
+        Wrong delimiter. Payload-capture uses pipes `|c|`, not
+        parens.
+expectStdout: |
+  red
+  green
+  blue
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `for (colors)` to name the slice, then ` |c|` (pipes, not parens, around the binding name), then ` {` to open the body."
+  - "Shape: `for (<slice>) |<binding>| {`. For this exercise: `for (colors) |c| {`."
+  - "`for (colors) |c| {`"
+notes: |
+  Drills the `|item|` payload-capture syntax. The literal pipe
+  characters are the new syntactic shape — TS doesn't have an
+  analogue (Rust's `|x|` closure syntax is similar but in a
+  different context).

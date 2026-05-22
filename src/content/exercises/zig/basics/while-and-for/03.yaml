@@ -1,0 +1,70 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: mcq
+order: 3
+prompt: |
+  TypeScript's `for...of` iterates a collection. Zig's equivalent is
+  `for (slice) |item| { ... }` — the `|item|` part is the loop's
+  payload-capture syntax, common to several Zig constructs. Pick
+  the Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: colors
+      ts: |-
+        for (const c of colors) {
+            log(c);
+        }
+      canonical: |-
+        for (colors) |c| {
+            log(c);
+        }
+      distractors:
+        - |-
+          for (c of colors) {
+              log(c);
+          }
+        - |-
+          for (const c in colors) {
+              log(c);
+          }
+        - |-
+          for (colors) (c) {
+              log(c);
+          }
+    - id: numbers
+      ts: |-
+        for (const n of numbers) {
+            sum += n;
+        }
+      canonical: |-
+        for (numbers) |n| {
+            sum += n;
+        }
+      distractors:
+        - |-
+          for (n of numbers) {
+              sum += n;
+          }
+        - |-
+          for n in numbers {
+              sum += n;
+          }
+        - |-
+          for (numbers, n) {
+              sum += n;
+          }
+hints:
+  - "Zig's `for` over a slice uses payload-capture: `for (<slice>) |<binding>| { ... }`. The `|x|` syntax is also used in `if` payload-capture for optionals — same shape, same meaning."
+  - "Shape: `for (<slice>) |<item>| { <body> }`. No `of`, no `in`, no `const`."
+  - "For the colors variant: `for (colors) |c| { log(c); }`."
+runtime: none
+notes: |
+  Drill the `for (...) |item|` shape. Distractors:
+   - TS `for (x of arr)` — wrong; no `of` keyword in Zig.
+   - TS `for (x in arr)` — wrong; iterates keys not values.
+   - `for (slice) (item)` — wrong delimiter; payload-capture uses
+     pipes (`|x|`), not parens.
+
+  Two variants — slice of strings, slice of numbers — show the
+  shape is uniform.

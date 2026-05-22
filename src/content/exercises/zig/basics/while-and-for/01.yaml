@@ -1,0 +1,38 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `while (cond) { ... }`. Zig keeps the parens
+  and the braces. Pick the Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: count-down
+      ts: "while (n > 0) { n--; }"
+      canonical: "while (n > 0) { n -= 1; }"
+      distractors:
+        - "while n > 0 { n -= 1; }"
+        - "while (n > 0) do { n -= 1; }"
+        - "loop (n > 0) { n -= 1; }"
+    - id: not-done
+      ts: "while (!done) { check(); }"
+      canonical: "while (!done) { check(); }"
+      distractors:
+        - "while not done { check(); }"
+        - "while (done == false) do { check(); }"
+        - "until (done) { check(); }"
+hints:
+  - "Two pieces to keep: parens around the condition (`(cond)`) and braces around the body (`{ ... }`). The difference from TS is operator-level — Zig has no `n--` shorthand; use `n -= 1`."
+  - "Shape: `while (<bool>) { <body> }`. Same as TS, minus `--`/`++`."
+  - "For the count-down variant: `while (n > 0) { n -= 1; }`."
+runtime: none
+notes: |
+  Drill the `while` keyword + the no-parens-drop rule. Distractors
+  cover:
+   - Go reflex (no parens around condition).
+   - Pascal `do { ... }` reflex.
+   - Rust `loop` reflex (which is unconditional).
+
+  The `n--` → `n -= 1` distinction surfaces here once; later
+  exercises drill it.

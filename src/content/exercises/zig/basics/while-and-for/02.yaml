@@ -1,0 +1,52 @@
+target: zig
+themeId: zig/basics/while-and-for
+type: mcq
+order: 2
+prompt: |
+  Zig has no three-clause `for (init; cond; step)` — its
+  replacement is `while (cond) : (step) { ... }`. The step
+  expression goes after a colon, before the body. Pick the Zig
+  translation of this C-style for loop.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    for (let i = 0; i < 10; i++) {
+        process(i);
+    }
+  canonical: |-
+    var i: i32 = 0;
+    while (i < 10) : (i += 1) {
+        process(i);
+    }
+  distractors:
+    - |-
+      for (var i: i32 = 0; i < 10; i += 1) {
+          process(i);
+      }
+    - |-
+      var i: i32 = 0;
+      while (i < 10) {
+          process(i);
+          i += 1;
+      }
+    - |-
+      var i: i32 = 0;
+      for (i < 10) : (i += 1) {
+          process(i);
+      }
+hints:
+  - "Three pieces: declare `i` as `var` BEFORE the loop, use `while` (not `for`) for the condition, and put the step expression after a colon: `while (cond) : (step) { body }`."
+  - "Shape: `var i: i32 = 0;` then `while (i < 10) : (i += 1) { ... }`."
+  - "Full answer:\n```zig\nvar i: i32 = 0;\nwhile (i < 10) : (i += 1) {\n    process(i);\n}\n```"
+runtime: none
+notes: |
+  Drill the `while (cond) : (step)` shape — Zig's replacement for
+  the C three-clause for. Distractors:
+   - Three-clause for — wrong; doesn't exist in Zig.
+   - while without step continuation, step inside body — works
+     but isn't idiomatic; the `: (step)` form makes the loop
+     header self-contained and harder to break with an early
+     `continue`.
+   - `for (cond) : (step)` — wrong keyword; `for` is for
+     iteration, not condition.
