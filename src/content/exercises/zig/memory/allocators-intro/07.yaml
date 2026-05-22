@@ -1,0 +1,56 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — set up a `FixedBufferAllocator`
+  over a 64-byte stack buffer. With the right setup, the program
+  prints `abcd` (4 bytes allocated, written, printed).
+generator:
+  kind: template
+  vars:
+    line:
+      - "var fba = std.heap.FixedBufferAllocator.init(&backing);"
+  ts: |-
+    /* No direct equivalent — TS does heap-alloc strings under the hood. */
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        var backing: [64]u8 = undefined;
+        ${line}
+        const alloc = fba.allocator();
+        const buf = try alloc.alloc(u8, 4);
+        defer alloc.free(buf);
+        @memcpy(buf, "abcd");
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "var fba = std.heap.FixedBufferAllocator.init(backing);"
+      explain: |-
+        `.init` wants the ADDRESS of the buffer, not the buffer
+        by value. Add the `&`: `init(&backing)`.
+    - match: "const fba = std.heap.FixedBufferAllocator.init(&backing);"
+      explain: |-
+        `fba` needs to be `var` (not `const`) — subsequent
+        allocations mutate the FBA's bump pointer.
+    - match: "var fba = std.heap.FixedBufferAllocator(&backing);"
+      explain: |-
+        Missing the `.init` method call. The constructor is
+        `FixedBufferAllocator.init(&backing)`, not a bare type
+        application.
+expectStdout: |
+  abcd
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `var fba =`, `std.heap.FixedBufferAllocator.init`, `(&backing)` (address-of the buffer), semicolon."
+  - "Shape: `var fba = std.heap.FixedBufferAllocator.init(&<buffer>);`."
+  - "`var fba = std.heap.FixedBufferAllocator.init(&backing);`"
+notes: |
+  Drill the FBA setup in a runnable context. The combination of
+  `var backing: [N]u8 = undefined;` + `.init(&backing)` +
+  `.allocator()` is the canonical no-heap-allocation pattern —
+  useful in tight loops, embedded contexts, or anywhere a hard
+  upper bound on bytes is known.

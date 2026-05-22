@@ -1,0 +1,41 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: mcq
+order: 2
+prompt: |
+  When the allocation has a known maximum size and you don't
+  want to touch the heap, use a `FixedBufferAllocator` over a
+  stack-allocated buffer. Pick the right setup.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const backing = new Uint8Array(128);
+    const buf = backing.subarray(0, 4);
+  canonical: |-
+    var backing: [128]u8 = undefined;
+    var fba = std.heap.FixedBufferAllocator.init(&backing);
+    const alloc = fba.allocator();
+  distractors:
+    - |-
+      const backing: [128]u8 = .{};
+      var fba = std.heap.FixedBufferAllocator(&backing);
+      const alloc = fba.allocator;
+    - |-
+      var fba = std.heap.FixedBufferAllocator.init(128);
+      const alloc = fba.allocator();
+    - |-
+      var fba: [128]u8 = undefined;
+      const alloc = fba.allocator();
+hints:
+  - "Three pieces: a `var backing: [128]u8 = undefined;` stack array, `.init(&backing)` to construct the FBA from the array's address, then call `.allocator()` (PARENS — it's a method) to get the interface value."
+  - "Shape:\n```zig\nvar backing: [N]u8 = undefined;\nvar fba = std.heap.FixedBufferAllocator.init(&backing);\nconst alloc = fba.allocator();\n```"
+  - "Full canonical:\n```zig\nvar backing: [128]u8 = undefined;\nvar fba = std.heap.FixedBufferAllocator.init(&backing);\nconst alloc = fba.allocator();\n```"
+runtime: none
+notes: |
+  Drill the FBA setup. Distractors:
+   - `.{}` initializer (uninit array would compile but is
+     unidiomatic); missing parens on `init`; field access
+     `.allocator` (it's a METHOD with parens).
+   - Passing `128` instead of a buffer reference.
+   - Trying to use the array directly as the allocator.

@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: mcq
+order: 3
+prompt: |
+  An `ArenaAllocator` wraps another allocator and tracks every
+  allocation so they can ALL be freed in one shot via
+  `arena.deinit()`. Pick the right setup.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const arena = new Arena();
+    arena.alloc(4);
+    arena.dispose();
+  canonical: |-
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const alloc = arena.allocator();
+  distractors:
+    - |-
+      var arena = std.heap.ArenaAllocator{};
+      defer arena.deinit();
+      const alloc = arena.allocator();
+    - |-
+      var arena = std.heap.ArenaAllocator.init();
+      defer arena.deinit();
+      const alloc = arena.allocator();
+    - |-
+      const arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+      defer arena.deinit();
+      const alloc = arena.allocator();
+hints:
+  - "Three pieces: `.init(<backing-allocator>)` to construct the arena (pick a real allocator like `std.heap.page_allocator` as backing), `defer arena.deinit();` immediately for cleanup, then `arena.allocator()` for the interface value. Note: `var`, not `const` — `deinit` mutates."
+  - "Shape:\n```zig\nvar arena = std.heap.ArenaAllocator.init(<backing>);\ndefer arena.deinit();\nconst alloc = arena.allocator();\n```"
+  - "Full canonical:\n```zig\nvar arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);\ndefer arena.deinit();\nconst alloc = arena.allocator();\n```"
+runtime: none
+notes: |
+  Drill the arena setup. Distractors:
+   - Default-init `.{}` — needs a backing allocator argument.
+   - `.init()` with no args — same issue.
+   - `const arena` — `deinit` mutates, so the arena must be
+     `var`.
+
+  Arenas are the pragmatic choice when you have many short-lived
+  allocations sharing a lifetime — request-scoped state, an AST,
+  a parse pass.

@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: mcq
+order: 1
+prompt: |
+  TypeScript hides allocation completely — `new Foo()` just
+  works. Zig surfaces an `Allocator` interface as a value you
+  pass around explicitly. Pick the line that asks the page
+  allocator (the simplest, OS-page-granularity allocator) for
+  32 bytes.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const buf = new Uint8Array(32);
+  canonical: |-
+    const alloc = std.heap.page_allocator;
+    const buf = try alloc.alloc(u8, 32);
+  distractors:
+    - |-
+      const buf = std.heap.page_allocator.alloc(u8, 32);
+    - |-
+      const buf = try std.heap.alloc(u8, 32);
+    - |-
+      const buf = try new Allocator(32);
+hints:
+  - "Three pieces: name the allocator (`std.heap.page_allocator`), call its `.alloc(<type>, <count>)` method, prefix with `try` (the call can fail — OOM)."
+  - "Shape: `const buf = try alloc.alloc(<type>, <count>);` where `alloc` is the allocator value."
+  - "`const alloc = std.heap.page_allocator;` then `const buf = try alloc.alloc(u8, 32);`."
+runtime: none
+notes: |
+  First memory exercise. Drills the "allocator is a value, `try`
+  the call" pattern. Distractors:
+   - Missing `try` — compile error (uncaught error union).
+   - `std.heap.alloc` — wrong namespace; the allocator itself
+     has the `alloc` method.
+   - `new Allocator(32)` — TS reflex.

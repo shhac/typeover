@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/memory
+title: "Allocators (intro)"
+order: 1
+prerequisites: []
+intro: |
+  Zig has no hidden allocations. Every dynamic alloc goes through an Allocator interface value, and you pick which. The three you meet first: page_allocator (OS page granularity, simple, no bookkeeping), FixedBufferAllocator (a slice of memory you supply, zero heap), and ArenaAllocator (deferred mass-free — drop everything on deinit). The Allocator interface is uniform: alloc, free, dupe, realloc. Pick the allocator that matches the lifetime you want.

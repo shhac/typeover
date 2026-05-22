@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing method name. The `Allocator` interface
+  exposes this for allocating bytes; you pass the element type
+  and the count, and you get back a slice. Five letters.
+generator:
+  kind: template
+  vars:
+    method:
+      - "alloc"
+  ts: |-
+    const buf = new Uint8Array(32);
+  canonical: |-
+    const buf = try a.${method}(u8, 32);
+  distractors:
+    - "make"
+    - "new"
+    - "malloc"
+blanks: [method]
+hints:
+  - "Five letters, lowercase. Short for `allocate`. Same name as on `std.mem`."
+  - "Starts with `a`."
+  - "`alloc`"
+runtime: none
+notes: |
+  Drill `.alloc`. Distractors:
+   - `make` — Go reflex.
+   - `new` — TS / Java / C# reflex.
+   - `malloc` — C reflex (and Zig's name is shorter).

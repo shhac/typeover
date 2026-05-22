@@ -1,0 +1,55 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — allocate 5 bytes via the
+  `page_allocator`. The next line writes "hello" into the
+  buffer and the program prints it.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const buf = try alloc.alloc(u8, 5);"
+  ts: |-
+    const buf = new Uint8Array(5);
+    buf.set([104, 101, 108, 108, 111]);
+    console.log(new TextDecoder().decode(buf));
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        ${line}
+        defer alloc.free(buf);
+        @memcpy(buf, "hello");
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "const buf = alloc.alloc(u8, 5);"
+      explain: |-
+        Missing `try`. `alloc()` returns an error union (`![]u8`);
+        without `try` the compiler refuses.
+    - match: "const buf = try alloc.alloc(5);"
+      explain: |-
+        `alloc` takes TWO arguments: the element type and the
+        count. The element type comes first: `alloc.alloc(u8, 5)`.
+    - match: "const buf: [5]u8 = try alloc.alloc(u8, 5);"
+      explain: |-
+        The allocator returns a slice (`[]u8`), not a fixed
+        array (`[5]u8`). Drop the explicit annotation — Zig
+        infers `[]u8` here.
+expectStdout: |
+  hello
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `const buf =`, `try`, `alloc.alloc(u8, 5)`, semicolon."
+  - "Shape: `const buf = try alloc.alloc(<type>, <count>);`."
+  - "`const buf = try alloc.alloc(u8, 5);`"
+notes: |
+  First runnable allocator slot. Uses page_allocator + defer
+  free + @memcpy to seed the buffer with "hello", then prints
+  it. The `defer alloc.free(buf);` is right after the alloc —
+  Zig's canonical alloc-then-defer-free pattern.

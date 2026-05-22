@@ -1,0 +1,10 @@
+target: zig
+title: Memory
+order: 3
+summary: |
+  The friction module. Allocators are explicit: every dynamic
+  allocation goes through one, and you pick which. `defer` is
+  the structural tool that makes manual memory safe to write
+  (and read). Ownership is enforced by convention, not the
+  compiler — "whoever calls `init` calls `deinit`." Once
+  comfortable here, the rest of the Zig stdlib reads naturally.

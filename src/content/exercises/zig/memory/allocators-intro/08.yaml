@@ -1,0 +1,40 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that allocates a 6-byte slice
+  from the page_allocator, writes `"zigzag"` into it, prints
+  the slice followed by a newline, and frees the slice via
+  `defer`.
+
+  Expected stdout: `zigzag`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const buf = "zigzag";
+    console.log(buf);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const buf = try alloc.alloc(u8, 6);
+        defer alloc.free(buf);
+        @memcpy(buf, "zigzag");
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  zigzag
+runtime: zig
+hints:
+  - "Five pieces: bind the allocator, `try alloc.alloc(u8, 6)`, `defer alloc.free(buf)` (immediately after alloc — that's the safe pattern), `@memcpy(buf, \"zigzag\")` to fill it, then write the slice + newline."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const alloc = std.heap.page_allocator;\n    const buf = try alloc.alloc(u8, 6);\n    defer alloc.free(buf);\n    @memcpy(buf, \"zigzag\");\n    // writeStreamingAll(buf), writeStreamingAll(\"\\n\")\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls (buf + newline).'
+notes: |
+  First memory freeform. Drills the canonical
+  alloc-defer-free-then-use pattern with `page_allocator`.
+  The `@memcpy` builtin is the only safe way to copy a string
+  literal into a byte slice.

@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing method name. The `Allocator` interface
+  exposes this for releasing memory you allocated earlier. Pass
+  the slice you got from `alloc`. Four letters, same as in C.
+generator:
+  kind: template
+  vars:
+    method:
+      - "free"
+  ts: |-
+    /* GC handles this in TS */
+  canonical: |-
+    a.${method}(buf);
+  distractors:
+    - "release"
+    - "drop"
+    - "dispose"
+blanks: [method]
+hints:
+  - "Four letters, lowercase, same as C / C++."
+  - "Starts with `f`. Opposite of `alloc`."
+  - "`free`"
+runtime: none
+notes: |
+  Drill `.free`. Distractors:
+   - `release` — generic / .NET reflex.
+   - `drop` — Rust reflex.
+   - `dispose` — C# reflex.

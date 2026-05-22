@@ -1,0 +1,41 @@
+target: zig
+themeId: zig/memory/allocators-intro
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that uses an `ArenaAllocator`
+  (backed by `page_allocator`) to allocate a 5-byte slice. Fill
+  it with `"arena"`, print it, and let the arena's `defer
+  deinit()` free everything at once.
+
+  Expected stdout: `arena`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const buf = "arena";
+    console.log(buf);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        const alloc = arena.allocator();
+        const buf = try alloc.alloc(u8, 5);
+        @memcpy(buf, "arena");
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  arena
+runtime: zig
+hints:
+  - "Four pieces: `var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);`, `defer arena.deinit();` immediately for one-shot mass-free, `const alloc = arena.allocator();`, then the standard alloc + memcpy + write."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);\n    defer arena.deinit();\n    const alloc = arena.allocator();\n    const buf = try alloc.alloc(u8, 5);\n    @memcpy(buf, \"arena\");\n    // writeStreamingAll(buf), writeStreamingAll(\"\\n\")\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls. Note: no per-slice `defer alloc.free(buf);` — the arena frees everything on `deinit`.'
+notes: |
+  Closes types/memory/allocators-intro. Drills the arena
+  pattern: one `defer arena.deinit()`, no per-slice
+  bookkeeping. Pairs nicely with the page-allocator pattern in
+  slot 08 — same program, different lifetime story.
