@@ -29,7 +29,6 @@
  */
 
 import { expose } from "comlink";
-import { untar } from "@andrewbranch/untar.js";
 import {
   ConsoleStdout,
   Directory,
@@ -41,6 +40,7 @@ import {
   type Fd,
   type Inode,
 } from "@bjorn3/browser_wasi_shim";
+import { buildStdlibTree, decompressIfGzipped } from "./zig-assets";
 
 interface ZigResult {
   stdout: string;
@@ -103,54 +103,9 @@ function loadHeavyAssets(): Promise<PreparedAssets> {
 async function fetchStdlib(): Promise<Directory> {
   const res = await fetch("/zig/zig-stdlib.tar.gz");
   if (!res.ok) throw new Error(`zig-stdlib.tar.gz fetch failed (${res.status})`);
-
-  let buf = await res.arrayBuffer();
-  const magic = new Uint8Array(buf, 0, 2);
-  if (magic[0] === 0x1f && magic[1] === 0x8b) {
-    /* Server didn't already gunzip; decompress in the worker. */
-    const ds = new DecompressionStream("gzip");
-    const stream = new Response(buf).body!.pipeThrough(ds);
-    buf = await new Response(stream).arrayBuffer();
-  }
-
-  /* The tar bundle is rooted at `lib/std/...` — we want to mount at
-   * `/lib` inside WASI, so we strip the `lib/` prefix here and the
-   * compiler sees `/lib/std/...`. */
-  const entries = untar(buf);
-  type Tree = Map<string, Tree | Uint8Array>;
-  const root: Tree = new Map();
-  for (const e of entries) {
-    if (!e.filename.startsWith("lib/")) continue;
-    const rel = e.filename.slice("lib/".length);
-    if (!rel) continue;
-    const parts = rel.split("/");
-    let cur = root;
-    for (const seg of parts.slice(0, -1)) {
-      let next = cur.get(seg);
-      if (!next || next instanceof Uint8Array) {
-        next = new Map();
-        cur.set(seg, next);
-      }
-      cur = next;
-    }
-    cur.set(parts[parts.length - 1]!, e.fileData);
-  }
-  return treeToDirectory(root);
-}
-
-function treeToDirectory(node: Map<string, Map<string, unknown> | Uint8Array>): Directory {
-  const contents = new Map<string, Inode>();
-  for (const [name, value] of node.entries()) {
-    if (value instanceof Uint8Array) {
-      contents.set(name, new File(value));
-    } else {
-      /* Recurse — `value` is a Tree (Map). The cast keeps TypeScript
-       * quiet without us threading a Tree alias through the public
-       * worker surface. */
-      contents.set(name, treeToDirectory(value as Map<string, Map<string, unknown> | Uint8Array>));
-    }
-  }
-  return new Directory(contents);
+  const compressed = await res.arrayBuffer();
+  const buf = await decompressIfGzipped(compressed);
+  return buildStdlibTree(buf);
 }
 
 async function fetchLibCompilerRt(): Promise<Uint8Array> {
@@ -172,36 +127,102 @@ function captureFd(buf: { text: string }): ConsoleStdout {
   return fd;
 }
 
+/* WASI bytecode → JS exit-code triage. Returns either a clean exit
+ * or a rich error reason; never throws. Centralised so the compile
+ * and run pipelines share the same shape and we don't repeat the
+ * try/catch + exit-code-non-zero plumbing twice. */
+type WasiOutcome = { ok: true; exitCode: number } | { ok: false; reason: string };
+
+function runWasi(
+  module: WebAssembly.Module,
+  wasi: WASI,
+  stderrBuf: { text: string },
+): Promise<WasiOutcome>;
+function runWasi(
+  module: ArrayBuffer,
+  wasi: WASI,
+  stderrBuf: { text: string },
+): Promise<WasiOutcome>;
+async function runWasi(
+  moduleOrBytes: WebAssembly.Module | ArrayBuffer,
+  wasi: WASI,
+  stderrBuf: { text: string },
+): Promise<WasiOutcome> {
+  const mod =
+    moduleOrBytes instanceof WebAssembly.Module
+      ? moduleOrBytes
+      : await WebAssembly.compile(moduleOrBytes);
+  const instance = await WebAssembly.instantiate(mod, {
+    wasi_snapshot_preview1: wasi.wasiImport,
+  });
+  try {
+    /* Cast: the shim types `start` against an Instance shape that
+     * matches what `WebAssembly.instantiate` returns; the small lib
+     * type diff doesn't matter at runtime. */
+    const exitCode = wasi.start(instance as unknown as Parameters<typeof wasi.start>[0]);
+    return { ok: true, exitCode };
+  } catch (err) {
+    /* Zig traps and the shim's `wasi.start` exit-throw both land
+     * here. Surface stderr alongside the raw error so the learner
+     * sees the diagnostic. */
+    const errStr = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      reason: stderrBuf.text ? `${stderrBuf.text}\n${errStr}` : errStr,
+    };
+  }
+}
+
+/* Builds the fd table the compile-stage WASI context wants. Hoisting
+ * cwd into a named const lets the post-run lookup read
+ * `cwdFd.dir.contents.get(...)` directly — no `as PreopenDirectory`
+ * cast on `fds[3]`, no risk of an array reorder desyncing the cast. */
+function buildCompileFds(
+  source: string,
+  assets: PreparedAssets,
+  stdoutBuf: { text: string },
+  stderrBuf: { text: string },
+): { fds: Fd[]; cwdFd: PreopenDirectory } {
+  const cwdEntries = new Map<string, Inode>([
+    ["main.zig", new File(new TextEncoder().encode(source))],
+    ["libcompiler_rt.a", new File(assets.libCompilerRt)],
+  ]);
+  const cwdFd = new PreopenDirectory(".", cwdEntries);
+  const fds: Fd[] = [
+    new OpenFile(new File([])),
+    captureFd(stdoutBuf),
+    captureFd(stderrBuf),
+    cwdFd,
+    new PreopenDirectory("/lib", assets.stdlibDir.contents),
+    new PreopenDirectory("/cache", new Map<string, Inode>()),
+  ];
+  return { fds, cwdFd };
+}
+
+/* Read `main.wasm` out of the post-compile cwd preopen, copying into
+ * a fresh ArrayBuffer so the caller has a definite
+ * `Uint8Array<ArrayBuffer>` view for downstream `WebAssembly.compile`
+ * (the shim's `File.data` widens to `ArrayBufferLike` in TS, which
+ * the BufferSource overload narrows poorly). */
+function extractMainWasm(cwdFd: PreopenDirectory, stderrText: string): ArrayBuffer {
+  const mainWasm = cwdFd.dir.contents.get("main.wasm");
+  if (!(mainWasm instanceof File)) {
+    throw new Error(`compile succeeded but main.wasm not found in cwd; stderr: ${stderrText}`);
+  }
+  const out = new ArrayBuffer(mainWasm.data.byteLength);
+  new Uint8Array(out).set(mainWasm.data);
+  return out;
+}
+
 /* Stage 1: invoke the compiler. Mirrors the zigtools playground's
  * argv exactly — `build-exe main.zig libcompiler_rt.a` with the two
  * `-fno-...` flags that work around limitations of the self-hosted
  * wasm backend. Returns an ArrayBuffer of main.wasm on success, or
- * throws with the captured stderr on compile failure.
- *
- * Returns an ArrayBuffer (not the shim's Uint8Array) so the
- * downstream WebAssembly.compile call sees a definite
- * Uint8Array<ArrayBuffer> in TS's lib types. */
+ * throws with the captured stderr on compile failure. */
 async function compile(source: string, assets: PreparedAssets): Promise<ArrayBuffer> {
   const stdoutBuf = { text: "" };
   const stderrBuf = { text: "" };
-
-  const mainZig = new File(new TextEncoder().encode(source));
-  const libCompilerRtFile = new File(assets.libCompilerRt);
-
-  const cwdEntries = new Map<string, Inode>([
-    ["main.zig", mainZig],
-    ["libcompiler_rt.a", libCompilerRtFile],
-  ]);
-
-  const fds = [
-    new OpenFile(new File([])),
-    captureFd(stdoutBuf),
-    captureFd(stderrBuf),
-    new PreopenDirectory(".", cwdEntries),
-    new PreopenDirectory("/lib", assets.stdlibDir.contents),
-    new PreopenDirectory("/cache", new Map<string, Inode>()),
-  ] satisfies Fd[];
-
+  const { fds, cwdFd } = buildCompileFds(source, assets, stdoutBuf, stderrBuf);
   const argv = [
     "zig.wasm",
     "build-exe",
@@ -210,80 +231,43 @@ async function compile(source: string, assets: PreparedAssets): Promise<ArrayBuf
     "-fno-compiler-rt",
     "-fno-entry",
   ];
-
   const wasi = new WASI(argv, [], fds, { debug: false });
-  const instance = await WebAssembly.instantiate(assets.compilerModule, {
-    wasi_snapshot_preview1: wasi.wasiImport,
-  });
-
-  let exitCode = 0;
-  try {
-    /* Cast: the shim types `start` against an Instance shape that
-     * matches what `WebAssembly.instantiate` returns; the small lib
-     * type diff doesn't matter at runtime. */
-    exitCode = wasi.start(instance as unknown as Parameters<typeof wasi.start>[0]);
-  } catch (err) {
-    throw new Error(stderrBuf.text || `compile crashed: ${String(err)}`);
+  const outcome = await runWasi(assets.compilerModule, wasi, stderrBuf);
+  if (!outcome.ok) {
+    throw new Error(stderrBuf.text || `compile crashed: ${outcome.reason}`);
   }
-  if (exitCode !== 0) {
-    throw new Error(stderrBuf.text || `compile failed with exit code ${exitCode}`);
+  if (outcome.exitCode !== 0) {
+    throw new Error(stderrBuf.text || `compile failed with exit code ${outcome.exitCode}`);
   }
-
-  const cwdFd = fds[3] as PreopenDirectory;
-  const mainWasm = cwdFd.dir.contents.get("main.wasm");
-  if (!(mainWasm instanceof File)) {
-    throw new Error(`compile succeeded but main.wasm not found in cwd; stderr: ${stderrBuf.text}`);
-  }
-  /* Copy into a freshly-allocated ArrayBuffer so the caller has a
-   * definite Uint8Array<ArrayBuffer> view available — the shim's
-   * `File.data` is typed as bare Uint8Array which TS widens to
-   * ArrayBufferLike. */
-  const out = new ArrayBuffer(mainWasm.data.byteLength);
-  new Uint8Array(out).set(mainWasm.data);
-  return out;
+  return extractMainWasm(cwdFd, stderrBuf.text);
 }
 
 /* Stage 2: run the compiled program. Separate WASI context, separate
  * memory — the compiler's address space is irrelevant. We give it a
  * read-only stdin and capture stdout/stderr the same way as compile.
  * If wasi.start throws, it's typically a Zig trap (panic, unreachable,
- * stack overflow) — surface that as the program's error. */
+ * stack overflow) — `runWasi` surfaces that as `outcome.reason`. */
 async function run(
   wasmBytes: ArrayBuffer,
 ): Promise<{ stdout: string; stderr: string; error: string }> {
   const stdoutBuf = { text: "" };
   const stderrBuf = { text: "" };
 
-  const fds = [
+  const fds: Fd[] = [
     new OpenFile(new File([])),
     captureFd(stdoutBuf),
     captureFd(stderrBuf),
     new PreopenDirectory(".", new Map<string, Inode>()),
-  ] satisfies Fd[];
-
+  ];
   const wasi = new WASI(["main.wasm"], [], fds, { debug: false });
-  /* Two-step (compile then instantiate) instead of the
-   * BufferSource overload of `WebAssembly.instantiate` — the BufferSource
-   * overload's return type narrows poorly in TS strict mode when the
-   * argument is a Uint8Array variable. */
-  const userModule = await WebAssembly.compile(wasmBytes);
-  const instance = await WebAssembly.instantiate(userModule, {
-    wasi_snapshot_preview1: wasi.wasiImport,
-  });
+  const outcome = await runWasi(wasmBytes, wasi, stderrBuf);
 
   let error = "";
-  try {
-    const exitCode = wasi.start(instance as unknown as Parameters<typeof wasi.start>[0]);
-    if (exitCode !== 0) {
-      error = stderrBuf.text || `program exited with code ${exitCode}`;
-    }
-  } catch (err) {
-    /* Zig traps come back as Error("Aborted()") from the WASI shim's
-     * abi exit path. Tack on stderr (the panic message often lives
-     * there) so the learner sees the diagnostic. */
-    error = stderrBuf.text ? `${stderrBuf.text}\n${String(err)}` : String(err);
+  if (!outcome.ok) {
+    error = outcome.reason;
+  } else if (outcome.exitCode !== 0) {
+    error = stderrBuf.text || `program exited with code ${outcome.exitCode}`;
   }
-
   return { stdout: stdoutBuf.text, stderr: stderrBuf.text, error };
 }
 
