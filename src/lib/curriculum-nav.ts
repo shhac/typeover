@@ -6,99 +6,26 @@ type Theme = CollectionEntry<"themes">;
 type Exercise = CollectionEntry<"exercises">;
 
 /*
- * Route-time navigation helpers — adjacency walks, context
- * resolution, and href builders. Sibling module to curriculum.ts
- * (which owns the build-time tree + coverage aggregation) per the
- * structural review's file-decomposition lens.
+ * Route-time navigation helpers — context loads (theme/exercise
+ * parent resolution) and adjacency walks (next/previous exercise
+ * within or across themes).
+ *
+ * URL builders and collection-id parsers (`exerciseHref`,
+ * `paramsForExercise`, etc.) used to live here but moved to
+ * `./curriculum-paths` — they're pure string ops with no
+ * `CollectionEntry` shape, so non-route consumers (chips,
+ * breadcrumbs, tests) can import them without the Astro type
+ * machinery. The umbrella `./curriculum` module re-exports
+ * everything so existing callers' import paths stay stable.
  *
  * Both files share Astro's CollectionEntry types but serve
  * different consumers:
- *   - curriculum.ts  → /go index page, ModuleCompleteCard
+ *   - curriculum.ts  → /[lang] index, ModuleCompleteCard
  *                      (tree-building, coverage rollup)
- *   - curriculum-nav → exercise + theme routes
+ *   - curriculum-paths → anywhere (pure string helpers)
+ *   - curriculum-nav   → exercise + theme routes
  *                      (Previous/Next walks, breadcrumb context)
  */
-
-/* ============================== Hrefs =============================== */
-
-/* Multi-language tracks: every collection ID is prefixed with its
- * language slug (`go/foundations/loops/01`,
- * `zig/basics/hello-and-output/01`), and URLs are 1-to-1 with IDs —
- * `/{id}` is the route. The lang is part of the path because the page
- * renders track-specific chrome (LangCrumbs, exercise grader runtime
- * selection, etc.). */
-
-/** Exercise IDs are `<lang>/<module>/<theme>/<index>`, mapping 1-to-1
- *  to the /[lang]/[module]/[theme]/[index] dynamic route. */
-export const exerciseHref = (exerciseId: string) => `/${exerciseId}`;
-
-/** Theme IDs are `<lang>/<module>/<theme>`, mapping 1-to-1 to the
- *  /[lang]/[module]/[theme] overview route. */
-export const themeHref = (themeId: string) => `/${themeId}`;
-
-/** Module-overview route. Single-module narrower view of the lang
- *  curriculum — used by breadcrumbs that used to lie about their
- *  destination. */
-export const moduleHref = (moduleId: string) => `/${moduleId}`;
-
-/** Module-completion celebration page. Linked from the last
- *  exercise of the last theme in a module via the `nextExerciseHref`
- *  the route file computes. */
-export const moduleCompleteHref = (moduleId: string) => `/${moduleId}/complete`;
-
-/** Top-of-track index for a given language (`/go`, `/zig`, …). */
-export const langHref = (lang: string) => `/${lang}`;
-
-/* =========================== Static-paths =========================== */
-
-/**
- * Parse an exercise collection id (`<lang>/<module>/<theme>/<index>`)
- * into the route params Astro's `getStaticPaths` returns. Returns
- * `null` if the id has the wrong shape — content with a malformed
- * path would silently render `/undefined/...`-style routes otherwise.
- */
-export function paramsForExercise(
-  id: string,
-): { lang: string; module: string; theme: string; index: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 4) return null;
-  const [lang, module, theme, index] = parts;
-  if (!lang || !module || !theme || !index) return null;
-  return { lang, module, theme, index };
-}
-
-/**
- * Parse a theme collection id (`<lang>/<module>/<theme>`) into route
- * params for the theme-overview page. Returns null if malformed.
- */
-export function paramsForTheme(id: string): { lang: string; module: string; theme: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 3) return null;
-  const [lang, module, theme] = parts;
-  if (!lang || !module || !theme) return null;
-  return { lang, module, theme };
-}
-
-/**
- * Parse a module collection id (`<lang>/<module>`) into route params
- * for the module-overview / module-complete pages. Returns null if
- * malformed.
- */
-export function paramsForModule(id: string): { lang: string; module: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 2) return null;
-  const [lang, module] = parts;
-  if (!lang || !module) return null;
-  return { lang, module };
-}
-
-/** Pull the lang slug off a collection ID (`go/foundations/...` → `"go"`). */
-export const langOf = (id: string): string => id.split("/")[0] ?? "";
-
-/* Astro-runtime-coupled collection loaders live in `./curriculum-loaders`
- * (the `getCollection` runtime import would break vitest's resolution
- * of this module). Re-exported via `~/lib/curriculum` so the route
- * files can keep their single import. */
 
 /* ============================ Context loads ========================= */
 
@@ -174,6 +101,30 @@ export function findAdjacentExercises(
   };
 }
 
+/* The three cross-theme walks (`lastExerciseInModule`,
+ * `firstExerciseOfNextTheme`, `lastExerciseOfPreviousTheme`) all
+ * start from the same triple: own theme, that theme's sibling list
+ * sorted by order, and the index of the own theme in that list.
+ * Lift it into one named helper so each caller reads as the unique
+ * thing it does (look at the tail, look at i+1, look at i-1). */
+interface ModuleThemeContext {
+  ownTheme: Theme;
+  moduleThemes: Theme[];
+  index: number;
+}
+function moduleThemeContext(
+  exercise: Exercise,
+  themes: readonly Theme[],
+): ModuleThemeContext | null {
+  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
+  if (!ownTheme) return null;
+  const moduleThemes = themes
+    .filter((t) => t.data.moduleId === ownTheme.data.moduleId)
+    .sort(byOrder);
+  const index = moduleThemes.findIndex((t) => t.id === ownTheme.id);
+  return { ownTheme, moduleThemes, index };
+}
+
 /**
  * Is this the last exercise of the last theme in its module?
  *
@@ -191,15 +142,15 @@ export function lastExerciseInModule(
   themes: readonly Theme[],
   allExercises: readonly Exercise[],
 ): { moduleId: string } | null {
-  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
-  if (!ownTheme) return null;
-  const moduleId = ownTheme.data.moduleId;
-  const moduleThemes = themes.filter((t) => t.data.moduleId === moduleId).sort(byOrder);
-  const isLastTheme = moduleThemes[moduleThemes.length - 1]?.id === ownTheme.id;
+  const ctx = moduleThemeContext(exercise, themes);
+  if (!ctx) return null;
+  const isLastTheme = ctx.moduleThemes[ctx.moduleThemes.length - 1]?.id === ctx.ownTheme.id;
   if (!isLastTheme) return null;
-  const themeExercises = allExercises.filter((ex) => ex.data.themeId === ownTheme.id).sort(byOrder);
+  const themeExercises = allExercises
+    .filter((ex) => ex.data.themeId === ctx.ownTheme.id)
+    .sort(byOrder);
   const isLastExercise = themeExercises[themeExercises.length - 1]?.id === exercise.id;
-  return isLastExercise ? { moduleId } : null;
+  return isLastExercise ? { moduleId: ctx.ownTheme.data.moduleId } : null;
 }
 
 /**
@@ -216,13 +167,9 @@ export function firstExerciseOfNextTheme(
   themes: readonly Theme[],
   allExercises: readonly Exercise[],
 ): Exercise | null {
-  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
-  if (!ownTheme) return null;
-  const moduleThemes = themes
-    .filter((t) => t.data.moduleId === ownTheme.data.moduleId)
-    .sort(byOrder);
-  const i = moduleThemes.findIndex((t) => t.id === ownTheme.id);
-  const nextTheme = moduleThemes[i + 1];
+  const ctx = moduleThemeContext(exercise, themes);
+  if (!ctx) return null;
+  const nextTheme = ctx.moduleThemes[ctx.index + 1];
   if (!nextTheme) return null;
   const nextThemeExercises = allExercises
     .filter((ex) => ex.data.themeId === nextTheme.id)
@@ -246,13 +193,9 @@ export function lastExerciseOfPreviousTheme(
   themes: readonly Theme[],
   allExercises: readonly Exercise[],
 ): Exercise | null {
-  const ownTheme = themes.find((t) => t.id === exercise.data.themeId);
-  if (!ownTheme) return null;
-  const moduleThemes = themes
-    .filter((t) => t.data.moduleId === ownTheme.data.moduleId)
-    .sort(byOrder);
-  const i = moduleThemes.findIndex((t) => t.id === ownTheme.id);
-  const prevTheme = moduleThemes[i - 1];
+  const ctx = moduleThemeContext(exercise, themes);
+  if (!ctx) return null;
+  const prevTheme = ctx.moduleThemes[ctx.index - 1];
   if (!prevTheme) return null;
   const prevThemeExercises = allExercises
     .filter((ex) => ex.data.themeId === prevTheme.id)

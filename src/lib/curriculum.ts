@@ -148,27 +148,33 @@ export function summariseCoverage(tree: readonly ModuleNode[]): CoverageSummary 
   };
 }
 
-/* ======================= Re-exports (sibling module) =================
- * Navigation helpers (hrefs, paramsForExercise, context loads,
- * adjacency walks) moved to `./curriculum-nav.ts`. Re-exported
- * here to keep every existing `~/lib/curriculum` import working.
- * New code should import from `./curriculum-nav` directly. */
+/* ======================= Re-exports (sibling modules) ================
+ * Navigation helpers split across two files:
+ *   - `./curriculum-paths` — pure URL builders + id parsers, no
+ *     `CollectionEntry` dep, importable from anywhere.
+ *   - `./curriculum-nav` — context loads + adjacency walks that
+ *     depend on Astro's `CollectionEntry` types.
+ * Both are re-exported here so existing `~/lib/curriculum` imports
+ * stay stable. New code can import from the leaner module directly. */
 export {
   exerciseHref,
-  findAdjacentExercises,
-  firstExerciseOfNextTheme,
   langHref,
   langOf,
-  lastExerciseInModule,
-  lastExerciseOfPreviousTheme,
-  loadExerciseContext,
-  loadThemeContext,
   moduleCompleteHref,
   moduleHref,
   paramsForExercise,
   paramsForModule,
   paramsForTheme,
   themeHref,
+} from "./curriculum-paths";
+
+export {
+  findAdjacentExercises,
+  firstExerciseOfNextTheme,
+  lastExerciseInModule,
+  lastExerciseOfPreviousTheme,
+  loadExerciseContext,
+  loadThemeContext,
   type ExerciseContext,
   type ThemeContext,
 } from "./curriculum-nav";
