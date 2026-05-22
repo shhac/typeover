@@ -140,22 +140,31 @@ func greet(u User) string {
               <span class="text-accent-zig">Zig</span> for TypeScript devs
             </Heading>
             <Fragment slot="dek">
-              Preview track — {zigExerciseCount} exercises across
-              {zigThemeCount} {zigThemeCount === 1 ? "theme" : "themes"} so far,
-              graded by the real self-hosted Zig compiler running in a Web Worker.
-              Modules ramp from basics → types → memory → errors → comptime →
-              stdlib → idioms.
+              Modules 1–4 (basics, types, memory, errors) ship {zigExerciseCount}
+              exercises across {zigThemeCount}
+              {zigThemeCount === 1 ? "theme" : "themes"}, graded by the real
+              self-hosted Zig compiler running in a Web Worker. Modules 5–7
+              (comptime, stdlib, idioms) follow.
             </Fragment>
             <Stack gap="xs" slot="modules">
               <Text tone="muted" size="sm" family="mono">
-                <span class="text-accent-zig">1.</span> Basics · preview (hello + output)
+                <span class="text-accent-zig">1.</span> Basics · ready
+              </Text>
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-zig">2.</span> Types · ready
+              </Text>
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-zig">3.</span> Memory · ready
+              </Text>
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-zig">4.</span> Errors · ready
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>2–7.</span> Types, memory, errors, comptime, stdlib, idioms · soon
+                <span>5–7.</span> Comptime, stdlib, idioms · soon
               </Text>
             </Stack>
             <a href="/zig/basics/hello-and-output/01" class="inline-flex">
-              <Button variant="primary" size="md">Try the preview</Button>
+              <Button variant="primary" size="md">Start with Basics</Button>
             </a>
             <a href="/zig" class="inline-flex">
               <Button variant="secondary" size="md">Browse the curriculum</Button>
