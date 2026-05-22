@@ -70,42 +70,49 @@ build_local() {
   cp "$CACHE_DIR/zig-out/zig.tar.gz"        "$OUT_DIR/zig-stdlib.tar.gz"
 }
 
+PLAYGROUND_ORIGIN="https://playground.zigtools.org"
+
+# Echo the first path matching $pattern in $haystack, or fail with a
+# diagnostic referencing $label. Pulled out of fetch_prebuilt's
+# four-times-near-identical inline grep+validate pairs — when
+# Vite's chunk-naming or directory layout shifts upstream, the
+# single helper definition is the only place that needs updating.
+scrape_first_match() {
+  local haystack="$1" pattern="$2" label="$3"
+  local match
+  match="$(printf '%s' "$haystack" | grep -oE "$pattern" | head -1)"
+  if [ -z "$match" ]; then
+    echo "  (could not locate $label in scraped content)"
+    return 1
+  fi
+  printf '%s' "$match"
+}
+
 fetch_prebuilt() {
-  echo "→ Fallback: fetching prebuilt assets from playground.zigtools.org"
+  echo "→ Fallback: fetching prebuilt assets from $PLAYGROUND_ORIGIN"
   command -v curl >/dev/null 2>&1 || { echo "  (no \`curl\` on PATH)"; return 1; }
 
-  local index_html
-  index_html="$(curl -fsSL https://playground.zigtools.org/)" || return 1
+  local index_html main_chunk main_js zig_chunk zig_js zig_wasm rt_a tar_gz
 
-  local main_chunk
-  main_chunk="$(printf '%s' "$index_html" | grep -oE '/assets/index-[A-Za-z0-9_-]+\.js' | head -1)"
-  [ -n "$main_chunk" ] || { echo "  (could not locate main JS chunk in index.html)"; return 1; }
+  index_html="$(curl -fsSL "$PLAYGROUND_ORIGIN/")" || return 1
+  main_chunk="$(scrape_first_match "$index_html" '/assets/index-[A-Za-z0-9_-]+\.js' "main JS chunk")" || return 1
 
   # The main bundle imports the zig-worker chunk by name — scrape both
   # then probe the zig-worker chunk for the wasm/.a/.tar.gz paths.
-  local main_js zig_chunk
-  main_js="$(curl -fsSL "https://playground.zigtools.org$main_chunk")" || return 1
-  zig_chunk="$(printf '%s' "$main_js" | grep -oE '/assets/zig-[A-Za-z0-9_-]+\.js' | head -1)"
-  [ -n "$zig_chunk" ] || { echo "  (could not locate zig worker chunk)"; return 1; }
+  main_js="$(curl -fsSL "$PLAYGROUND_ORIGIN$main_chunk")" || return 1
+  zig_chunk="$(scrape_first_match "$main_js" '/assets/zig-[A-Za-z0-9_-]+\.js' "zig worker chunk")" || return 1
 
-  local zig_js
-  zig_js="$(curl -fsSL "https://playground.zigtools.org$zig_chunk")" || return 1
-
-  local zig_wasm rt_a tar_gz
-  zig_wasm="$(printf '%s' "$zig_js" | grep -oE '/assets/zig-[A-Za-z0-9_-]+\.wasm' | head -1)"
-  rt_a="$(printf '%s' "$zig_js" | grep -oE '/assets/libcompiler_rt-[A-Za-z0-9_-]+\.a' | head -1)"
-  tar_gz="$(printf '%s' "$zig_js" | grep -oE '/assets/zig\.tar-[A-Za-z0-9_-]+\.gz' | head -1)"
-  [ -n "$zig_wasm" ] && [ -n "$rt_a" ] && [ -n "$tar_gz" ] || {
-    echo "  (could not locate one of: zig.wasm / libcompiler_rt.a / zig.tar.gz)"
-    return 1
-  }
+  zig_js="$(curl -fsSL "$PLAYGROUND_ORIGIN$zig_chunk")" || return 1
+  zig_wasm="$(scrape_first_match "$zig_js" '/assets/zig-[A-Za-z0-9_-]+\.wasm' "zig.wasm asset")" || return 1
+  rt_a="$(scrape_first_match "$zig_js" '/assets/libcompiler_rt-[A-Za-z0-9_-]+\.a' "libcompiler_rt.a asset")" || return 1
+  tar_gz="$(scrape_first_match "$zig_js" '/assets/zig\.tar-[A-Za-z0-9_-]+\.gz' "zig-stdlib.tar.gz asset")" || return 1
 
   echo "  zig.wasm           ← $zig_wasm"
   echo "  libcompiler_rt.a   ← $rt_a"
   echo "  zig-stdlib.tar.gz  ← $tar_gz"
-  curl -fsSL "https://playground.zigtools.org$zig_wasm" -o "$OUT_DIR/zig.wasm" || return 1
-  curl -fsSL "https://playground.zigtools.org$rt_a"     -o "$OUT_DIR/libcompiler_rt.a" || return 1
-  curl -fsSL "https://playground.zigtools.org$tar_gz"   -o "$OUT_DIR/zig-stdlib.tar.gz" || return 1
+  curl -fsSL "$PLAYGROUND_ORIGIN$zig_wasm" -o "$OUT_DIR/zig.wasm" || return 1
+  curl -fsSL "$PLAYGROUND_ORIGIN$rt_a"     -o "$OUT_DIR/libcompiler_rt.a" || return 1
+  curl -fsSL "$PLAYGROUND_ORIGIN$tar_gz"   -o "$OUT_DIR/zig-stdlib.tar.gz" || return 1
 }
 
 if build_local; then

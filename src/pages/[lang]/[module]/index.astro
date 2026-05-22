@@ -18,6 +18,7 @@ import {
   moduleHref,
   paramsForModule,
 } from "~/lib/curriculum";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 import { formatBlock } from "~/lib/format-block";
 
 /**
@@ -54,14 +55,8 @@ const { entry } = Astro.props;
 const moduleData = entry.data;
 const lang = moduleData.target;
 
-const [allModules, allThemes, allExercises] = await Promise.all([
-  getCollection("modules"),
-  getCollection("themes"),
-  getCollection("exercises"),
-]);
-const langModules = allModules.filter((m) => m.data.target === lang);
-const langThemes = allThemes.filter((t) => t.data.target === lang);
-const langExercises = allExercises.filter((ex) => ex.data.target === lang);
+const { modules: langModules, themes: langThemes, exercises: langExercises } =
+  await loadLangCollections(lang);
 
 const tree = buildCurriculumTree(langModules, langThemes, langExercises);
 const node = tree.find((n) => n.module.id === entry.id);

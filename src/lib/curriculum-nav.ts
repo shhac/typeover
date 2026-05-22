@@ -95,6 +95,11 @@ export function paramsForModule(id: string): { lang: string; module: string } | 
 /** Pull the lang slug off a collection ID (`go/foundations/...` → `"go"`). */
 export const langOf = (id: string): string => id.split("/")[0] ?? "";
 
+/* Astro-runtime-coupled collection loaders live in `./curriculum-loaders`
+ * (the `getCollection` runtime import would break vitest's resolution
+ * of this module). Re-exported via `~/lib/curriculum` so the route
+ * files can keep their single import. */
+
 /* ============================ Context loads ========================= */
 
 export type ThemeContext = {

@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   ButtonLink,
@@ -16,6 +15,7 @@ import {
 import Accordion from "~/components/ds/Accordion.astro";
 import ThemeCard from "~/components/curriculum/ThemeCard.astro";
 import { buildCurriculumTree, exerciseHref, summariseCoverage } from "~/lib/curriculum";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 import { targetSchema } from "~/lib/content-schema";
 import { LANG_DISPLAY } from "~/lib/lang";
 import { formatInline } from "~/lib/format-inline";
@@ -32,14 +32,7 @@ export const getStaticPaths = () =>
 
 const { lang } = Astro.params;
 
-const [allModules, allThemes, allExercises] = await Promise.all([
-  getCollection("modules"),
-  getCollection("themes"),
-  getCollection("exercises"),
-]);
-const modules = allModules.filter((m) => m.data.target === lang);
-const themes = allThemes.filter((t) => t.data.target === lang);
-const exercises = allExercises.filter((ex) => ex.data.target === lang);
+const { modules, themes, exercises } = await loadLangCollections(lang);
 
 const tree = buildCurriculumTree(modules, themes, exercises);
 const coverage = summariseCoverage(tree);

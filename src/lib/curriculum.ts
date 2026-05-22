@@ -172,3 +172,11 @@ export {
   type ExerciseContext,
   type ThemeContext,
 } from "./curriculum-nav";
+
+/* loadLangCollections + LangCollections aren't re-exported here
+ * because their `getCollection` runtime import from `astro:content`
+ * can't be resolved by vitest (the virtual module only exists
+ * inside the Astro pipeline). Route pages import directly from
+ * `~/lib/curriculum-loaders` — one extra import line per page,
+ * but the schema/nav helpers stay test-importable through
+ * `~/lib/curriculum`. */
