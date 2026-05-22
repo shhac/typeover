@@ -21,7 +21,7 @@ generator:
 blanks: [op]
 hints:
   - "One character, same as C / C++ for taking an address."
-  - "Sits at the same place as `&&` in JavaScript would — at the start."
+  - "Single character, prefix operator — sits at the same position as `!` in `!x` (boolean negation) or `-` in `-y` (unary minus)."
   - "`&`"
 runtime: none
 notes: |

@@ -54,7 +54,7 @@ expectStdout: |
 runtime: zig
 blanks: [line]
 hints:
-  - "Three pieces: `const s: Shape =` annotates the type, then `.{ .circle = 5 };` is an anonymous-struct-literal that the compiler coerces to the right `Shape` variant. Note: TWO dots — one for the outer literal, one for the field name."
+  - "Three pieces: `const s: Shape =` annotates the type, then `.{ .circle = 5 };` is an anonymous-struct-literal that the compiler coerces to the right `Shape` variant. Note: TWO dots — one for the outer literal, one for the field name. The `|radius|` and `|side|` payload captures in the switch arms below are the same pipe-binding shape from `basics/optionals` (`if (x) |y|`) and `basics/while-and-for` (`for (...) |item|`) — third context, same syntax."
   - "Shape: `const s: <UnionType> = .{ .<variant> = <payload> };`."
   - "`const s: Shape = .{ .circle = 5 };`"
 notes: |
@@ -62,3 +62,11 @@ notes: |
   difference in this theme. The leading `.{...}` is the
   anonymous-struct shorthand; the inner `.circle` selects the
   variant; `= 5` is the payload.
+
+  This slot jumps from slot 06's bare enum-variant binding
+  (`.green`) to a tagged-union construction with switch payload
+  capture in one go. The pipe-payload-capture `|x|` is the
+  THIRD context for that syntax in the curriculum (for-loops in
+  basics/while-and-for, if-on-optionals in basics/optionals,
+  switch arms here). Reading hint #1 emphasises the
+  cross-reference.

@@ -29,12 +29,12 @@ generator:
       explain: |-
         TS reflex — Zig field initializers need a leading dot AND
         `=` (not `:`): `Point{ .x = 3, .y = 4 }`.
-    - match: "const p: Point = .{ .x = 3, .y = 4 };"
+    - match: "const p = Point{ x = 3, y = 4 };"
       explain: |-
-        The `.{...}` "anonymous struct literal" form would work if
-        the binding's type were inferred, but here the explicit
-        `Point{ ... }` form is clearer. Both compile; pick the
-        explicit form for teaching purposes.
+        Missing dots on the field initializers. Zig
+        struct-literal fields are written `.field = value`
+        with a LEADING dot — that's what distinguishes them
+        from bare assignments.
     - match: "const p = Point(x = 3, y = 4);"
       explain: |-
         Constructor-call syntax doesn't exist in Zig. Struct
