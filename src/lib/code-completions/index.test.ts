@@ -6,7 +6,9 @@ import {
   GO_MEMBERS,
   extractIdentifiers,
   makeCompletionSource,
-} from "./code-completions";
+  tryMemberCompletion,
+  tryScopeCompletion,
+} from "./index";
 
 /*
  * Pin the two completion mechanics independently:
@@ -227,5 +229,65 @@ describe("makeCompletionSource — branch dispatch", () => {
     });
     const ls = labelsOf(call(src, ctxFor("nums.it", undefined, true)));
     expect(ls).toContain("items");
+  });
+});
+
+describe("tryMemberCompletion (branch helper)", () => {
+  it("returns a CompletionResult for a known root", () => {
+    const result = tryMemberCompletion(ctxFor("std."), ZIG_MEMBERS);
+    expect(result).not.toBeNull();
+    expect(typeof result).toBe("object");
+    /* The sentinel FALLTHROUGH is a Symbol, so a populated
+     * options array confirms we got the result branch. */
+    expect((result as CompletionResult).options.length).toBeGreaterThan(0);
+  });
+
+  it("returns FALLTHROUGH for a non-dotted context (lets scope branch run)", () => {
+    const result = tryMemberCompletion(ctxFor("hello"), ZIG_MEMBERS);
+    expect(result).not.toBeNull();
+    expect(String(result)).toContain("fallthrough");
+  });
+
+  it("returns null for unknown root + non-explicit trigger (suppress)", () => {
+    /* Cursor right after a dot, no partial typed, unknown root — suppress. */
+    expect(tryMemberCompletion(ctxFor("nums."), ZIG_MEMBERS)).toBeNull();
+  });
+
+  it("returns FALLTHROUGH sentinel for unknown root + partial + explicit", () => {
+    const result = tryMemberCompletion(
+      ctxFor("nums.it", undefined, /* explicit */ true),
+      ZIG_MEMBERS,
+    );
+    expect(result).not.toBeNull();
+    /* Symbols stringify as `Symbol(fallthrough)`. */
+    expect(String(result)).toContain("fallthrough");
+  });
+});
+
+describe("tryScopeCompletion (branch helper)", () => {
+  it("returns options merging seed + buffer identifiers", () => {
+    const seed = new Set(["alpha", "bravo"]);
+    const blocklist = new Set<string>();
+    const ctx = ctxFor("charlie ch");
+    const result = tryScopeCompletion(ctx, seed, blocklist);
+    expect(result).not.toBeNull();
+    const ls = (result!.options as readonly { label: string }[]).map((o) => o.label);
+    expect(ls).toContain("alpha");
+    expect(ls).toContain("bravo");
+    expect(ls).toContain("charlie");
+  });
+
+  it("filters out blocklisted identifiers", () => {
+    const seed = new Set(["fn", "process"]);
+    const blocklist = new Set(["fn"]);
+    const ls = (
+      tryScopeCompletion(ctxFor("p"), seed, blocklist)!.options as readonly { label: string }[]
+    ).map((o) => o.label);
+    expect(ls).toContain("process");
+    expect(ls).not.toContain("fn");
+  });
+
+  it("returns null when nothing to suggest", () => {
+    expect(tryScopeCompletion(ctxFor("x"), new Set(), new Set())).toBeNull();
   });
 });
