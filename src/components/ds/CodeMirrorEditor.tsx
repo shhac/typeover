@@ -10,11 +10,6 @@ import { cmLanguageExtension, type CmLanguage } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
 import { useCodeMirror } from "~/lib/use-codemirror";
 
-/** Language packs the editor supports. Alias of `CmLanguage`, kept
- *  as a named export so existing consumers (Freeform, FillBlank
- *  surfaces) don't churn imports. */
-export type EditorLanguage = CmLanguage;
-
 /*
  * Solid wrapper around CodeMirror 6 for the Freeform exercise's
  * code-editing surface. Replaces the bare `<textarea>` per
@@ -87,7 +82,7 @@ interface CodeMirrorEditorProps {
    *  the TS-source pane in the exercise shell. */
   readOnly?: boolean;
   /** Language pack to load. Defaults to "go". */
-  language?: EditorLanguage;
+  language?: CmLanguage;
   /** Aria-label for the editor surface (CodeMirror puts it on
    *  the contentDOM). */
   ariaLabel?: string;
@@ -171,7 +166,7 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
 
 /* Aria labels per language. Used as the contentDOM default when the
  * caller doesn't supply one. */
-const ARIA_LABEL_BY_LANG: Record<EditorLanguage, string> = {
+const ARIA_LABEL_BY_LANG: Record<CmLanguage, string> = {
   go: "Go code",
   ts: "TypeScript source",
   zig: "Zig code",
@@ -180,7 +175,7 @@ const ARIA_LABEL_BY_LANG: Record<EditorLanguage, string> = {
 /* Map editor language → completion language. Returns null for
  * languages without a curated member map (the TS pane is read-only
  * and doesn't need completion). */
-function toCompletionLanguage(lang: EditorLanguage): CompletionLanguage | null {
+function toCompletionLanguage(lang: CmLanguage): CompletionLanguage | null {
   return lang === "zig" ? "zig" : lang === "go" ? "go" : null;
 }
 

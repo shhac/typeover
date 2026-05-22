@@ -26,15 +26,6 @@ import { zigLanguage } from "@ndim/codemirror-lang-zig";
 /** Canonical language union for every CodeMirror editor surface. */
 export type CmLanguage = "go" | "ts" | "zig";
 
-/** Lookup table: language → human-readable label used in aria
- *  attributes + UI labels. Kept here (not in the editor components)
- *  so all three surfaces stay in sync. */
-export const CM_LANGUAGE_LABEL: Record<CmLanguage, string> = {
-  go: "Go",
-  ts: "TypeScript",
-  zig: "Zig",
-};
-
 /** Return the CodeMirror extension for a given language. */
 export function cmLanguageExtension(lang: CmLanguage): Extension {
   switch (lang) {

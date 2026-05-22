@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EditorState } from "@codemirror/state";
-import { cmLanguageExtension, CM_LANGUAGE_LABEL, type CmLanguage } from "./codemirror-lang";
+import { cmLanguageExtension, type CmLanguage } from "./codemirror-lang";
 
 /* Verify the dispatcher returns SOMETHING for every language. The
  * extension objects are opaque internals — we don't introspect their
@@ -17,12 +17,4 @@ describe("cmLanguageExtension", () => {
       expect(state.doc.toString()).toBe("x");
     });
   }
-});
-
-describe("CM_LANGUAGE_LABEL", () => {
-  it("provides human labels for every language", () => {
-    expect(CM_LANGUAGE_LABEL.go).toBe("Go");
-    expect(CM_LANGUAGE_LABEL.ts).toBe("TypeScript");
-    expect(CM_LANGUAGE_LABEL.zig).toBe("Zig");
-  });
 });

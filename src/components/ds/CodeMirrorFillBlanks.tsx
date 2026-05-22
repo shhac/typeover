@@ -41,11 +41,12 @@ import { LANG_DISPLAY } from "~/lib/lang";
  * without CodeMirror-internal probing.
  */
 
-/** Language slug that selects the CodeMirror grammar used for
- *  syntax-highlighting the surrounding scaffold. Maps onto the
- *  exercise's `target` field; defaults to "go" for back-compat
- *  with the original Go-only call sites. */
-export type FillBlanksLanguage = "go" | "zig";
+/* Language slug that selects the CodeMirror grammar used for
+ * syntax-highlighting the surrounding scaffold. Maps onto the
+ * exercise's `target` field; defaults to "go" for back-compat
+ * with the original Go-only call sites. Internal — callers pass
+ * the raw string via the `language` prop, not via this type. */
+type FillBlanksLanguage = "go" | "zig";
 
 interface CodeMirrorFillBlanksProps {
   segments: readonly FillSegment[];
@@ -64,10 +65,10 @@ interface CodeMirrorFillBlanksProps {
 }
 
 /* `LANG_DISPLAY` is keyed by Target (`"go" | "zig"`) which matches
- * `FillBlanksLanguage` exactly today — schema-validated. If the
- * schema's target enum and this component's language enum ever
- * diverge, the assignment surfaces a TS error here. */
-const LANGUAGE_LABEL: Record<FillBlanksLanguage, string> = LANG_DISPLAY;
+ * `FillBlanksLanguage` exactly today — schema-validated. The
+ * indexer `LANG_DISPLAY[lang]` below relies on this; if the schema's
+ * target enum and this component's language enum ever diverge,
+ * the indexer surfaces a TS error at the call sites. */
 
 /* The widget owns its mount lifecycle: toDOM creates a host span,
  * mounts the caller-supplied JSX via Solid's standalone render, and
@@ -127,7 +128,7 @@ class BlankWidget extends WidgetType {
  * segments array — matches the existing fill-word convention so
  * the same blank var appearing twice produces two independent
  * widgets (e.g. `${x} == ${x}`). */
-export interface BlankPosition {
+interface BlankPosition {
   from: number;
   to: number;
   slotIdx: number;
@@ -169,7 +170,7 @@ function LegacyFallback(props: CodeMirrorFillBlanksProps): JSX.Element {
    * passthrough the prop was silently dropped in test mode, which
    * left the language-selection wiring untestable. */
   const lang = props.language ?? "go";
-  const ariaLabel = props.ariaLabel ?? `Fill-the-blanks ${LANGUAGE_LABEL[lang]} snippet`;
+  const ariaLabel = props.ariaLabel ?? `Fill-the-blanks ${LANG_DISPLAY[lang]} snippet`;
   return (
     <div
       class="font-mono text-code bg-bg-inset p-3 rounded-sm border border-border-default"
@@ -220,7 +221,7 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
         EditorView.decorations.of(decorationSet),
         EditorView.atomicRanges.of(() => decorationSet),
         EditorView.contentAttributes.of({
-          "aria-label": props.ariaLabel ?? `Fill-the-blanks ${LANGUAGE_LABEL[lang]} snippet`,
+          "aria-label": props.ariaLabel ?? `Fill-the-blanks ${LANG_DISPLAY[lang]} snippet`,
           spellcheck: "false",
         }),
         ...codemirrorThemeExtensions({
