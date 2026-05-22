@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/memory
+title: defer and errdefer
+order: 2
+prerequisites: []
+intro: |
+  defer is Zig's structural cleanup tool: each defer statement runs when the enclosing block exits, in LIFO order. errdefer is the same idea, but it only fires when the function returns via an error path. The canonical pattern is alloc-then-defer-free (always run cleanup) or alloc-then-errdefer-free (only on the error path, so successful returns hand ownership to the caller). Once these two land in your fingertips, manual memory management stops being scary.

@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: mcq
+order: 1
+prompt: |
+  TypeScript reaches for `try { ... } finally { ... }` for
+  guaranteed cleanup. Zig uses `defer` — placed at the point of
+  acquisition, runs when the enclosing block exits. Pick the
+  right Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const buf = alloc(32);
+    try {
+        use(buf);
+    } finally {
+        free(buf);
+    }
+  canonical: |-
+    const buf = try alloc.alloc(u8, 32);
+    defer alloc.free(buf);
+    use(buf);
+  distractors:
+    - |-
+      const buf = try alloc.alloc(u8, 32);
+      use(buf);
+      alloc.free(buf);
+    - |-
+      const buf = try alloc.alloc(u8, 32);
+      try {
+          use(buf);
+      } finally {
+          alloc.free(buf);
+      }
+    - |-
+      const buf = try alloc.alloc(u8, 32);
+      defer { alloc.free(buf); }
+      use(buf);
+hints:
+  - "Two pieces: write `defer <cleanup-statement>;` IMMEDIATELY after the acquisition, then the code that uses the resource. The defer is automatic; you don't need to remember to call free at the end."
+  - "Shape: `defer <statement>;` — one statement, semicolon, no braces required."
+  - "`defer alloc.free(buf);` right after the alloc."
+runtime: none
+notes: |
+  First defer exercise. Drills the alloc-then-defer-free
+  pattern. Distractors:
+   - Manual cleanup at the end — works for the happy path but
+     fails on early returns or errors.
+   - `try { ... } finally { ... }` — TS reflex.
+   - `defer { ... }` block — Zig's `defer` takes a single
+     statement; no braces needed (you can add them but it's
+     unusual).

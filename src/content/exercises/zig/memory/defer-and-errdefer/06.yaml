@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — schedule the buffer's release so
+  it runs when `main` exits, regardless of return path. With the
+  right defer, the program prints `bye` and the buffer is freed
+  on exit.
+generator:
+  kind: template
+  vars:
+    line:
+      - "defer alloc.free(buf);"
+  ts: |-
+    const buf = alloc(3);
+    try { console.log("bye"); } finally { free(buf); }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const buf = try alloc.alloc(u8, 3);
+        ${line}
+        @memcpy(buf, "bye");
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "alloc.free(buf);"
+      explain: |-
+        Missing `defer`. Without it the free runs in source
+        order — fine here, but breaks the moment you add an
+        early return or a `try` that might error before the
+        bare free.
+    - match: "defer alloc.free(buf)"
+      explain: |-
+        Missing semicolon. Zig statements end with `;` —
+        `defer` is no exception.
+    - match: "defer { alloc.free(buf); }"
+      explain: |-
+        Works mechanically, but Zig's `defer` takes a single
+        statement — the braces add noise without value.
+expectStdout: |
+  bye
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: keyword `defer`, the cleanup statement `alloc.free(buf)`, semicolon."
+  - "Shape: `defer <cleanup-statement>;` — one statement, no braces."
+  - "`defer alloc.free(buf);`"
+notes: |
+  First runnable defer slot. Drills the canonical
+  alloc-then-defer-free pattern.

@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that:
+   1. Defines `fn makeBuf(a: std.mem.Allocator) ![]u8` that
+      allocates 7 bytes, errdefers the free, copies `"caller!"`
+      into the buf, and returns it.
+   2. From `main`, calls `makeBuf`, takes ownership with its
+      own `defer alloc.free(buf);`, prints the buf + newline.
+
+  Expected stdout: `caller!`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* No direct TS equivalent */
+  canonical: |-
+    const std = @import("std");
+
+    fn makeBuf(a: std.mem.Allocator) ![]u8 {
+        const buf = try a.alloc(u8, 7);
+        errdefer a.free(buf);
+        @memcpy(buf, "caller!");
+        return buf;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const buf = try makeBuf(alloc);
+        defer alloc.free(buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  caller!
+runtime: zig
+hints:
+  - "Two layers: the factory uses `errdefer` so failures don't leak (here `@memcpy` won't fail so the errdefer just doesn't fire); the caller uses `defer` because IT now owns the buffer."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn makeBuf(a: std.mem.Allocator) ![]u8 {\n    const buf = try a.alloc(u8, 7);\n    errdefer a.free(buf);\n    @memcpy(buf, \"caller!\");\n    return buf;\n}\n\npub fn main(init: std.process.Init) !void {\n    const alloc = std.heap.page_allocator;\n    const buf = try makeBuf(alloc);\n    defer alloc.free(buf);\n    // writeStreamingAll(buf), writeStreamingAll(\"\\n\")\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls. Note the ownership handoff: `makeBuf` would free if it errored mid-construction, but on success the buf transfers to main, which now bears the `defer free` responsibility.'
+notes: |
+  Closes defer-and-errdefer. Drills the canonical
+  factory-returns-allocation idiom: errdefer in the factory
+  (for the construction-fails-cleanly path), defer in the
+  caller (for ownership of successful return).

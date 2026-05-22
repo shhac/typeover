@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword. The line schedules a cleanup that
+  runs unconditionally when the block exits. Five letters, same
+  word Go uses for the same idea.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "defer"
+  ts: |-
+    try { use(buf); } finally { free(buf); }
+  canonical: |-
+    ${keyword} alloc.free(buf);
+  distractors:
+    - "finally"
+    - "scope"
+    - "cleanup"
+blanks: [keyword]
+hints:
+  - "Five letters, lowercase. Same word Go uses for the same idea."
+  - "Starts with `d`."
+  - "`defer`"
+runtime: none
+notes: |
+  Drill `defer`. Distractors:
+   - `finally` — TS / Java reflex.
+   - `scope` — Rust's `scopeguard` crate reflex.
+   - `cleanup` — generic.

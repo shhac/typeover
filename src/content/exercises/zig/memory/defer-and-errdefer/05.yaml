@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing keyword. Same as `defer`, but fires ONLY
+  when the function returns via an error. Eight letters,
+  compound word.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "errdefer"
+  ts: |-
+    /* No direct TS analogue */
+  canonical: |-
+    ${keyword} alloc.free(buf);
+  distractors:
+    - "deferror"
+    - "catchdefer"
+    - "errorcleanup"
+blanks: [keyword]
+hints:
+  - "Eight letters, lowercase, two pieces: `err` + `defer`."
+  - "Starts with `e`."
+  - "`errdefer`"
+runtime: none
+notes: |
+  Drill `errdefer`. Distractors:
+   - `deferror` — wrong word order (defer + err).
+   - `catchdefer` — not a Zig keyword.
+   - `errorcleanup` — too verbose.

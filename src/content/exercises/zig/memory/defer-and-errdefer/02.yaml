@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: mcq
+order: 2
+prompt: |
+  Multiple `defer` statements in the same block run in REVERSE
+  order — last-registered, first-fired (LIFO). Pick the output
+  for the program below.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TypeScript's `finally` blocks can be nested but not stacked. */
+  canonical: |-
+    /* Output: "open\nuse\nclose-2\nclose-1\n" */
+    open();
+    defer close1();
+    defer close2();
+    use();
+  distractors:
+    - "Output: \"open\\nuse\\nclose-1\\nclose-2\\n\""
+    - "Output: \"open\\nclose-1\\nclose-2\\nuse\\n\""
+    - "Output: \"open\\nclose-2\\nclose-1\\nuse\\n\""
+hints:
+  - "Two rules: defers fire when the BLOCK EXITS (after the main code, not before), and they fire in REVERSE registration order (LIFO — the last `defer` runs first)."
+  - "So: `open()` runs first, then `use()`, then defers in reverse: `close2()` then `close1()`."
+  - "`open / use / close-2 / close-1`."
+runtime: none
+notes: |
+  Drill LIFO semantics. The pattern matches how nested
+  resources work — last opened, first closed. Distractors:
+   - FIFO order — wrong; defers are LIFO.
+   - Defers BEFORE the code — wrong; they fire on block exit.
+   - Reversed defers but with cleanup before use — wrong;
+     `use` always runs before the defers.

@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that demonstrates `defer`'s
+  LIFO order. Stack three defers that each print a single
+  letter (`a`, `b`, `c`), followed by a `try` writing `x`.
+  After the function body runs, the defers fire in reverse,
+  producing `x` then `c` then `b` then `a`, each on its own
+  line.
+
+  Expected stdout (exactly):
+  ```
+  x
+  c
+  b
+  a
+  ```
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* No direct TS equivalent */
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const out = std.Io.File.stdout();
+        defer out.writeStreamingAll(init.io, "a\n") catch {};
+        defer out.writeStreamingAll(init.io, "b\n") catch {};
+        defer out.writeStreamingAll(init.io, "c\n") catch {};
+        try out.writeStreamingAll(init.io, "x\n");
+    }
+expectStdout: |
+  x
+  c
+  b
+  a
+runtime: zig
+hints:
+  - "Three defers + one regular write. Defers fire AT BLOCK EXIT, in LIFO order. Note: defer can't propagate errors via `try`, so each defer uses `catch {}` to swallow them — that's the idiomatic shape for defers calling fallible operations."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const out = std.Io.File.stdout();\n    defer out.writeStreamingAll(init.io, \"a\\n\") catch {};\n    defer out.writeStreamingAll(init.io, \"b\\n\") catch {};\n    defer out.writeStreamingAll(init.io, \"c\\n\") catch {};\n    try out.writeStreamingAll(init.io, \"x\\n\");\n}\n```"
+  - 'Full program is the skeleton — three defers in source order (a, b, c) plus one `try` writing x. The defers run in reverse on block exit.'
+notes: |
+  First defer freeform. Drills LIFO + the `catch {}` idiom
+  for defers calling fallible operations (defer can't have a
+  `try` since try is for propagating errors out of the current
+  function, not a defer block).

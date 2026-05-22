@@ -1,0 +1,64 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — schedule cleanup that runs ONLY
+  if a later operation fails. The current code has an `errdefer
+  free`, then a `try` that succeeds, then returns the buffer.
+  Because the try succeeded, the errdefer does NOT fire and the
+  caller (main) sees the buffer.
+generator:
+  kind: template
+  vars:
+    line:
+      - "errdefer alloc.free(buf);"
+  ts: |-
+    /* No direct TS equivalent */
+  canonical: |-
+    const std = @import("std");
+
+    fn make(alloc: std.mem.Allocator) ![]u8 {
+        const buf = try alloc.alloc(u8, 5);
+        ${line}
+        // (no operation that could fail; the errdefer does NOT fire)
+        @memcpy(buf, "owned");
+        return buf;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const buf = try make(alloc);
+        defer alloc.free(buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, buf);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "defer alloc.free(buf);"
+      explain: |-
+        `defer` would free unconditionally, including on the
+        successful path — meaning the caller would see freed
+        memory. Use `errdefer` so the cleanup runs ONLY on
+        error.
+    - match: "errdefer alloc.free(buf)"
+      explain: |-
+        Missing semicolon. `errdefer` is a statement, needs
+        `;`.
+    - match: "catch alloc.free(buf);"
+      explain: |-
+        `catch` isn't a standalone statement keyword in this
+        context. The right tool is `errdefer`.
+expectStdout: |
+  owned
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: keyword `errdefer`, cleanup `alloc.free(buf)`, semicolon."
+  - "Shape: `errdefer <cleanup-statement>;` — same shape as `defer`, different trigger."
+  - "`errdefer alloc.free(buf);`"
+notes: |
+  Drill errdefer in a runnable context. The function's `![]u8`
+  return type is what makes errdefer fire on error paths only.
+  Note the caller has its own `defer alloc.free(buf);` — the
+  pair forms the canonical "factory + caller cleans up"
+  ownership-transfer pattern.

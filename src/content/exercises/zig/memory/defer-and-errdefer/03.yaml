@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/memory/defer-and-errdefer
+type: mcq
+order: 3
+prompt: |
+  `errdefer` is `defer`'s twin — same shape, but only fires
+  when the function returns via an ERROR. The canonical pattern
+  is "alloc, then errdefer free" — so on success the caller
+  takes ownership of the alloc; on failure the alloc is
+  cleaned up. Pick the right shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* No direct TS analogue — closest is rejecting a promise
+     * with cleanup before propagating. */
+  canonical: |-
+    fn makeBuf(alloc: std.mem.Allocator) ![]u8 {
+        const buf = try alloc.alloc(u8, 32);
+        errdefer alloc.free(buf);
+        try fillBuf(buf);
+        return buf;
+    }
+  distractors:
+    - |-
+      fn makeBuf(alloc: std.mem.Allocator) ![]u8 {
+          const buf = try alloc.alloc(u8, 32);
+          defer alloc.free(buf);
+          try fillBuf(buf);
+          return buf;
+      }
+    - |-
+      fn makeBuf(alloc: std.mem.Allocator) ![]u8 {
+          const buf = try alloc.alloc(u8, 32);
+          try fillBuf(buf) catch alloc.free(buf);
+          return buf;
+      }
+    - |-
+      fn makeBuf(alloc: std.mem.Allocator) ![]u8 {
+          const buf = try alloc.alloc(u8, 32);
+          errdefer alloc.free(buf);
+          fillBuf(buf);
+          return buf;
+      }
+hints:
+  - "Two pieces: the cleanup keyword is `errdefer` (not `defer`), and it sits right after the alloc — so if `fillBuf` fails, the alloc gets freed; if it succeeds, the caller gets the buf and owns it."
+  - "Shape: `errdefer <cleanup>;` placed between alloc and the next fallible operation. The function's `!T` return type is what makes this work — Zig knows the function can error."
+  - "`errdefer alloc.free(buf);` right after the alloc."
+runtime: none
+notes: |
+  Drill errdefer. Distractors:
+   - Plain `defer` — would free even on successful return,
+     defeating the "transfer ownership to caller" intent.
+   - `catch` chain — wrong syntax; Zig's catch is an
+     expression operator, not a statement.
+   - Missing `try` on `fillBuf` — the call won't propagate
+     errors, so errdefer never fires.
