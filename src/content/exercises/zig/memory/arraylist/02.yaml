@@ -15,9 +15,9 @@ generator:
   canonical: |-
     try nums.append(alloc, 10);
   distractors:
+    - "try nums.append(10);"
     - "nums.append(alloc, 10);"
     - "try nums.push(alloc, 10);"
-    - "try nums.append(10);"
 hints:
   - "Three pieces: `try` (the call can fail — allocator might OOM), method name `append`, then `(alloc, 10)` — allocator first, value second."
   - "Shape: `try <list>.append(<allocator>, <value>);`."
@@ -25,7 +25,10 @@ hints:
 runtime: none
 notes: |
   Drill `try .append(alloc, value)`. Distractors:
+   - Missing allocator arg (`try nums.append(10);`) — the
+     most common slip if you came from Zig 0.13's managed API,
+     where the list stored an allocator pointer and append
+     took only the value. Zig 0.16's unmanaged convention
+     requires the allocator on every mutating call.
    - Missing `try` — uncaught error union.
    - `.push` — TS / JS reflex.
-   - Missing allocator arg — unmanaged convention requires
-     it on every mutating call.

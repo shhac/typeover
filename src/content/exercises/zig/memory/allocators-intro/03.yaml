@@ -37,8 +37,12 @@ hints:
 runtime: none
 notes: |
   Drill the arena setup. Distractors:
-   - Default-init `.{}` — needs a backing allocator argument.
-   - `.init()` with no args — same issue.
+   - Default-init `.{}` — fails to construct because the
+     struct has required fields. The arena needs a backing
+     allocator wired in via `.init(backing)`.
+   - `.init()` with no args — same underlying issue: the
+     constructor takes the backing allocator as its only
+     argument.
    - `const arena` — `deinit` mutates, so the arena must be
      `var`.
 

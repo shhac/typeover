@@ -34,7 +34,7 @@ generator:
           return s.items.len;
       }
 hints:
-  - "A READ-ONLY borrower takes the narrowest reasonable type. For a string-like input that's `[]const u8` — a slice of read-only bytes. No allocator (you're not allocating), no free (the caller still owns it)."
+  - "Borrow rule: a function that READS but doesn't OWN takes the narrowest reasonable type and NO allocator parameter — full stop. If you see an `Allocator` in the signature, the function is going to allocate; if you don't, it's not. For a string-like input that's `[]const u8` — a slice of read-only bytes."
   - "Shape: `fn <name>(s: []const u8) <ReturnType> { ... }` — no allocator, no defer, no free."
   - "`fn lengthOf(s: []const u8) usize { return s.len; }`"
 runtime: none

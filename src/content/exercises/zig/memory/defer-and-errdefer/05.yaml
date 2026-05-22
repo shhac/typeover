@@ -12,7 +12,9 @@ generator:
     keyword:
       - "errdefer"
   ts: |-
-    /* No direct TS analogue */
+    // Imagine: try { ... } catch (e) { free(buf); throw e; }
+    // — TS has no direct construct; the closest pattern is
+    // "rethrow after cleanup" inside a catch.
   canonical: |-
     ${keyword} alloc.free(buf);
   distractors:

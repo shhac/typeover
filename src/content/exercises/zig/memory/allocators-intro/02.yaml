@@ -18,12 +18,13 @@ generator:
     const alloc = fba.allocator();
   distractors:
     - |-
-      const backing: [128]u8 = .{};
-      var fba = std.heap.FixedBufferAllocator(&backing);
-      const alloc = fba.allocator;
-    - |-
-      var fba = std.heap.FixedBufferAllocator.init(128);
+      var backing: [128]u8 = undefined;
+      var fba = std.heap.FixedBufferAllocator.init(backing);
       const alloc = fba.allocator();
+    - |-
+      var backing: [128]u8 = undefined;
+      var fba = std.heap.FixedBufferAllocator.init(&backing);
+      const alloc = fba.allocator;
     - |-
       var fba: [128]u8 = undefined;
       const alloc = fba.allocator();
@@ -34,8 +35,11 @@ hints:
 runtime: none
 notes: |
   Drill the FBA setup. Distractors:
-   - `.{}` initializer (uninit array would compile but is
-     unidiomatic); missing parens on `init`; field access
-     `.allocator` (it's a METHOD with parens).
-   - Passing `128` instead of a buffer reference.
-   - Trying to use the array directly as the allocator.
+   - Pass-by-value (`init(backing)` instead of `init(&backing)`)
+     — FBA needs the address of the buffer it'll bump-allocate
+     into; passing by value would hand over a copy.
+   - Field access `.allocator` instead of method call
+     `.allocator()` — `.allocator` is a METHOD that returns the
+     interface value.
+   - Treating the backing array directly as the allocator —
+     skips the FBA construction step entirely.
