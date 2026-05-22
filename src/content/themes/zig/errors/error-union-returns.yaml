@@ -2,6 +2,6 @@ target: zig
 moduleId: zig/errors
 title: "Error union returns (!T)"
 order: 3
-prerequisites: []
+prerequisites: [zig/errors/error-sets, zig/errors/try-and-catch]
 intro: |
   A function that can fail declares a return type with a leading bang: !T means "either a T or an error." The error set is usually INFERRED from the function body — every return error.X line is added to the implicit set. !void is the common shape for functions that succeed silently or fail (validators, writers). The caller consumes via try, catch <default>, or catch |err| handler. The bang plus a body that mentions error.X is the whole error story.

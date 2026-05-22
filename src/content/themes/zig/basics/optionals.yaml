@@ -2,6 +2,6 @@ target: zig
 moduleId: zig/basics
 title: "Optionals (?T)"
 order: 8
-prerequisites: []
+prerequisites: [zig/basics/functions, zig/basics/numeric-primitives]
 intro: |
   TypeScript uses `T | null` (or `T | undefined`) to mark "maybe absent" values; Zig's analogue is the type prefix `?T`. A `?T` value is either some `T` or `null`. Three idiomatic ways to handle one: `orelse <default>` (TS `??`), `if (x) |unwrapped| { ... }` (payload capture that runs only when present), or `x.?` for "I know it's not null, unwrap anyway" (panics on null). No more silent nullable bugs.

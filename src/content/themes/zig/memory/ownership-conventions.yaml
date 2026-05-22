@@ -2,6 +2,6 @@ target: zig
 moduleId: zig/memory
 title: Ownership conventions
 order: 4
-prerequisites: []
+prerequisites: [zig/memory/allocators-intro, zig/memory/arraylist]
 intro: |
   Zig has no borrow checker — ownership is convention, not enforcement. The rule that makes manual memory livable: whoever calls init is responsible for calling deinit. A function that allocates and returns ownership uses errdefer to clean up on failure; the caller then defers the deinit. A function that borrows takes a slice or pointer and never frees. Once these conventions become reflex, manual memory feels almost as easy as garbage collection — minus the runtime cost.

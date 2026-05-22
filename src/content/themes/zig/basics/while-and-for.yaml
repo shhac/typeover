@@ -2,6 +2,6 @@ target: zig
 moduleId: zig/basics
 title: while and for
 order: 4
-prerequisites: []
+prerequisites: [zig/basics/variables, zig/basics/conditionals]
 intro: |
   Zig has `while (cond) { ... }` for condition-driven loops and `for (slice) |item| { ... }` for iteration. The C-style three-clause `for (init; cond; step)` is gone — its replacement is `while (cond) : (step) { ... }` (note the colon-continuation syntax for the step expression). The TS `for...of` reflex maps directly to Zig's `for (...) |item|`.

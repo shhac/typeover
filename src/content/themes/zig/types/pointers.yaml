@@ -2,6 +2,6 @@ target: zig
 moduleId: zig/types
 title: Pointers
 order: 3
-prerequisites: []
+prerequisites: [zig/types/structs]
 intro: |
   TypeScript has no pointer syntax — everything is a reference under the hood. Zig has FOUR pointer flavours that mean different things: `*T` (single pointer to one T), `*const T` (read-only single pointer), `[*]T` (many-item pointer, length unknown), and `?*T` (nullable single pointer). `&value` takes the address; `p.*` dereferences. The discipline: pick the narrowest flavour that fits the use case.
