@@ -1,11 +1,10 @@
 import { For, onCleanup, onMount, type JSX } from "solid-js";
 import { render } from "solid-js/web";
-import { EditorState, type Extension } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType } from "@codemirror/view";
-import { go } from "@codemirror/lang-go";
-import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
+import { cmLanguageExtension } from "~/lib/codemirror-lang";
 import type { FillSegment } from "~/lib/generator-runtime";
 import { LANG_DISPLAY } from "~/lib/lang";
 
@@ -62,11 +61,6 @@ interface CodeMirrorFillBlanksProps {
    *  need to change. */
   language?: FillBlanksLanguage;
 }
-
-const LANGUAGE_EXTENSION: Record<FillBlanksLanguage, () => Extension> = {
-  go: () => go(),
-  zig: () => zigLanguage,
-};
 
 /* `LANG_DISPLAY` is keyed by Target (`"go" | "zig"`) which matches
  * `FillBlanksLanguage` exactly today — schema-validated. If the
@@ -225,7 +219,7 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
       extensions: [
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
-        LANGUAGE_EXTENSION[lang](),
+        cmLanguageExtension(lang),
         decorationField,
         atomicField,
         EditorView.contentAttributes.of({

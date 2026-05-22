@@ -3,10 +3,9 @@ import { EditorState, Compartment, Prec, type Extension } from "@codemirror/stat
 import { EditorView, keymap } from "@codemirror/view";
 import { history, historyKeymap } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
-import { go } from "@codemirror/lang-go";
-import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
+import { cmLanguageExtension } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
 import { cn } from "../ds/_internal";
 
@@ -179,7 +178,7 @@ function BlankInputCodeMirror(props: BlankInputProps, state: () => InputState) {
   onMount(() => {
     if (!parent) return;
 
-    const languageExt: Extension = props.language === "zig" ? zigLanguage : go();
+    const languageExt: Extension = cmLanguageExtension(props.language ?? "go");
     const completionExt: Extension[] = props.language
       ? [completionExtension({ language: props.language, canonical: props.canonical })]
       : [];

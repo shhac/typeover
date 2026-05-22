@@ -4,29 +4,15 @@ import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirro
 import { bracketMatching, indentOnInput, indentUnit } from "@codemirror/language";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
-import { go } from "@codemirror/lang-go";
-import { javascript } from "@codemirror/lang-javascript";
-import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
+import { cmLanguageExtension, type CmLanguage } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
 
-/** Language packs we support today. Add a value here and the matching
- *  switch case in `languageExtension` below when adding a new one. */
-export type EditorLanguage = "go" | "ts" | "zig";
-
-function languageExtension(lang: EditorLanguage): Extension {
-  switch (lang) {
-    case "go":
-      return go();
-    case "ts":
-      return javascript({ typescript: true });
-    case "zig":
-      /* `zigLanguage` is an `LRLanguage` value (not a constructor
-       * like lang-go's `go()`); use directly as the extension. */
-      return zigLanguage;
-  }
-}
+/** Language packs the editor supports. Alias of `CmLanguage`, kept
+ *  as a named export so existing consumers (Freeform, FillBlank
+ *  surfaces) don't churn imports. */
+export type EditorLanguage = CmLanguage;
 
 /*
  * Solid wrapper around CodeMirror 6 for the Freeform exercise's
@@ -202,7 +188,7 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
     const defaultAriaLabel =
       lang === "go" ? "Go code" : lang === "zig" ? "Zig code" : "TypeScript source";
     const baseExtensions: Extension[] = [
-      languageExtension(lang),
+      cmLanguageExtension(lang),
       EditorView.contentAttributes.of({
         "aria-label": props.ariaLabel ?? defaultAriaLabel,
         spellcheck: "false",
