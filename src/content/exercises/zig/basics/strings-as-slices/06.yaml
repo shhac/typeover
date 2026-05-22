@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — fetch the length of `greeting` into
+  the binding `n`. The program then prints `n` followed by a
+  newline; for the canonical's `"hello"` the expected output is
+  `5`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const n: usize = greeting.len;"
+  ts: |-
+    const greeting: string = "hello";
+    const n: number = greeting.length;
+    console.log(n);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const greeting: []const u8 = "hello";
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const n: usize = greeting.length;"
+      explain: |-
+        Zig spells it `.len` (three letters), not `.length`. The
+        TS reflex is the most common wrong answer.
+    - match: "const n: i32 = greeting.len;"
+      explain: |-
+        `.len` is `usize`, not `i32`. The annotation has to match
+        — `usize` is pointer-width unsigned (the natural type for
+        sizes / lengths).
+    - match: "const n = greeting.size;"
+      explain: |-
+        `.size` is a Rust-collection reflex. Zig slices use
+        `.len`.
+expectStdout: |
+  5
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const n: usize =`, then `greeting.len;`."
+  - "Shape: `const n: usize = greeting.len;`."
+  - "`const n: usize = greeting.len;`"
+notes: |
+  First runnable strings-as-slices slot. Drills `.len` + `usize`
+  in a working program. The bufPrint integer pattern from
+  numeric-primitives carries over.

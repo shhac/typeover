@@ -1,0 +1,53 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the substring of `"hello world"`
+  from index 6 to the end (`6..11`, i.e. `"world"`). With the
+  right slice expression, the program prints `world` followed by
+  a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const sub = greeting[6..11];"
+  ts: |-
+    const greeting: string = "hello world";
+    const sub = greeting.slice(6, 11);
+    console.log(sub);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const greeting: []const u8 = "hello world";
+        ${line}
+        try std.Io.File.stdout().writeStreamingAll(init.io, sub);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "const sub = greeting.slice(6, 11);"
+      explain: |-
+        Zig has no `.slice` method. The slicing operator is
+        `[a..b]` — `greeting[6..11]`.
+    - match: "const sub = greeting[6, 11];"
+      explain: |-
+        Comma is for tuples / array literals. The slicing
+        separator is `..` (two dots): `greeting[6..11]`.
+    - match: "const sub = greeting.substring(6, 11);"
+      explain: |-
+        `.substring` is older TS / Java. Zig uses
+        `greeting[6..11]`.
+expectStdout: |
+  world
+runtime: zig
+blanks: [line]
+hints:
+  - "Shape: `<slice>[<start>..<end>]`. For this exercise: `greeting[6..11]`. (Indexes are zero-based, end is exclusive — same as TS / Python.)"
+  - "The whole line: `const sub = greeting[6..11];`."
+  - "`const sub = greeting[6..11];`"
+notes: |
+  Drill the `[a..b]` slicing syntax in a runnable context. The
+  substring shares memory with the source — no allocation
+  needed. Module 2 (memory) revisits this with lifetime
+  intuition.

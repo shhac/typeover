@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Declares `const message: []const u8 = "typeover";`.
+   2. Prints the message's length followed by a newline.
+
+  Expected stdout: `8` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const message = "typeover";
+    console.log(message.length);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const message: []const u8 = "typeover";
+        const n: usize = message.len;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  8
+runtime: zig
+hints:
+  - "Three pieces: declare the slice (`const message: []const u8 = \"typeover\";`), read `.len` into a `usize` binding, then bufPrint + writeStreamingAll with `{d}` for the integer."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const message: []const u8 = \"typeover\";\n    const n: usize = message.len;\n    // bufPrint(\"{d}\\n\", .{n}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the standard bufPrint/writeStreamingAll dance. The string `"typeover"` has 8 bytes, hence the expected output `8`.'
+notes: |
+  First strings-as-slices freeform. Synthesises slot 04
+  (`.len`), slot 06 (length in runnable form), and the bufPrint
+  pattern.

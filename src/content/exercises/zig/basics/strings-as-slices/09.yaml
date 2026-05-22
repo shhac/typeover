@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that:
+   1. Declares `const phrase: []const u8 = "hello, world";`.
+   2. Takes the first five bytes (`hello`) via `phrase[0..5]`.
+   3. Prints the substring followed by a newline.
+
+  Expected stdout: `hello` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const phrase = "hello, world";
+    const head = phrase.slice(0, 5);
+    console.log(head);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const phrase: []const u8 = "hello, world";
+        const head = phrase[0..5];
+        try std.Io.File.stdout().writeStreamingAll(init.io, head);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  hello
+runtime: zig
+hints:
+  - "Two pieces: slice the first five bytes with `phrase[0..5]`, bind it to a `const`, then write the substring + a newline."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const phrase: []const u8 = \"hello, world\";\n    const head = phrase[0..5];\n    try std.Io.File.stdout().writeStreamingAll(init.io, head);\n    try std.Io.File.stdout().writeStreamingAll(init.io, \"\\n\");\n}\n```"
+  - 'Full program is the skeleton. Two `writeStreamingAll` calls — one for the substring, one for the trailing newline — keep the shape clear; combining into a single bufPrint would also work.'
+notes: |
+  Last strings-as-slices slot. Synthesises slicing (slot 07)
+  with the writer pattern. Closes Module 1 theme 7.

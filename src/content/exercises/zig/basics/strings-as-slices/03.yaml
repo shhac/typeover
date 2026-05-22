@@ -1,0 +1,43 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: mcq
+order: 3
+prompt: |
+  TypeScript's `s.slice(start, end)` returns a substring. Zig
+  has a simpler form: `s[start..end]` returns another `[]const
+  u8` viewing the same bytes. No method call, no copy. Pick
+  the Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const greeting: string = "hello world";
+    const hello = greeting.slice(0, 5);
+  canonical: |-
+    const greeting: []const u8 = "hello world";
+    const hello = greeting[0..5];
+  distractors:
+    - |-
+      const greeting: []const u8 = "hello world";
+      const hello = greeting.slice(0, 5);
+    - |-
+      const greeting: []const u8 = "hello world";
+      const hello = greeting[0, 5];
+    - |-
+      const greeting: []const u8 = "hello world";
+      const hello = greeting.substring(0, 5);
+hints:
+  - "Two pieces to remember: the slicing operator is `..` (two dots) between the bounds, and the whole expression is wrapped in `[...]`. So `s[a..b]` reads as \"slice s from a up to (but not including) b.\""
+  - "Shape: `<slice>[<start>..<end>]`. For this exercise: `greeting[0..5]`."
+  - "`const hello = greeting[0..5];`"
+runtime: none
+notes: |
+  Drill `s[a..b]` slicing. Distractors:
+   - `.slice(0, 5)` — TS reflex (method call).
+   - `[0, 5]` — comma instead of `..`; would be array literal
+     syntax.
+   - `.substring(0, 5)` — older TS / Java reflex.
+
+  Note: the substring shares memory with the original — it's a
+  view, not a copy. This is a Module 2 (memory) topic; for now
+  the learner just needs the syntax.

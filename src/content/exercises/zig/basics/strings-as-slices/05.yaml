@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing type. The element type of a Zig byte slice
+  (`[]const u8`) is the byte: a single unsigned 8-bit integer.
+  Two characters total.
+generator:
+  kind: template
+  vars:
+    type:
+      - "u8"
+  ts: |-
+    const first: number = "hello".charCodeAt(0);
+  canonical: |-
+    const first: ${type} = "hello"[0];
+  distractors:
+    - "char"
+    - "byte"
+    - "i8"
+blanks: [type]
+hints:
+  - "Two characters: `u` for unsigned, then a digit for the bit width."
+  - "Width is the same as in C: 8 bits. So `u<8>`."
+  - "`u8`"
+runtime: none
+notes: |
+  Drill `u8` as the byte type. Distractors:
+   - `char` — C / TS reflex.
+   - `byte` — Java / C# reflex.
+   - `i8` — signed; bytes used for text are unsigned by
+     convention.

@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `const greeting: string = "hello";`. Zig has
+  no `string` type — string literals are byte slices. Pick the
+  idiomatic Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: greeting
+      ts: 'const greeting: string = "hello";'
+      canonical: 'const greeting: []const u8 = "hello";'
+      distractors:
+        - 'const greeting: string = "hello";'
+        - 'const greeting: char[] = "hello";'
+        - 'const greeting: str = "hello";'
+    - id: name
+      ts: 'const name: string = "ada";'
+      canonical: 'const name: []const u8 = "ada";'
+      distractors:
+        - 'const name: String = "ada";'
+        - 'const name: []u8 = "ada";'
+        - 'const name: []const char = "ada";'
+hints:
+  - "Three pieces: keep `const`, drop `string` for `[]const u8` (a slice of constant unsigned 8-bit bytes), keep the value. The annotation reads: `[]` slice, `const` immutable, `u8` byte."
+  - "Shape: `const <name>: []const u8 = <value>;`."
+  - "For the greeting variant: `const greeting: []const u8 = \"hello\";`."
+runtime: none
+notes: |
+  First strings-as-slices exercise. Drills the `[]const u8` type
+  annotation across two variants. Distractors:
+   - `string` — TS / Python reflex; doesn't exist in Zig.
+   - `String` — Java / Rust reflex (capitalised).
+   - `[]u8` — close but mutable; string literals are immutable.
+   - `[]const char` — wrong byte type; Zig has no `char`, the
+     byte type is `u8`.
+   - `char[]` / `str` — C / Rust reflexes.

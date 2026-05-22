@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing property name. The property gives the length
+  of a byte slice — same idea as TypeScript's `.length` but
+  shorter (three letters).
+generator:
+  kind: template
+  vars:
+    prop:
+      - "len"
+  ts: |-
+    const size: number = greeting.length;
+  canonical: |-
+    const size: usize = greeting.${prop};
+  distractors:
+    - "length"
+    - "size"
+    - "count"
+blanks: [prop]
+hints:
+  - "Three letters, lowercase. Same as Go (`len(slice)` becomes `slice.len` in Zig)."
+  - "Starts with `l`."
+  - "`len`"
+runtime: none
+notes: |
+  Drill `.len`. Distractors:
+   - `length` — TS reflex.
+   - `size` — Rust reflex.
+   - `count` — LINQ / Ruby reflex.

@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/basics
+title: Strings as slices
+order: 7
+prerequisites: []
+intro: |
+  There's no `String` type in Zig. String literals are byte slices typed as `[]const u8` — same shape as any other slice of read-only bytes. Length comes from `.len` (a `usize`), indexing returns a single `u8` byte, and substring with `s[a..b]` produces another `[]const u8`. The mental model from TypeScript needs one shift: a Zig string isn't a value-typed character sequence, it's a view into bytes.

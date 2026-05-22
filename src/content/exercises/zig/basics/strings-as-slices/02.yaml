@@ -1,0 +1,31 @@
+target: zig
+themeId: zig/basics/strings-as-slices
+type: mcq
+order: 2
+prompt: |
+  TypeScript reads `s.length` to get a string's length. Zig's
+  byte slices have a similar property — but with the same
+  shortened name as Go and a different type. Pick the Zig
+  translation.
+generator:
+  kind: template
+  vars:
+    name: [greeting, message, label]
+  ts: "const len: number = ${name}.length;"
+  canonical: "const len: usize = ${name}.len;"
+  distractors:
+    - "const len: usize = ${name}.length;"
+    - "const len: i32 = ${name}.len;"
+    - "const len: usize = ${name}.size;"
+hints:
+  - "Two shifts from TS: the property is `.len` (three letters), and the type is `usize` (pointer-sized unsigned integer — the natural type for sizes)."
+  - "Shape: `const len: usize = <name>.len;`."
+  - "For the greeting variant: `const len: usize = greeting.len;`."
+runtime: none
+notes: |
+  Drill `.len` + `usize`. Distractors:
+   - `.length` — TS reflex; Zig uses `.len`.
+   - `usize` vs `i32` — `.len` is `usize` because lengths are
+     pointer-width (architecture-dependent), never negative.
+   - `.size` — Rust collection reflex (`HashMap`, `Vec`); doesn't
+     work on slices.
