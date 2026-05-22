@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/basics/optionals
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the `if (...)` header that captures
+  the value of `maybe` (an optional `i32` set to `42`) into the
+  payload binding `n`. The body prints `n`. Expected stdout: `42`
+  followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if (maybe) |n| {"
+  ts: |-
+    if (maybe !== null) {
+        const n = maybe;
+        console.log(n);
+    }
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const maybe: ?i32 = 42;
+        ${line}
+            var buf: [16]u8 = undefined;
+            const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+            try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+        }
+    }
+  distractors:
+    - match: "if (maybe != null) {"
+      explain: |-
+        Works but doesn't narrow the type. Inside the body
+        `maybe` would still be `?i32`, not `i32`. Use payload
+        capture: `if (maybe) |n| { ... }`.
+    - match: "if let n = maybe {"
+      explain: |-
+        Rust / Swift syntax. Zig uses payload-capture pipes:
+        `if (maybe) |n| { ... }`.
+    - match: "if (maybe) (n) {"
+      explain: |-
+        Wrong delimiter. Payload capture uses pipes (`|n|`), not
+        parens.
+expectStdout: |
+  42
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `if (maybe)` (the condition is the optional itself), `|n|` (payload-capture pipes around the binding name), `{` (open the body)."
+  - "Shape: `if (<optional>) |<binding>| {`."
+  - "`if (maybe) |n| {`"
+notes: |
+  Drill if-payload-capture in a runnable context. The pipe
+  syntax `|n|` is the same as the for-loop's `|item|` from
+  while-and-for — reinforces that payload capture is one syntactic
+  shape used in multiple places.

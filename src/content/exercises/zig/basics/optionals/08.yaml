@@ -1,0 +1,39 @@
+target: zig
+themeId: zig/basics/optionals
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Declares `const found: ?i32 = 7;` (an optional containing 7).
+   2. Uses `if (...) |...| { ... }` to print the unwrapped value
+      followed by a newline.
+
+  Expected stdout: `7` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const found: number | null = 7;
+    if (found !== null) console.log(found);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const found: ?i32 = 7;
+        if (found) |x| {
+            var buf: [16]u8 = undefined;
+            const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{x});
+            try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+        }
+    }
+expectStdout: |
+  7
+runtime: zig
+hints:
+  - "Three pieces: declare `const found: ?i32 = 7;`, open `if (found) |x| { ... }`, and inside use `x` (now `i32`) with bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const found: ?i32 = 7;\n    if (found) |x| {\n        // bufPrint(\"{d}\\n\", .{x}) + writeStreamingAll\n    }\n}\n```"
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Note the payload binding `|x|` is `i32` (unwrapped), not `?i32`.'
+notes: |
+  First optionals freeform. Synthesises slot 03 (recognise
+  payload-capture) + slot 07 (type one) + the bufPrint integer
+  pattern into a full program.

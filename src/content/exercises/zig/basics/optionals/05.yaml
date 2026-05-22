@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/basics/optionals
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing single character that marks an optional type.
+  Same character TypeScript uses for `T?` suffix, but Zig writes
+  it as a PREFIX on the type.
+generator:
+  kind: template
+  vars:
+    sigil:
+      - "?"
+  ts: |-
+    const maybe: number | null = null;
+  canonical: |-
+    const maybe: ${sigil}i32 = null;
+  distractors:
+    - "*"
+    - "&"
+    - "!"
+blanks: [sigil]
+hints:
+  - "One character, on the same key as the question mark on US keyboards."
+  - "Same character used in TS for optional chaining (`x?.y`) and Swift's `T?` suffix."
+  - "`?`"
+runtime: none
+notes: |
+  Drill the `?` sigil. Distractors:
+   - `*` — pointer sigil (Module 2 territory).
+   - `&` — address-of operator.
+   - `!` — error-union sigil (Module 4 territory).
+
+  The lesson: each sigil means something different and isn't
+  interchangeable.

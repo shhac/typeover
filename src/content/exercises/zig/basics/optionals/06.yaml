@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/basics/optionals
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — declare an optional `i32` named
+  `maybeCount`, initially null, then use `orelse` to get a value
+  with default `99`. With the right line, the program prints `99`
+  followed by a newline (the optional is null so the default
+  wins).
+generator:
+  kind: template
+  vars:
+    line:
+      - "const value: i32 = maybeCount orelse 99;"
+  ts: |-
+    const maybeCount: number | null = null;
+    const value = maybeCount ?? 99;
+    console.log(value);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const maybeCount: ?i32 = null;
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{value});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const value: i32 = maybeCount ?? 99;"
+      explain: |-
+        `??` is TypeScript. Zig spells the same idea as the
+        keyword `orelse`.
+    - match: "const value: i32 = maybeCount || 99;"
+      explain: |-
+        `||` is JavaScript's truthy-default. Zig's `||` is
+        boolean OR — different semantics, doesn't unwrap
+        optionals.
+    - match: "const value: ?i32 = maybeCount orelse 99;"
+      explain: |-
+        The result of `orelse` is the inner type, not optional.
+        Annotate `value` as plain `i32`, not `?i32`.
+expectStdout: |
+  99
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const value: i32 =` (note: NOT `?i32` — orelse strips the optional), `maybeCount orelse 99;`."
+  - "Shape: `const value: i32 = <optional> orelse <default>;`."
+  - "`const value: i32 = maybeCount orelse 99;`"
+notes: |
+  First runnable optionals slot. Drills `orelse` and the
+  type-narrowing it produces (the result is `i32`, not `?i32`).

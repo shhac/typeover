@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/basics/optionals
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `T | null` (or `T | undefined`) for "maybe
+  absent" values. Zig has a dedicated syntax: prefix `?` on the
+  type. Pick the Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: maybe-int
+      ts: "let count: number | null = null;"
+      canonical: "var count: ?i32 = null;"
+      distractors:
+        - "var count: i32 | null = null;"
+        - "var count: i32? = null;"
+        - "var count: Optional<i32> = null;"
+    - id: maybe-string
+      ts: "let name: string | null = null;"
+      canonical: "var name: ?[]const u8 = null;"
+      distractors:
+        - "var name: []const u8 | null = null;"
+        - "var name: ?string = null;"
+        - "var name: []const u8? = null;"
+hints:
+  - "Two pieces: prefix `?` on the type (not suffix as in TS optional chaining; not `| null` either), and `null` is the literal value of an absent optional."
+  - "Shape: `?T` for the type. For an absent value: assign `null`. For a present value: assign a regular `T`."
+  - "For maybe-int: `var count: ?i32 = null;`. For maybe-string: `var name: ?[]const u8 = null;`."
+runtime: none
+notes: |
+  First optionals exercise. Drills the `?T` prefix shape.
+  Distractors:
+   - `T | null` — TS reflex (union with literal null).
+   - `T?` — Swift / Kotlin suffix reflex.
+   - `Optional<T>` — Java / Rust enum reflex.

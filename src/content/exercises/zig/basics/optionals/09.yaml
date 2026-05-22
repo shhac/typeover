@@ -1,0 +1,42 @@
+target: zig
+themeId: zig/basics/optionals
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program demonstrating the `orelse` default
+  on a null optional:
+   1. Declares `const maybe: ?i32 = null;`.
+   2. Uses `orelse` to default to `100`.
+   3. Prints the result followed by a newline.
+
+  Expected stdout: `100` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const maybe: number | null = null;
+    const value = maybe ?? 100;
+    console.log(value);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const maybe: ?i32 = null;
+        const value: i32 = maybe orelse 100;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{value});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  100
+runtime: zig
+hints:
+  - "Three pieces: `const maybe: ?i32 = null;`, `const value: i32 = maybe orelse 100;` (NOT `?i32` — orelse strips the optional), then bufPrint + writeStreamingAll."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const maybe: ?i32 = null;\n    const value: i32 = maybe orelse 100;\n    // bufPrint(\"{d}\\n\", .{value}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Because `maybe` is null, the orelse picks the default — 100.'
+notes: |
+  Last basics/optionals slot. Closes Module 1 — the full basics
+  module is now end-to-end exerciseable. Drills `orelse` with the
+  null-path case (slot 06 was also null-path; the slot still
+  serves as a different scaffold and bufPrint exercise for the
+  same idiom).

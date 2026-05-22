@@ -1,0 +1,29 @@
+target: zig
+themeId: zig/basics/optionals
+type: mcq
+order: 2
+prompt: |
+  TypeScript's `??` provides a default value when the left side is
+  null/undefined. Zig has a direct equivalent — pick the Zig
+  translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const value = maybeCount ?? 0;
+  canonical: |-
+    const value: i32 = maybeCount orelse 0;
+  distractors:
+    - "const value: i32 = maybeCount ?? 0;"
+    - "const value: i32 = maybeCount || 0;"
+    - "const value: i32 = maybeCount.unwrap_or(0);"
+hints:
+  - "Six letters, one word, lives between the optional value and the default. Same idea as TS `??`, just a keyword instead of an operator."
+  - "Shape: `<optional> orelse <default>`. Reads naturally as English: \"this value, OR ELSE this default.\""
+  - "`const value: i32 = maybeCount orelse 0;`"
+runtime: none
+notes: |
+  Drill `orelse`. Distractors:
+   - `??` — TS reflex.
+   - `||` — JS truthy-default reflex (different semantics).
+   - `.unwrap_or(0)` — Rust reflex (method instead of keyword).

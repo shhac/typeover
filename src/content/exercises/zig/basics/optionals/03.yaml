@@ -1,0 +1,46 @@
+target: zig
+themeId: zig/basics/optionals
+type: mcq
+order: 3
+prompt: |
+  TypeScript's `if (x !== null)` narrows the type so the body sees
+  a non-null value. Zig has a built-in form for this: `if (x) |y|
+  { ... }` — the body runs only when the optional is present, and
+  `y` is the unwrapped value. Pick the Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    if (maybeCount !== null) {
+        use(maybeCount);
+    }
+  canonical: |-
+    if (maybeCount) |count| {
+        use(count);
+    }
+  distractors:
+    - |-
+      if (maybeCount != null) {
+          use(maybeCount);
+      }
+    - |-
+      if let count = maybeCount {
+          use(count);
+      }
+    - |-
+      if (maybeCount) {
+          use(maybeCount.?);
+      }
+hints:
+  - "Two pieces: the condition `if (<optional>)` evaluates true when present, and the payload-capture `|<binding>|` (same pipe syntax as for-loops) gives you the unwrapped value inside the body."
+  - "Shape: `if (<optional>) |<binding>| { <body> }`. The binding is non-optional inside the body."
+  - "`if (maybeCount) |count| { use(count); }`"
+runtime: none
+notes: |
+  Drill if-payload-capture on optionals. Distractors:
+   - `if (x != null)` — works but doesn't narrow the type; you'd
+     still have an optional inside the body.
+   - `if let count = maybeCount` — Rust / Swift reflex.
+   - `if (x)` + `.x` — using the force-unwrap `.?` is correct in
+     a "you've verified it's not null" context, but the
+     payload-capture form is the cleaner idiom.

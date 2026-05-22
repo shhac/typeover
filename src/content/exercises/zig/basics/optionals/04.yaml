@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/basics/optionals
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword. The expression provides a fallback
+  value when the left side is `null`. TypeScript's `??` operator,
+  but as a keyword. Six letters, one word.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "orelse"
+  ts: |-
+    const value = maybeCount ?? 0;
+  canonical: |-
+    const value: i32 = maybeCount ${keyword} 0;
+  distractors:
+    - "default"
+    - "else"
+    - "or"
+blanks: [keyword]
+hints:
+  - "Six letters, lowercase, two English words mashed together: `or` + `else`."
+  - "Starts with `o`."
+  - "`orelse`"
+runtime: none
+notes: |
+  Drill `orelse`. Distractors:
+   - `default` — too generic.
+   - `else` — close but unprefixed; Zig uses the compound word.
+   - `or` — boolean OR, different semantics.
