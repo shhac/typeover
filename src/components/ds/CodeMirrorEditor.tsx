@@ -9,7 +9,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
-import { zigCompletionExtension } from "~/lib/zig-completions";
+import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
 
 /** Language packs we support today. Add a value here and the matching
  *  switch case in `languageExtension` below when adding a new one. */
@@ -215,12 +215,16 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
       }),
     ];
 
-    /* Zig-specific completion sources (member-prefix dotted-path
-     * discovery + in-scope token completion seeded by the
-     * canonical, if any). Only relevant when the editor is
-     * editable AND the language is Zig. */
-    const zigCompletion: Extension[] =
-      lang === "zig" && !readOnly ? [zigCompletionExtension({ canonical: props.canonical })] : [];
+    /* Completion sources (member-prefix dotted-path discovery +
+     * in-scope token completion seeded by the canonical, if any).
+     * Wired for languages with curated member maps (Zig + Go);
+     * skipped for the TS pane (which is read-only anyway). */
+    const completionLang: CompletionLanguage | null =
+      lang === "zig" ? "zig" : lang === "go" ? "go" : null;
+    const completion: Extension[] =
+      completionLang && !readOnly
+        ? [completionExtension({ language: completionLang, canonical: props.canonical })]
+        : [];
 
     const editorOnly: Extension[] = readOnly
       ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
@@ -233,7 +237,7 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
           indentUnit.of("\t"),
           highlightActiveLine(),
           editableCompartment.of(EditorView.editable.of(!props.disabled)),
-          ...zigCompletion,
+          ...completion,
           keymap.of([
             {
               key: "Mod-Enter",

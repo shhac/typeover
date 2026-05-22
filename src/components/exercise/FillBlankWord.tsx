@@ -59,7 +59,10 @@ export function FillBlankWord(props: FillBlankWordProps) {
    * one input jump focus to the next empty one (or submit when
    * all are filled). Populated via BlankInput's `ref` callback
    * during the For render. */
-  const inputRefs = new Map<number, HTMLInputElement>();
+  /* Element type widened to HTMLElement: under production the
+   * BlankInput's editable DOM is CodeMirror's `cm-content`
+   * contenteditable div, not an <input>. Both support `.focus()`. */
+  const inputRefs = new Map<number, HTMLElement>();
 
   /** Enter handler: if every blank is filled, submit (subject to
    *  the phase's canSubmit gate). Otherwise jump focus to the
@@ -140,6 +143,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
             submitted={phase.submitted()}
             revealed={phase.revealed()}
             locked={phase.current() === "right"}
+            language={props.target ?? "go"}
+            canonical={expected}
             onInput={(value) => setInputs((prev) => ({ ...prev, [slotIdx]: value }))}
             onEnter={() => handleEnter(slotIdx)}
             ref={(el) => inputRefs.set(slotIdx, el)}

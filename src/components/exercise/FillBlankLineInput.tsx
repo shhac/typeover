@@ -219,6 +219,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
              * aren't cramped into 14ch. Mobile stays at the
              * default. */
             wide
+            language={runner.runtimeTarget}
+            canonical={expected}
             onInput={(value) => {
               setInput(value);
               /* Editing the input invalidates the last Run's grade
