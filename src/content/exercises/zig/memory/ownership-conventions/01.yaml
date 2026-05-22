@@ -1,0 +1,52 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: mcq
+order: 1
+prompt: |
+  TypeScript's garbage collector hides ownership. Zig surfaces
+  it via convention. Pick the right responsibility for a
+  function that ALLOCATES a buffer and RETURNS it to the
+  caller.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TypeScript: GC handles it; no caller obligation. */
+  canonical: |-
+    fn make(a: std.mem.Allocator) ![]u8 {
+        const buf = try a.alloc(u8, 16);
+        errdefer a.free(buf);
+        // ... populate buf ...
+        return buf;
+    }
+    // Caller's responsibility: `defer alloc.free(buf);` after
+    // a successful call.
+  distractors:
+    - |-
+      fn make(a: std.mem.Allocator) ![]u8 {
+          const buf = try a.alloc(u8, 16);
+          defer a.free(buf);
+          return buf;
+      }
+    - |-
+      fn make(a: std.mem.Allocator) ![]u8 {
+          return try a.alloc(u8, 16);
+      }
+    - |-
+      fn make(a: std.mem.Allocator) []u8 {
+          const buf = a.alloc(u8, 16) catch unreachable;
+          return buf;
+      }
+hints:
+  - "The function returns the buffer to the caller, so the CALLER becomes responsible for deinit. Inside `make`, only the FAILURE path needs cleanup — that's `errdefer`. Plain `defer` would free the buf before returning, leaving the caller with a dangling pointer."
+  - "Shape: `errdefer a.free(buf);` immediately after the alloc, so failed construction cleans up but a successful return hands ownership to the caller."
+  - "`errdefer a.free(buf);` is the cleanup; the caller's `defer alloc.free(buf);` is the matching pair."
+runtime: none
+notes: |
+  First ownership-conventions exercise. Drills the
+  factory-with-errdefer + caller-with-defer pair. Distractors:
+   - Plain `defer` — would free on the success path, returning
+     a dangling pointer.
+   - No cleanup at all — leaks on the error path.
+   - `catch unreachable` + no error return — defeats Zig's
+     entire error-union story.

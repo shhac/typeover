@@ -1,0 +1,49 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program demonstrating the
+  factory-with-errdefer + caller-with-defer pattern.
+
+   1. Define `fn dup(a: std.mem.Allocator, s: []const u8) ![]u8`
+      that allocates a copy of `s` and returns it. Inside,
+      `errdefer` the free; use `@memcpy(out, s);` to copy.
+   2. From `main`, call `dup(alloc, "owned!");`, immediately
+      `defer alloc.free(copy);`, then print the copy + newline.
+
+  Expected stdout: `owned!`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TS: GC + structural sharing */
+  canonical: |-
+    const std = @import("std");
+
+    fn dup(a: std.mem.Allocator, s: []const u8) ![]u8 {
+        const out = try a.alloc(u8, s.len);
+        errdefer a.free(out);
+        @memcpy(out, s);
+        return out;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const copy = try dup(alloc, "owned!");
+        defer alloc.free(copy);
+        try std.Io.File.stdout().writeStreamingAll(init.io, copy);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+expectStdout: |
+  owned!
+runtime: zig
+hints:
+  - "Two layers: factory uses `errdefer` (only frees on construction failure), caller uses `defer` (frees on every exit path). `@memcpy(out, s)` copies the bytes."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn dup(a: std.mem.Allocator, s: []const u8) ![]u8 {\n    const out = try a.alloc(u8, s.len);\n    errdefer a.free(out);\n    @memcpy(out, s);\n    return out;\n}\n\npub fn main(init: std.process.Init) !void {\n    const alloc = std.heap.page_allocator;\n    const copy = try dup(alloc, \"owned!\");\n    defer alloc.free(copy);\n    // writeStreamingAll(copy), writeStreamingAll(\"\\n\")\n}\n```"
+  - 'Full program is the skeleton + two writeStreamingAll calls. This is the canonical "factory transfers ownership" pattern.'
+notes: |
+  Drills the ownership handoff end-to-end. Note this is also
+  the implementation pattern for `std.mem.dupe` (or equivalents
+  in older stdlib versions) — the curriculum teaches it as a
+  pattern first; the stdlib helper comes later.

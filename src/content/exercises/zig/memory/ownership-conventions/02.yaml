@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: mcq
+order: 2
+prompt: |
+  TypeScript functions that READ a collection just receive the
+  reference. Zig functions that READ a buffer they don't own
+  take a SLICE (`[]const T` for read-only). The function
+  doesn't allocate, doesn't free, doesn't keep the slice past
+  return. Pick the right signature.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function lengthOf(s: string): number {
+        return s.length;
+    }
+  canonical: |-
+    fn lengthOf(s: []const u8) usize {
+        return s.len;
+    }
+  distractors:
+    - |-
+      fn lengthOf(s: []const u8, a: std.mem.Allocator) usize {
+          defer a.free(s);
+          return s.len;
+      }
+    - |-
+      fn lengthOf(s: []u8) usize {
+          return s.len;
+      }
+    - |-
+      fn lengthOf(s: *const std.ArrayList(u8)) usize {
+          return s.items.len;
+      }
+hints:
+  - "A READ-ONLY borrower takes the narrowest reasonable type. For a string-like input that's `[]const u8` — a slice of read-only bytes. No allocator (you're not allocating), no free (the caller still owns it)."
+  - "Shape: `fn <name>(s: []const u8) <ReturnType> { ... }` — no allocator, no defer, no free."
+  - "`fn lengthOf(s: []const u8) usize { return s.len; }`"
+runtime: none
+notes: |
+  Drill the "borrow doesn't take ownership" rule. Distractors:
+   - Taking an allocator + freeing — wrong; the borrower has
+     no claim to free what the caller owns.
+   - `[]u8` (writable) — over-permissions; if you don't mutate,
+     ask for `[]const u8`.
+   - Taking the full ArrayList — over-coupling; if you only
+     need the bytes, take a slice.

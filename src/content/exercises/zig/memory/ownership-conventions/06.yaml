@@ -1,0 +1,62 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — schedule the cleanup that the
+  CALLER owes after taking ownership of `upper` from a factory.
+  With the right line, the program prints `HELLO` and the
+  buffer is freed at main's exit.
+generator:
+  kind: template
+  vars:
+    line:
+      - "defer alloc.free(upper);"
+  ts: |-
+    /* TS: GC handles cleanup */
+  canonical: |-
+    const std = @import("std");
+
+    fn upperCopy(a: std.mem.Allocator, s: []const u8) ![]u8 {
+        const out = try a.alloc(u8, s.len);
+        errdefer a.free(out);
+        for (s, 0..) |c, i| {
+            out[i] = if (c >= 'a' and c <= 'z') c - 32 else c;
+        }
+        return out;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const alloc = std.heap.page_allocator;
+        const upper = try upperCopy(alloc, "hello");
+        ${line}
+        try std.Io.File.stdout().writeStreamingAll(init.io, upper);
+        try std.Io.File.stdout().writeStreamingAll(init.io, "\n");
+    }
+  distractors:
+    - match: "errdefer alloc.free(upper);"
+      explain: |-
+        The CALLER took ownership on a successful return; cleanup
+        has to fire on every exit path, not only errors. Use
+        plain `defer`.
+    - match: "alloc.free(upper);"
+      explain: |-
+        Bare cleanup runs in source order — fine for the happy
+        path, but breaks the moment you add an early return or
+        a fallible call before the write. The whole point of
+        `defer` is robust cleanup.
+    - match: "upper.deinit(alloc);"
+      explain: |-
+        `upper` is a `[]u8` slice (returned by the factory),
+        not an ArrayList. Use `alloc.free(upper)` to release.
+expectStdout: |
+  HELLO
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `defer`, `alloc.free(upper)`, semicolon."
+  - "Shape: `defer <allocator>.free(<slice>);`."
+  - "`defer alloc.free(upper);`"
+notes: |
+  First runnable ownership-conventions slot. Drills the
+  caller-side defer in a complete factory-then-caller program.

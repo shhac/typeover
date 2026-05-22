@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: mcq
+order: 3
+prompt: |
+  TypeScript's `String.prototype.toUpperCase()` returns a new
+  string. The Zig equivalent — `toUpperCopy(a, s)` — ALLOCATES
+  the result. Pick the right call site shape (the call AND the
+  caller's cleanup).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const upper = s.toUpperCase();
+  canonical: |-
+    const upper = try toUpperCopy(alloc, s);
+    defer alloc.free(upper);
+  distractors:
+    - "const upper = toUpperCopy(alloc, s);"
+    - |-
+      const upper = try toUpperCopy(alloc, s);
+      // (no defer — assume the function frees on the caller's behalf)
+    - |-
+      var upper = try toUpperCopy(alloc, s);
+      defer upper.deinit();
+hints:
+  - "Two pieces: `try` the call (alloc can fail), and `defer alloc.free(<returned-slice>);` right after — the caller now owns the returned slice."
+  - "Shape: `const x = try <fn-that-allocates>(<args>); defer <allocator>.free(x);`."
+  - "`const upper = try toUpperCopy(alloc, s); defer alloc.free(upper);`"
+runtime: none
+notes: |
+  Reinforce caller-side ownership. Distractors:
+   - Missing `try` — uncaught error union.
+   - No `defer` — leak.
+   - `defer upper.deinit()` — `upper` is a slice, not an
+     ArrayList; `.deinit` doesn't exist.

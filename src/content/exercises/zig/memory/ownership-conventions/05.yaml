@@ -1,0 +1,34 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing cleanup keyword for the CALLER who took
+  ownership of an allocation. The keyword runs unconditionally
+  when the block exits.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "defer"
+  ts: |-
+    /* No direct TS analogue. */
+  canonical: |-
+    const upper = try toUpperCopy(alloc, s);
+    ${keyword} alloc.free(upper);
+  distractors:
+    - "errdefer"
+    - "finally"
+    - "free"
+blanks: [keyword]
+hints:
+  - "Five letters, same word Go uses, fires on every exit path."
+  - "Same keyword as from the defer-and-errdefer theme."
+  - "`defer`"
+runtime: none
+notes: |
+  Mirror of slot 04. Drills the "caller uses plain `defer`,
+  factory uses `errdefer`" pair. Distractors:
+   - `errdefer` — would skip cleanup on the success path.
+   - `finally` — TS.
+   - `free` — that's the action, not the scheduling keyword.

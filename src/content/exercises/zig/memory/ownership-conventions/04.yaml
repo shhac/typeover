@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing cleanup keyword for the FACTORY function
+  that allocates and returns ownership to its caller. The
+  keyword fires ONLY on error paths — so a successful return
+  hands the alloc off.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "errdefer"
+  ts: |-
+    /* No direct TS analogue. */
+  canonical: |-
+    const buf = try a.alloc(u8, 16);
+    ${keyword} a.free(buf);
+    // ... populate ...
+    return buf;
+  distractors:
+    - "defer"
+    - "finally"
+    - "catch"
+blanks: [keyword]
+hints:
+  - "Eight letters, compound: `err` + `defer`."
+  - "Same keyword from the defer-and-errdefer theme — the one that ONLY fires on the error path."
+  - "`errdefer`"
+runtime: none
+notes: |
+  Reinforces `errdefer` in the ownership-transfer context.
+  Distractors:
+   - `defer` — would free on success, breaking the transfer.
+   - `finally` — TS reflex.
+   - `catch` — wrong statement form here.

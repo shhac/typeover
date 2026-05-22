@@ -1,0 +1,55 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program demonstrating the BORROW
+  convention — a function reads a slice it doesn't own.
+
+   1. Define `fn countDots(s: []const u8) usize` that returns
+      how many `.` bytes appear in `s`.
+   2. From `main`, call `countDots("a.b.c.d");` and print the
+      count followed by a newline.
+
+  Expected stdout: `3`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function countDots(s: string): number {
+        let n = 0;
+        for (const c of s) if (c === ".") n++;
+        return n;
+    }
+    console.log(countDots("a.b.c.d"));
+  canonical: |-
+    const std = @import("std");
+
+    fn countDots(s: []const u8) usize {
+        var n: usize = 0;
+        for (s) |c| {
+            if (c == '.') n += 1;
+        }
+        return n;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const n = countDots("a.b.c.d");
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  3
+runtime: zig
+hints:
+  - "Three pieces: `fn countDots(s: []const u8) usize` (borrow signature — no allocator, no errors), iterate with `for (s) |c|`, compare with `c == '.'` (single-quote = byte literal in Zig)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn countDots(s: []const u8) usize {\n    var n: usize = 0;\n    for (s) |c| {\n        if (c == '.') n += 1;\n    }\n    return n;\n}\n\npub fn main(init: std.process.Init) !void {\n    const n = countDots(\"a.b.c.d\");\n    // bufPrint(\"{d}\\n\", .{n}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. Note: the function takes `[]const u8` (read-only borrow), never frees or allocates — the caller still owns the bytes.'
+notes: |
+  Last memory/ownership-conventions slot — CLOSES MODULE 3.
+  Drills the no-allocator, no-defer, no-free borrow signature.
+
+  Per design-docs/10b "Done is when": Module 3 (memory) is
+  now end-to-end exerciseable. Modules 1+2+3 = 20 themes ×
+  9 slots = 180 Zig exercises authored.

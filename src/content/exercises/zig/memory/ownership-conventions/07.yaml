@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/memory/ownership-conventions
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig signature — the `lengthOf` function
+  that BORROWS a `[]const u8` and returns its length. No
+  allocator, no defer, no free. With the right signature, the
+  program prints `5` for the length of `"hello"`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn lengthOf(s: []const u8) usize {"
+  ts: |-
+    function lengthOf(s: string): number { return s.length; }
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+        return s.len;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const n = lengthOf("hello");
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "fn lengthOf(s: []const u8, a: std.mem.Allocator) usize {"
+      explain: |-
+        The function doesn't allocate, so it doesn't need an
+        allocator. Adding one signals false intent — callers
+        would wonder if the function is going to allocate
+        something behind the scenes.
+    - match: "fn lengthOf(s: []u8) usize {"
+      explain: |-
+        Over-permissions. The function only reads — ask for
+        `[]const u8` so the compiler enforces read-only.
+    - match: "fn lengthOf(s: *const std.ArrayList(u8)) usize {"
+      explain: |-
+        Coupling the function to ArrayList rules out other
+        sources (string literals, slices into a buffer). Take
+        the slice directly: `s: []const u8`.
+expectStdout: |
+  5
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `fn lengthOf`, parameter `(s: []const u8)`, return type `usize` (no colon, no arrow), then `{`."
+  - "Shape: `fn lengthOf(s: []const u8) usize {` — no allocator, no defer, just read."
+  - "`fn lengthOf(s: []const u8) usize {`"
+notes: |
+  Drill the "borrow doesn't take ownership" rule. The function
+  takes the narrowest reasonable type (`[]const u8`), reads
+  `.len`, returns.
