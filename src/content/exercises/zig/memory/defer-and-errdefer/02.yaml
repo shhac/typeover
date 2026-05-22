@@ -4,32 +4,46 @@ type: mcq
 order: 2
 prompt: |
   Multiple `defer` statements in the same block run in REVERSE
-  order — last-registered, first-fired (LIFO). Pick the output
-  for the program below.
+  order — last-registered, first-fired (LIFO). Pick the
+  expected stdout for this program:
+
+  ```zig
+  pub fn main(init: std.process.Init) !void {
+      const out = std.Io.File.stdout();
+      try out.writeStreamingAll(init.io, "open\n");
+      defer out.writeStreamingAll(init.io, "close-1\n") catch {};
+      defer out.writeStreamingAll(init.io, "close-2\n") catch {};
+      try out.writeStreamingAll(init.io, "use\n");
+  }
+  ```
 generator:
   kind: template
   vars: {}
   ts: |-
     /* TypeScript's `finally` blocks can be nested but not stacked. */
   canonical: |-
-    /* Output: "open\nuse\nclose-2\nclose-1\n" */
-    open();
-    defer close1();
-    defer close2();
-    use();
+    open / use / close-2 / close-1
   distractors:
-    - "Output: \"open\\nuse\\nclose-1\\nclose-2\\n\""
-    - "Output: \"open\\nclose-1\\nclose-2\\nuse\\n\""
-    - "Output: \"open\\nclose-2\\nclose-1\\nuse\\n\""
+    - "open / use / close-1 / close-2"
+    - "open / close-1 / close-2 / use"
+    - "open / close-2 / close-1 / use"
 hints:
   - "Two rules: defers fire when the BLOCK EXITS (after the main code, not before), and they fire in REVERSE registration order (LIFO — the last `defer` runs first)."
-  - "So: `open()` runs first, then `use()`, then defers in reverse: `close2()` then `close1()`."
-  - "`open / use / close-2 / close-1`."
+  - "So: `open` runs first, then `use` (the non-defer body), then defers in reverse: `close-2` then `close-1`."
+  - "`open / use / close-2 / close-1`"
 runtime: none
 notes: |
   Drill LIFO semantics. The pattern matches how nested
-  resources work — last opened, first closed. Distractors:
-   - FIFO order — wrong; defers are LIFO.
-   - Defers BEFORE the code — wrong; they fire on block exit.
-   - Reversed defers but with cleanup before use — wrong;
-     `use` always runs before the defers.
+  resources work — last opened, first closed.
+
+  Per the M3 validator: previously the canonical was wrapped
+  in a `/* Output: ... */` comment block with the code below it
+  while the distractors were bare strings — not parallel and
+  confusing. Now the code lives in the PROMPT (where the
+  learner reads it once) and all four answer choices are
+  plain `X / Y / Z / W` output orderings.
+
+  Distractors model the three predictable wrong mental models:
+   - FIFO instead of LIFO (close-1 then close-2).
+   - Defers fire BEFORE the body (close-1, close-2, use).
+   - Reversed defers but before the body (close-2, close-1, use).

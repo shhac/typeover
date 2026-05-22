@@ -5,9 +5,10 @@ order: 7
 prompt: |
   Type the missing Zig line — schedule cleanup that runs ONLY
   if a later operation fails. The current code has an `errdefer
-  free`, then a `try` that succeeds, then returns the buffer.
-  Because the try succeeded, the errdefer does NOT fire and the
-  caller (main) sees the buffer.
+  free`, then a `try`-call that COULD have errored but happens
+  to succeed, then returns the buffer. Because the try
+  succeeded, the errdefer does NOT fire and the caller (main)
+  sees the buffer.
 generator:
   kind: template
   vars:
@@ -21,8 +22,7 @@ generator:
     fn make(alloc: std.mem.Allocator) ![]u8 {
         const buf = try alloc.alloc(u8, 5);
         ${line}
-        // (no operation that could fail; the errdefer does NOT fire)
-        @memcpy(buf, "owned");
+        _ = try std.fmt.bufPrint(buf, "owned", .{});
         return buf;
     }
 
@@ -59,6 +59,20 @@ hints:
 notes: |
   Drill errdefer in a runnable context. The function's `![]u8`
   return type is what makes errdefer fire on error paths only.
-  Note the caller has its own `defer alloc.free(buf);` — the
-  pair forms the canonical "factory + caller cleans up"
-  ownership-transfer pattern.
+
+  The `_ = try std.fmt.bufPrint(buf, "owned", .{});` line is
+  the load-bearing demo. `bufPrint` returns `![]u8` (errors
+  with `error.NoSpaceLeft` if the buffer is too small). Here
+  the 5-byte buffer fits `"owned"` exactly, so the call
+  succeeds and the errdefer doesn't fire — but if you changed
+  the alloc size to 3, the `try` would propagate
+  `error.NoSpaceLeft`, the errdefer would fire, and main would
+  get the error instead of a leaked allocation.
+
+  Per the M3 validator: the previous canonical had no fallible
+  operation between the errdefer and the return, so the
+  errdefer's role was vacuously demonstrated. The bufPrint
+  call makes the cleanup path reachable.
+
+  Pair with main's own `defer alloc.free(buf);` — the canonical
+  "factory + caller cleans up" ownership-transfer pattern.
