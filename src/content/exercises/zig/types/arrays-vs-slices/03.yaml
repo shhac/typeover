@@ -17,7 +17,7 @@ generator:
     sum(arr[0..]);
   distractors:
     - "sum(arr);"
-    - "sum(&arr);"
+    - "sum(arr[..]);"
     - "sum(arr.toSlice());"
 hints:
   - "One operator: `arr[0..]` — start index 0, end omitted (means \"to the end\"). The result is a `[]const i32` slice pointing at the array's elements."
@@ -29,6 +29,15 @@ notes: |
    - Bare `arr` — would try to pass the array by value; type
      mismatch unless the function takes `[N]i32` (concrete
      length).
-   - `&arr` — works in some Zig versions (coerces to slice),
-     but the idiomatic teaching shape is `arr[0..]`.
+   - `arr[..]` — missing start index. Zig requires a start
+     (use `0..` for "from the beginning") even when the
+     end is implicit.
    - `.toSlice()` — invented method; doesn't exist.
+
+  Worth noting: `sum(&arr)` also compiles — `&arr` produces
+  `*[N]i32` which Zig coerces to `[]const i32` for the
+  parameter. The curriculum teaches `arr[0..]` because the
+  `[a..b]` syntax also covers subranges (`arr[1..3]`,
+  `arr[2..]`), so the same syntactic shape extends — whereas
+  `&arr` only gives you the whole array.
+

@@ -4,29 +4,45 @@ type: mcq
 order: 1
 prompt: |
   TypeScript writes `const arr: number[] = [10, 20, 30];`. Zig
-  distinguishes fixed-length arrays from runtime-length slices.
-  Pick the FIXED-LENGTH ARRAY declaration (the length is part of
-  the type, known at compile time).
+  has two shapes for fixed-length array initialization: the
+  TYPE-PREFIX form (`[3]i32{ ... }` — type-name first, then
+  the initializer) and the annotation-with-anonymous-literal
+  form (slot 06's `const arr: [3]i32 = .{ ... };`). The
+  type-prefix form works WITHOUT a binding-side annotation —
+  useful when passing an array directly to a function or
+  storing it as a struct field. Pick the type-prefix shape.
 generator:
   kind: template
   vars: {}
   ts: |-
     const arr: number[] = [10, 20, 30];
   canonical: |-
-    const arr: [3]i32 = .{ 10, 20, 30 };
+    const arr = [3]i32{ 10, 20, 30 };
   distractors:
-    - "const arr: []i32 = .{ 10, 20, 30 };"
-    - "const arr: i32[3] = .{ 10, 20, 30 };"
-    - "const arr: [3, i32] = .{ 10, 20, 30 };"
+    - "const arr = [3]i32 .{ 10, 20, 30 };"
+    - "const arr = [3, i32]{ 10, 20, 30 };"
+    - "const arr = []i32{ 10, 20, 30 };"
 hints:
-  - "Two pieces: the type is `[N]T` (N first, T second, both inside square brackets) — note `N` is the count, NOT a comma-separated pair. The initializer uses the dot-prefixed anonymous-struct shorthand `.{ ... }`."
-  - "Shape: `[<count>]<elementType>` for the type, `.{ <e1>, <e2>, ... }` for the initializer."
-  - "`const arr: [3]i32 = .{ 10, 20, 30 };`"
+  - "Three pieces: `const arr =` (no binding-side annotation), `[3]i32` (the type, count first), then `{ ... }` directly (no dot, no comma, no slice marker `[]`)."
+  - "Shape: `[<count>]<elementType>{ <e1>, <e2>, ... }`."
+  - "`const arr = [3]i32{ 10, 20, 30 };`"
 runtime: none
 notes: |
-  First arrays-vs-slices exercise. Drills the `[N]T` shape and
-  separates it from the slice shape `[]T`. Distractors:
-   - `[]i32` — slice, not array; would need a different
-     initializer.
-   - `i32[3]` — C reflex (Eastern declaration).
-   - `[3, i32]` — tuple-style reflex; Zig has no comma here.
+  First arrays-vs-slices exercise. Teaches the type-prefix
+  initialization form `[N]T{ ... }` — slot 06 (fill-line)
+  then drills the annotation-with-anonymous-literal form
+  (`const arr: [N]T = .{ ... };`) which is the same shape
+  with the type annotation moved to the binding.
+
+  Distractors model three real shape mistakes:
+   - `[3]i32 .{ ... }` — extra `.` (mixing type-prefix and
+     anonymous-literal syntax).
+   - `[3, i32]{ ... }` — comma between count and element
+     type (tuple reflex).
+   - `[]i32{ ... }` — SLICE type instead of fixed array;
+     would need a slice initializer, not array fields.
+
+  Probed against the playground compiler: the canonical
+  compiles cleanly and indexing `arr[2]` returns `30`. Fixed
+  per M2 validator's C8 finding (slots 01 and 06 previously
+  drilled the same form).

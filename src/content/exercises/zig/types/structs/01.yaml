@@ -20,8 +20,8 @@ generator:
       ts: "type User = { name: string; age: number };"
       canonical: "const User = struct { name: []const u8, age: i32 };"
       distractors:
-        - "interface User { name: []const u8, age: i32 }"
-        - "struct User { name: []const u8, age: i32 }"
+        - "interface User { name: []const u8, age: i32 };"
+        - "struct User { name: []const u8, age: i32 };"
         - "const User = { name: []const u8, age: i32 };"
 hints:
   - "Three pieces: `const <Name> = struct { ... };` — the struct is bound to a `const`, the type is on the right-hand side, the fields are comma-separated (not semicolon)."
