@@ -45,20 +45,21 @@ export type ClientRuntime = "yaegi" | "zig";
  *  without a snap-default. */
 export type AcceptedRuntime = ClientRuntime | "server";
 
-/** Which curriculum-target language each runtime grades. Drives
- *  both the display label (via `LANG_DISPLAY`) and any per-language
- *  UI dispatch in consumers (e.g. picking the right CodeMirror
- *  grammar). Single map; the label is a derived value. */
-export const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
+/* Which curriculum-target language each runtime grades. Drives
+ * both the display label (via `LANG_DISPLAY`) and the handle's
+ * `runtimeTarget` field. Internal; consumers read the per-handle
+ * `runtimeTarget` instead. */
+const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
   yaegi: "go",
   zig: "zig",
 };
 
-/** Human-facing label per runtime. Derived from RUNTIME_TARGET +
- *  LANG_DISPLAY so the display strings live in one place
- *  (LANG_DISPLAY). Surfaced through the handle so the shared
- *  toolbar boot badge renders the right name. */
-export const RUNTIME_LABELS: Record<ClientRuntime, string> = {
+/* Human-facing label per runtime. Derived from RUNTIME_TARGET +
+ * LANG_DISPLAY so the display strings live in one place
+ * (LANG_DISPLAY). Internal; surfaced through the handle's
+ * `runtimeLabel` field so shared UI (toolbar boot badge) doesn't
+ * need to maintain its own lookup. */
+const RUNTIME_LABELS: Record<ClientRuntime, string> = {
   yaegi: LANG_DISPLAY[RUNTIME_TARGET.yaegi],
   zig: LANG_DISPLAY[RUNTIME_TARGET.zig],
 };

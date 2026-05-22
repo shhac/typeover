@@ -24,10 +24,11 @@ import { Directory, File, type Inode } from "@bjorn3/browser_wasi_shim";
  *     buffer, returns a `Directory` rooted at the stdlib's `lib/`
  *     subtree (the prefix is stripped so the WASI mount-point at
  *     `/lib` lines up with the compiler's expectations).
- *   - `treeToDirectory(tree)` — the recursive Map → Directory
- *     converter, exported so callers with their own tar parser
- *     (e.g. the Node smoke harness using a hand-rolled USTAR
- *     reader) can share the final step.
+ *
+ * (`treeToDirectory` used to be exported as a sharing handhold for
+ * the Node smoke harness, but the harness keeps its own copy
+ * because it's `.mjs` and can't import this `.ts` module cleanly.
+ * Re-export when an actual consumer materialises.)
  */
 
 /** Internal tree shape — segment name → either a subtree or a
@@ -79,10 +80,11 @@ function insertPath(root: Tree, parts: readonly string[], data: Uint8Array): voi
   cur.set(parts[parts.length - 1]!, data);
 }
 
-/** Recursive Map → Directory conversion. Exported so callers with
- *  their own tar parser (Node smoke harness) can share this final
- *  step instead of duplicating it. */
-export function treeToDirectory(node: Tree): Directory {
+/* Recursive Map → Directory conversion. Internal — used by
+ * `buildStdlibTree`. Re-export when a consumer outside this file
+ * needs it (e.g. a future smoke-harness rewrite that can import
+ * this module). */
+function treeToDirectory(node: Tree): Directory {
   const contents = new Map<string, Inode>();
   for (const [name, value] of node.entries()) {
     if (value instanceof Uint8Array) {

@@ -49,8 +49,10 @@ export function migrateLegacyIds(p: Progress): Progress {
 }
 
 /** Predicate: does this exercise ID need the legacy → 4-segment
- *  rewrite? Exported for unit tests; not consumed elsewhere. */
-export function needsLegacyPrefix(id: string): boolean {
+ *  rewrite? Internal helper; the public surface is just
+ *  `migrateLegacyIds`. Re-export if a test ever needs to call it
+ *  directly. */
+function needsLegacyPrefix(id: string): boolean {
   const parts = id.split("/");
   if (parts.length !== 3) return false;
   /* Reject empty segments — those are corrupt rather than legacy. */
