@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing keyword that consumes an error union and
+  substitutes a default or runs a handler. Five letters,
+  lowercase, same word C++ / Java use.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "catch"
+  ts: |-
+    const n = await fetchN().catch(() => 0);
+  canonical: |-
+    const n: i32 = fetchN() ${keyword} 0;
+  distractors:
+    - "orelse"
+    - "rescue"
+    - "default"
+blanks: [keyword]
+hints:
+  - "Five letters, lowercase, same as C++ / Java."
+  - "Starts with `c`."
+  - "`catch`"
+runtime: none
+notes: |
+  Drill `catch`. Distractors:
+   - `orelse` — that's optionals, not error unions.
+   - `rescue` — Ruby reflex.
+   - `default` — generic, not a Zig keyword.

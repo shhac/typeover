@@ -1,0 +1,50 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Defines `E = error{ Bad };`.
+   2. Defines `fn doub(x: i32) E!i32` returning `error.Bad`
+      for negatives, else `x * 2`.
+   3. From `main`, calls `doub(-5)`, handles the error with
+      `catch -1`, and prints the result followed by a newline.
+
+  Expected stdout: `-1`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function doub(x: number): number {
+        if (x < 0) throw new Error("Bad");
+        return x * 2;
+    }
+    let n;
+    try { n = doub(-5); } catch { n = -1; }
+    console.log(n);
+  canonical: |-
+    const std = @import("std");
+
+    const E = error{ Bad };
+
+    fn doub(x: i32) E!i32 {
+        if (x < 0) return error.Bad;
+        return x * 2;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const n: i32 = doub(-5) catch -1;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  -1
+runtime: zig
+hints:
+  - "Three pieces: declare `E = error{ Bad };`, declare `fn doub(x: i32) E!i32 { ... }` with the guard, then call with `catch -1` to handle the error path."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst E = error{ Bad };\n\nfn doub(x: i32) E!i32 {\n    if (x < 0) return error.Bad;\n    return x * 2;\n}\n\npub fn main(init: std.process.Init) !void {\n    const n: i32 = doub(-5) catch -1;\n    // bufPrint(\"{d}\\n\", .{n}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. `catch -1` substitutes when the call errors (which it does for `-5`).'
+notes: |
+  First try-and-catch freeform. Drills `catch <default>`
+  end-to-end on a complete program.

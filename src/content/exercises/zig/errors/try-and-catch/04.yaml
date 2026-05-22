@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword that propagates an error from a
+  fallible call to the enclosing function's return. Three
+  letters, lowercase — the same keyword used many times in
+  Module 1.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "try"
+  ts: |-
+    const n = await fetchN();
+  canonical: |-
+    const n = ${keyword} fetchN();
+  distractors:
+    - "await"
+    - "throw"
+    - "catch"
+blanks: [keyword]
+hints:
+  - "Three letters, same word from the basics module."
+  - "Starts with `t`."
+  - "`try`"
+runtime: none
+notes: |
+  Reinforce `try` as the propagator. The keyword has been
+  drilled before (basics/hello-and-output 06); this slot puts
+  it in its full errors-module context.

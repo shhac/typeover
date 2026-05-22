@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: mcq
+order: 2
+prompt: |
+  When you'd rather substitute a DEFAULT VALUE for an error
+  (like TypeScript's `await fetchN().catch(() => 0)`), Zig has
+  `<expr> catch <default>` — exactly mirroring the optional's
+  `orelse`. Pick the right shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n = await fetchN().catch(() => 0);
+  canonical: |-
+    const n: i32 = fetchN() catch 0;
+  distractors:
+    - "const n: i32 = fetchN() orelse 0;"
+    - "const n: i32 = fetchN() ?? 0;"
+    - "const n: i32 = try fetchN() catch 0;"
+hints:
+  - "One keyword, between the call and the default value. Same as the propagator's `catch` — but here followed by a value instead of a payload-capture handler."
+  - "Shape: `<fallible-expr> catch <default-value>`."
+  - "`const n: i32 = fetchN() catch 0;`"
+runtime: none
+notes: |
+  Drill `catch <default>`. Distractors:
+   - `orelse` — that's optionals, not error unions.
+   - `??` — TS reflex.
+   - `try ... catch <default>` — using both is double cleanup;
+     `try` already propagates, so a fallback right after has
+     no effect.

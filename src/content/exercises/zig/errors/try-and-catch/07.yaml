@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — bind `n` to the result of
+  `maybe(-1)`, substituting `0` if the call errors. With the
+  right line, the error path runs and the program prints `0`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const n: i32 = maybe(-1) catch 0;"
+  ts: |-
+    const n = await maybe(-1).catch(() => 0);
+  canonical: |-
+    const std = @import("std");
+
+    const E = error{ Bad };
+
+    fn maybe(x: i32) E!i32 {
+        if (x < 0) return error.Bad;
+        return x * 2;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const n: i32 = maybe(-1) orelse 0;"
+      explain: |-
+        `orelse` is for optionals (`?T`). Error unions use
+        `catch <default>`.
+    - match: "const n: i32 = try maybe(-1) catch 0;"
+      explain: |-
+        Using both `try` AND `catch` is redundant — `try` would
+        propagate the error before `catch` even runs. Pick
+        ONE: `try` (propagate) or `catch` (handle).
+    - match: "const n: ?i32 = maybe(-1) catch null;"
+      explain: |-
+        Compiles, but the binding's type becomes optional `?i32`
+        and the rest of the program would need to handle that.
+        For an integer default, use `catch <i32-value>`.
+expectStdout: |
+  0
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const n: i32 =`, `maybe(-1) catch 0;`."
+  - "Shape: `const <name>: <Type> = <expr> catch <default>;`."
+  - "`const n: i32 = maybe(-1) catch 0;`"
+notes: |
+  Drill `catch <default>` in a runnable program. The `-1`
+  input forces the error path; `catch 0` substitutes.

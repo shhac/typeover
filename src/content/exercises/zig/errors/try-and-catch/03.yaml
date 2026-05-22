@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: mcq
+order: 3
+prompt: |
+  When you need to handle the error case differently per
+  variant (or do something more interesting than substitute a
+  default), use `catch |err| { ... }` — same payload-capture
+  pipe syntax as `if (x) |y|` from optionals. Pick the right
+  shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const v = await maybe(-3).catch((err) => {
+        if (err.kind === "Bad") return 999;
+        throw err;
+    });
+  canonical: |-
+    const v = maybe(-3) catch |err| blk: {
+        switch (err) {
+            error.Bad => break :blk @as(i32, 999),
+        }
+    };
+  distractors:
+    - |-
+      const v = maybe(-3) catch (err) {
+          return 999;
+      };
+    - |-
+      const v = maybe(-3) catch err => 999;
+    - |-
+      const v = try maybe(-3) catch |err| 999;
+hints:
+  - "Three syntactic pieces: `catch |err|` (payload-capture pipes around the binding), `blk:` label so the block is an expression, `break :blk <value>` to produce the result."
+  - "Shape:\n```zig\nconst v = <call> catch |err| blk: {\n    switch (err) {\n        error.<Variant> => break :blk <fallback>,\n    }\n};\n```"
+  - "Full canonical:\n```zig\nconst v = maybe(-3) catch |err| blk: {\n    switch (err) {\n        error.Bad => break :blk @as(i32, 999),\n    }\n};\n```"
+runtime: none
+notes: |
+  Drill the labelled-block handler shape. Distractors:
+   - `catch (err)` — parens are TS; Zig uses pipes `|err|`.
+   - `catch err => 999` — match-style arrow; not Zig syntax.
+   - `try ... catch |err| ...` — `try` already handles
+     propagation; pairing with handler defeats both.
+
+  In simple cases `catch <default>` (slot 02) is enough; this
+  shape is for when you genuinely need to inspect or branch
+  on the error variant.

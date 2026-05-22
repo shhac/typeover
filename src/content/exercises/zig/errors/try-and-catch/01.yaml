@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: mcq
+order: 1
+prompt: |
+  TypeScript reaches for `try { ... } catch (e) { throw e; }` to
+  propagate an error to the caller. Zig has a single keyword
+  that does this in one line — call the function with `try`
+  and the error propagates to the enclosing function's return.
+  Pick the right shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n = await fetchN();
+  canonical: |-
+    const n = try fetchN();
+  distractors:
+    - "const n = fetchN();"
+    - "const n = await fetchN();"
+    - "const n = try { fetchN(); };"
+hints:
+  - "Three letters, sits before the call. Sugar for `<call> catch |err| return err`."
+  - "Shape: `const <name> = try <fallible-call>(<args>);`."
+  - "`const n = try fetchN();`"
+runtime: none
+notes: |
+  First try-and-catch exercise. Drills `try` in the
+  propagator role. Distractors:
+   - Bare call — uncaught error union → compile error.
+   - `await` — TS / async reflex; not Zig.
+   - `try { ... }` block — Zig's `try` is a unary OPERATOR
+     before the expression, not a block introducer.

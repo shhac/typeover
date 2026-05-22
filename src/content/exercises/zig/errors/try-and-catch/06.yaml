@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — call `maybe(7)` with `try` so its
+  value propagates to `n`, or its error propagates to main's
+  return. With the right line, the program prints `14` (7 × 2).
+generator:
+  kind: template
+  vars:
+    line:
+      - "const n = try maybe(7);"
+  ts: |-
+    const n = await maybe(7);
+  canonical: |-
+    const std = @import("std");
+
+    const E = error{ Bad };
+
+    fn maybe(x: i32) E!i32 {
+        if (x < 0) return error.Bad;
+        return x * 2;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const n = maybe(7);"
+      explain: |-
+        `maybe` returns `E!i32` — an error union. Without `try`
+        or `catch`, the value isn't unwrapped and the compiler
+        refuses to assign it to `i32`.
+    - match: "const n = await maybe(7);"
+      explain: |-
+        `await` is TS / JS. Zig propagates errors with `try`.
+    - match: "const n = maybe(7) catch unreachable;"
+      explain: |-
+        Works mechanically — but `unreachable` aborts on the
+        error path instead of propagating. Use `try` when the
+        natural response is "let my caller handle it."
+expectStdout: |
+  14
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const n =`, `try maybe(7);`."
+  - "Shape: `const <name> = try <fallible-call>;`."
+  - "`const n = try maybe(7);`"
+notes: |
+  First runnable try slot. The function's `E!i32` return type
+  forces the call site to consume the error union; `try`
+  propagates on error, unwraps on success.

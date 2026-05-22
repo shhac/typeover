@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/errors
+title: try and catch
+order: 2
+prerequisites: []
+intro: |
+  There are three ways to consume an error union. try expr is the propagator: on error, return the error to the caller; on success, unwrap the value. expr catch <default> substitutes a fallback value (analogous to optionals orelse). expr catch |err| { ... } captures the error and runs a handler block — pair with a switch on err to handle each case. Once these three are reflex, error handling reads cleanly without exception-handler ceremony.

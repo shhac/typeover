@@ -1,0 +1,61 @@
+target: zig
+themeId: zig/errors/try-and-catch
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that uses payload-capture
+  `catch |err| blk: { ... }` to branch on the error variant:
+
+   1. Define `E = error{ Tiny, Huge };`.
+   2. Define `fn classify(n: i32) E!i32` returning `error.Tiny`
+      for `n < 0`, `error.Huge` for `n > 100`, else `n`.
+   3. From `main`, call `classify(200)` and handle: on `Tiny`
+      print `tiny`, on `Huge` print `huge`. Then `\n`.
+
+  Expected stdout: `huge`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    /* TS would use a labelled discriminated-error union or
+     * tag-checking inside the catch body. */
+  canonical: |-
+    const std = @import("std");
+
+    const E = error{ Tiny, Huge };
+
+    fn classify(n: i32) E!i32 {
+        if (n < 0) return error.Tiny;
+        if (n > 100) return error.Huge;
+        return n;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const out = std.Io.File.stdout();
+        _ = classify(200) catch |err| {
+            const msg: []const u8 = switch (err) {
+                error.Tiny => "tiny",
+                error.Huge => "huge",
+            };
+            try out.writeStreamingAll(init.io, msg);
+            try out.writeStreamingAll(init.io, "\n");
+            return;
+        };
+    }
+expectStdout: |
+  huge
+runtime: zig
+hints:
+  - "Three pieces: declare two-variant set, declare classify with two guards, then `_ = classify(200) catch |err| { switch (err) { ... } return; };` — the catch block prints + returns from main, so the success path's unused result is discarded with `_ =`."
+  - "Skeleton:\n```zig\nconst E = error{ Tiny, Huge };\nfn classify(n: i32) E!i32 {\n    if (n < 0) return error.Tiny;\n    if (n > 100) return error.Huge;\n    return n;\n}\n```\nThen in main, `_ = classify(200) catch |err| { ... return; };` with a switch on err inside."
+  - 'Full program: the canonical above. The success path is `_ = ... ;` to discard; on error, the handler block writes the matching label and returns from main.'
+notes: |
+  Last try-and-catch slot. Drills the catch-with-payload
+  handler block + switch-on-err. Note the `return;` inside
+  the catch block — without it, control would fall through
+  to the (non-existent) code after the catch and the success
+  path's `_ =` would be the only consumer.
+
+  Closes the theme with the most expressive catch form. Theme
+  3 (`error-union-returns`) goes deeper on the `!T` syntax
+  family and inferred error sets.
