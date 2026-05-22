@@ -68,6 +68,12 @@ interface BlankInputProps {
   /** Optional ref escape hatch so a parent can focus this input
    *  (e.g. fill-word's "Enter jumps to the next empty blank"). */
   ref?: (el: HTMLInputElement) => void;
+  /** When true, the input floor widens to 64ch on desktop (`md:` and
+   *  up) so a single-blank fill-line surface doesn't look cramped on
+   *  browsers without `field-sizing: content` support (Firefox <138,
+   *  older Safari). Fill-word leaves this false — multiple short
+   *  blanks inside one snippet shouldn't each be 64ch wide. */
+  wide?: boolean;
 }
 
 export function BlankInput(props: BlankInputProps) {
@@ -115,8 +121,13 @@ export function BlankInput(props: BlankInputProps) {
          *   - Browsers without field-sizing support fall back to
          *     `w-[14ch]` (the prior shipped behavior); newer
          *     browsers — Chrome 123+, Firefox 138+, Safari 18.4+ —
-         *     get the grow-with-content behavior automatically. */
+         *     get the grow-with-content behavior automatically.
+         *   - On `wide` inputs (fill-line), bump the desktop floor
+         *     to 64ch so Firefox <138 / older Safari still get a
+         *     usable surface for full-line answers. Mobile stays at
+         *     14ch to fit narrow viewports. */
         "w-[14ch] min-w-[14ch] max-w-full field-sizing-content",
+        props.wide && "md:min-w-[64ch] md:w-[64ch]",
         inputClass[state()],
       )}
     />

@@ -213,6 +213,12 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
              * Feedback panel carries the correctness signal. */
             revealed={false}
             locked={phase.current() === "right"}
+            /* fill-line surface — give browsers without
+             * `field-sizing: content` support (Firefox <138, older
+             * Safari) a wider desktop floor so full-line answers
+             * aren't cramped into 14ch. Mobile stays at the
+             * default. */
+            wide
             onInput={(value) => {
               setInput(value);
               /* Editing the input invalidates the last Run's grade
