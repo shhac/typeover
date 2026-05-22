@@ -503,18 +503,3 @@ export function completionExtension(options: CompletionOptions): Extension {
     activateOnTyping: true,
   });
 }
-
-/* Back-compat thin wrappers so existing call sites that imported
- * the Zig-named helpers keep working without threading the
- * `language: "zig"` arg through. */
-export function makeZigCompletionSource(
-  options: Omit<CompletionOptions, "language"> = {},
-): CompletionSource {
-  return makeCompletionSource({ ...options, language: "zig" });
-}
-
-export function zigCompletionExtension(
-  options: Omit<CompletionOptions, "language"> = {},
-): Extension {
-  return completionExtension({ ...options, language: "zig" });
-}

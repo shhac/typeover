@@ -6,7 +6,6 @@ import {
   GO_MEMBERS,
   extractIdentifiers,
   makeCompletionSource,
-  makeZigCompletionSource,
 } from "./code-completions";
 
 /*
@@ -228,12 +227,5 @@ describe("makeCompletionSource — branch dispatch", () => {
     });
     const ls = labelsOf(call(src, ctxFor("nums.it", undefined, true)));
     expect(ls).toContain("items");
-  });
-});
-
-describe("makeZigCompletionSource (back-compat wrapper)", () => {
-  it("returns same shape as makeCompletionSource with language: zig", () => {
-    const src = makeZigCompletionSource();
-    expect(labelsOf(call(src, ctxFor("std.")))).toContain("Io");
   });
 });
