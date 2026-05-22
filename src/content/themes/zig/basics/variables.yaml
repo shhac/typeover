@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/basics
+title: "Variables (const and var)"
+order: 2
+prerequisites: []
+intro: |
+  Zig defaults the other way from TypeScript. `const` is the default reflex; `var` is the explicit opt-in when you need to reassign. Type annotations come AFTER the name (`var x: i32 = 5`), not before, and they're optional when the literal disambiguates. Shadowing across scopes is allowed; redeclaring in the same scope is a compile error.

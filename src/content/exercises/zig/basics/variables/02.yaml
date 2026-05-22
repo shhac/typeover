@@ -1,0 +1,40 @@
+target: zig
+themeId: zig/basics/variables
+type: mcq
+order: 2
+prompt: |
+  TypeScript's `const` and Zig's `const` look identical, but
+  there's a wrinkle: Zig prefers `const` as the DEFAULT — every
+  declaration starts as `const` until you have a reason to make
+  it mutable. Pick the Zig translation for this constant.
+generator:
+  kind: variant
+  variants:
+    - id: pi
+      ts: "const PI: number = 3.14;"
+      canonical: "const PI: f64 = 3.14;"
+      distractors:
+        - "let PI: f64 = 3.14;"
+        - "var PI: f64 = 3.14;"
+        - "const PI = 3.14: f64;"
+    - id: max-retries
+      ts: "const MAX_RETRIES: number = 3;"
+      canonical: "const MAX_RETRIES: i32 = 3;"
+      distractors:
+        - "let MAX_RETRIES: i32 = 3;"
+        - "var MAX_RETRIES: i32 = 3;"
+        - "const MAX_RETRIES = 3: i32;"
+hints:
+  - "Two shifts from TS: `const` stays (good — same keyword), but the type is a Zig-specific width (`f64`, `i32`), and the annotation goes between name and `=`."
+  - "Shape: `const <NAME>: <type> = <value>;`."
+  - "For the pi variant: `const PI: f64 = 3.14;`."
+runtime: none
+notes: |
+  Drill the const-default reflex. Distractors include:
+   - `let PI` — wrong keyword (TS reflex).
+   - `var PI` — Zig keyword but wrong reach (mutable when shouldn't
+     be; Zig's `var` is the explicit opt-in, not the default).
+   - Wrong annotation position (`= value: type`).
+
+  Two variants (pi, MAX_RETRIES) keep the same shape across a
+  float and an int.

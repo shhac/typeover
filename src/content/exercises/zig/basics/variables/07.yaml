@@ -1,0 +1,54 @@
+target: zig
+themeId: zig/basics/variables
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line. The program declares a MUTABLE
+  integer `score`, increments it by 10, and prints the result.
+  With the right declaration, running prints `15` then a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "var score: i32 = 5;"
+  ts: |-
+    let score: number = 5;
+    score += 10;
+    console.log(score);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        score += 10;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{score});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const score: i32 = 5;"
+      explain: |-
+        `const` makes the binding immutable, so the `score += 10`
+        line below would be a compile error. This variable is
+        reassigned later — use `var`.
+    - match: "let score: i32 = 5;"
+      explain: |-
+        `let` is TypeScript. Zig uses `var` for mutable bindings.
+    - match: "var score = 5: i32;"
+      explain: |-
+        Annotation order is wrong. Zig puts the type between the
+        name and the `=`: `var score: i32 = 5;`, not after the
+        value.
+expectStdout: |
+  15
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: the keyword is `var` (because `score` IS reassigned on the next line via `+= 10`), the annotation `: i32` goes between the name and the `=`, and the value is `5`."
+  - "Shape: `var <name>: <type> = <value>;`. For this exercise: `var score: i32 = 5;`."
+  - "`var score: i32 = 5;`"
+notes: |
+  Mirror of slot 06 but with `var` instead of `const`. The
+  scaffold's `score += 10;` line is the load-bearing constraint
+  that forces `var`. Distractors are the three obvious wrong
+  reflexes (const, let, wrong annotation order).

@@ -1,0 +1,45 @@
+target: zig
+themeId: zig/basics/variables
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Declares a `const` named `daysInWeek` of type `i32` set to 7.
+   2. Prints `7` followed by a newline.
+
+  You'll need `@import("std")`, the entry-point signature, a
+  bufPrint to format the integer, and a writeStreamingAll to push
+  the formatted bytes to stdout.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const daysInWeek: number = 7;
+    console.log(daysInWeek);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const daysInWeek: i32 = 7;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{daysInWeek});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  7
+runtime: zig
+hints:
+  - "Five pieces: `@import(\"std\")` bound to `const std`, the `pub fn main(init: std.process.Init) !void` entry, the `const daysInWeek: i32 = 7;` declaration, a `var buf: [16]u8 = undefined;` + `std.fmt.bufPrint(&buf, \"{d}\\n\", .{daysInWeek})` to format the integer, and a `try ... writeStreamingAll(init.io, printed)` to print it."
+  - "Skeleton:\n\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const daysInWeek: i32 = 7;\n    var buf: [16]u8 = undefined;\n    const printed = try std.fmt.bufPrint(&buf, \"{d}\\n\", .{daysInWeek});\n    try std.Io.File.stdout().writeStreamingAll(init.io, printed);\n}\n```"
+  - 'The full program is the same as the skeleton in hint 2 — `{d}` is the integer format specifier; `&buf` passes the buffer by reference so bufPrint can write into it; `.{daysInWeek}` is the argument tuple.'
+notes: |
+  First variables-theme freeform. Drills:
+   - The const-default reflex (we COULD write `var` but
+     `daysInWeek` is immutable).
+   - The i32 explicit annotation.
+   - The bufPrint + writeStreamingAll integer-printing pattern
+     introduced in slot 06.
+
+  Hint 3 spells out the format specifier `{d}` since the learner
+  hasn't seen it before — this exercise is also the first to use
+  it.

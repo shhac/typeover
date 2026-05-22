@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/basics/variables
+type: mcq
+order: 3
+prompt: |
+  TypeScript's `string` is a primitive built-in. Zig has no
+  `string` type — string literals are byte slices of read-only
+  memory, typed as `[]const u8`. Pick the Zig translation.
+generator:
+  kind: template
+  vars:
+    name: [greeting, message, label]
+    value: ['"hello"', '"hi there"', '"ready"']
+  ts: |-
+    const ${name}: string = ${value};
+  canonical: |-
+    const ${name}: []const u8 = ${value};
+  distractors:
+    - "const ${name}: string = ${value};"
+    - "const ${name}: char[] = ${value};"
+    - "var ${name}: []const u8 = ${value};"
+hints:
+  - "Zig strings are read-only byte slices. The type written explicitly is `[]const u8` — a slice (`[]`) of constant (`const`) unsigned 8-bit bytes (`u8`)."
+  - "Two pieces: keep `const` (the literal isn't going to change), and use `[]const u8` for the type. Annotation position is the same as the other variables — between name and `=`."
+  - "`const ${name}: []const u8 = ${value};`"
+runtime: none
+notes: |
+  Recognition of `[]const u8` as the string-literal type. Distractors:
+   - `string` — TS reflex.
+   - `char[]` — C reflex.
+   - `var greeting` — Zig keyword but wrong reach (string literal
+     is immutable; use `const`).
+
+  Note: a string literal's actual type is `*const [N:0]u8` (pointer
+  to a zero-terminated byte array), which coerces to `[]const u8`.
+  The annotation `[]const u8` is the idiomatic one taught; the
+  full pointer type is a Module 2 (types) topic.

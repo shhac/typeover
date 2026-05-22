@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/basics/variables
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword. The variable will be reassigned later
+  in the program (you can see the `+= 1` line), so it needs the
+  mutable form — not the const default.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "var"
+  ts: |-
+    let count = 0;
+    count += 1;
+  canonical: |-
+    ${keyword} count: i32 = 0;
+    count += 1;
+  distractors:
+    - "let"
+    - "const"
+    - "mut"
+blanks: [keyword]
+hints:
+  - "Zig's keyword for a mutable binding is THREE letters and is NOT `let` (that's TypeScript). It's also NOT `mut` (that's Rust)."
+  - "Three letters, starts with `v`."
+  - "`var`"
+runtime: none
+notes: |
+  Drill the `var` keyword in isolation. The TS scaffold uses
+  `let` so the learner sees the cross-language reflex directly.
+  Distractors:
+   - `let` — TS reflex (most common wrong answer).
+   - `const` — wrong reach (immutable; the `+= 1` line wouldn't
+     compile).
+   - `mut` — Rust reflex.

@@ -1,0 +1,58 @@
+target: zig
+themeId: zig/basics/variables
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line. The program declares a constant
+  `answer` of type `i32` with value 42, then prints it via the
+  stdout writer. With the right declaration, running the program
+  prints `42` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const answer: i32 = 42;"
+  ts: |-
+    const answer: number = 42;
+    console.log(answer);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{answer});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "var answer: i32 = 42;"
+      explain: |-
+        `var` makes `answer` mutable — but this binding never gets
+        reassigned, so the const-default convention applies. Use
+        `const`.
+    - match: "let answer: i32 = 42;"
+      explain: |-
+        `let` is TypeScript's mutable-binding keyword. Zig uses
+        either `const` (default) or `var` (when mutability is
+        needed). For a write-once value like this, `const`.
+    - match: "const answer = 42: i32;"
+      explain: |-
+        Annotation order is wrong. Zig puts the type between the
+        name and the `=`: `const answer: i32 = 42;`, not after
+        the value.
+expectStdout: |
+  42
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: the keyword is `const` (because `answer` is never reassigned), the name is `answer`, the type annotation `: i32` goes between name and `=`, then `= 42;` with the trailing semicolon."
+  - "Shape: `const <name>: <type> = <value>;`. For this exercise: name `answer`, type `i32`, value `42`."
+  - "`const answer: i32 = 42;`"
+notes: |
+  First fill-line for variables. The scaffold already includes the
+  bufPrint + writeStreamingAll dance to format the integer for
+  output; the learner only has to write the declaration line.
+
+  bufPrint is the playground-friendly way to format a number into
+  bytes; the alternative (`std.debug.print`) writes to stderr +
+  has linker quirks. design-docs/04b documents this.

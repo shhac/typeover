@@ -1,0 +1,50 @@
+target: zig
+themeId: zig/basics/variables
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that:
+   1. Declares a MUTABLE counter `attempts` of type `i32`,
+      initially 0.
+   2. Increments it three times (`attempts += 1` three times, or
+      `attempts += 3` once — either works).
+   3. Prints the final value followed by a newline.
+
+  Expected stdout: `3` on its own line.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let attempts: number = 0;
+    attempts += 1;
+    attempts += 1;
+    attempts += 1;
+    console.log(attempts);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        var attempts: i32 = 0;
+        attempts += 1;
+        attempts += 1;
+        attempts += 1;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{attempts});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  3
+runtime: zig
+hints:
+  - "Two reflexes to land at once: the declaration must use `var` (not `const`) because the value changes, and the mutation `attempts += 1;` is identical to TypeScript."
+  - "Skeleton:\n\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    var attempts: i32 = 0;\n    // increment three times\n    var buf: [16]u8 = undefined;\n    const printed = try std.fmt.bufPrint(&buf, \"{d}\\n\", .{attempts});\n    try std.Io.File.stdout().writeStreamingAll(init.io, printed);\n}\n```"
+  - 'The full program: declare `var attempts: i32 = 0;`, then three `attempts += 1;` lines (or one `attempts += 3;`), then the bufPrint + writeStreamingAll combination from slot 08.'
+notes: |
+  Second variables-theme freeform. Mirror of slot 08 but with
+  `var` instead of `const` plus the mutation step. The prompt
+  explicitly lets the learner pick between three increments or
+  one — both produce `3`, and the grader's oracle is stdout.
+
+  Slot 09 closes Module 1 theme 2; the learner now has the
+  const/var distinction reinforced four ways (mcq 01-02-03,
+  fill-word 04, fill-line 06-07, freeform 08-09).

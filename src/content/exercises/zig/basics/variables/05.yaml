@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/basics/variables
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing TYPE annotation. The variable holds a Boolean
+  value; Zig's primitive bool type is the answer. Same name as in
+  most languages — just a short, lower-case identifier.
+generator:
+  kind: template
+  vars:
+    type:
+      - "bool"
+  ts: |-
+    const isReady: boolean = true;
+  canonical: |-
+    const isReady: ${type} = true;
+  distractors:
+    - "boolean"
+    - "Boolean"
+    - "Bool"
+blanks: [type]
+hints:
+  - "Zig's boolean type is FOUR letters, all lowercase. Not the full word, not capitalised."
+  - "Four letters, starts with `b`, ends with `l`."
+  - "`bool`"
+runtime: none
+notes: |
+  Drill the lowercase Zig type name `bool`. Distractors hit
+  capitalisation + naming reflexes from other languages:
+   - `boolean` — TS / JS reflex.
+   - `Boolean` — Java reflex (wrapper class).
+   - `Bool` — Swift reflex.

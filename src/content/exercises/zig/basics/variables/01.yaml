@@ -1,0 +1,45 @@
+target: zig
+themeId: zig/basics/variables
+type: mcq
+order: 1
+prompt: |
+  TypeScript declares a mutable binding with `let` and the type
+  annotation `: type` between the name and the `=`. Zig swaps the
+  keyword to `var` and keeps the annotation position — but with
+  a Zig-specific width (no generic `number`/`boolean`). Pick the
+  idiomatic Zig translation.
+generator:
+  kind: variant
+  variants:
+    - id: int
+      ts: "let count: number = 5;"
+      canonical: "var count: i32 = 5;"
+      distractors:
+        - "let count: i32 = 5;"
+        - "var count = 5: i32;"
+        - "i32 count = 5;"
+    - id: float
+      ts: "let ratio: number = 0.5;"
+      canonical: "var ratio: f64 = 0.5;"
+      distractors:
+        - "let ratio: f64 = 0.5;"
+        - "var ratio = 0.5: f64;"
+        - "f64 ratio = 0.5;"
+    - id: bool
+      ts: "let ready: boolean = false;"
+      canonical: "var ready: bool = false;"
+      distractors:
+        - "let ready: bool = false;"
+        - "var ready = false: bool;"
+        - "boolean ready = false;"
+hints:
+  - "Three shifts from TS: keyword changes (`let` → `var`), `number` becomes a specific width (`i32`/`f64`), and `boolean` becomes `bool`. The annotation position (`: type` between name and `=`) is the same as TS."
+  - "Shape: `var <name>: <type> = <value>;`. The trailing semicolon is required."
+  - "For the int variant: `var count: i32 = 5;`."
+runtime: none
+notes: |
+  Variant MCQ across int / float / bool — same shape, three
+  primitive groupings. Distractors cover:
+   - TS leakage (`let`, `number`, `boolean` literally typed).
+   - Wrong annotation position (`= value: type`).
+   - C-style declaration (`type name = value`).
