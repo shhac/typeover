@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/types/pointers
+type: mcq
+order: 2
+prompt: |
+  When a function only READS through a pointer (never writes),
+  Zig's idiom is to mark the pointer `const`. Pick the right
+  signature for a function that takes a pointer just to read
+  the value it points at.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function read(p: { value: number }): number {
+        return p.value;
+    }
+  canonical: |-
+    fn read(p: *const i32) i32 {
+        return p.*;
+    }
+  distractors:
+    - "fn read(p: *i32) i32 { return p.*; }"
+    - "fn read(p: const *i32) i32 { return p.*; }"
+    - "fn read(p: i32 const) i32 { return p; }"
+hints:
+  - "Two pieces: the read-only-pointer type is `*const T` (with `const` between the `*` and the underlying type). The deref `p.*` is unchanged."
+  - "Shape: `fn name(p: *const T) ReturnType { return p.*; }`."
+  - "`fn read(p: *const i32) i32 { return p.*; }`"
+runtime: none
+notes: |
+  Drill `*const T`. Distractors:
+   - `*i32` — works mechanically but over-permissions; the
+     idiomatic discipline is "read-only is the default; reach
+     for writable only when needed."
+   - `const *i32` — wrong word order; `const` goes AFTER `*`.
+   - `i32 const` — C reflex (Eastern const).

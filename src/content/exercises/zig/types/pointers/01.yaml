@@ -1,0 +1,47 @@
+target: zig
+themeId: zig/types/pointers
+type: mcq
+order: 1
+prompt: |
+  TypeScript has no separate pointer syntax — passing an object
+  to a function passes a reference, end of story. Zig is
+  explicit. Pick the type for a parameter that's a single
+  pointer to an `i32` so the function can mutate the caller's
+  variable.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function double(p: { value: number }) {
+        p.value = p.value * 2;
+    }
+  canonical: |-
+    fn double(p: *i32) void {
+        p.* = p.* * 2;
+    }
+  distractors:
+    - |-
+      fn double(p: i32) void {
+          p = p * 2;
+      }
+    - |-
+      fn double(p: &i32) void {
+          p.* = p.* * 2;
+      }
+    - |-
+      fn double(p: *const i32) void {
+          p.* = p.* * 2;
+      }
+hints:
+  - "Three pieces: the parameter type is `*i32` (single pointer to i32 — `*` is PREFIX), and to read/write through it you use `p.*` (the `.*` is POSTFIX, like JavaScript's `.value` field access)."
+  - "Shape: `fn name(p: *T) ReturnType { ... p.* ... }`."
+  - "`fn double(p: *i32) void { p.* = p.* * 2; }`"
+runtime: none
+notes: |
+  First pointers exercise. Drills the basic `*T` parameter +
+  `p.*` deref shape. Distractors:
+   - `p: i32` — pass-by-value; can't mutate caller.
+   - `p: &i32` — C++ reference reflex; Zig uses `*` not `&`
+     in the TYPE position (`&` is the address-of OPERATOR).
+   - `p: *const i32` — read-only pointer; can't write through
+     it.

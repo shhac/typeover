@@ -1,0 +1,48 @@
+target: zig
+themeId: zig/types/pointers
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that READS through a read-only
+  pointer:
+   1. Define `fn get(p: *const i32) i32` returning `p.*`.
+   2. From `main`, declare `const v: i32 = 42;`, call
+      `get(&v)`, and print the result followed by a newline.
+
+  Expected stdout: `42`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function get(p: { value: number }): number {
+        return p.value;
+    }
+    const v = 42;
+    console.log(get({ value: v }));
+  canonical: |-
+    const std = @import("std");
+
+    fn get(p: *const i32) i32 {
+        return p.*;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const v: i32 = 42;
+        const got = get(&v);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{got});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  42
+runtime: zig
+hints:
+  - "Three pieces: function `fn get(p: *const i32) i32 { return p.*; }`, declare `const v: i32 = 42;` (CAN be const because the pointer is read-only), call `get(&v)`."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn get(p: *const i32) i32 {\n    return p.*;\n}\n\npub fn main(init: std.process.Init) !void {\n    const v: i32 = 42;\n    const got = get(&v);\n    // bufPrint(\"{d}\\n\", .{got}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. The `*const i32` type lets `get` accept either `&const-var` or `&var-var` — read-only is more general.'
+notes: |
+  Mirror of slot 08 but read-only. Establishes the
+  read-only-is-more-general intuition: `*const T` accepts both
+  `&const x` and `&var x`, but `*T` accepts only `&var x`.
+  Module 3 (memory) builds on this when ownership / borrowing
+  patterns come up.

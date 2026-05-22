@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/types/pointers
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — declare `read` taking a read-only
+  pointer to `i32` and returning that value. With the right
+  signature, the program prints `7` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn read(p: *const i32) i32 {"
+  ts: |-
+    function read(p: { value: number }): number {
+        return p.value;
+    }
+  canonical: |-
+    const std = @import("std");
+
+    ${line}
+        return p.*;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const x: i32 = 7;
+        const got = read(&x);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{got});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "fn read(p: *i32) i32 {"
+      explain: |-
+        Compiles, but `const x` can't be passed because `*i32`
+        is a writable pointer. The fix: use `*const i32` to
+        promise the function won't mutate.
+    - match: "fn read(p: const *i32) i32 {"
+      explain: |-
+        Wrong word order. The `const` goes between `*` and the
+        underlying type: `*const i32`.
+    - match: "fn read(p: *const i32): i32 {"
+      explain: |-
+        Drop the colon before the return type. Zig puts the
+        return type right after the param list — no colon.
+expectStdout: |
+  7
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `fn read`, parameter `(p: *const i32)`, return type `i32` (no colon), then `{`. The `*const i32` says \"read-only pointer to an i32.\""
+  - "Shape: `fn <name>(p: *const T) <ReturnType> {`."
+  - "`fn read(p: *const i32) i32 {`"
+notes: |
+  Drill `*const T` in a runnable context. The caller passes
+  `&x` where `x` is a `const i32` — the const-pointer type
+  is what makes that call type-check (a `*i32` would refuse).

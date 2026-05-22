@@ -1,0 +1,46 @@
+target: zig
+themeId: zig/types/pointers
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that mutates through a pointer:
+   1. Define `fn increment(p: *i32) void` that does `p.* += 1`.
+   2. From `main`, declare `var n: i32 = 9;`, call
+      `increment(&n);`, then print `n` followed by a newline.
+
+  Expected stdout: `10`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function increment(p: { value: number }) {
+        p.value += 1;
+    }
+    let n = 9;
+    increment({ value: n });
+    console.log(n + 1);
+  canonical: |-
+    const std = @import("std");
+
+    fn increment(p: *i32) void {
+        p.* += 1;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        var n: i32 = 9;
+        increment(&n);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{n});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  10
+runtime: zig
+hints:
+  - "Three pieces: function `fn increment(p: *i32) void { p.* += 1; }`, declare `var n: i32 = 9;` (must be `var` to take a writable pointer), call `increment(&n);`."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn increment(p: *i32) void {\n    p.* += 1;\n}\n\npub fn main(init: std.process.Init) !void {\n    var n: i32 = 9;\n    increment(&n);\n    // bufPrint(\"{d}\\n\", .{n}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. Note `p.* += 1` — the deref `p.*` is itself an lvalue you can assign to.'
+notes: |
+  Synthesises slots 04 (`&`), 05 (`.*`), and 06 (mutation
+  through pointer) into a complete program. The `+=` on a deref
+  is a small new wrinkle but reads naturally.

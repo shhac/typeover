@@ -1,0 +1,61 @@
+target: zig
+themeId: zig/types/pointers
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — pass `x`'s address to `double`,
+  which mutates the value. With the right call, the program
+  prints `42` followed by a newline (21 × 2).
+generator:
+  kind: template
+  vars:
+    line:
+      - "double(&x);"
+  ts: |-
+    let x = 21;
+    double({ value: x });
+    console.log(x);
+  canonical: |-
+    const std = @import("std");
+
+    fn double(p: *i32) void {
+        p.* = p.* * 2;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        var x: i32 = 21;
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{x});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "double(x);"
+      explain: |-
+        Passes by value. `x` reaches `double` as a copy; the
+        original `x` in `main` doesn't change. Take the address
+        with `&`: `double(&x);`.
+    - match: "double(*x);"
+      explain: |-
+        `*` here would dereference `x`, but `x` isn't a pointer
+        — it's an i32. To take the address use `&`: `double(&x);`.
+    - match: "&double(x);"
+      explain: |-
+        The `&` goes on the ARGUMENT, not the function name.
+        `double(&x);`.
+expectStdout: |
+  42
+runtime: zig
+blanks: [line]
+hints:
+  - "Two pieces: function name `double`, then `(&x);` — the `&` takes `x`'s address."
+  - "Shape: `<fn>(&<var>);`."
+  - "`double(&x);`"
+notes: |
+  First runnable pointers slot. Drills `&` in the call-site
+  position. The function body uses `p.* = p.* * 2;` to read +
+  write through the pointer.
+
+  Note: `x` MUST be `var` (not `const`) — you can't take a
+  writable pointer to a const. The compiler would surface
+  this as a type error if the learner tried.

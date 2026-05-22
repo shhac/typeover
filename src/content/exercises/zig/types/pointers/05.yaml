@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/types/pointers
+type: fill-word
+order: 5
+prompt: |
+  Fill the two-character postfix sequence that DEREFERENCES a
+  pointer. Read it as the inverse of `&` — "the thing pointed
+  at."
+generator:
+  kind: template
+  vars:
+    op:
+      - ".*"
+  ts: |-
+    const n = p.value;
+  canonical: |-
+    const n: i32 = p${op};
+  distractors:
+    - "*"
+    - "->"
+    - "&*"
+blanks: [op]
+hints:
+  - "Two characters total. Reads like field access (`.<name>`), but the field name is just `*`."
+  - "It's `.<character>`. The character is the same one used in pointer TYPES (`*T`)."
+  - "`.*`"
+runtime: none
+notes: |
+  Drill the `.*` postfix deref. Distractors:
+   - `*` (prefix) — that's the type-position pointer marker;
+     not used for deref.
+   - `->` — C / Rust reflex.
+   - `&*` — meaningless in Zig.

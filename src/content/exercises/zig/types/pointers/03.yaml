@@ -1,0 +1,34 @@
+target: zig
+themeId: zig/types/pointers
+type: mcq
+order: 3
+prompt: |
+  TypeScript writes `&` nowhere; you just pass the value. Zig
+  uses the prefix operator `&` to TAKE the address of a value.
+  Pick the right call site that gives `double` a pointer to
+  `x`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    var x = 21;
+    double({ value: x });
+  canonical: |-
+    var x: i32 = 21;
+    double(&x);
+  distractors:
+    - "double(x);"
+    - "double(*x);"
+    - "double(@addressOf(x));"
+hints:
+  - "One operator: `&` BEFORE the variable name takes its address. Same character as C / C++ but used only as an operator (never as a type)."
+  - "Shape: `<fn>(&<var>);`."
+  - "`double(&x);`"
+runtime: none
+notes: |
+  Drill the `&` address-of operator. Distractors:
+   - Bare `x` — passes by value, not pointer.
+   - `*x` — dereferences (and `x` isn't a pointer anyway, so
+     wouldn't compile).
+   - `@addressOf(x)` — plausible-sounding builtin that doesn't
+     exist.
