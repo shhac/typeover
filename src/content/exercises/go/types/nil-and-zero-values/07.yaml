@@ -3,7 +3,7 @@ themeId: go/types/nil-and-zero-values
 type: mcq
 order: 7
 prompt: |
-  Slot 5 showed a nil SLICE is fully usable for `append`.
+  Exercise 5 showed a nil SLICE is fully usable for `append`.
   What about a nil MAP? Given:
 
   ```go

@@ -34,8 +34,8 @@ generator:
         - 'rank := [8]int'
         - 'rank: [8]int'
 hints:
-  - "When the length is part of the contract — exactly N slots, no growth — the *array* shape carries that in the type."
-  - "`var name [N]T` declares an N-element array. No initializer needed; the zero value of the element type fills every slot."
+  - "When the length is part of the contract — exactly N exercises, no growth — the *array* shape carries that in the type."
+  - "`var name [N]T` declares an N-element array. No initializer needed; the zero value of the element type fills every exercise."
   - "Two parts: `var` + name + `[N]T`."
 runtime: none
 notes: |

@@ -48,7 +48,7 @@ generator:
         - "func (p &Point) scale(k int) { p.x *= k; p.y *= k }"
         - "func scale(p *Point, k int) { p.x *= k; p.y *= k }"
 hints:
-  - "Value receivers (`c Counter`) get a COPY of the caller's struct — mutations vanish on return. Pointer receivers (`c *Counter`) get a handle to the caller's storage — mutations stick. Mirror of theme 3.1 slot 6: same divergence, now scoped to methods."
+  - "Value receivers (`c Counter`) get a COPY of the caller's struct — mutations vanish on return. Pointer receivers (`c *Counter`) get a handle to the caller's storage — mutations stick. Mirror of theme 3.1 exercise 6: same divergence, now scoped to methods."
   - "The type modifier on the receiver is `*Counter` (pointer-to-Counter). The `&` symbol is for the CALL site (taking the address), not the type."
   - "`func (c *Counter) bump() { c.n++ }`."
 runtime: none

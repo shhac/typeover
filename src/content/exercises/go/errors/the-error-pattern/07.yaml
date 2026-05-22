@@ -4,7 +4,7 @@ type: fill-line
 order: 7
 prompt: |
   The if-init form of error handling — declare + check in one
-  statement. Tighter than slot 3's two-line shape, used when
+  statement. Tighter than exercise 3's two-line shape, used when
   the result isn't needed after the check (just side-effects
   or a propagation-only path).
 

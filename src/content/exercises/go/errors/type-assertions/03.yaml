@@ -40,7 +40,7 @@ generator:
             ID int
           }
 hints:
-  - "Two pieces: a struct holding the structured context, AND an `Error() string` method (pointer-receiver convention, theme 3.2 slot 2 consistency rule). The struct + method together implicitly satisfy the `error` interface (theme 4.1 slot 2)."
+  - "Two pieces: a struct holding the structured context, AND an `Error() string` method (pointer-receiver convention, theme 3.2 exercise 2 consistency rule). The struct + method together implicitly satisfy the `error` interface (theme 4.1 exercise 2)."
   - "Struct with fields, then a method `Error() string` returning a formatted message — pointer receiver."
   - "`type NotFoundError struct { ... }; func (e *NotFoundError) Error() string { ... }`."
 runtime: none

@@ -5,7 +5,7 @@ order: 7
 prompt: |
   Type the call to `strings.Repeat` that produces `abcabcabc`
   (the string `"abc"` repeated 3 times). This drills the
-  package-qualified call pattern from slot 2's capitalisation
+  package-qualified call pattern from exercise 2's capitalisation
   rule — `Repeat` is capitalised because it's exported by
   `strings`.
 

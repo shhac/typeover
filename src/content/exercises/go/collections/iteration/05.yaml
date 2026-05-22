@@ -6,7 +6,7 @@ prompt: |
   Range over a MAP one-value-form: which one does Go emit, key or
   value?
 
-  Compare with slots 2 and 3 (slice): `for x := range slice` gives
+  Compare with exercises 2 and 3 (slice): `for x := range slice` gives
   the INDEX. Now MAPs: `for x := range m` gives the KEY. The same
   `range x` syntax means different things by collection type.
 

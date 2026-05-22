@@ -11,7 +11,7 @@ prompt: |
   ${word}(b, src)
   ```
 
-  This is the antidote to slice-aliasing surprises (slot 2).
+  This is the antidote to slice-aliasing surprises (exercise 2).
 generator:
   kind: template
   vars:

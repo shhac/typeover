@@ -10,8 +10,11 @@ interface RevealButtonProps {
 }
 
 /**
- * RevealButton: persistent "Show canonical" toggle. Available before
- * and after submission. Reveals the idiomatic answer for comparison.
+ * RevealButton: persistent "Show answer" toggle. Available before
+ * and after submission. Reveals the idiomatic answer for
+ * comparison. The internal prop name remains `canonical` (it's the
+ * curriculum's term for the reference solution) but the UI string
+ * says "answer" — the user-facing word.
  *
  * onReveal fires once per component instance — toggling closed and
  * back open does NOT re-fire. Consumers that record this as
@@ -35,10 +38,10 @@ export function RevealButton(props: RevealButtonProps) {
   return (
     <div class="flex flex-col gap-3">
       <Button variant="ghost" size="md" onClick={toggle} aria-expanded={shown()}>
-        {shown() ? "Hide canonical" : "Show canonical"}
+        {shown() ? "Hide answer" : "Show answer"}
       </Button>
       <Show when={shown()}>
-        <CodeBlock lang={props.lang ?? "go"} filename="canonical">
+        <CodeBlock lang={props.lang ?? "go"} filename="answer">
           {props.canonical}
         </CodeBlock>
       </Show>

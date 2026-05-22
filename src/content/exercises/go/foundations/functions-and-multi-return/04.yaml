@@ -3,7 +3,7 @@ themeId: go/foundations/functions-and-multi-return
 type: mcq
 order: 4
 prompt: |
-  Slot 3 covered the `(T, error)` return-tuple signature. To put a
+  Exercise 3 covered the `(T, error)` return-tuple signature. To put a
   *value* into the error half of that tuple, Go uses a tiny stdlib
   helper. Which one constructs a new error from a string?
 generator:

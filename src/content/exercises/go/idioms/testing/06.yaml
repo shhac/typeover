@@ -3,7 +3,7 @@ themeId: go/idioms/testing
 type: fill-line
 order: 6
 prompt: |
-  Yaegi can't import the `testing` package, so this slot
+  Yaegi can't import the `testing` package, so this exercise
   uses a TINY MOCK `T` that mirrors `*testing.T`'s
   `Errorf` method. The shape is identical — pretend it IS
   `*testing.T` for the lesson.

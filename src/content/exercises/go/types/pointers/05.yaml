@@ -6,8 +6,8 @@ prompt: |
   Dereference `p` to read the value it points at. The blank is
   the single operator that goes before the variable name.
 
-  This is the deref half of the `&` / `*` pair. Slot 4 did
-  address-of; this slot does the inverse.
+  This is the deref half of the `&` / `*` pair. Exercise 4 did
+  address-of; this exercise does the inverse.
 generator:
   kind: template
   vars:
@@ -22,7 +22,7 @@ generator:
     fmt.Println(${deref}p)
 blanks: [deref]
 hints:
-  - "Deref operator. One character. It's the OPPOSITE of the address-of operator from slot 4 — they form the `&` / `*` pair."
+  - "Deref operator. One character. It's the OPPOSITE of the address-of operator from exercise 4 — they form the `&` / `*` pair."
   - "Single character. The same character that turns `T` into `*T` in a type position."
   - "`*`."
 runtime: none

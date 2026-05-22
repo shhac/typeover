@@ -20,8 +20,8 @@ generator:
     parts := ${pkg}.${fn}(${s}, ${sep})
 blanks: [pkg, fn]
 hints:
-  - "Same package as slot 4, different function. The Go function takes two arguments — the string to split (first) and the separator (second). The TS form has these reversed: the string is the receiver, the separator is the only argument."
-  - "Package is `strings` (same as slot 5). Function name is one word, capital first. Think of what the operation *does* to the string — it splits it."
+  - "Same package as exercise 4, different function. The Go function takes two arguments — the string to split (first) and the separator (second). The TS form has these reversed: the string is the receiver, the separator is the only argument."
+  - "Package is `strings` (same as exercise 5). Function name is one word, capital first. Think of what the operation *does* to the string — it splits it."
   - "Fills: `strings` and `Split`. Canonical: `strings.Split(phrase, \" \")`."
 notes: |
   Second Theme 3 fill-word. Same package, different function, but

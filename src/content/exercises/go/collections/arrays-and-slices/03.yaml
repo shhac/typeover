@@ -20,7 +20,7 @@ generator:
     - "${name} := new([]int, ${n})"
     - "${name} := []int(${n})"
 hints:
-  - "Go's built-in for sizing collections is `make`. The first arg is the type, the second is the *length* — and `make` fills every slot with the zero value of the element type."
+  - "Go's built-in for sizing collections is `make`. The first arg is the type, the second is the *length* — and `make` fills every exercise with the zero value of the element type."
   - "`make([]T, n)` allocates a slice of length n, filled with zeros."
   - "`${name} := make([]int, ${n})`"
 runtime: none

@@ -26,13 +26,13 @@ interface InlineCanonicalRevealProps {
 }
 
 /*
- * Component-owned "Show canonical / Hide canonical" toggle. Replaces
+ * Component-owned "Show answer / Hide answer" toggle. Replaces
  * the shell-footer RevealButton for fill-line and freeform — design-
  * docs/06 + the user's 2026-05-19 redesign place this *next to the
  * input line* rather than detached in a button row at the bottom.
  *
  * On reveal: if the learner has typed something, render a diff
- * (DiffView). If the field is empty, render the plain canonical
+ * (DiffView). If the field is empty, render the plain answer
  * (CodeBlock) — same content the legacy RevealButton showed.
  *
  * onReveal fires once per reveal (not once per Hide / Show toggle).
@@ -63,14 +63,14 @@ export function InlineCanonicalReveal(props: InlineCanonicalRevealProps) {
     <div class="flex flex-col gap-2">
       <Show when={!isForced()}>
         <Button variant="ghost" size="sm" onClick={toggle} aria-expanded={shown()}>
-          {shown() ? "Hide canonical" : "Show canonical"}
+          {shown() ? "Hide answer" : "Show answer"}
         </Button>
       </Show>
       <Show when={shown()}>
         <Show
           when={hasSubmission()}
           fallback={
-            <CodeBlock lang={props.lang ?? "go"} filename="canonical">
+            <CodeBlock lang={props.lang ?? "go"} filename="answer">
               {props.canonical}
             </CodeBlock>
           }

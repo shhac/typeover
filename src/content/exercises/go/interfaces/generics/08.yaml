@@ -21,7 +21,7 @@ prompt: |
   20
   ```
 
-  Direct generic counterpart to theme 3.2 slot 9 (which built a
+  Direct generic counterpart to theme 3.2 exercise 9 (which built a
   Stack[int] hardcoded). Demonstrates how generics swap out the
   concrete `int` for a type parameter without changing the rest
   of the shape.

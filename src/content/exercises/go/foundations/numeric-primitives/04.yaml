@@ -3,7 +3,7 @@ themeId: go/foundations/numeric-primitives
 type: fill-word
 order: 4
 prompt: |
-  Slot 2 covered which Go type a decimal literal defaults to. Now
+  Exercise 2 covered which Go type a decimal literal defaults to. Now
   write it — fill in the keyword and the type so the Go declaration
   is explicit about both.
 generator:
@@ -19,7 +19,7 @@ generator:
     ${kw} ${name} ${type} = ${value}
 blanks: [kw, type]
 hints:
-  - "Two blanks. The keyword introduces a typed declaration in Go (it's not `let`, not `:=`). The type is what slot 2 covered as the default for a decimal literal."
+  - "Two blanks. The keyword introduces a typed declaration in Go (it's not `let`, not `:=`). The type is what exercise 2 covered as the default for a decimal literal."
   - "Keyword: `var`. Type: ends in `64` and starts with the word for floating-point."
   - "Fills: `var` and `float64`."
 notes: |

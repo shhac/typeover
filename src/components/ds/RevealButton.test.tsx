@@ -16,14 +16,14 @@ const CANONICAL = "x := 42";
 describe("RevealButton", () => {
   it("starts hidden — canonical content is not rendered", () => {
     const { getByRole, queryByText } = render(() => <RevealButton canonical={CANONICAL} />);
-    expect(getByRole("button").textContent).toBe("Show canonical");
+    expect(getByRole("button").textContent).toBe("Show answer");
     expect(queryByText(CANONICAL)).toBeNull();
   });
 
   it("first click shows the canonical and flips the label", () => {
     const { getByRole, getByText } = render(() => <RevealButton canonical={CANONICAL} />);
     fireEvent.click(getByRole("button"));
-    expect(getByRole("button").textContent).toBe("Hide canonical");
+    expect(getByRole("button").textContent).toBe("Hide answer");
     expect(getByText(CANONICAL)).toBeTruthy();
   });
 
@@ -32,7 +32,7 @@ describe("RevealButton", () => {
     const btn = getByRole("button");
     fireEvent.click(btn);
     fireEvent.click(btn);
-    expect(btn.textContent).toBe("Show canonical");
+    expect(btn.textContent).toBe("Show answer");
     expect(queryByText(CANONICAL)).toBeNull();
   });
 

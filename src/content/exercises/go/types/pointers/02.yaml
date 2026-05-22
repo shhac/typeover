@@ -4,8 +4,8 @@ type: mcq
 order: 2
 prompt: |
   Pick the line that DECLARES a pointer `p` holding the address
-  of `x`. Slot 1 went the other direction (deref to read);
-  this slot goes the FIRST direction (take the address to
+  of `x`. Exercise 1 went the other direction (deref to read);
+  this exercise goes the FIRST direction (take the address to
   create the pointer in the first place).
 
   Given `x := 42`, what line gives you a `*int` pointing at
@@ -41,7 +41,7 @@ generator:
         - "p := pointer(count)"
         - "p := new(count)"
 hints:
-  - "Slot 1's deref operator was `*`. The MIRROR operator — address-of — is `&`. Apply it to the variable name to produce a pointer."
+  - "Exercise 1's deref operator was `*`. The MIRROR operator — address-of — is `&`. Apply it to the variable name to produce a pointer."
   - "One character before the variable name."
   - "`p := &x`."
 runtime: none

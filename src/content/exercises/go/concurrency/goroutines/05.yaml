@@ -29,7 +29,7 @@ generator:
 runtime: none
 blanks: [word]
 hints:
-  - "Same keyword as slot 4."
+  - "Same keyword as exercise 4."
   - "`go`."
   - "`go`."
 notes: |

@@ -242,7 +242,7 @@ export function ExerciseShell(props: ExerciseShellProps) {
         <Show when={!props.ownsReveal}>
           {/* Footer reveal records the same way Hint does — a peek
            * at the canonical pre-submit is a hint-equivalent.
-           * Without this, a learner who clicked "Show canonical"
+           * Without this, a learner who clicked "Show answer"
            * before picking an MCQ got no progress signal, while a
            * learner who tried and failed and THEN revealed paid a
            * full failure — same surface, different cost. design-

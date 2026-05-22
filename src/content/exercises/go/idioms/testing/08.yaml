@@ -5,7 +5,7 @@ order: 8
 prompt: |
   Demonstrate the **table-driven test** pattern — Go's
   canonical shape for testing the same function against
-  multiple inputs. Uses the same mock-T as slots 6 + 7.
+  multiple inputs. Uses the same mock-T as exercises 6 + 7.
 
   1. Function under test: `func add(a, b int) int { return
      a + b }`.

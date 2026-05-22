@@ -5,7 +5,7 @@ order: 5
 prompt: |
   Type the conventional name for the COMMA-OK boolean — the
   second value returned by a "safe" type assertion. Same
-  convention you've used for map lookups (Module 2.2 slot 4),
+  convention you've used for map lookups (Module 2.2 exercise 4),
   channel receives (Module 6), and `errors.As` (theme 5.2).
 generator:
   kind: template

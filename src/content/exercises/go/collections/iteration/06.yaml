@@ -48,7 +48,7 @@ generator:
         - "for i, _ := range 100 { fmt.Println(i) }"
 hints:
   - "Go 1.22+ lets you range an integer directly — same `range` keyword you've been using on slices and maps. No upper-bound expression needed."
-  - "The one-value form emits the loop counter `0..N-1`. Same `range` keyword, third semantics — slot 5 warned this asymmetry was coming."
+  - "The one-value form emits the loop counter `0..N-1`. Same `range` keyword, third semantics — exercise 5 warned this asymmetry was coming."
   - "`for i := range N`."
 runtime: none
 notes: |

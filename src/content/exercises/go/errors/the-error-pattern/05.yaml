@@ -23,7 +23,7 @@ generator:
     }
 blanks: [noerror]
 hints:
-  - "Same nil-able keyword from theme 3.4. The `error` interface IS nil-able; the success path returns `nil` in the error slot."
+  - "Same nil-able keyword from theme 3.4. The `error` interface IS nil-able; the success path returns `nil` in the error exercise."
   - "Three letters, lowercase."
   - "`nil`."
 runtime: none

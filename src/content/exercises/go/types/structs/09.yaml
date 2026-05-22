@@ -19,8 +19,8 @@ prompt: |
   1934
   ```
 
-  Drills: struct declaration (slot 1), nested struct literal (slot
-  2), nested field access (slot 7), and the zero-value rule (slot
+  Drills: struct declaration (exercise 1), nested struct literal (exercise
+  2), nested field access (exercise 7), and the zero-value rule (exercise
   3) is silent here — every field is explicitly assigned, so the
   zero rule isn't visible, but the literal SHAPE relies on you
   knowing all fields are accounted for.

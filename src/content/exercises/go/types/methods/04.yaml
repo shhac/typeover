@@ -7,7 +7,7 @@ prompt: |
   caller's `Counter`. The blank is the type-side modifier.
 
   Without it, `bump` takes a copy and the mutation is invisible
-  to `main` — same as slot 6 of theme 3.1, now method-shaped.
+  to `main` — same as exercise 6 of theme 3.1, now method-shaped.
 generator:
   kind: template
   vars:

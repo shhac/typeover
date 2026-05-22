@@ -9,7 +9,7 @@ prompt: |
      `n`.
   2. Creates `c := Counter{n: 5}`.
   3. Calls `bump(&c)` where `bump` takes a `*Counter` and
-     increments `c.n` (pattern from slot 6).
+     increments `c.n` (pattern from exercise 6).
   4. Prints the resulting `c.n`.
 
   Expected output: `6` (the mutation through the pointer survives

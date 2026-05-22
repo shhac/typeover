@@ -3,7 +3,7 @@ themeId: go/collections/iteration
 type: mcq
 order: 3
 prompt: |
-  Now flip slot 2 around: you want ONLY the index, no value. Pick
+  Now flip exercise 2 around: you want ONLY the index, no value. Pick
   the idiomatic Go form.
 
   TypeScript:
@@ -13,7 +13,7 @@ prompt: |
   }
   ```
 
-  This is the form that bites slot 2's trap-believers in reverse:
+  This is the form that bites exercise 2's trap-believers in reverse:
   when you DO want just the index, the one-value form is the
   RIGHT answer.
 generator:
@@ -50,7 +50,7 @@ generator:
         - "for i, _ := range rows { fmt.Println(i) }"
         - "for i = 0; i < len(rows); i = i + 1 { fmt.Println(i) }"
 hints:
-  - "On a slice, the one-value `range` form gives the INDEX. That's the asymmetry slot 2 warned about: same syntax, but here it's what you want."
+  - "On a slice, the one-value `range` form gives the INDEX. That's the asymmetry exercise 2 warned about: same syntax, but here it's what you want."
   - "Shape: `for i := range items`. No need for the explicit `i, _` — the one-value form already drops the value."
   - "`for i := range items`."
 runtime: none

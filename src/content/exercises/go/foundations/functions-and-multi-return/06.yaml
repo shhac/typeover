@@ -3,7 +3,7 @@ themeId: go/foundations/functions-and-multi-return
 type: fill-word
 order: 6
 prompt: |
-  Slot 3 covered the `(T, error)` return-tuple convention by
+  Exercise 3 covered the `(T, error)` return-tuple convention by
   recognition. Now produce it: fill in the value type and the error
   type that complete the tuple.
 generator:

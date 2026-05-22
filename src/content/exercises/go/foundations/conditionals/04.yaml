@@ -3,7 +3,7 @@ themeId: go/foundations/conditionals
 type: mcq
 order: 4
 prompt: |
-  Go's `switch` has two shapes the previous slot didn't show.
+  Go's `switch` has two shapes the previous exercise didn't show.
   Pick the idiomatic Go translation of this TypeScript.
 generator:
   kind: variant

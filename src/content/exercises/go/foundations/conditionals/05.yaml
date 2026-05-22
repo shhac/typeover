@@ -3,7 +3,7 @@ themeId: go/foundations/conditionals
 type: fill-word
 order: 5
 prompt: |
-  Theme 4 slot 2 covered the short-statement-if form. Now write
+  Theme 4 exercise 2 covered the short-statement-if form. Now write
   the comparison: fill in the operator and the nil literal that Go
   uses for "result of this call is empty/not-found."
 generator:

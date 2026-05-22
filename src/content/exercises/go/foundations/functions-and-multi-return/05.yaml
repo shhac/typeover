@@ -3,7 +3,7 @@ themeId: go/foundations/functions-and-multi-return
 type: fill-word
 order: 5
 prompt: |
-  Slot 1 covered the function-signature shape by recognition. Now
+  Exercise 1 covered the function-signature shape by recognition. Now
   produce it: fill in the keyword and the return type.
 generator:
   kind: template

@@ -6,7 +6,7 @@ prompt: |
   Take the address of `x` to create the pointer. The blank is the
   single operator that goes before the variable name.
 
-  This is the "take a pointer" half of the `&` / `*` pair. Slot
+  This is the "take a pointer" half of the `&` / `*` pair. Exercise
   5 will be the deref half.
 generator:
   kind: template
@@ -20,7 +20,7 @@ generator:
     p := ${addr}x
 blanks: [addr]
 hints:
-  - "Address-of operator. One character. It's the OPPOSITE of the deref operator from slot 1 — they form the `&` / `*` pair."
+  - "Address-of operator. One character. It's the OPPOSITE of the deref operator from exercise 1 — they form the `&` / `*` pair."
   - "Single character. C/C++ uses the same symbol for the same purpose."
   - "`&`."
 runtime: none

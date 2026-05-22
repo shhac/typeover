@@ -29,7 +29,7 @@ generator:
       const unsigned: u32 = signed;
 hints:
   - "Two questions per line: (1) is the target type WIDER than the source (safe to widen)? (2) does the sign change in a way that could lose information? If both answers favor safety, no cast is needed."
-  - "`u8 → u32` is wider and same sign — safe, implicit. The other three are narrowing OR sign-changing (where the source could exceed the target's representable range) — they need `@intCast` (drilled in slot 03)."
+  - "`u8 → u32` is wider and same sign — safe, implicit. The other three are narrowing OR sign-changing (where the source could exceed the target's representable range) — they need `@intCast` (drilled in exercise 03)."
   - "`const small: u8 = 10; const big: u32 = small;`"
 runtime: none
 notes: |

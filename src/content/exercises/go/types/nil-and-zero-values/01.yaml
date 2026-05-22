@@ -6,7 +6,7 @@ prompt: |
   Every Go type has a defined zero value — what `var x T`
   produces without an initialiser. Match the type to its zero
   value. (Themes 3.1 + 3.3 covered struct and pointer zero
-  values; this slot is the canonical reference table.)
+  values; this exercise is the canonical reference table.)
 
   Pick the line that's CORRECT — only one matches its type's
   actual zero value.

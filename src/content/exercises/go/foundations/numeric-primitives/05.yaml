@@ -3,7 +3,7 @@ themeId: go/foundations/numeric-primitives
 type: fill-word
 order: 5
 prompt: |
-  Slot 3 introduced Go's explicit-conversion shape — call the target
+  Exercise 3 introduced Go's explicit-conversion shape — call the target
   type like a function. Now write it: an average of two integers
   needs both operands converted to a float before division, or you
   get integer division (which silently truncates). Fill the casts.
@@ -17,8 +17,8 @@ generator:
     avg := ${cast}(total) / ${cast}(count)
 blanks: [cast]
 hints:
-  - "Two slots — both need the same target type. Go won't promote either operand for you; if you leave one as `int`, you get integer division and your average truncates."
-  - "The type is the same one slot 2 covered as the default for floats. Function-call form, applied to *each* operand."
+  - "Two exercises — both need the same target type. Go won't promote either operand for you; if you leave one as `int`, you get integer division and your average truncates."
+  - "The type is the same one exercise 2 covered as the default for floats. Function-call form, applied to *each* operand."
   - "Both blanks fill to `float64`."
 notes: |
   Slot 5 drills the "convert both operands" idiom that the learner

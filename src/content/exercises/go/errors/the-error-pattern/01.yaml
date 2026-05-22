@@ -21,7 +21,7 @@ generator:
         - "class Error { message: string }"
         - "type error struct { Error string }"
 hints:
-  - "Built-in interface with ONE method: `Error() string`. Capitalised method name (exported, per theme 4.1 slot 4 convention). Type name is `error` — lowercase, because it's a predeclared identifier built into the language."
+  - "Built-in interface with ONE method: `Error() string`. Capitalised method name (exported, per theme 4.1 exercise 4 convention). Type name is `error` — lowercase, because it's a predeclared identifier built into the language."
   - "One method. Method returns string. Type name is lowercase `error`."
   - "`type error interface { Error() string }`."
 runtime: none

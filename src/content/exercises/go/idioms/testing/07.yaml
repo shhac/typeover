@@ -14,7 +14,7 @@ prompt: |
   FAIL
   ```
 
-  Uses the same mock-T scaffold as slot 6.
+  Uses the same mock-T scaffold as exercise 6.
 generator:
   kind: template
   vars:

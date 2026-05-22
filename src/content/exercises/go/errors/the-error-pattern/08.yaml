@@ -14,8 +14,8 @@ prompt: |
   result: 5
   ```
 
-  Drills the full (T, error) shape from slots 1-3 + the
-  errors.New construction from slot 6.
+  Drills the full (T, error) shape from exercises 1-3 + the
+  errors.New construction from exercise 6.
 
   TypeScript reference:
   ```ts

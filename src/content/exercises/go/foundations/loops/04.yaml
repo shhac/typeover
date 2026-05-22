@@ -3,7 +3,7 @@ themeId: go/foundations/loops
 type: fill-word
 order: 4
 prompt: |
-  Slot 1 covered the classic three-clause for-loop by recognition.
+  Exercise 1 covered the classic three-clause for-loop by recognition.
   Now produce it: fill in the operator that introduces the counter
   and the function that gets a slice's length.
 generator:
@@ -22,7 +22,7 @@ generator:
     }
 blanks: [op, len_fn]
 hints:
-  - "Two blanks. One is the operator that both declares the counter AND assigns to it (slot 1's MCQ showed this). The other is the function that replaces `.length` — Go puts length-of-collection in a top-level function, not a property."
+  - "Two blanks. One is the operator that both declares the counter AND assigns to it (exercise 1's MCQ showed this). The other is the function that replaces `.length` — Go puts length-of-collection in a top-level function, not a property."
   - "Operator: `:=`. Length function: `len`. Same as `len(slice)` for length, `len(string)` for byte count, `len(map)` for key count."
   - "Fills: `:=` and `len`. Canonical: `for i := 0; i < len(items); i++ { print(items[i]) }`."
 notes: |

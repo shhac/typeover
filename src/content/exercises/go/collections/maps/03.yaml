@@ -37,7 +37,7 @@ generator:
         - "does not compile"
 hints:
   - "Missing-key lookup in Go DOESN'T error and DOESN'T return `nil`. It returns the zero value for the map's value type — `0` for `int`, `\"\"` for `string`, `false` for `bool`."
-  - "This is THE trap. You can't tell apart `\"key was missing\"` from `\"key was present with the zero value\"` by reading the result alone — slot 4's comma-ok lookup is the antidote."
+  - "This is THE trap. You can't tell apart `\"key was missing\"` from `\"key was present with the zero value\"` by reading the result alone — exercise 4's comma-ok lookup is the antidote."
   - "The int zero value is `0`. Pick the line that says so."
 runtime: none
 notes: |

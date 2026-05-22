@@ -20,8 +20,8 @@ prompt: |
   Hola
   ```
 
-  Drills implicit satisfaction (slot 2), interface as a parameter
-  type (slot 6), and the polymorphic-dispatch payoff that makes
+  Drills implicit satisfaction (exercise 2), interface as a parameter
+  type (exercise 6), and the polymorphic-dispatch payoff that makes
   interfaces worth the syntax.
 
   TypeScript reference:

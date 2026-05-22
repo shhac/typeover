@@ -98,7 +98,7 @@ expectStdout: |
   20
 hints:
   - "Three methods, all pointer receivers (`*Stack`). `push` appends to `s.items`; `pop` reads the last element, shrinks the slice with `s.items[:len(s.items)-1]`, returns the read value; `peek` reads without shrinking."
-  - "Don't forget to ASSIGN BACK after `append` — `s.items = append(s.items, v)` (Module 2 theme 2.1 slot 5)."
+  - "Don't forget to ASSIGN BACK after `append` — `s.items = append(s.items, v)` (Module 2 theme 2.1 exercise 5)."
   - "See canonical."
 runtime: yaegi
 notes: |

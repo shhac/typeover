@@ -3,7 +3,7 @@ themeId: go/errors/the-error-pattern
 type: mcq
 order: 3
 prompt: |
-  Slot 2 pinned the `(T, error)` return convention. This slot
+  Exercise 2 pinned the `(T, error)` return convention. This exercise
   pins the CALLER side — the idiomatic check-and-early-return
   pattern that appears in every Go codebase, hundreds of times.
 

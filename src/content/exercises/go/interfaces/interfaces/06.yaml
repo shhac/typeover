@@ -6,7 +6,7 @@ prompt: |
   Implement the `Greeter` interface for the `English` struct
   by writing the METHOD that satisfies it. No declaration of
   intent — just write the method with the matching signature
-  and Go infers implicit satisfaction (slot 2).
+  and Go infers implicit satisfaction (exercise 2).
 
   The scaffold defines the interface, declares `English`, and
   has `main` calling `g.Greet()` through the interface variable.

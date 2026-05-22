@@ -4,7 +4,7 @@ type: freeform
 order: 6
 prompt: |
   Theme capstone — write a complete program that demonstrates
-  the nil-interface trap from slot 3 (the recognition MCQ).
+  the nil-interface trap from exercise 3 (the recognition MCQ).
   The point is to make the trap concrete by running it.
 
   Build:

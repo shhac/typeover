@@ -29,7 +29,7 @@ generator:
     for ${k_var}, ${v_var} := range ${name} { fmt.Println(${k_var}, ${v_var}) }
 blanks: [k_var, v_var]
 hints:
-  - "Two single-letter range variables. KEY first, then VALUE — same positional discipline as slot 4's two-value form."
+  - "Two single-letter range variables. KEY first, then VALUE — same positional discipline as exercise 4's two-value form."
   - "`k` then `v`. Reversing them is the most common TS-`.forEach` leak."
   - "`k`, `v`."
 runtime: none

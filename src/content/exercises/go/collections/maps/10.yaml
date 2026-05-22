@@ -72,8 +72,8 @@ expectStdout: |
   alan=7 carl=2
 hints:
   - "The function signature is `func clearScore(scores map[string]int, name string)` — plain `map[K]V`, no pointer. Maps are reference types; the function's parameter is a HEADER that points at the same backing table as the caller's variable."
-  - "Inside the function: `delete(scores, name)` — the builtin from slot 5. The caller's `scores` sees the deletion because both variables point at the same table."
-  - "Look back at slot 9 for the deterministic-print pattern (collect keys, sort, format)."
+  - "Inside the function: `delete(scores, name)` — the builtin from exercise 5. The caller's `scores` sees the deletion because both variables point at the same table."
+  - "Look back at exercise 9 for the deterministic-print pattern (collect keys, sort, format)."
 runtime: yaegi
 notes: |
   Closes theme 2.2 by exposing the OTHER big map asymmetry from TS:

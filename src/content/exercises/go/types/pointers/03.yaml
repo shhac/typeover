@@ -4,7 +4,7 @@ type: mcq
 order: 3
 prompt: |
   What's the ZERO VALUE of a pointer? Same question as theme 3.1
-  slot 3 was for structs, now scoped to pointer types.
+  exercise 3 was for structs, now scoped to pointer types.
 
   TypeScript's rough analog: a variable declared `let p: User`
   without an initialiser is `undefined`. Go gives every type a

@@ -3,8 +3,8 @@ themeId: go/errors/is-and-as
 type: mcq
 order: 1
 prompt: |
-  Theme 5.1 slot 9 introduced `errors.Is` for matching a
-  WRAPPED error against a sentinel. This slot recaps the
+  Theme 5.1 exercise 9 introduced `errors.Is` for matching a
+  WRAPPED error against a sentinel. This exercise recaps the
   CONTRACT.
 
   Given:

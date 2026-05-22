@@ -19,7 +19,7 @@ generator:
     }
 blanks: [constraint]
 hints:
-  - "Same keyword as theme 4.1 slot 3+5 — the empty-interface alias. Used as a generic constraint, it means \"no restriction\"."
+  - "Same keyword as theme 4.1 exercise 3+5 — the empty-interface alias. Used as a generic constraint, it means \"no restriction\"."
   - "Three letters, lowercase."
   - "`any`."
 runtime: none

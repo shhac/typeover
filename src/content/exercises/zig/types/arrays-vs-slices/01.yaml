@@ -7,7 +7,7 @@ prompt: |
   has two shapes for fixed-length array initialization: the
   TYPE-PREFIX form (`[3]i32{ ... }` — type-name first, then
   the initializer) and the annotation-with-anonymous-literal
-  form (slot 06's `const arr: [3]i32 = .{ ... };`). The
+  form (exercise 06's `const arr: [3]i32 = .{ ... };`). The
   type-prefix form works WITHOUT a binding-side annotation —
   useful when passing an array directly to a function or
   storing it as a struct field. Pick the type-prefix shape.

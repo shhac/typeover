@@ -3,7 +3,7 @@ themeId: go/foundations/loops
 type: fill-word
 order: 5
 prompt: |
-  Slot 2 covered Go's "for-as-while" shape by recognition. Now
+  Exercise 2 covered Go's "for-as-while" shape by recognition. Now
   produce it: fill in the one keyword.
 generator:
   kind: template

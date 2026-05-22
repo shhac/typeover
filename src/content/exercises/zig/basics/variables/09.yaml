@@ -38,7 +38,7 @@ runtime: zig
 hints:
   - "Two reflexes to land at once: the declaration must use `var` (not `const`) because the value changes, and the mutation `attempts += 1;` is identical to TypeScript."
   - "Skeleton:\n\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    var attempts: i32 = 0;\n    // increment three times\n    var buf: [16]u8 = undefined;\n    const printed = try std.fmt.bufPrint(&buf, \"{d}\\n\", .{attempts});\n    try std.Io.File.stdout().writeStreamingAll(init.io, printed);\n}\n```"
-  - 'The full program: declare `var attempts: i32 = 0;`, then three `attempts += 1;` lines (or one `attempts += 3;`), then the bufPrint + writeStreamingAll combination from slot 08.'
+  - 'The full program: declare `var attempts: i32 = 0;`, then three `attempts += 1;` lines (or one `attempts += 3;`), then the bufPrint + writeStreamingAll combination from exercise 08.'
 notes: |
   Second variables-theme freeform. Mirror of slot 08 but with
   `var` instead of `const` plus the mutation step. The prompt

@@ -17,7 +17,7 @@ prompt: |
 
   Expected output (order may vary on real Go, but our
   deterministic-output test expects both lines to appear —
-  the slot uses sorted printing or relies on Yaegi's stable
+  the exercise uses sorted printing or relies on Yaegi's stable
   scheduling):
   ```
   recv: alpha

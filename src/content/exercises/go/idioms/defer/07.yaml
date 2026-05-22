@@ -3,7 +3,7 @@ themeId: go/idioms/defer
 type: fill-line
 order: 7
 prompt: |
-  Defer-arg-evaluation gotcha from MCQ slot 3 in action.
+  Defer-arg-evaluation gotcha from MCQ exercise 3 in action.
   Write the line that defers a closure-wrapped call so the
   print sees the LATEST value of `i` (not the value at the
   defer site).

@@ -16,8 +16,8 @@ prompt: |
   Expected output: `3`.
 
   Drills: receiver-kind choice (pointer to mutate, value to
-  read — slot 2), method declaration syntax (slot 1), call-site
-  uniformity (slot 3).
+  read — exercise 2), method declaration syntax (exercise 1), call-site
+  uniformity (exercise 3).
 
   TypeScript reference:
   ```ts
@@ -70,7 +70,7 @@ expectStdout: |
   3
 runtime: yaegi
 hints:
-  - "Two methods on Counter — one MUTATES (needs `*Counter` receiver, slot 2's rule), one READS (value receiver is fine). The call site is identical for both: `c.bump()` and `c.read()` look the same regardless of receiver kind."
+  - "Two methods on Counter — one MUTATES (needs `*Counter` receiver, exercise 2's rule), one READS (value receiver is fine). The call site is identical for both: `c.bump()` and `c.read()` look the same regardless of receiver kind."
   - "Three pieces: struct decl, two method decls (one *Counter, one Counter), main with three bumps + one print."
   - "See canonical."
 notes: |

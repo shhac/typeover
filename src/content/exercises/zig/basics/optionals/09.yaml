@@ -4,7 +4,7 @@ type: freeform
 order: 9
 prompt: |
   Write a complete Zig program demonstrating the `orelse`
-  default on a PRESENT optional (the opposite of slot 06's
+  default on a PRESENT optional (the opposite of exercise 06's
   null-path case):
    1. Declares `const maybe: ?i32 = 7;` (a present value).
    2. Uses `orelse` with a fallback of `100`.
@@ -35,7 +35,7 @@ runtime: zig
 hints:
   - "Three pieces: `const maybe: ?i32 = 7;` (note the value `7`, not `null`), `const value: i32 = maybe orelse 100;` (the orelse fallback is unused when the optional has a value), then bufPrint + writeStreamingAll."
   - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const maybe: ?i32 = 7;\n    const value: i32 = maybe orelse 100;\n    // bufPrint(\"{d}\\n\", .{value}) + writeStreamingAll\n}\n```"
-  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Because `maybe` is the present value 7, `orelse` returns 7 (the fallback is unused). Compare with slot 06 — same `orelse` expression, null instead of 7 → fallback 99 wins.'
+  - 'Full program is the skeleton + the bufPrint/writeStreamingAll dance. Because `maybe` is the present value 7, `orelse` returns 7 (the fallback is unused). Compare with exercise 06 — same `orelse` expression, null instead of 7 → fallback 99 wins.'
 notes: |
   Last basics/optionals slot. Closes Module 1 — the full basics
   module is now end-to-end exerciseable.

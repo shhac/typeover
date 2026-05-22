@@ -6,7 +6,7 @@ prompt: |
   Build a small program that uses `sync.WaitGroup` correctly:
 
   1. Declare `var wg sync.WaitGroup`.
-  2. Call `wg.Add(3)` BEFORE the launch loop (slot 3's rule).
+  2. Call `wg.Add(3)` BEFORE the launch loop (exercise 3's rule).
   3. Launch three goroutines; each defers `wg.Done()` and
      prints `"worker"`.
   4. Call `wg.Wait()`.

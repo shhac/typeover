@@ -3,7 +3,7 @@ themeId: go/collections/maps
 type: mcq
 order: 4
 prompt: |
-  Slot 3 pinned the trap: missing-key lookup returns the zero value,
+  Exercise 3 pinned the trap: missing-key lookup returns the zero value,
   same as a present-but-zero entry. Pick the idiomatic Go check for
   "is key `name` PRESENT in `scores`?" — the antidote to that trap.
 

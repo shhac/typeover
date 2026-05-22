@@ -30,7 +30,7 @@ generator:
         - 'buf := make([]byte, 4096, 0)'
         - 'buf := []byte{cap: 4096}'
 hints:
-  - "`make` takes a third argument: the *capacity*. Length is how many elements are usable now; capacity is how many slots the backing array can hold before `append` has to reallocate."
+  - "`make` takes a third argument: the *capacity*. Length is how many elements are usable now; capacity is how many exercises the backing array can hold before `append` has to reallocate."
   - "You want length 0 (start empty) and capacity N (room to grow to N without reallocation). `make([]T, 0, N)`."
   - "`make([]T, 0, N)` — length first, capacity second."
 runtime: none

@@ -3,8 +3,8 @@ themeId: go/errors/type-assertions
 type: mcq
 order: 1
 prompt: |
-  Slot 7 of theme 4.1 introduced type assertions (`v.(T)`).
-  Theme 5.2's `errors.As` is the wrap-aware version. This slot
+  Exercise 7 of theme 4.1 introduced type assertions (`v.(T)`).
+  Theme 5.2's `errors.As` is the wrap-aware version. This exercise
   recaps the BARE assertion form — used when you have an error
   interface value and KNOW it's a specific concrete type (no
   wraps involved).
