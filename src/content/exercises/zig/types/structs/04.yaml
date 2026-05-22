@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/types/structs
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing keyword that declares a record type. Six
+  letters, same as C/C++/Rust/Go.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "struct"
+  ts: |-
+    type Point = { x: number; y: number };
+  canonical: |-
+    const Point = ${keyword} { x: i32, y: i32 };
+  distractors:
+    - "type"
+    - "record"
+    - "interface"
+blanks: [keyword]
+hints:
+  - "Six letters, same as Go and Rust."
+  - "Starts with `s`."
+  - "`struct`"
+runtime: none
+notes: |
+  Drill the `struct` keyword. Distractors:
+   - `type` — TS / Rust reflex (alias keyword, not struct
+     declaration).
+   - `record` — Java / C# reflex.
+   - `interface` — TS reflex.

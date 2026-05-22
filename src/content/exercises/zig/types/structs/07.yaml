@@ -1,0 +1,68 @@
+target: zig
+themeId: zig/types/structs
+type: fill-line
+order: 7
+prompt: |
+  Type the missing Zig line — the method signature for `area`,
+  inside the `Box` struct. The method returns `i32` (the product
+  of width and height). With the right signature, calling
+  `b.area()` returns 30 and the program prints `30`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "pub fn area(self: Box) i32 {"
+  ts: |-
+    class Box {
+        constructor(public w: number, public h: number) {}
+        area(): number { return this.w * this.h; }
+    }
+    const b = new Box(5, 6);
+    console.log(b.area());
+  canonical: |-
+    const std = @import("std");
+
+    const Box = struct {
+        w: i32,
+        h: i32,
+        ${line}
+            return self.w * self.h;
+        }
+    };
+
+    pub fn main(init: std.process.Init) !void {
+        const b = Box{ .w = 5, .h = 6 };
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{b.area()});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "pub fn area() i32 {"
+      explain: |-
+        Missing the `self: Box` parameter. Zig methods need an
+        explicit self receiver; there's no implicit `this`.
+    - match: "fn area(self: Box) i32 {"
+      explain: |-
+        Missing `pub`. Without it the method is private to the
+        defining file — main's `b.area()` call would fail to
+        resolve (well, here both are in the same file so it
+        would compile; but the idiom for cross-module-callable
+        methods is `pub fn`).
+    - match: "pub fn area(self: Box): i32 {"
+      explain: |-
+        Drop the colon before the return type. Zig puts the
+        return type right after the param list, no colon.
+expectStdout: |
+  30
+runtime: zig
+blanks: [line]
+hints:
+  - "Four pieces: `pub fn` (visibility + keyword), function name `area`, the parameter list `(self: Box)`, the return type `i32` (no colon, no arrow), then `{`."
+  - "Shape: `pub fn <name>(self: <SelfType>) <ReturnType> {`. For this: `pub fn area(self: Box) i32 {`."
+  - "`pub fn area(self: Box) i32 {`"
+notes: |
+  Drill the method signature. Distractors hit the three classic
+  mistakes:
+   - Missing self.
+   - Missing pub.
+   - Colon before return type.

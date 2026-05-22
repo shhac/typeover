@@ -1,0 +1,31 @@
+target: zig
+themeId: zig/types/structs
+type: mcq
+order: 2
+prompt: |
+  TypeScript instantiates an object literal with `{ key: value }`.
+  Zig uses `TypeName{ .field = value }` — the leading dot
+  prefixes each field name. Pick the right Zig translation.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const p: Point = { x: 3, y: 4 };
+  canonical: |-
+    const p = Point{ .x = 3, .y = 4 };
+  distractors:
+    - "const p = Point{ x: 3, y: 4 };"
+    - "const p = Point{ x = 3, y = 4 };"
+    - "const p: Point = { .x = 3, .y = 4 };"
+hints:
+  - "Three pieces: type name `Point` before the braces, dot-prefixed field names (`.x`, `.y`), and `=` (not `:`) between field and value."
+  - "Shape: `TypeName{ .field = value, ... }`."
+  - "`const p = Point{ .x = 3, .y = 4 };`"
+runtime: none
+notes: |
+  Drill the struct-literal shape. Distractors:
+   - TS-style `{ x: 3, y: 4 }` — no dot prefix, colon instead of
+     equals.
+   - `{ x = 3, y = 4 }` — half-right (equals) but missing dots.
+   - `Point = { .x = 3, .y = 4 }` (assignment-style) — the type
+     belongs BEFORE the braces, not after the equals.

@@ -1,0 +1,11 @@
+target: zig
+title: Types
+order: 2
+summary: |
+  Zig's type vocabulary is similar enough to TypeScript that you
+  can lean on the analogues — `struct` matches object literals,
+  `enum` matches string literal unions, `union(enum)` matches
+  discriminated unions. The diverging bits are pointers (`*T`,
+  `*const T`, `[*]T`, `?*T` — each meaning something specific)
+  and arrays vs slices (`[N]T` length-in-type vs `[]T` slice).
+  Lays the type foundation that Memory + Errors + Comptime build on.

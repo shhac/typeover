@@ -1,0 +1,35 @@
+target: zig
+themeId: zig/types/structs
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing conventional name of the receiver parameter in
+  a struct method. Four letters, same as Python / Rust.
+generator:
+  kind: template
+  vars:
+    name:
+      - "self"
+  ts: |-
+    area(): number { return this.w * this.h; }
+  canonical: |-
+    pub fn area(${name}: Box) i32 { return ${name}.w * ${name}.h; }
+  distractors:
+    - "this"
+    - "me"
+    - "instance"
+blanks: [name]
+hints:
+  - "Four letters, lowercase, same as Python / Rust convention. The compiler doesn't enforce the name — but every Zig codebase uses this one."
+  - "Starts with `s`."
+  - "`self`"
+runtime: none
+notes: |
+  Drill the `self` parameter name. Distractors:
+   - `this` — TS / Java reflex.
+   - `me` — Visual Basic reflex.
+   - `instance` — generic / awkward.
+
+  Note: Zig doesn't enforce the name — `fn area(b: Box) i32`
+  would also work. But every Zig codebase uses `self` by
+  convention.

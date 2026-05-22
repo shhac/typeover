@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/types
+title: Structs
+order: 1
+prerequisites: []
+intro: |
+  Zig structs are TypeScript object literals' closest cousin: `const Point = struct { x: i32, y: i32 };`. Instantiation uses dot-prefixed field initializers (`Point{ .x = 3, .y = 4 }`); access is `.x` (no surprise). Methods are declared INSIDE the struct as `pub fn name(self: SelfType, ...) ReturnType` — same shape as Go, but with the explicit `self:` parameter named like Python. No inheritance, no implicit `this`.

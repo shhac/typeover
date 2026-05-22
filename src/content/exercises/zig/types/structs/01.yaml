@@ -1,0 +1,42 @@
+target: zig
+themeId: zig/types/structs
+type: mcq
+order: 1
+prompt: |
+  TypeScript declares a struct-like shape via `type` or
+  `interface`. Zig uses `struct` directly. Pick the Zig
+  translation.
+generator:
+  kind: variant
+  variants:
+    - id: point
+      ts: "type Point = { x: number; y: number };"
+      canonical: "const Point = struct { x: i32, y: i32 };"
+      distractors:
+        - "struct Point { x: i32, y: i32 };"
+        - "type Point = struct { x: i32, y: i32 };"
+        - "const Point: struct = { x: i32, y: i32 };"
+    - id: user
+      ts: "type User = { name: string; age: number };"
+      canonical: "const User = struct { name: []const u8, age: i32 };"
+      distractors:
+        - "interface User { name: []const u8, age: i32 }"
+        - "struct User { name: []const u8, age: i32 }"
+        - "const User = { name: []const u8, age: i32 };"
+hints:
+  - "Three pieces: `const <Name> = struct { ... };` — the struct is bound to a `const`, the type is on the right-hand side, the fields are comma-separated (not semicolon)."
+  - "Shape: `const <Name> = struct { <field>: <type>, ... };`."
+  - "For the Point variant: `const Point = struct { x: i32, y: i32 };`."
+runtime: none
+notes: |
+  First types/structs exercise. Three idioms to drill at once:
+   - `struct { ... }` is a TYPE EXPRESSION, bound to a const.
+   - Fields are comma-separated.
+   - The trailing semicolon belongs to the const declaration.
+
+  Distractors:
+   - C-style `struct Point { ... }` — no const binding; not how
+     Zig declares.
+   - `type Point = struct { ... }` — TS/Rust-ish; Zig uses just
+     `const`.
+   - `interface User` — TS reflex; doesn't exist in Zig.

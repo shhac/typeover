@@ -1,0 +1,41 @@
+target: zig
+themeId: zig/types/structs
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Defines a `Rect` struct with fields `w: i32` and `h: i32`.
+   2. From `main`, creates `const r = Rect{ .w = 4, .h = 6 };`.
+   3. Prints `r.w * r.h` followed by a newline.
+
+  Expected stdout: `24`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Rect = { w: number; h: number };
+    const r: Rect = { w: 4, h: 6 };
+    console.log(r.w * r.h);
+  canonical: |-
+    const std = @import("std");
+
+    const Rect = struct { w: i32, h: i32 };
+
+    pub fn main(init: std.process.Init) !void {
+        const r = Rect{ .w = 4, .h = 6 };
+        const area = r.w * r.h;
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{area});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  24
+runtime: zig
+hints:
+  - "Three pieces: declare the struct at module scope (`const Rect = struct { ... };`), instantiate in main with the dot-prefixed initializer, compute and print via bufPrint."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst Rect = struct { w: i32, h: i32 };\n\npub fn main(init: std.process.Init) !void {\n    const r = Rect{ .w = 4, .h = 6 };\n    const area = r.w * r.h;\n    // bufPrint(\"{d}\\n\", .{area}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. Field access uses `.fieldname` like TS.'
+notes: |
+  First types/structs freeform. Synthesises slot 04 (`struct`
+  keyword) + slot 06 (struct literal) + the bufPrint pattern
+  into a runnable program.

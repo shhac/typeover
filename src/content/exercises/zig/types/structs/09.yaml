@@ -1,0 +1,50 @@
+target: zig
+themeId: zig/types/structs
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program with a method on a struct:
+   1. Define `Circle` with field `radius: i32`.
+   2. Inside `Circle`, define `pub fn diameter(self: Circle) i32`
+      that returns `self.radius * 2`.
+   3. From `main`, create `const c = Circle{ .radius = 5 };`,
+      call `c.diameter()`, and print the result.
+
+  Expected stdout: `10`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Circle {
+        constructor(public radius: number) {}
+        diameter(): number { return this.radius * 2; }
+    }
+    const c = new Circle(5);
+    console.log(c.diameter());
+  canonical: |-
+    const std = @import("std");
+
+    const Circle = struct {
+        radius: i32,
+        pub fn diameter(self: Circle) i32 {
+            return self.radius * 2;
+        }
+    };
+
+    pub fn main(init: std.process.Init) !void {
+        const c = Circle{ .radius = 5 };
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{c.diameter()});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  10
+runtime: zig
+hints:
+  - "Three pieces: declare `Circle` with the field AND the method inside the braces, instantiate, then call the method via the field-access syntax (`c.diameter()`)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nconst Circle = struct {\n    radius: i32,\n    pub fn diameter(self: Circle) i32 {\n        return self.radius * 2;\n    }\n};\n\npub fn main(init: std.process.Init) !void {\n    const c = Circle{ .radius = 5 };\n    // bufPrint(\"{d}\\n\", .{c.diameter()}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. The method call `c.diameter()` desugars to `Circle.diameter(c)` — Zig passes the receiver as the first argument automatically.'
+notes: |
+  Last types/structs slot. Drills the method-with-self idiom
+  end-to-end. The "method call as field-access" syntax is the
+  same as TS/Go/Rust.

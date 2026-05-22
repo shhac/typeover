@@ -1,0 +1,64 @@
+target: zig
+themeId: zig/types/structs
+type: mcq
+order: 3
+prompt: |
+  TypeScript attaches methods inside the type / class. Zig
+  attaches methods INSIDE the struct, declared with `pub fn` and
+  an explicit `self` parameter (Python style — named, not
+  implicit). Pick the right Zig shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Box {
+        constructor(public w: number, public h: number) {}
+        area(): number { return this.w * this.h; }
+    }
+  canonical: |-
+    const Box = struct {
+        w: i32,
+        h: i32,
+        pub fn area(self: Box) i32 {
+            return self.w * self.h;
+        }
+    };
+  distractors:
+    - |-
+      const Box = struct {
+          w: i32,
+          h: i32,
+          pub fn area() i32 {
+              return this.w * this.h;
+          }
+      };
+    - |-
+      const Box = struct {
+          w: i32,
+          h: i32,
+      };
+      pub fn (b: Box) area() i32 {
+          return b.w * b.h;
+      }
+    - |-
+      const Box = struct {
+          w: i32,
+          h: i32,
+          fn area(this: Box) i32 {
+              return this.w * this.h;
+          }
+      };
+hints:
+  - "Three pieces: method is declared INSIDE the struct body, signature is `pub fn <name>(self: <SelfType>, ...) <ReturnType>` (the `self:` parameter is explicit and conventionally named `self`), body uses `self.<field>`."
+  - "Shape:\n```zig\nconst Box = struct {\n    w: i32,\n    h: i32,\n    pub fn area(self: Box) i32 {\n        return self.w * self.h;\n    }\n};\n```"
+  - "Full canonical:\n```zig\nconst Box = struct {\n    w: i32,\n    h: i32,\n    pub fn area(self: Box) i32 {\n        return self.w * self.h;\n    }\n};\n```"
+runtime: none
+notes: |
+  Drill the method-with-self idiom. Distractors:
+   - Implicit `this` — Zig has no implicit receiver; you have
+     to name the self parameter.
+   - Go-style receiver outside the struct — wrong; Zig methods
+     live INSIDE the braces.
+   - `this: Box` instead of `self: Box` — the convention is
+     `self`; the compiler doesn't enforce the name but `this`
+     reads as TS.

@@ -1,0 +1,52 @@
+target: zig
+themeId: zig/types/structs
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — instantiate a `Point` with x=3 and
+  y=4. The program then prints `3,4` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - "const p = Point{ .x = 3, .y = 4 };"
+  ts: |-
+    const p: Point = { x: 3, y: 4 };
+    console.log(`${p.x},${p.y}`);
+  canonical: |-
+    const std = @import("std");
+
+    const Point = struct { x: i32, y: i32 };
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        var buf: [32]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d},{d}\n", .{ p.x, p.y });
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const p = Point{ x: 3, y: 4 };"
+      explain: |-
+        TS reflex — Zig field initializers need a leading dot AND
+        `=` (not `:`): `Point{ .x = 3, .y = 4 }`.
+    - match: "const p: Point = .{ .x = 3, .y = 4 };"
+      explain: |-
+        The `.{...}` "anonymous struct literal" form would work if
+        the binding's type were inferred, but here the explicit
+        `Point{ ... }` form is clearer. Both compile; pick the
+        explicit form for teaching purposes.
+    - match: "const p = Point(x = 3, y = 4);"
+      explain: |-
+        Constructor-call syntax doesn't exist in Zig. Struct
+        instantiation uses `TypeName{ .field = value, ... }`.
+expectStdout: |
+  3,4
+runtime: zig
+blanks: [line]
+hints:
+  - "Shape: `const p = Point{ .x = 3, .y = 4 };` — type name, brace, dot-prefixed field, `=`, value, comma, repeat."
+  - "Three pieces: `const p = `, then `Point{ .x = 3, .y = 4 };`."
+  - "`const p = Point{ .x = 3, .y = 4 };`"
+notes: |
+  First runnable struct slot. Drills the struct-literal shape
+  + field access (`.x`, `.y`) in a working program.
