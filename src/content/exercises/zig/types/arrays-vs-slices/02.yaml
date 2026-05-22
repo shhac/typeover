@@ -1,0 +1,36 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: mcq
+order: 2
+prompt: |
+  When you don't want to repeat the length, use `_` as the
+  array length and let the compiler count from the initializer.
+  Pick the right declaration.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const colors = ["red", "green", "blue"];
+  canonical: |-
+    const colors = [_][]const u8{ "red", "green", "blue" };
+  distractors:
+    - "const colors = []u8{ \"red\", \"green\", \"blue\" };"
+    - "const colors = [3][]const u8{ \"red\", \"green\", \"blue\" };"
+    - "const colors: [][]const u8 = .{ \"red\", \"green\", \"blue\" };"
+hints:
+  - "The underscore in `[_]T` tells the compiler to count the initializer entries. Drop the count, keep the brackets and the element type."
+  - "Shape: `[_]<ElementType>{ ... }` — same as `[N]T` but with `_` as the inferred length."
+  - "`const colors = [_][]const u8{ \"red\", \"green\", \"blue\" };`"
+runtime: none
+notes: |
+  Drill the `[_]T` length-inference shape. This was already
+  used in basics/while-and-for/09 — drilling it here in its
+  natural arrays-vs-slices context.
+
+  Distractors:
+   - `[]u8{ ... }` — wrong type (single bytes instead of byte
+     slices) AND that initializer wouldn't typecheck.
+   - `[3][]const u8{ ... }` — works but spells out the count;
+     the `_` form is more maintainable.
+   - `[][]const u8 = .{ ... }` — slice type with array-literal
+     initializer; mismatched shapes.

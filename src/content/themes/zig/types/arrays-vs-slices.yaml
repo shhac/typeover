@@ -1,0 +1,7 @@
+target: zig
+moduleId: zig/types
+title: Arrays vs slices
+order: 4
+prerequisites: []
+intro: |
+  Zig has two collection shapes where TypeScript has one. [N]T is a fixed-length array; the length N is part of the type, known at compile time. []T is a slice: a pointer plus a runtime length. Pass an array to a function and you pass a copy; pass a slice (built via arr[0..]) and you pass a view. Module 3 builds on this.

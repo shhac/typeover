@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: fill-word
+order: 4
+prompt: |
+  Fill the missing single character that tells the compiler to
+  infer the array length from the initializer. Used inside the
+  square brackets of the type — same character used in TS for
+  "don't care" or "discard."
+generator:
+  kind: template
+  vars:
+    sigil:
+      - "_"
+  ts: |-
+    const colors = ["red", "green", "blue"];
+  canonical: |-
+    const colors = [${sigil}][]const u8{ "red", "green", "blue" };
+  distractors:
+    - "?"
+    - "*"
+    - "N"
+blanks: [sigil]
+hints:
+  - "One character. Same as the wildcard in Rust patterns and the throwaway in JS / Python: an underscore."
+  - "It's a single character."
+  - "`_`"
+runtime: none
+notes: |
+  Drill the `_` length-inference sigil. Distractors:
+   - `?` — optional sigil, wrong context.
+   - `*` — pointer sigil, wrong context.
+   - `N` — would be a literal `N` (the letter), not "infer."

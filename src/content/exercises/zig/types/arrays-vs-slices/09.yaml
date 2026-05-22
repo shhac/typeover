@@ -1,0 +1,57 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: freeform
+order: 9
+prompt: |
+  Write a complete Zig program that:
+   1. Defines `fn sum(s: []const i32) i32` returning the sum of
+      the slice's elements.
+   2. From `main`, declares `const xs: [4]i32 = .{ 1, 2, 3, 4 };`,
+      calls `sum(xs[0..])`, and prints the result followed by a
+      newline.
+
+  Expected stdout: `10`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function sum(s: number[]): number {
+        let total = 0;
+        for (const v of s) total += v;
+        return total;
+    }
+    const xs = [1, 2, 3, 4];
+    console.log(sum(xs));
+  canonical: |-
+    const std = @import("std");
+
+    fn sum(s: []const i32) i32 {
+        var total: i32 = 0;
+        for (s) |v| {
+            total += v;
+        }
+        return total;
+    }
+
+    pub fn main(init: std.process.Init) !void {
+        const xs: [4]i32 = .{ 1, 2, 3, 4 };
+        const total = sum(xs[0..]);
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{total});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  10
+runtime: zig
+hints:
+  - "Four pieces: declare `sum` taking `[]const i32`, accumulate via `for (s) |v|`, declare the array, slice the whole thing with `xs[0..]`, print."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\nfn sum(s: []const i32) i32 {\n    var total: i32 = 0;\n    for (s) |v| { total += v; }\n    return total;\n}\n\npub fn main(init: std.process.Init) !void {\n    const xs: [4]i32 = .{ 1, 2, 3, 4 };\n    const total = sum(xs[0..]);\n    // bufPrint(\"{d}\\n\", .{total}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. The `for (s) |v|` payload-capture works on slices the same way it does on arrays.'
+notes: |
+  Last types/arrays-vs-slices slot — CLOSES MODULE 2 (types).
+  Synthesises: `[N]T` array, slice from array (`[0..]`),
+  `[]const i32` slice parameter, for-payload over slice.
+
+  Per design-docs/10b "Done is when": Module 2 (types) is now
+  end-to-end exerciseable. Memory module (allocators + defer)
+  is the next milestone.

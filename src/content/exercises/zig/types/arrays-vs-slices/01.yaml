@@ -1,0 +1,32 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes `const arr: number[] = [10, 20, 30];`. Zig
+  distinguishes fixed-length arrays from runtime-length slices.
+  Pick the FIXED-LENGTH ARRAY declaration (the length is part of
+  the type, known at compile time).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const arr: number[] = [10, 20, 30];
+  canonical: |-
+    const arr: [3]i32 = .{ 10, 20, 30 };
+  distractors:
+    - "const arr: []i32 = .{ 10, 20, 30 };"
+    - "const arr: i32[3] = .{ 10, 20, 30 };"
+    - "const arr: [3, i32] = .{ 10, 20, 30 };"
+hints:
+  - "Two pieces: the type is `[N]T` (N first, T second, both inside square brackets) — note `N` is the count, NOT a comma-separated pair. The initializer uses the dot-prefixed anonymous-struct shorthand `.{ ... }`."
+  - "Shape: `[<count>]<elementType>` for the type, `.{ <e1>, <e2>, ... }` for the initializer."
+  - "`const arr: [3]i32 = .{ 10, 20, 30 };`"
+runtime: none
+notes: |
+  First arrays-vs-slices exercise. Drills the `[N]T` shape and
+  separates it from the slice shape `[]T`. Distractors:
+   - `[]i32` — slice, not array; would need a different
+     initializer.
+   - `i32[3]` — C reflex (Eastern declaration).
+   - `[3, i32]` — tuple-style reflex; Zig has no comma here.

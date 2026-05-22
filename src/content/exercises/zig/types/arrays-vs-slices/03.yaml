@@ -1,0 +1,34 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: mcq
+order: 3
+prompt: |
+  To pass an array to a function that takes a slice, you build
+  a slice from it. The full-array shortcut is `arr[0..]` — slice
+  the whole thing. Pick the right call site.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const arr: number[] = [1, 2, 3];
+    sum(arr);
+  canonical: |-
+    const arr: [3]i32 = .{ 1, 2, 3 };
+    sum(arr[0..]);
+  distractors:
+    - "sum(arr);"
+    - "sum(&arr);"
+    - "sum(arr.toSlice());"
+hints:
+  - "One operator: `arr[0..]` — start index 0, end omitted (means \"to the end\"). The result is a `[]const i32` slice pointing at the array's elements."
+  - "Shape: `<array>[0..]` to slice the whole thing."
+  - "`sum(arr[0..]);`"
+runtime: none
+notes: |
+  Drill the `arr[0..]` slice-from-array idiom. Distractors:
+   - Bare `arr` — would try to pass the array by value; type
+     mismatch unless the function takes `[N]i32` (concrete
+     length).
+   - `&arr` — works in some Zig versions (coerces to slice),
+     but the idiomatic teaching shape is `arr[0..]`.
+   - `.toSlice()` — invented method; doesn't exist.

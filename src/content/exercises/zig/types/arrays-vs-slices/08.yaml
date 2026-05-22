@@ -1,0 +1,37 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: freeform
+order: 8
+prompt: |
+  Write a complete Zig program that:
+   1. Declares a fixed-length array `nums: [5]i32 = .{ 2, 4, 6, 8, 10 };`.
+   2. Prints the array length followed by a newline.
+
+  Expected stdout: `5`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const nums = [2, 4, 6, 8, 10];
+    console.log(nums.length);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        const nums: [5]i32 = .{ 2, 4, 6, 8, 10 };
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{nums.len});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+expectStdout: |
+  5
+runtime: zig
+hints:
+  - "Three pieces: array declaration with `[5]i32`, init `.{ 2, 4, 6, 8, 10 }`, then `nums.len` (same `.len` property as on slices)."
+  - "Skeleton:\n```zig\nconst std = @import(\"std\");\n\npub fn main(init: std.process.Init) !void {\n    const nums: [5]i32 = .{ 2, 4, 6, 8, 10 };\n    // bufPrint(\"{d}\\n\", .{nums.len}) + writeStreamingAll\n}\n```"
+  - 'Full program is the skeleton + bufPrint/writeStreamingAll. Note: `.len` works on arrays AND slices, returning `usize` for both.'
+notes: |
+  Drills `[N]T` declaration + `.len` end-to-end. Note that
+  arrays and slices share the `.len` property — a recurring
+  theme of "the API surface is uniform; the type tells you
+  whether the length is compile-time or runtime."

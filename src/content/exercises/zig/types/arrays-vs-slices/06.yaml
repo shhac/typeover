@@ -1,0 +1,51 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: fill-line
+order: 6
+prompt: |
+  Type the missing Zig line — declare a fixed-length array `nums`
+  of three `i32` values: 10, 20, 30. With the right declaration,
+  the program prints `30` followed by a newline (the third element).
+generator:
+  kind: template
+  vars:
+    line:
+      - "const nums: [3]i32 = .{ 10, 20, 30 };"
+  ts: |-
+    const nums: number[] = [10, 20, 30];
+    console.log(nums[2]);
+  canonical: |-
+    const std = @import("std");
+
+    pub fn main(init: std.process.Init) !void {
+        ${line}
+        var buf: [16]u8 = undefined;
+        const printed = try std.fmt.bufPrint(&buf, "{d}\n", .{nums[2]});
+        try std.Io.File.stdout().writeStreamingAll(init.io, printed);
+    }
+  distractors:
+    - match: "const nums: []i32 = .{ 10, 20, 30 };"
+      explain: |-
+        `[]i32` is a SLICE type. To declare a fixed-length array,
+        put the length in the brackets: `[3]i32`.
+    - match: "const nums: [3]i32 = [10, 20, 30];"
+      explain: |-
+        Wrong initializer syntax. Use the dot-prefixed
+        anonymous-struct form: `.{ 10, 20, 30 }`.
+    - match: "const nums = [3]i32{ 10, 20, 30 };"
+      explain: |-
+        Mechanically works (the type-prefix form) but the
+        annotation-then-dot-init shape is what we're drilling
+        here. Pick the form with the type annotation on the
+        binding.
+expectStdout: |
+  30
+runtime: zig
+blanks: [line]
+hints:
+  - "Three pieces: `const nums: [3]i32` (type annotation with length-in-brackets), `= .{ 10, 20, 30 };` (dot-prefixed initializer)."
+  - "Shape: `const <name>: [<count>]<type> = .{ <e1>, <e2>, ... };`."
+  - "`const nums: [3]i32 = .{ 10, 20, 30 };`"
+notes: |
+  First runnable arrays-vs-slices slot. Drills the
+  `[N]T` array shape + indexing (`nums[2]`).

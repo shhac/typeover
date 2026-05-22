@@ -1,0 +1,33 @@
+target: zig
+themeId: zig/types/arrays-vs-slices
+type: fill-word
+order: 5
+prompt: |
+  Fill the missing two-character operator that builds a slice
+  of an array's full range. Used as `arr[start..end]` — leave
+  both ends off to slice the whole thing.
+generator:
+  kind: template
+  vars:
+    op:
+      - ".."
+  ts: |-
+    const s = arr.slice();
+  canonical: |-
+    const s = arr[0${op}];
+  distractors:
+    - "::"
+    - "..="
+    - ":"
+blanks: [op]
+hints:
+  - "Two dots — same operator Rust uses for ranges. NOT a colon (that's Python), NOT `::` (that's Rust's path separator)."
+  - "Two of the same character. Period."
+  - "`..`"
+runtime: none
+notes: |
+  Drill the `..` range operator. Distractors:
+   - `::` — Rust path separator reflex.
+   - `..=` — Rust inclusive-range reflex; Zig has no inclusive
+     end here.
+   - `:` — Python slice reflex.
