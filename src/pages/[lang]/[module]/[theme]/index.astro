@@ -42,6 +42,8 @@ interface Props {
 
 const { theme } = Astro.props;
 const lang = theme.data.target;
+const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
+const langLabel = LANG_DISPLAY[lang];
 
 const [modules, exercises] = await Promise.all([
   getCollection("modules"),
@@ -59,7 +61,7 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
 
 <BaseLayout
   title={`${theme.data.title} — typeover`}
-  description={`Exercises for ${theme.data.title} — TypeScript to Go.`}
+  description={`Exercises for ${theme.data.title} — TypeScript to ${langLabel}.`}
 >
   <main class="py-12 sm:py-20">
     <Container width="default">

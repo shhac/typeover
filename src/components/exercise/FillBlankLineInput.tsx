@@ -198,7 +198,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       <InstructionLine>Type the line →</InstructionLine>
       <CodeMirrorFillBlanks
         segments={instance().blankSegments ?? []}
-        ariaLabel="Fill-the-line Go snippet"
+        language={props.runtime === "zig" ? "zig" : "go"}
+        ariaLabel={`Fill-the-line ${props.runtime === "zig" ? "Zig" : "Go"} snippet`}
         renderBlank={(slotIdx, varName, expected) => (
           <BlankInput
             slotIdx={slotIdx}

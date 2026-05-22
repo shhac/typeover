@@ -52,4 +52,5 @@ SESSION_HANDOVER.md
 # Playtest screenshots (gitignored — Playwright MCP outputs)
 playtest-*.png
 page-*.png
+step*.png
 .playwright-mcp/

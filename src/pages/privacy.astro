@@ -90,10 +90,17 @@ import { Container, Heading, Stack, Text } from "~/components/ds";
         <Stack gap="md">
           <Heading level={2} size="xl">Code execution</Heading>
           <Text>
-            Go code you type into freeform and fill-line exercises runs in a
-            WebAssembly Go interpreter (Yaegi) inside a Web Worker — on
-            your device, not on any server. Your code never leaves the
-            browser tab.
+            Code you type into freeform and fill-line exercises runs locally
+            in your browser — on your device, not on any server. Your code
+            never leaves the browser tab.
+          </Text>
+          <Text>
+            Each language uses a different runtime inside a Web Worker:
+            Go code runs through a WebAssembly Go interpreter (Yaegi);
+            Zig code runs through the real Zig compiler (compiled to
+            WebAssembly), which then executes the produced wasm in a
+            second nested WASI context. Both ship as static assets and
+            run entirely client-side.
           </Text>
         </Stack>
 

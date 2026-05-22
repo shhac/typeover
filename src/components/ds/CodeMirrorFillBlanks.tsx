@@ -1,8 +1,9 @@
 import { For, onCleanup, onMount, type JSX } from "solid-js";
 import { render } from "solid-js/web";
-import { EditorState } from "@codemirror/state";
+import { EditorState, type Extension } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType } from "@codemirror/view";
 import { go } from "@codemirror/lang-go";
+import { zigLanguage } from "@ndim/codemirror-lang-zig";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import type { FillSegment } from "~/lib/generator-runtime";
@@ -39,6 +40,12 @@ import type { FillSegment } from "~/lib/generator-runtime";
  * without CodeMirror-internal probing.
  */
 
+/** Language slug that selects the CodeMirror grammar used for
+ *  syntax-highlighting the surrounding scaffold. Maps onto the
+ *  exercise's `target` field; defaults to "go" for back-compat
+ *  with the original Go-only call sites. */
+export type FillBlanksLanguage = "go" | "zig";
+
 interface CodeMirrorFillBlanksProps {
   segments: readonly FillSegment[];
   /** Renders the widget body for the blank at `slotIdx`. The caller
@@ -49,7 +56,21 @@ interface CodeMirrorFillBlanksProps {
   renderBlank: (slotIdx: number, varName: string, expected: string) => JSX.Element;
   /** Optional aria-label override on the editor contentDOM. */
   ariaLabel?: string;
+  /** Which Lezer grammar to load for syntax highlighting. Defaults to
+   *  `"go"` so existing Go fill-line / fill-word call sites don't
+   *  need to change. */
+  language?: FillBlanksLanguage;
 }
+
+const LANGUAGE_EXTENSION: Record<FillBlanksLanguage, () => Extension> = {
+  go: () => go(),
+  zig: () => zigLanguage,
+};
+
+const LANGUAGE_LABEL: Record<FillBlanksLanguage, string> = {
+  go: "Go",
+  zig: "Zig",
+};
 
 /* The widget owns its mount lifecycle: toDOM creates a host span,
  * mounts the caller-supplied JSX via Solid's standalone render, and
@@ -186,16 +207,17 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
     const decorationField = EditorView.decorations.of(decorationSet);
     const atomicField = EditorView.atomicRanges.of(() => decorationSet);
 
+    const lang = props.language ?? "go";
     const state = EditorState.create({
       doc,
       extensions: [
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
-        go(),
+        LANGUAGE_EXTENSION[lang](),
         decorationField,
         atomicField,
         EditorView.contentAttributes.of({
-          "aria-label": props.ariaLabel ?? "Fill-the-blanks Go snippet",
+          "aria-label": props.ariaLabel ?? `Fill-the-blanks ${LANGUAGE_LABEL[lang]} snippet`,
           spellcheck: "false",
         }),
         ...codemirrorThemeExtensions({

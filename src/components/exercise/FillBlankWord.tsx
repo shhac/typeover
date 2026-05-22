@@ -15,6 +15,10 @@ interface FillBlankWordProps {
   generator: GeneratorSpec;
   blanks: string[];
   hints: readonly [string, string, string];
+  /** Which target language the exercise belongs to. Used to pick the
+   *  CodeMirror Lezer grammar so Zig fill-words don't highlight with
+   *  the Go parser. Defaults to "go" for back-compat. */
+  target?: "go" | "zig";
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
@@ -125,7 +129,8 @@ export function FillBlankWord(props: FillBlankWordProps) {
       <InstructionLine>Fill the blanks →</InstructionLine>
       <CodeMirrorFillBlanks
         segments={segments()}
-        ariaLabel="Fill-the-blanks Go snippet"
+        language={props.target ?? "go"}
+        ariaLabel={`Fill-the-blanks ${props.target === "zig" ? "Zig" : "Go"} snippet`}
         renderBlank={(slotIdx, varName, expected) => (
           <BlankInput
             slotIdx={slotIdx}

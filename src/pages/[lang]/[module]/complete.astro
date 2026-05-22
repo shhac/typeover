@@ -83,8 +83,8 @@ const continueLabel = nextModule && nextModuleFirstExercise
 
 const siteOrigin = import.meta.env.SITE ?? "https://typeover.paulie.app";
 
-const shareTemplate =
-  "Just finished {moduleTitle} on typeover — Go for TypeScript devs. {themeCount} themes, {exerciseCount} exercises down.";
+const LANG_DISPLAY = { go: "Go", zig: "Zig" } as const;
+const shareTemplate = `Just finished {moduleTitle} on typeover — ${LANG_DISPLAY[lang]} for TypeScript devs. {themeCount} themes, {exerciseCount} exercises down.`;
 ---
 
 <BaseLayout

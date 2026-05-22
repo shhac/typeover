@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  lezer-zig: npm:@ndim/lezer-zig@^0.1.0
+
 importers:
 
   .:
@@ -47,6 +50,12 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
+      '@ndim/codemirror-lang-zig':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@ndim/lezer-zig':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@tailwindcss/vite':
         specifier: ^4.3.0
         version: 4.3.0(vite@7.3.3(@types/node@25.9.0)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
@@ -716,6 +725,12 @@ packages:
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
+
+  '@ndim/codemirror-lang-zig@0.1.0':
+    resolution: {integrity: sha512-491O1ccottJ9iTSaHcLjf0Mgs/8gjqhOwBYCWNUHVQLMYxs/zrrrw5DMQXSN6I17ZcRszQstWY5YRLwE+LHfRw==}
+
+  '@ndim/lezer-zig@0.1.0':
+    resolution: {integrity: sha512-yZvcEQlHmT5kq12gEEAlCTV2IOUzOKnEMi5g365uQiXv6Esnqy0lFG+bh39tKkojbNgMrKS9gwXkw3X8kltohg==}
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
@@ -3517,6 +3532,16 @@ snapshots:
       '@lezer/common': 1.5.2
 
   '@marijn/find-cluster-break@1.0.2': {}
+
+  '@ndim/codemirror-lang-zig@0.1.0':
+    dependencies:
+      lezer-zig: '@ndim/lezer-zig@0.1.0'
+
+  '@ndim/lezer-zig@0.1.0':
+    dependencies:
+      '@lezer/common': 1.5.2
+      '@lezer/highlight': 1.2.3
+      '@lezer/lr': 1.4.10
 
   '@oslojs/encoding@1.1.0': {}
 
