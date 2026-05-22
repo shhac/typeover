@@ -22,19 +22,21 @@ import type { GeneratorSpec } from "~/lib/generator-schema";
  * localStorage shim.
  */
 
-const { evalMock, terminateMock } = vi.hoisted(() => ({
+const { evalMock, terminateMock, zigEvalMock, zigTerminateMock } = vi.hoisted(() => ({
   evalMock: vi.fn(),
   terminateMock: vi.fn(),
+  zigEvalMock: vi.fn(),
+  zigTerminateMock: vi.fn(),
 }));
 
 vi.mock("~/runtime", () => ({
+  /* Distinct spies per runtime so the runtime-selection block at
+   * the bottom can verify dispatch. The main happy/wrong/etc.
+   * blocks use the Yaegi pair (matching the historic suite). */
   getRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
   terminateRunner: terminateMock,
-  /* The hook imports both runtime accessors at module load even when
-   * the test only exercises the Yaegi branch — stub Zig too so the
-   * import doesn't blow up. Share the mocks; assertions stay valid. */
-  getZigRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
-  terminateZigRunner: terminateMock,
+  getZigRunner: () => ({ eval: zigEvalMock, ready: () => Promise.resolve() }),
+  terminateZigRunner: zigTerminateMock,
 }));
 
 import { FillBlankLineInput } from "./FillBlankLineInput";
@@ -58,6 +60,8 @@ const EXPECTED_STDOUT = "10\n";
 beforeEach(() => {
   evalMock.mockReset();
   terminateMock.mockReset();
+  zigEvalMock.mockReset();
+  zigTerminateMock.mockReset();
 });
 afterEach(() => {
   localStorage.clear();
@@ -346,5 +350,46 @@ describe("<FillBlankLineInput> — Another resets state", () => {
     fireEvent.click(getByText("Try a fresh variant"));
     expect(lineInput(container).value).toBe("");
     expect(queryByText(EXPECTED_STDOUT.trim())).toBeNull();
+  });
+});
+
+describe('<FillBlankLineInput> — runtime="zig" path', () => {
+  /* Until this block existed, both `getRunner` and `getZigRunner`
+   * shared one spy and every test was `runtime="yaegi"`. A
+   * regression hard-coding the Yaegi runtime inside the component
+   * would not have failed any test. These cases pin:
+   *   - eval() dispatches to the Zig runner spy
+   *   - the CodeMirror surface picks up the Zig aria-label
+   *   - terminate dispatches to the Zig terminate spy on reset */
+
+  const renderZig = () =>
+    render(() => (
+      <FillBlankLineInput
+        exerciseId={EX_ID}
+        prompt="Type the missing line."
+        generator={GEN}
+        blanks={["line"]}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="zig"
+      />
+    ));
+
+  it("Run dispatches eval to the Zig runner, not the Yaegi runner", async () => {
+    zigEvalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container, getAllByText } = renderZig();
+    setVal(lineInput(container), "doubled := count * 2");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => expect(zigEvalMock).toHaveBeenCalledTimes(1));
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("CodeMirror surface carries the Zig aria-label", () => {
+    const { container } = renderZig();
+    /* Under jsdom the LegacyFallback renders; the language prop
+     * + aria-label now thread onto the wrapper div, so the
+     * grammar-selection wiring is observable end-to-end. */
+    const surface = container.querySelector('[aria-label="Fill-the-line Zig snippet"]');
+    expect(surface).not.toBeNull();
   });
 });

@@ -23,14 +23,19 @@ const { evalMock, terminateMock } = vi.hoisted(() => ({
   terminateMock: vi.fn(),
 }));
 
+/* Distinct spies per runtime so the runtime-selection block at the
+ * bottom can verify dispatch. The main blocks use the Yaegi pair
+ * (matching the historic suite). */
+const { zigEvalMock, zigTerminateMock } = vi.hoisted(() => ({
+  zigEvalMock: vi.fn(),
+  zigTerminateMock: vi.fn(),
+}));
+
 vi.mock("~/runtime", () => ({
   getRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
   terminateRunner: terminateMock,
-  /* The hook imports both runtime accessors at module load even when
-   * the test only exercises the Yaegi branch — stub Zig too so the
-   * import doesn't blow up. Share the mocks; assertions stay valid. */
-  getZigRunner: () => ({ eval: evalMock, ready: () => Promise.resolve() }),
-  terminateZigRunner: terminateMock,
+  getZigRunner: () => ({ eval: zigEvalMock, ready: () => Promise.resolve() }),
+  terminateZigRunner: zigTerminateMock,
 }));
 
 import { Freeform } from "./Freeform";
@@ -53,6 +58,8 @@ const GEN: GeneratorSpec = {
 beforeEach(() => {
   evalMock.mockReset();
   terminateMock.mockReset();
+  zigEvalMock.mockReset();
+  zigTerminateMock.mockReset();
 });
 afterEach(() => {
   localStorage.clear();
@@ -257,5 +264,68 @@ describe("<Freeform> — Another resets scaffold + runResult", () => {
     expect(ta.value).not.toContain('fmt.Println("hello")');
     /* Submit is back to disabled (runResult cleared). */
     expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(true);
+  });
+});
+
+describe("<Freeform> — runtime dispatch", () => {
+  /* Pin which worker the Freeform component drives based on its
+   * `runtime` prop. Before distinct spies landed, both branches
+   * shared one `evalMock` and the dispatch wiring was invisible
+   * to the suite — a regression hard-coding the Yaegi runtime
+   * inside Freeform would silently still grade correctly under
+   * `runtime="zig"`. */
+
+  const renderZig = () =>
+    render(() => (
+      <Freeform
+        exerciseId={EX_ID}
+        prompt="Print hello."
+        generator={GEN}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="zig"
+      />
+    ));
+
+  const renderServer = () =>
+    render(() => (
+      <Freeform
+        exerciseId={EX_ID}
+        prompt="Print hello."
+        generator={GEN}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="server"
+      />
+    ));
+
+  it("Run dispatches eval to the Zig runner when runtime is zig", async () => {
+    zigEvalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { getAllByText } = renderZig();
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => expect(zigEvalMock).toHaveBeenCalledTimes(1));
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("server runtime disables Run — canRun gates the button", async () => {
+    /* The hook now accepts `"server"` and returns `canRun: false`
+     * for it; Freeform threads that into `canRun={runner.canRun}`.
+     * Without this gate a learner could click Run on a server-
+     * runtime exercise and trip an undefined-accessor path. */
+    const { getAllByText } = renderServer();
+    /* Flush any boot microtasks just to be safe. */
+    await Promise.resolve();
+    await Promise.resolve();
+    /* Two "Run" buttons: toolbar + mobile-key-bar shortcut. The
+     * toolbar's is the one with the disabled attribute (the
+     * MobileKeyBar omits its Run prop when !canRun, leaving the
+     * button absent from that toolbar). Find the disabled toolbar
+     * Run. */
+    const runBtns = getAllByText("Run") as HTMLButtonElement[];
+    const toolbarRun = runBtns.find((b) => b.disabled);
+    expect(toolbarRun).toBeTruthy();
+    fireEvent.click(toolbarRun!);
+    expect(zigEvalMock).not.toHaveBeenCalled();
+    expect(evalMock).not.toHaveBeenCalled();
   });
 });

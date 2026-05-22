@@ -168,8 +168,18 @@ function buildDocAndRanges(segments: readonly FillSegment[]): {
  * pre-CodeMirror DOM shape so the existing fill-line + fill-word
  * tests (which query for BlankInput elements) keep finding them. */
 function LegacyFallback(props: CodeMirrorFillBlanksProps): JSX.Element {
+  /* aria-label threads through so component tests (which render
+   * exclusively against the LegacyFallback under jsdom) can assert
+   * the right language label landed on the wrapper. Without this
+   * passthrough the prop was silently dropped in test mode, which
+   * left the language-selection wiring untestable. */
+  const lang = props.language ?? "go";
+  const ariaLabel = props.ariaLabel ?? `Fill-the-blanks ${LANGUAGE_LABEL[lang]} snippet`;
   return (
-    <div class="font-mono text-code bg-bg-inset p-3 rounded-sm border border-border-default">
+    <div
+      class="font-mono text-code bg-bg-inset p-3 rounded-sm border border-border-default"
+      aria-label={ariaLabel}
+    >
       <For each={props.segments}>
         {(seg, idx) => {
           if (seg.kind === "text") return <span>{seg.text}</span>;

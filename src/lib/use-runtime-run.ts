@@ -203,6 +203,39 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     generation += 1;
   };
 
+  /* Arm the stall timer for a given boot generation. If we're STILL
+   * booting at BOOT_STALL_MS, the `bootStalled` signal flips on so
+   * the UI can surface a "Retry runtime" affordance. The generation
+   * guard mirrors the one on the ready() callbacks: a reset() mid-
+   * boot bumps the generation, the timer's callback no-ops
+   * harmlessly. Re-entrant — clears any prior timer first via the
+   * shared helper. */
+  function armStallTimer(bootGen: number): void {
+    clearStallTimer();
+    stallTimer = setTimeout(() => {
+      if (bootGen !== currentGen()) return;
+      if (runtimeStatus() !== "booting") return;
+      setBootStalled(true);
+    }, BOOT_STALL_MS);
+  }
+
+  /* Wire the runner's `ready()` promise to the status signals.
+   * Generation-guarded — a reset() mid-boot drops the late
+   * resolution on the floor. */
+  function attachBootHandlers(bootGen: number, ready: Promise<void>): void {
+    ready.then(
+      () => {
+        if (bootGen !== currentGen()) return;
+        setStatus("ready");
+      },
+      (e: unknown) => {
+        if (bootGen !== currentGen()) return;
+        setStatus("error");
+        setBootError(e instanceof Error ? e.message : String(e));
+      },
+    );
+  }
+
   function preflight(): void {
     /* Server runtime is accepted but undriven — no worker to warm,
      * no status to advance. Caller's UI gates Run on `canRun`. */
@@ -215,34 +248,8 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     const bootGen = currentGen();
     setStatus("booting");
     setBootError(null);
-    /* Arm the stall timer — if we're STILL booting at BOOT_STALL_MS,
-     * the bootStalled signal flips on so the UI can surface a
-     * "Retry runtime" affordance. The generation guard mirrors the
-     * one on the ready() callbacks: a reset() mid-boot bumps the
-     * generation, the timer's callback no-ops harmlessly. The
-     * setStatus() wrapper handles clearing on the way OUT; arming
-     * here is preflight's job. */
-    setBootStalled(false);
-    if (stallTimer !== null) clearTimeout(stallTimer);
-    stallTimer = setTimeout(() => {
-      if (bootGen !== currentGen()) return;
-      if (runtimeStatus() !== "booting") return;
-      setBootStalled(true);
-    }, BOOT_STALL_MS);
-    accessors
-      .get()
-      .ready()
-      .then(
-        () => {
-          if (bootGen !== currentGen()) return; /* reset happened mid-boot */
-          setStatus("ready");
-        },
-        (e: unknown) => {
-          if (bootGen !== currentGen()) return;
-          setStatus("error");
-          setBootError(e instanceof Error ? e.message : String(e));
-        },
-      );
+    armStallTimer(bootGen);
+    attachBootHandlers(bootGen, accessors.get().ready());
   }
 
   async function run(): Promise<void> {
