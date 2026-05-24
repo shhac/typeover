@@ -476,3 +476,40 @@ describe("useRuntimeRun — runtime selection", () => {
     expect(zig.runtimeTarget).toBe("zig");
   });
 });
+
+describe("useRuntimeRun — precheck hook", () => {
+  function setupWithPrecheck(
+    precheck: () => { ok: boolean; message: string },
+  ): ReturnType<typeof useRuntimeRun> {
+    let handle!: ReturnType<typeof useRuntimeRun>;
+    createRoot((dispose) => {
+      handle = useRuntimeRun({
+        runtime: "yaegi",
+        buildProgram: () => "irrelevant",
+        precheck,
+      });
+      disposers.push(dispose);
+    });
+    return handle;
+  }
+
+  it("short-circuits run() with the precheck message when it fails", async () => {
+    const h = setupWithPrecheck(() => ({
+      ok: false,
+      message: "Your program should start with `package main`.",
+    }));
+    await h.run();
+    const r = h.runResult();
+    expect(r?.error).toBe("Your program should start with `package main`.");
+    expect(r?.stdout).toBe("");
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("passes through to eval() when precheck succeeds", async () => {
+    evalMock.mockResolvedValue({ stdout: "ok", stderr: "", error: "" });
+    const h = setupWithPrecheck(() => ({ ok: true, message: "" }));
+    await h.run();
+    expect(evalMock).toHaveBeenCalledTimes(1);
+    expect(h.runResult()?.stdout).toBe("ok");
+  });
+});

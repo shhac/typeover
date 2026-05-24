@@ -64,6 +64,23 @@ const exerciseFields = {
    *  grader still passes them — paired with `successNote` so the
    *  UI explains why. */
   alternateCanonicals: z.array(z.string()).optional(),
+  /** Freeform only — bookend constraints on the learner's
+   *  submission. After trimming whitespace, the source must
+   *  start with `mustStartWith` and end with `mustEndWith` (each
+   *  is independent). Catches the "I deleted the main wrapper"
+   *  case at grade time with a friendly hint instead of letting
+   *  it surface as an opaque compile error, and saves a compile
+   *  round-trip on obviously broken submissions. Layers on top
+   *  of the per-language default in
+   *  `src/lib/freeform-shape.ts` — set either field to override
+   *  one end, or both to replace the whole shape (e.g. an
+   *  exercise that requires a specific `use` statement). */
+  submissionShape: z
+    .object({
+      mustStartWith: z.string().optional(),
+      mustEndWith: z.string().optional(),
+    })
+    .optional(),
 } as const;
 
 type Exercise = z.infer<z.ZodObject<typeof exerciseFields>>;
@@ -234,6 +251,20 @@ function validateAlternateCanonicalsScope(ex: Exercise, ctx: Ctx): void {
   });
 }
 
+/** submissionShape is the bookend contract on a learner's freeform
+ *  submission. Only freeform exercises have a learner-supplied
+ *  source to constrain — fill-word / fill-line submit single tokens
+ *  or lines, and MCQ doesn't submit source at all. */
+function validateSubmissionShapeScope(ex: Exercise, ctx: Ctx): void {
+  if (!ex.submissionShape) return;
+  if (ex.type === "freeform") return;
+  ctx.addIssue({
+    code: "custom",
+    message: `\`submissionShape\` is only valid for freeform exercises; got type "${ex.type}".`,
+    path: ["submissionShape"],
+  });
+}
+
 export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => {
   validateFillBlanks(ex, ctx);
   validateFillLineMode(ex, ctx);
@@ -241,4 +272,5 @@ export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => 
   validateBlanksOnlyForFill(ex, ctx);
   validateRunnableExpectStdout(ex, ctx);
   validateAlternateCanonicalsScope(ex, ctx);
+  validateSubmissionShapeScope(ex, ctx);
 });

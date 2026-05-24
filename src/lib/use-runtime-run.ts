@@ -161,6 +161,14 @@ interface UseRuntimeRunArgs {
    *  (Freeform), a substituted scaffold (FillBlankLineInput), or
    *  whatever else. */
   buildProgram: () => string;
+  /** Optional consumer-supplied pre-check, run before each eval.
+   *  Lets a consumer reject obviously-invalid input synchronously
+   *  with a friendly message (Freeform uses this to enforce
+   *  submission-shape bookends, saving a Sandbox round-trip on
+   *  "you deleted main"). On `{ ok: false }` the hook short-
+   *  circuits — sets runResult.error to the message and skips the
+   *  worker call. */
+  precheck?: () => { ok: boolean; message: string };
 }
 
 /** How long the runtime can sit in "booting" before we surface a
@@ -276,6 +284,21 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
      * doesn't try to dereference undefined accessors. */
     if (!canRun) return;
     if (running()) return;
+    /* Consumer-supplied pre-check — synchronous, runs before any
+     * worker invocation. Catches obviously-bad input without
+     * burning a compile round-trip. */
+    if (args.precheck) {
+      const verdict = args.precheck();
+      if (!verdict.ok) {
+        setRunResult({
+          stdout: "",
+          stderr: "",
+          error: verdict.message,
+          durationMs: 0,
+        });
+        return;
+      }
+    }
     /* If the consumer never called preflight(), boot lazily — Run is
      * still the canonical trigger for the first WASM load. */
     preflight();

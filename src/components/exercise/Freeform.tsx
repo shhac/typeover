@@ -5,6 +5,13 @@ import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { useRuntimeRun } from "~/lib/use-runtime-run";
+import {
+  LANGUAGE_FREEFORM_SCAFFOLD,
+  resolveSubmissionShape,
+  validateSubmissionShape,
+  type SubmissionShape,
+} from "~/lib/freeform-shape";
+import { assertUnreachable } from "~/lib/assert-unreachable";
 import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "../ds/CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -25,29 +32,15 @@ interface FreeformProps {
    *  reshapes (target=rust, runtime=server) → runtime=rust before
    *  reaching this component. design-docs/32. */
   runtime: "yaegi" | "zig" | "rust" | "server";
+  /** Optional per-exercise override on the submission's required
+   *  bookends. Layered onto the per-language default in
+   *  `freeform-shape.ts` — exercises that don't set this get the
+   *  language default (e.g. Rust requires `fn main` ... `}`). */
+  submissionShape?: SubmissionShape;
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
 }
-
-/* Default scaffold the textarea starts with. Per the user's
- * 2026-05-19 ask, freeform must NOT prefill the canonical — the
- * exercise is about the learner producing the code, and a prefilled
- * answer collapses that to a delete-and-Run cycle. The scaffold is
- * deliberately barren: package + import + an empty main with a
- * comment marker. When per-exercise scaffolds become useful (e.g.
- * an exercise that wants the learner to FILL a specific function),
- * add a `scaffold` field to the schema and fall back here when
- * unset. */
-const DEFAULT_SCAFFOLD = `package main
-
-import "fmt"
-
-func main() {
-\t// implement here
-\t_ = fmt.Println
-}
-`;
 
 /*
  * v0 freeform exercise — CodeMirror editor, Run button, stdout-match
@@ -69,7 +62,30 @@ func main() {
 export function Freeform(props: FreeformProps) {
   const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
 
-  const [code, setCode] = createSignal(DEFAULT_SCAFFOLD);
+  /* Per-target scaffold lookup — replaces the historical hardcoded
+   * Go scaffold. The runtime → target mapping happens via the
+   * hook below; we don't have it here at construction time, so map
+   * directly from the runtime prop. The switch is exhaustive
+   * (assertUnreachable) so adding a runtime to the prop type
+   * surfaces a TS error here rather than silently picking the Go
+   * default. The "server" branch can never actually run; we still
+   * pick a sensible default so the editor isn't empty if someone
+   * navigates to a future server-only exercise. */
+  const initialScaffold = ((): string => {
+    switch (props.runtime) {
+      case "yaegi":
+        return LANGUAGE_FREEFORM_SCAFFOLD.go;
+      case "zig":
+        return LANGUAGE_FREEFORM_SCAFFOLD.zig;
+      case "rust":
+        return LANGUAGE_FREEFORM_SCAFFOLD.rust;
+      case "server":
+        return LANGUAGE_FREEFORM_SCAFFOLD.go;
+      default:
+        return assertUnreachable(props.runtime);
+    }
+  })();
+  const [code, setCode] = createSignal(initialScaffold);
   let editorHandle: CodeMirrorEditorHandle | undefined;
 
   /* The hook accepts `props.runtime` verbatim. When it's `"server"`
@@ -77,8 +93,23 @@ export function Freeform(props: FreeformProps) {
    * is a no-op; we gate Run + Cmd-Enter + the mobile-bar handler on
    * `runner.canRun` rather than re-deriving the rule. When the SSR
    * fallback path lands, the hook learns how to drive it and
-   * `canRun` flips true without any component-side change. */
-  const runner = useRuntimeRun({ runtime: props.runtime, buildProgram: () => code() });
+   * `canRun` flips true without any component-side change.
+   *
+   * `precheck` runs the submission-shape bookend check before any
+   * compile round-trip. The shape resolves from the language
+   * default + this exercise's optional override. Fast-fail saves
+   * the learner a wait and us a Sandbox compile. */
+  const runner = useRuntimeRun({
+    runtime: props.runtime,
+    buildProgram: () => code(),
+    precheck: () => {
+      const shape = resolveSubmissionShape(
+        runner.runtimeTarget,
+        props.submissionShape,
+      );
+      return validateSubmissionShape(code(), shape);
+    },
+  });
 
   /* Preflight the worker on mount. `preflight()` is a no-op when
    * canRun is false, so no per-runtime gate needed at the call
@@ -100,7 +131,7 @@ export function Freeform(props: FreeformProps) {
     canSubmit,
     onAnother: () => {
       another();
-      setCode(DEFAULT_SCAFFOLD);
+      setCode(initialScaffold);
       runner.clear();
     },
     onTryAgain: () => runner.clear(),
