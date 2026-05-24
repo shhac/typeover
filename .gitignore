@@ -54,3 +54,5 @@ playtest-*.png
 page-*.png
 step*.png
 .playwright-mcp/
+.vercel
+.env*

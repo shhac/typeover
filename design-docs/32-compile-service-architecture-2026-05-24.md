@@ -241,12 +241,57 @@ any line items charge.
   scoped. The normalize module + service-worker skeleton land now
   because they're language-agnostic infrastructure.
 
+## Implementation notes
+
+### Function lives at the project root, not under `src/pages/api/`
+
+Astro stays in `output: "static"` mode. The Function lives at
+`/api/compile/rust.ts` at the project root, where Vercel's
+zero-config Function detection picks it up regardless of the
+framework on top. This avoids switching every existing page to
+`export const prerender = true` just to add one endpoint. A
+future move into the Astro tree (with `@astrojs/vercel` and
+`output: "server"`) is a near-mechanical refactor when the API
+surface grows past one route.
+
+### Pool of named sandboxes, not explicit snapshot IDs
+
+The transport addresses sandboxes by stable names —
+`rust-compiler-pool-0`, `-1`, `-2` by default. Vercel Sandbox is
+persistent-by-default: on first creation, `onCreate` runs the
+rustup install (~30 s, one-shot); afterward the sandbox
+auto-snapshots its filesystem on idle stop and the next
+`getOrCreate` call resumes from snapshot in milliseconds.
+
+Why not the explicit-snapshot-ID pattern from the SDK docs:
+- No env var to manage between bootstrap and production runtime.
+- No "the snapshot ID drifted out of sync" failure mode.
+- The pool name is the single coordinate; the rustup install is
+  baked into a `onCreate` hook colocated with the transport.
+
+The bootstrap script (`pnpm bootstrap:rust-sandbox`) is now just
+a pre-warmer — it touches each pool shard once so the first
+production request doesn't pay the 30 s rustup install. Re-run
+on rust-toolchain bumps after deleting the old named sandboxes.
+
+### L2 (Blob) tier is deferred
+
+The current Function compiles via Sandbox on every cache miss
+without writing to Blob. The L1 build-time pre-bake covers the
+expected long-tail (canonical solutions); novel learner code
+each pays one Sandbox compile. When that proves expensive, drop
+in a Blob lookup at the Function entry — the cascade contract
+in the SW + transport is already shaped for it.
+
 ## Files that capture each decision
 
 | Layer | Files |
 |---|---|
 | Normalizer + language registry | `src/lib/compile-service/normalize/*.ts`, tests alongside |
-| Service-worker cache | `public/sw-compile-cache.js` (or bundled equivalent), registration in `src/layouts/BaseLayout.astro` |
-| Future: compile endpoint | `src/pages/api/compile/[lang].ts` (TBD) |
-| Future: Rust client runtime | `src/lib/use-rust-runtime.ts` + worker (TBD) |
-| Future: build-time pre-cache | `scripts/prebake-wasm-cache.mjs` (TBD) |
+| Service-worker cache | `public/sw-compile-cache.js` (built from `src/service-worker/compile-cache.ts`), registration in `src/layouts/BaseLayout.astro` |
+| Compile endpoint | `/api/compile/rust.ts` (project-root, Vercel auto-Function) |
+| Rust client runtime | `src/runtime/rust-worker.ts` + `src/runtime/index.ts` |
+| Compile transports | `src/lib/compile-service/transports/{docker,sandbox,types}.ts` |
+| Sandbox pre-warmer | `scripts/bootstrap-rust-sandbox.ts` (`pnpm bootstrap:rust-sandbox`) |
+| Build-time pre-cache | `scripts/prebake-compile-cache.ts` (`pnpm cache:prebake`) |
+| Submission shape (per-language defaults + override) | `src/lib/freeform-shape.ts` |

@@ -27,7 +27,8 @@
     "content:lint": "node scripts/content-lint.ts",
     "content:new": "node scripts/content-new-theme.ts",
     "content:report": "node scripts/content-report.ts",
-    "cache:prebake": "node scripts/prebake-compile-cache.ts"
+    "cache:prebake": "node scripts/prebake-compile-cache.ts",
+    "bootstrap:rust-sandbox": "node --env-file-if-exists=.env.local scripts/bootstrap-rust-sandbox.ts"
   },
   "dependencies": {
     "@andrewbranch/untar.js": "^1.0.3",

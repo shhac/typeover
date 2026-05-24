@@ -94,14 +94,11 @@ async function collectCanonicals(): Promise<CanonicalEntry[]> {
 function pickTransport(): CompileTransport {
   const mode = process.env.COMPILE_TRANSPORT ?? "docker";
   if (mode === "sandbox") {
-    const snapshotId = process.env.RUST_TOOLCHAIN_SNAPSHOT;
-    if (!snapshotId) {
-      throw new Error(
-        "COMPILE_TRANSPORT=sandbox requires RUST_TOOLCHAIN_SNAPSHOT in env. " +
-          "Run scripts/bootstrap-rust-sandbox.ts first.",
-      );
-    }
-    return new SandboxTransport({ snapshotId });
+    /* SandboxTransport uses the pool-pattern: warm sandboxes named
+     * by stable shard IDs auto-install rustc on first creation and
+     * resume from snapshot afterward. No env-var snapshot ID needed
+     * — the pool name + Vercel persistence does it. */
+    return new SandboxTransport();
   }
   return new DockerTransport();
 }
