@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/foundations
+title: "Hello and printing"
+order: 1
+prerequisites: []
+intro: |
+  Rust prints with a macro, not a function. `println!` (note the
+  `!`) writes to stdout with a trailing newline; `print!` is the
+  no-newline variant. Format placeholders use `{}` instead of
+  TypeScript's template-literal `${...}`. Macros, format strings,
+  and the no-newline-by-default `print!` are the three reflex
+  shifts here — none of them touch ownership yet, so they're the
+  cheap first step.

@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-word
+order: 3
+prompt: |
+  Fill the missing keyword. The declaration needs to allow the
+  reassignment on the next line. Three letters, same word C++
+  uses for similar intent.
+generator:
+  kind: template
+  vars:
+    keyword:
+      - "mut"
+  ts: |-
+    let score: number = 0;
+    score = score + 1;
+  canonical: |-
+    let ${keyword} score: i32 = 0;
+    score = score + 1;
+  distractors:
+    - "let"
+    - "var"
+    - "mutable"
+blanks: [keyword]
+hints:
+  - "Rust's reflex is immutable-by-default. The keyword you're filling in is the explicit opt-in for reassignment — the same word you saw in exercise 02."
+  - "Three letters. C++ uses the same spelling for member-function intent."
+  - "`mut`."
+runtime: none
+notes: |
+  Fill-word reinforcement of `let mut` after the MCQ recognition
+  in slot 02. Single canonical answer (`mut`); distractors model
+  the most common wrong reflexes:
+   - `let` — duplicate the keyword instead of adding `mut`.
+   - `var` — JavaScript / Zig reflex.
+   - `mutable` — verbose C++-style spelling; Rust uses the
+     abbreviated `mut`.

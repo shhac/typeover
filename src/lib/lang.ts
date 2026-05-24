@@ -15,6 +15,7 @@ import type { Target } from "./content-schema";
 export const LANG_DISPLAY: Record<Target, string> = {
   go: "Go",
   zig: "Zig",
+  rust: "Rust",
 };
 
 export type LangDisplay = (typeof LANG_DISPLAY)[Target];

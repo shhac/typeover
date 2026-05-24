@@ -24,7 +24,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { zigLanguage } from "@ndim/codemirror-lang-zig";
 
 /** Canonical language union for every CodeMirror editor surface. */
-export type CmLanguage = "go" | "ts" | "zig";
+export type CmLanguage = "go" | "ts" | "zig" | "rust";
 
 /** Return the CodeMirror extension for a given language. */
 export function cmLanguageExtension(lang: CmLanguage): Extension {
@@ -37,5 +37,12 @@ export function cmLanguageExtension(lang: CmLanguage): Extension {
       /* `zigLanguage` is an `LRLanguage` value (not a constructor
        * like lang-go's `go()`); use directly as the extension. */
       return zigLanguage;
+    case "rust":
+      /* No Rust Lezer parser bundled today — code renders in mono
+       * with no syntax tinting. Adding a parser is a focused
+       * upgrade (`@codemirror/lang-rust` exists upstream); leaving
+       * the fallback empty keeps the bundle lean until the Rust
+       * track justifies the dependency. */
+      return [];
   }
 }

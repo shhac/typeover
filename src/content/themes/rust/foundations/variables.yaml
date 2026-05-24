@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/foundations
+title: "Variables and mutability"
+order: 2
+prerequisites: [rust/foundations/hello-and-printing]
+intro: |
+  Rust flips TypeScript's mutability default. Every binding starts
+  immutable; you opt in to mutability with `let mut`. Type
+  annotations come after the name (`let x: i32 = 5`), and the
+  numeric primitives are width-specific (`i32`, `u64`, `f64`)
+  instead of TS's single `number`. Shadowing is allowed and idiomatic
+  — re-bind the same name to a new value (or even a new type) in
+  the same scope. This is *not* the same as `let mut` — it's a fresh
+  binding that happens to reuse the name.

@@ -8,6 +8,7 @@ import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { codemirrorThemeExtensions } from "~/lib/codemirror-theme";
 import { cmLanguageExtension, type CmLanguage } from "~/lib/codemirror-lang";
 import { completionExtension, type CompletionLanguage } from "~/lib/code-completions";
+import { assertUnreachable } from "~/lib/assert-unreachable";
 import { useCodeMirror } from "~/lib/use-codemirror";
 
 /*
@@ -170,13 +171,27 @@ const ARIA_LABEL_BY_LANG: Record<CmLanguage, string> = {
   go: "Go code",
   ts: "TypeScript source",
   zig: "Zig code",
+  rust: "Rust code",
 };
 
 /* Map editor language → completion language. Returns null for
  * languages without a curated member map (the TS pane is read-only
- * and doesn't need completion). */
+ * and doesn't need completion). Rust currently has empty maps —
+ * forward it through so behavior is uniform with go/zig if/when
+ * members are added later. */
 function toCompletionLanguage(lang: CmLanguage): CompletionLanguage | null {
-  return lang === "zig" ? "zig" : lang === "go" ? "go" : null;
+  switch (lang) {
+    case "go":
+      return "go";
+    case "zig":
+      return "zig";
+    case "rust":
+      return "rust";
+    case "ts":
+      return null;
+    default:
+      return assertUnreachable(lang);
+  }
 }
 
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {

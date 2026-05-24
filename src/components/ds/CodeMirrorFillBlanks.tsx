@@ -46,7 +46,7 @@ import { LANG_DISPLAY } from "~/lib/lang";
  * exercise's `target` field; defaults to "go" for back-compat
  * with the original Go-only call sites. Internal — callers pass
  * the raw string via the `language` prop, not via this type. */
-type FillBlanksLanguage = "go" | "zig";
+type FillBlanksLanguage = "go" | "zig" | "rust";
 
 interface CodeMirrorFillBlanksProps {
   segments: readonly FillSegment[];

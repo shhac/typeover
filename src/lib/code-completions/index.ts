@@ -69,16 +69,21 @@ export function extractIdentifiers(source: string | undefined | null): string[] 
 
 /* ========================== Language registry ====================== */
 
-export type CompletionLanguage = "zig" | "go";
+export type CompletionLanguage = "zig" | "go" | "rust";
 
+/* Rust ships with empty maps for now — no curated member list, no
+ * blocklist. The completion source returns no suggestions, which is
+ * the right default until the Rust track justifies authoring them. */
 const MEMBERS_BY_LANG: Record<CompletionLanguage, Record<string, readonly string[]>> = {
   zig: ZIG_MEMBERS,
   go: GO_MEMBERS,
+  rust: {},
 };
 
 const BLOCKLIST_BY_LANG: Record<CompletionLanguage, ReadonlySet<string>> = {
   zig: ZIG_BLOCKLIST,
   go: GO_BLOCKLIST,
+  rust: new Set<string>(),
 };
 
 /* ========================== Branch matchers ======================== */

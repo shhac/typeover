@@ -32,16 +32,27 @@ import TrackCard from "~/components/ds/TrackCard.astro";
  * exercises across six themes" as static prose. Author 4 new
  * exercises and the homepage silently lies until someone notices.
  * Compute both numbers from the content collection at build time. */
-const [foundationsThemes, foundationsExercises, zigThemes, zigExercises] = await Promise.all([
+const [
+  foundationsThemes,
+  foundationsExercises,
+  zigThemes,
+  zigExercises,
+  rustThemes,
+  rustExercises,
+] = await Promise.all([
   getCollection("themes", (t) => t.data.moduleId === "go/foundations"),
   getCollection("exercises", (ex) => ex.data.themeId.startsWith("go/foundations/")),
   getCollection("themes", (t) => t.data.target === "zig"),
   getCollection("exercises", (ex) => ex.data.target === "zig"),
+  getCollection("themes", (t) => t.data.target === "rust"),
+  getCollection("exercises", (ex) => ex.data.target === "rust"),
 ]);
 const foundationsExerciseCount = foundationsExercises.length;
 const foundationsThemeCount = foundationsThemes.length;
 const zigExerciseCount = zigExercises.length;
 const zigThemeCount = zigThemes.length;
+const rustExerciseCount = rustExercises.length;
+const rustThemeCount = rustThemes.length;
 ---
 
 <BaseLayout
@@ -171,23 +182,32 @@ func greet(u User) string {
             </a>
           </TrackCard>
 
-          <TrackCard status="soon">
+          <TrackCard status="available">
             <Heading level={2} size="2xl" slot="title">
-              <span class="text-fg-secondary">Rust</span> for TypeScript devs
+              <span class="text-accent-rust">Rust</span> for TypeScript devs
             </Heading>
             <Fragment slot="dek">
-              A future track. Same bilingual progression — same
-              recognition → fill-in → freeform shape — for the
-              ownership / borrowing / lifetime moves Rust asks of you.
-              (Status: no embeddable Rust interpreter exists yet, so a
-              client-side runtime is on hold.)
+              Foundations preview — {rustExerciseCount} exercises across
+              {rustThemeCount}
+              {rustThemeCount === 1 ? "theme" : "themes"} covering printing,
+              variables, and the immutable-by-default shift. Runnable
+              exercises arrive once the server-compile path lands (see
+              design-docs/32); recognition + fill-in already work.
             </Fragment>
             <Stack gap="xs" slot="modules">
+              <Text tone="muted" size="sm" family="mono">
+                <span class="text-accent-rust">1.</span> Foundations · preview
+              </Text>
               <Text tone="faint" size="sm" family="mono">
-                proposed; blocked on runtime feasibility
+                <span>2+.</span> Ownership, error handling, more · soon
               </Text>
             </Stack>
-            <Button variant="ghost" size="md" disabled>Coming later</Button>
+            <a href="/rust/foundations/hello-and-printing/01" class="inline-flex">
+              <Button variant="primary" size="md">Start with Foundations</Button>
+            </a>
+            <a href="/rust" class="inline-flex">
+              <Button variant="secondary" size="md">Browse the curriculum</Button>
+            </a>
           </TrackCard>
         </Stack>
 
@@ -198,7 +218,7 @@ func greet(u User) string {
             typeover · 2026 · built with astro + solid + tailwind
           </Text>
           <Text tone="faint" size="xs" family="mono">
-            yaegi + zig runtimes · in browser
+            yaegi + zig runtimes · in browser · rust preview
           </Text>
         </Stack>
       </Stack>

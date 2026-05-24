@@ -31,6 +31,7 @@
    * ts     — TypeScript blue, anywhere TS is referenced
    * go     — Go cyan ("Aqua"), anywhere Go is referenced
    * zig    — Zig's brand orange #f7a41d, anywhere Zig is referenced
+   * rust   — Ferris-evoking warm salmon #e07856, anywhere Rust is referenced
    *
    * accent-ts brightened from #3178c6 (failed 4.5:1 AA at small text)
    * to #4a9eff (passes ~7.2:1).
@@ -39,6 +40,9 @@
    * association rather than perfect contrast; sits at ~5.5:1 against
    * the base bg, comfortable for the badge / accent surface but we
    * don't rely on it for body text.
+   * accent-rust #e07856 — Ferris-mascot peach/salmon, distinct enough
+   * from zig-orange and amber-primary to read as its own track. Sits
+   * at ~5:1 on the dark bg; usage rules match accent-zig.
    */
   --color-accent-primary: #ffa726;
   --color-accent-primary-dim: #b87a1c;
@@ -48,6 +52,8 @@
   --color-accent-go-dim: #007a99;
   --color-accent-zig: #f7a41d;
   --color-accent-zig-dim: #b3760e;
+  --color-accent-rust: #e07856;
+  --color-accent-rust-dim: #a8523a;
 
   --color-success: #4ade80;
   --color-warning: #fbbf24;

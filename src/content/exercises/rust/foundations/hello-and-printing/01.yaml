@@ -1,0 +1,42 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: mcq
+order: 1
+prompt: |
+  TypeScript prints with `console.log(...)` — a function call.
+  Rust prints with `println!(...)` — a *macro* invocation (note
+  the trailing `!`). Pick the idiomatic Rust translation.
+generator:
+  kind: variant
+  variants:
+    - id: hello
+      ts: 'console.log("Hello, world!");'
+      canonical: 'println!("Hello, world!");'
+      distractors:
+        - 'console.log("Hello, world!");'
+        - 'println("Hello, world!");'
+        - 'print!("Hello, world!");'
+    - id: name
+      ts: 'console.log("ready");'
+      canonical: 'println!("ready");'
+      distractors:
+        - 'console.log("ready");'
+        - 'println("ready");'
+        - 'print!("ready");'
+hints:
+  - "Three shifts from TS: `console.log` becomes `println!`, the trailing `!` marks it as a macro (not a function), and a trailing newline comes for free — same as `console.log`."
+  - "Shape: `println!(\"text\");`. The `!` is required — `println` without it isn't a real Rust symbol."
+  - 'For the hello variant: `println!("Hello, world!");`'
+runtime: none
+notes: |
+  Distractors cover the three reflex slips:
+   - `console.log(...)` — TS leakage, literal copy-paste.
+   - `println(...)` — dropped the `!`. Compiles to "unresolved
+     symbol" because `println` (no `!`) doesn't exist; it's a
+     macro identifier, not a function.
+   - `print!(...)` — right macro family, wrong member. Prints
+     without a trailing newline; usually not what the learner
+     wants when translating from `console.log`.
+
+  Two variants (hello, ready) keep the same shape across two
+  literal strings — replayability without losing focus.

@@ -59,6 +59,6 @@ function needsLegacyPrefix(id: string): boolean {
   if (parts.some((s) => s === "")) return false;
   /* Defensive: if a 3-segment id somehow starts with a known lang
    * slug, leave it alone (it's malformed but not "legacy Go"). */
-  if (parts[0] === "go" || parts[0] === "zig") return false;
+  if (parts[0] === "go" || parts[0] === "zig" || parts[0] === "rust") return false;
   return true;
 }

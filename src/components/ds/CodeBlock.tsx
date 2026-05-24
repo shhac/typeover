@@ -2,7 +2,7 @@ import type { JSX, ParentProps } from "solid-js";
 import { splitProps, Show } from "solid-js";
 import { cn } from "./_internal";
 
-type Lang = "ts" | "go" | "zig" | "shell" | "plain";
+type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
 
 interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
   lang?: Lang;
@@ -26,6 +26,7 @@ const langLabel: Record<Lang, string> = {
   ts: "TS",
   go: "GO",
   zig: "ZIG",
+  rust: "RS",
   shell: "SH",
   plain: "",
 };
@@ -34,6 +35,7 @@ const langAccent: Record<Lang, string> = {
   ts: "text-accent-ts border-accent-ts/40",
   go: "text-accent-go border-accent-go/40",
   zig: "text-accent-zig border-accent-zig/40",
+  rust: "text-accent-rust border-accent-rust/40",
   shell: "text-accent-primary border-accent-primary/40",
   plain: "text-fg-muted border-border-default",
 };
@@ -42,6 +44,7 @@ const langBarBg: Record<Lang, string> = {
   ts: "bg-accent-ts/5",
   go: "bg-accent-go/5",
   zig: "bg-accent-zig/5",
+  rust: "bg-accent-rust/5",
   shell: "bg-accent-primary/5",
   plain: "bg-bg-inset",
 };

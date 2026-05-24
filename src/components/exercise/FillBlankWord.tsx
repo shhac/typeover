@@ -42,7 +42,7 @@ interface FillBlankWordProps {
   /** Which target language the exercise belongs to. Used to pick the
    *  CodeMirror Lezer grammar so Zig fill-words don't highlight with
    *  the Go parser. Defaults to "go" for back-compat. */
-  target?: "go" | "zig";
+  target?: "go" | "zig" | "rust";
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;

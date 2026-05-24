@@ -1,0 +1,10 @@
+target: rust
+title: Foundations
+order: 1
+summary: |
+  The "you already know this, just spelled differently" module for
+  Rust. Printing, variables and mutability, primitives, conditionals,
+  loops, functions, and the &str / String split. By the end, the
+  bilingual reflex (TS-name → Rust-name) is fluent for the stuff that
+  doesn't yet involve ownership and borrowing. Modules 2+ pick up the
+  parts of Rust that don't have direct TS analogues.

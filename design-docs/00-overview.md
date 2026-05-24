@@ -31,6 +31,13 @@ from these files alone.
 | 12 | [test-plan.md](12-test-plan.md) | Critical-path test checklist for when Vitest lands. |
 | 13 | [themes.md](13-themes.md) | Theme catalogue + the data-theme swap mechanism. |
 
+## Architecture follow-ups
+
+| # | Doc | Question it answers |
+|---|---|---|
+| 31 | [multi-language-architecture-2026-05-22.md](31-multi-language-architecture-2026-05-22.md) | The one-time architectural reshape when Zig joined Go. |
+| 32 | [compile-service-architecture-2026-05-24.md](32-compile-service-architecture-2026-05-24.md) | How `runtime: "server"` resolves: Vercel Sandbox, SW cache, language-agnostic shape. |
+
 ## Open / parked
 
 | # | Doc | Question it answers |

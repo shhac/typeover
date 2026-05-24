@@ -1,0 +1,38 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: mcq
+order: 3
+prompt: |
+  Rust splits TypeScript's single `console.log` into two macros:
+  `println!` adds a trailing newline, `print!` does not. The two
+  exist because Rust takes I/O seriously — every byte you write
+  is explicit. Pick the right macro for this no-newline case.
+generator:
+  kind: template
+  vars:
+    text: ['"loading..."', '"> "', '"."']
+  ts: |-
+    process.stdout.write(${text});
+  canonical: |-
+    print!(${text});
+  distractors:
+    - "println!(${text});"
+    - "console.log(${text});"
+    - "print(${text});"
+hints:
+  - "TS-side, `process.stdout.write` is the no-trailing-newline form (vs `console.log` which appends `\\n`). Rust's symmetric pair is `print!` (no newline) vs `println!` (newline)."
+  - "Shape: `print!(\"text\");` — same macro syntax, no `ln` in the name. The `!` is still required."
+  - 'For the `"loading..."` variant: `print!("loading...");`'
+runtime: none
+notes: |
+  Recognition exercise — solidify the print! vs println! split
+  before the variables module asks learners to combine them with
+  format args. Distractors:
+   - `println!` — wrong member of the pair (adds newline learner
+     was told not to add).
+   - `console.log` — TS leakage.
+   - `print(...)` (no `!`) — dropped the macro marker, same kind
+     of slip as exercise 01.
+
+  Three text variants (loading, prompt, dot) keep the shape stable
+  while showing common no-newline use cases.

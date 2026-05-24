@@ -7,9 +7,9 @@ import { cn } from "./_internal";
 
 interface LangCrumbsProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Source language. Defaults to "ts". */
-  from?: "ts" | "go" | "zig";
+  from?: "ts" | "go" | "zig" | "rust";
   /** Target language. Defaults to "go". */
-  to?: "ts" | "go" | "zig";
+  to?: "ts" | "go" | "zig" | "rust";
 }
 
 /**

@@ -10,7 +10,7 @@ import { GeneratorSchema } from "./generator-schema";
  * exercise / theme / module shape. Edit here, never elsewhere.
  */
 
-export const targetSchema = z.enum(["go", "zig"]);
+export const targetSchema = z.enum(["go", "zig", "rust"]);
 export type Target = z.infer<typeof targetSchema>;
 
 export const moduleSchema = z.object({
