@@ -5,9 +5,8 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   /* Canonical origin for absolute URLs (og:image, og:url, sitemap).
-   * Currently the Vercel preview deploy; flips to https://typeover.dev
-   * when the domain is claimed (design-docs/07 pre-launch checklist). */
-  site: "https://typeover.paulie.app",
+   * typeover.paulie.app remains live as a secondary host. */
+  site: "https://typeover.dev",
   integrations: [
     solid(),
     /* Auto-emit sitemap.xml at build covering every static + dynamic

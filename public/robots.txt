@@ -8,4 +8,4 @@ Allow: /
 Disallow: /design-system
 Disallow: /runtime-smoke
 
-Sitemap: https://typeover.paulie.app/sitemap-index.xml
+Sitemap: https://typeover.dev/sitemap-index.xml

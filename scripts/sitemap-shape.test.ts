@@ -29,7 +29,7 @@ skipUnlessBuilt("sitemap + robots — release hygiene", () => {
 
   it("sitemap URLs use the canonical origin", () => {
     const xml = readFileSync(join(distDir, "sitemap-0.xml"), "utf8");
-    expect(xml).toContain("https://typeover.paulie.app/");
+    expect(xml).toContain("https://typeover.dev/");
   });
 
   it("excludes /design-system and /runtime-smoke (internal dev tools)", () => {
@@ -43,14 +43,14 @@ skipUnlessBuilt("sitemap + robots — release hygiene", () => {
     /* The home page, the curriculum index, and Module 1's first
      * exercise — the three URLs a discovery crawler should land
      * on first. */
-    expect(xml).toContain("<loc>https://typeover.paulie.app/</loc>");
-    expect(xml).toContain("https://typeover.paulie.app/go/");
-    expect(xml).toContain("https://typeover.paulie.app/go/foundations/variables/01/");
+    expect(xml).toContain("<loc>https://typeover.dev/</loc>");
+    expect(xml).toContain("https://typeover.dev/go/");
+    expect(xml).toContain("https://typeover.dev/go/foundations/variables/01/");
   });
 
   it("robots.txt points at the sitemap-index", () => {
     const txt = readFileSync(join(distDir, "robots.txt"), "utf8");
-    expect(txt).toMatch(/Sitemap:\s*https:\/\/typeover\.paulie\.app\/sitemap-index\.xml/);
+    expect(txt).toMatch(/Sitemap:\s*https:\/\/typeover\.dev\/sitemap-index\.xml/);
     expect(txt).toMatch(/Disallow:\s*\/design-system/);
     expect(txt).toMatch(/Disallow:\s*\/runtime-smoke/);
   });

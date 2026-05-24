@@ -20,7 +20,7 @@ const { title, description, prevExerciseHref, nextExerciseHref } = Astro.props;
  * og:image URL — some social platforms (notably LinkedIn and
  * old-school crawlers) refuse relative image paths. Falls back to
  * a sensible literal so dev / preview builds don't break. */
-const SITE_ORIGIN = import.meta.env.SITE ?? "https://typeover.paulie.app";
+const SITE_ORIGIN = import.meta.env.SITE ?? "https://typeover.dev";
 const ogImage = new URL("/og-image.svg", SITE_ORIGIN).toString();
 const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
 

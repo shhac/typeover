@@ -79,7 +79,7 @@ interface ModuleCompleteCardProps {
   /** Pre-composed share text. The card slots the live module title +
    *  exercise count in via simple {placeholder} substitution. */
   shareTemplate: string;
-  /** Origin of the deploy (typeover.paulie.app / typeover.dev) —
+  /** Origin of the deploy (typeover.dev) —
    *  used to build the absolute share URL. */
   siteOrigin: string;
 }
