@@ -26,14 +26,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
  * because the historic suite was written against `runtime: "yaegi"`;
  * the runtime-selection block below uses both pairs to verify the
  * hook dispatches to the right worker. */
-const { evalMock, readyMock, terminateMock, zigEvalMock, zigReadyMock, zigTerminateMock } =
-  vi.hoisted(() => ({
+const {
+  evalMock,
+  readyMock,
+  terminateMock,
+  zigEvalMock,
+  zigReadyMock,
+  zigTerminateMock,
+  rustEvalMock,
+  rustReadyMock,
+  rustTerminateMock,
+} = vi.hoisted(() => ({
     evalMock: vi.fn(),
     readyMock: vi.fn(),
     terminateMock: vi.fn(),
     zigEvalMock: vi.fn(),
     zigReadyMock: vi.fn(),
     zigTerminateMock: vi.fn(),
+    rustEvalMock: vi.fn(),
+    rustReadyMock: vi.fn(),
+    rustTerminateMock: vi.fn(),
   }));
 
 vi.mock("~/runtime", () => ({
@@ -41,6 +53,8 @@ vi.mock("~/runtime", () => ({
   terminateRunner: terminateMock,
   getZigRunner: () => ({ eval: zigEvalMock, ready: zigReadyMock }),
   terminateZigRunner: zigTerminateMock,
+  getRustRunner: () => ({ eval: rustEvalMock, ready: rustReadyMock }),
+  terminateRustRunner: rustTerminateMock,
 }));
 
 import { useRuntimeRun } from "./use-runtime-run";

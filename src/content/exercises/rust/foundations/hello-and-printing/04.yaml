@@ -1,0 +1,39 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: freeform
+order: 4
+prompt: |
+  Write a complete Rust program that prints exactly:
+
+      hello
+
+  Use `println!` (one call) inside `main`. The grader runs your
+  program on a server and checks stdout, so you need the full
+  `fn main() { ... }` wrapper, not just the print statement.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("hello");
+  canonical: |-
+    fn main() {
+        println!("hello");
+    }
+expectStdout: |
+  hello
+runtime: server
+hints:
+  - "Rust programs need an explicit `main`. Inside it, `println!` is the macro you want — note the `!`. The `println!` flavour appends a newline for free, so you don't need to add `\\n` yourself."
+  - "Skeleton: `fn main() { println!(\"hello\"); }`. The braces are required even for a one-statement body."
+  - "Canonical program:\n\n```rust\nfn main() {\n    println!(\"hello\");\n}\n```"
+notes: |
+  First Rust freeform exercise. The smallest possible end-to-end
+  test of the server-compile path: take the learner's program,
+  compile it to wasm32-wasip1 on the server (or hit the prebake'd
+  cache for the canonical), run in a Worker via browser_wasi_shim,
+  match stdout against `expectStdout`.
+
+  The TS counterpart is intentionally trivial — a one-line
+  `console.log` — so the learner's cognitive load is on the
+  Rust shape (entry point, macro `!`, braces, semicolon), not
+  on understanding what to print.

@@ -17,12 +17,14 @@ interface FreeformProps {
   generator: GeneratorSpec;
   hints: readonly [string, string, string];
   expectStdout: string;
-  /** Which runtime to grade against. `"yaegi"` and `"zig"` route to
-   *  their respective in-browser workers. `"server"` is reserved for
-   *  the future Vercel-function fallback (not implemented yet — the
-   *  page's freeform gate excludes it via `runtime !== "none"` and
-   *  this component disables Run when the runtime isn't one we drive). */
-  runtime: "yaegi" | "zig" | "server";
+  /** Which runtime to grade against. `"yaegi"`, `"zig"`, and
+   *  `"rust"` route to their respective in-browser workers (the
+   *  rust worker proxies to /api/compile/rust + SW L1 cache).
+   *  `"server"` remains a schema-level placeholder for compile
+   *  routes that don't yet have a client-side driver — the page
+   *  reshapes (target=rust, runtime=server) → runtime=rust before
+   *  reaching this component. design-docs/32. */
+  runtime: "yaegi" | "zig" | "rust" | "server";
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
@@ -152,7 +154,7 @@ export function Freeform(props: FreeformProps) {
     >
       <CodeMirrorEditor
         ariaLabel={`${runner.runtimeLabel} program for freeform exercise`}
-        language={runner.runtimeTarget === "zig" ? "zig" : "go"}
+        language={runner.runtimeTarget}
         canonical={instance().canonical}
         value={code()}
         onValueChange={(next) => {

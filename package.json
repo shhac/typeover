@@ -26,7 +26,8 @@
     "runtime:zig:smoke": "node runtime/zig-wasm/smoke.mjs",
     "content:lint": "node scripts/content-lint.ts",
     "content:new": "node scripts/content-new-theme.ts",
-    "content:report": "node scripts/content-report.ts"
+    "content:report": "node scripts/content-report.ts",
+    "cache:prebake": "node scripts/prebake-compile-cache.ts"
   },
   "dependencies": {
     "@andrewbranch/untar.js": "^1.0.3",
@@ -45,6 +46,7 @@
     "@ndim/codemirror-lang-zig": "^0.1.0",
     "@ndim/lezer-zig": "^0.1.0",
     "@tailwindcss/vite": "^4.3.0",
+    "@vercel/sandbox": "^2.0.0",
     "astro": "^6.3.3",
     "comlink": "^4.4.2",
     "diff": "^9.0.0",

@@ -1,6 +1,13 @@
 import { createSignal } from "solid-js";
 import type { Target } from "./content-schema";
-import { getRunner, getZigRunner, terminateRunner, terminateZigRunner } from "~/runtime";
+import {
+  getRunner,
+  getRustRunner,
+  getZigRunner,
+  terminateRunner,
+  terminateRustRunner,
+  terminateZigRunner,
+} from "~/runtime";
 import { LANG_DISPLAY } from "./lang";
 
 /*
@@ -34,15 +41,21 @@ import { LANG_DISPLAY } from "./lang";
  */
 
 /** Client-side runtimes the hook actually drives. Each maps to a
- *  Web Worker accessor in `RUNTIME_ACCESSORS` below. */
-export type ClientRuntime = "yaegi" | "zig";
+ *  Web Worker accessor in `RUNTIME_ACCESSORS` below.
+ *
+ *  `rust` is the server-compile path — the worker POSTs source to
+ *  /api/compile/rust and runs the returned wasm. From the hook's
+ *  perspective the API surface is identical to a fully-local
+ *  runtime; the SW intercepting that POST is the cache-aware part. */
+export type ClientRuntime = "yaegi" | "zig" | "rust";
 
-/** Wider runtime set the hook *accepts* — includes `"server"` for
- *  the future SSR-fallback path. The hook can't drive `"server"`
- *  today (no worker exists for it), so `canRun` below is `false`
- *  in that branch and Run-button consumers gate on it. Lets the
- *  consuming component pass `props.runtime` through verbatim
- *  without a snap-default. */
+/** Wider runtime set the hook *accepts* — includes `"server"` as a
+ *  schema-level placeholder for compile-routes that don't yet have
+ *  a client-side worker (e.g. server-compile Go). The hook returns
+ *  `canRun: false` for `"server"` and the consumer gates on it.
+ *  The (target=rust, runtime=server) combo is reshaped to
+ *  `runtime: "rust"` at the page boundary before reaching the
+ *  hook. */
 export type AcceptedRuntime = ClientRuntime | "server";
 
 /* Which curriculum-target language each runtime grades. Drives
@@ -52,6 +65,7 @@ export type AcceptedRuntime = ClientRuntime | "server";
 const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
   yaegi: "go",
   zig: "zig",
+  rust: "rust",
 };
 
 /* Human-facing label per runtime. Derived from RUNTIME_TARGET +
@@ -62,6 +76,7 @@ const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
 const RUNTIME_LABELS: Record<ClientRuntime, string> = {
   yaegi: LANG_DISPLAY[RUNTIME_TARGET.yaegi],
   zig: LANG_DISPLAY[RUNTIME_TARGET.zig],
+  rust: LANG_DISPLAY[RUNTIME_TARGET.rust],
 };
 
 /* Internal — keep the {get, terminate} pair per runtime so the
@@ -77,6 +92,7 @@ interface RuntimeAccessors {
 const RUNTIME_ACCESSORS: Record<ClientRuntime, RuntimeAccessors> = {
   yaegi: { get: getRunner, terminate: terminateRunner },
   zig: { get: getZigRunner, terminate: terminateZigRunner },
+  rust: { get: getRustRunner, terminate: terminateRustRunner },
 };
 
 export interface RunResult {

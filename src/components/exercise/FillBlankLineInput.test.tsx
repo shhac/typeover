@@ -22,11 +22,13 @@ import type { GeneratorSpec } from "~/lib/generator-schema";
  * localStorage shim.
  */
 
-const { evalMock, terminateMock, zigEvalMock, zigTerminateMock } = vi.hoisted(() => ({
+const { evalMock, terminateMock, zigEvalMock, zigTerminateMock, rustEvalMock, rustTerminateMock } = vi.hoisted(() => ({
   evalMock: vi.fn(),
   terminateMock: vi.fn(),
   zigEvalMock: vi.fn(),
   zigTerminateMock: vi.fn(),
+  rustEvalMock: vi.fn(),
+  rustTerminateMock: vi.fn(),
 }));
 
 vi.mock("~/runtime", () => ({
@@ -37,6 +39,8 @@ vi.mock("~/runtime", () => ({
   terminateRunner: terminateMock,
   getZigRunner: () => ({ eval: zigEvalMock, ready: () => Promise.resolve() }),
   terminateZigRunner: zigTerminateMock,
+  getRustRunner: () => ({ eval: rustEvalMock, ready: () => Promise.resolve() }),
+  terminateRustRunner: rustTerminateMock,
 }));
 
 import { FillBlankLineInput } from "./FillBlankLineInput";

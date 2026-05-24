@@ -26,9 +26,11 @@ const { evalMock, terminateMock } = vi.hoisted(() => ({
 /* Distinct spies per runtime so the runtime-selection block at the
  * bottom can verify dispatch. The main blocks use the Yaegi pair
  * (matching the historic suite). */
-const { zigEvalMock, zigTerminateMock } = vi.hoisted(() => ({
+const { zigEvalMock, zigTerminateMock, rustEvalMock, rustTerminateMock } = vi.hoisted(() => ({
   zigEvalMock: vi.fn(),
   zigTerminateMock: vi.fn(),
+  rustEvalMock: vi.fn(),
+  rustTerminateMock: vi.fn(),
 }));
 
 vi.mock("~/runtime", () => ({
@@ -36,6 +38,8 @@ vi.mock("~/runtime", () => ({
   terminateRunner: terminateMock,
   getZigRunner: () => ({ eval: zigEvalMock, ready: () => Promise.resolve() }),
   terminateZigRunner: zigTerminateMock,
+  getRustRunner: () => ({ eval: rustEvalMock, ready: () => Promise.resolve() }),
+  terminateRustRunner: rustTerminateMock,
 }));
 
 import { Freeform } from "./Freeform";

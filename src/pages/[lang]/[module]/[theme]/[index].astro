@@ -175,7 +175,7 @@ const parentThemeHref = themeHref(themeEntry.id);
               generator={ex.generator}
               hints={ex.hints}
               expectStdout={ex.expectStdout}
-              runtime={ex.runtime}
+              runtime={ex.target === "rust" && ex.runtime === "server" ? "rust" : ex.runtime}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}

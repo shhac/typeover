@@ -1,6 +1,7 @@
 import { wrap, type Remote } from "comlink";
 import type { YaegiWorkerAPI } from "./yaegi-worker";
 import type { ZigWorkerAPI } from "./zig-worker";
+import type { RustWorkerAPI } from "./rust-worker";
 
 /*
  * Main-thread accessors for the language-specific WASM runtimes. One
@@ -20,6 +21,7 @@ import type { ZigWorkerAPI } from "./zig-worker";
 
 export type YaegiRunner = Remote<YaegiWorkerAPI>;
 export type ZigRunner = Remote<ZigWorkerAPI>;
+export type RustRunner = Remote<RustWorkerAPI>;
 
 let yaegiRunner: YaegiRunner | null = null;
 let yaegiWorker: Worker | null = null;
@@ -66,4 +68,28 @@ export function terminateZigRunner(): void {
   zigWorker?.terminate();
   zigWorker = null;
   zigRunner = null;
+}
+
+let rustRunner: RustRunner | null = null;
+let rustWorker: Worker | null = null;
+
+/** Lazy accessor for the Rust runner. Boots a worker that proxies
+ *  compile requests to /api/compile/rust (intercepted by the SW
+ *  for L1 cache hits) and runs returned wasm via
+ *  @bjorn3/browser_wasi_shim. No compiler payload to fetch
+ *  ahead-of-time — `ready()` is a no-op. */
+export function getRustRunner(): RustRunner {
+  if (rustRunner) return rustRunner;
+  rustWorker = new Worker(new URL("./rust-worker.ts", import.meta.url), {
+    type: "module",
+  });
+  rustRunner = wrap<RustWorkerAPI>(rustWorker);
+  void rustRunner.ready();
+  return rustRunner;
+}
+
+export function terminateRustRunner(): void {
+  rustWorker?.terminate();
+  rustWorker = null;
+  rustRunner = null;
 }
