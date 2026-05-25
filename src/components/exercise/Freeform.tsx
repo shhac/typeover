@@ -4,7 +4,7 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
-import { useRuntimeRun, runtimeToTarget } from "~/lib/use-runtime-run";
+import { useRuntimeRun, runtimeToTarget, type AcceptedRuntime } from "~/lib/use-runtime-run";
 import {
   LANGUAGE_FREEFORM_SCAFFOLD,
   resolveSubmissionShape,
@@ -29,8 +29,11 @@ interface FreeformProps {
    *  `"server"` remains a schema-level placeholder for compile
    *  routes that don't yet have a client-side driver — the page
    *  reshapes (target=rust, runtime=server) → runtime=rust before
-   *  reaching this component. design-docs/32. */
-  runtime: "yaegi" | "zig" | "rust" | "server";
+   *  reaching this component. The canonical union lives in
+   *  `client-runtime-descriptors.ts`; re-exporting through
+   *  `use-runtime-run` so we type-check in lock-step with the
+   *  hook that consumes us. design-docs/32. */
+  runtime: AcceptedRuntime;
   /** Optional per-exercise override on the submission's required
    *  bookends. Layered onto the per-language default in
    *  `freeform-shape.ts` — exercises that don't set this get the

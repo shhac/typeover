@@ -43,43 +43,48 @@ export const langHref = (lang: string) => `/${lang}`;
 
 /* =========================== Static-paths =========================== */
 
-/**
- * Parse an exercise collection id (`<lang>/<module>/<theme>/<index>`)
- * into the route params Astro's `getStaticPaths` returns. Returns
- * `null` if the id has the wrong shape — content with a malformed
- * path would silently render `/undefined/...`-style routes otherwise.
- */
+/** Generic splitter for collection-id → route-params. Each entry in
+ *  `keys` consumes one `/`-segment; if the id has the wrong number
+ *  of segments, or any segment is empty, the result is `null`. All
+ *  three concrete `paramsForX` helpers below are one call into this
+ *  + a `keys` literal — the validation rule lives in exactly one
+ *  place. Content with a malformed path would otherwise silently
+ *  render `/undefined/...`-style routes. */
+export function parseIdSegments<K extends string>(
+  id: string,
+  keys: readonly K[],
+): Record<K, string> | null {
+  const parts = id.split("/");
+  if (parts.length !== keys.length) return null;
+  const out = {} as Record<K, string>;
+  for (let i = 0; i < keys.length; i++) {
+    const part = parts[i];
+    if (!part) return null;
+    out[keys[i]!] = part;
+  }
+  return out;
+}
+
+const EXERCISE_KEYS = ["lang", "module", "theme", "index"] as const;
+const THEME_KEYS = ["lang", "module", "theme"] as const;
+const MODULE_KEYS = ["lang", "module"] as const;
+
+/** Parse an exercise collection id (`<lang>/<module>/<theme>/<index>`)
+ *  into the route params Astro's `getStaticPaths` returns. */
 export function paramsForExercise(
   id: string,
 ): { lang: string; module: string; theme: string; index: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 4) return null;
-  const [lang, module, theme, index] = parts;
-  if (!lang || !module || !theme || !index) return null;
-  return { lang, module, theme, index };
+  return parseIdSegments(id, EXERCISE_KEYS);
 }
 
-/**
- * Parse a theme collection id (`<lang>/<module>/<theme>`) into route
- * params for the theme-overview page. Returns null if malformed.
- */
+/** Parse a theme collection id (`<lang>/<module>/<theme>`) into route
+ *  params for the theme-overview page. */
 export function paramsForTheme(id: string): { lang: string; module: string; theme: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 3) return null;
-  const [lang, module, theme] = parts;
-  if (!lang || !module || !theme) return null;
-  return { lang, module, theme };
+  return parseIdSegments(id, THEME_KEYS);
 }
 
-/**
- * Parse a module collection id (`<lang>/<module>`) into route params
- * for the module-overview / module-complete pages. Returns null if
- * malformed.
- */
+/** Parse a module collection id (`<lang>/<module>`) into route params
+ *  for the module-overview / module-complete pages. */
 export function paramsForModule(id: string): { lang: string; module: string } | null {
-  const parts = id.split("/");
-  if (parts.length !== 2) return null;
-  const [lang, module] = parts;
-  if (!lang || !module) return null;
-  return { lang, module };
+  return parseIdSegments(id, MODULE_KEYS);
 }

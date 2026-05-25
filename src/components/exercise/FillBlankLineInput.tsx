@@ -7,7 +7,7 @@ import { normaliseSubmission } from "~/lib/submission-normalise";
 import { useAutoSubmittingPhase } from "~/lib/use-auto-submitting-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
-import { useRuntimeRun } from "~/lib/use-runtime-run";
+import { useRuntimeRun, type ClientRuntime } from "~/lib/use-runtime-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { InstructionLine } from "../ds/InstructionLine";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
@@ -34,8 +34,10 @@ interface FillBlankLineInputProps {
    *  hits). The schema's `validateFillLineMode` admits the wider
    *  `runtime: server` and exercise-dispatch reshapes
    *  (target=rust, runtime=server) → `"rust"` at the page boundary
-   *  before it reaches this prop. */
-  runtime: "yaegi" | "zig" | "rust";
+   *  before it reaches this prop. ClientRuntime is the narrower
+   *  hook-facing union (no `"server"`) so a regression that tried
+   *  to pass the server placeholder here would fail typecheck. */
+  runtime: ClientRuntime;
   /** Alternate submission strings that grade correct even when
    *  Yaegi can't run them (e.g. Go 1.21+ generic-stdlib forms our
    *  Yaegi build doesn't support yet). Whitespace-normalised match.
