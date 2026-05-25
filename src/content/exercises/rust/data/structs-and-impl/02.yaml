@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: mcq
+order: 2
+prompt: |
+  Given `struct Point { x: f64, y: f64 }`, pick the expression
+  that constructs a `Point` with x=1.0 and y=2.0.
+generator:
+  kind: variant
+  variants:
+    - id: point-literal
+      ts: 'const p: Point = { x: 1.0, y: 2.0 };'
+      canonical: 'Point { x: 1.0, y: 2.0 } — named-field struct literal; type name followed by braces with `field: value` pairs.'
+      distractors:
+        - 'Point(1.0, 2.0) — positional construction works only for TUPLE structs; named-field structs need `{ field: value }`.'
+        - 'new Point(1.0, 2.0) — Rust has no `new` keyword; constructors are plain `fn` (typically named `new`).'
+        - '{ x: 1.0, y: 2.0 } as Point — TS-style type assertion; Rust struct literals require the type name BEFORE the braces.'
+hints:
+  - "Struct literals start with the type name and use BRACES containing `field: value` pairs separated by commas. There is no `new` keyword."
+  - "Shape: `<Type> { <field>: <value>, ... }`."
+  - '`Point { x: 1.0, y: 2.0 }`'
+runtime: none
+notes: |
+  Pins struct-literal syntax. Distractors cover positional
+  (tuple-struct only), `new` keyword (Java/TS reflex), and
+  TS-style type assertion.

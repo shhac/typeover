@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: fill-word
+order: 5
+prompt: |
+  Fill the receiver for a method that READS the rectangle without
+  taking ownership.
+generator:
+  kind: template
+  vars:
+    recv: ["&self"]
+  ts: |-
+    class Rectangle {
+      width: number;
+      height: number;
+      area(): number { return this.width * this.height; }
+    }
+  canonical: |-
+    struct Rectangle { width: f64, height: f64 }
+
+    impl Rectangle {
+        fn area(${recv}) -> f64 {
+            self.width * self.height
+        }
+    }
+blanks: [recv]
+hints:
+  - "Two tokens: the SHARED borrow prefix from slot 01 of `borrowing`, plus the lowercase receiver name. Without the prefix, the method takes ownership of the rectangle and the caller can't use it afterward."
+  - "Five characters: `&` + four-letter receiver name."
+  - "`&self`"
+runtime: none
+notes: |
+  Drills the `&self` read-only receiver. Distinct from `self`
+  (takes ownership) and `&mut self` (exclusive borrow for
+  mutation).

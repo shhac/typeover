@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: mcq
+order: 1
+prompt: |
+  Declare a `Point` with `x` and `y` as `f64` fields. Pick the
+  idiomatic Rust syntax.
+generator:
+  kind: variant
+  variants:
+    - id: point-decl
+      ts: 'type Point = { x: number; y: number; };'
+      canonical: 'struct Point { x: f64, y: f64, } — named-field struct, comma-separated.'
+      distractors:
+        - 'class Point { x: f64; y: f64; } — Rust has no `class` keyword; data declarations are `struct`.'
+        - 'struct Point(f64, f64); — that''s a TUPLE struct (positional fields); usable, but the question asks for NAMED fields.'
+        - 'struct Point { x: f64; y: f64; } — fields are comma-separated, not semicolon-separated.'
+hints:
+  - "The keyword is the same one used in C and Go for data declarations, lowercase. Fields are NAMED with type after a colon, separated by commas (not semicolons)."
+  - "Six letters: `struct`."
+  - '`struct Point { x: f64, y: f64, }`'
+runtime: none
+notes: |
+  Establishes the named-field struct shape. Distractors cover
+  `class` (TS reflex), tuple-struct (valid but off-spec for
+  this question), and `;` separators (Go reflex).

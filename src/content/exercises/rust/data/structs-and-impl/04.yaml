@@ -1,0 +1,33 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: fill-word
+order: 4
+prompt: |
+  Fill the keyword that attaches methods to a struct. Goes
+  directly before the type name.
+generator:
+  kind: template
+  vars:
+    keyword: ["impl"]
+  ts: |-
+    class Point {
+      constructor(public x: number, public y: number) {}
+    }
+  canonical: |-
+    struct Point { x: f64, y: f64 }
+
+    ${keyword} Point {
+        fn new(x: f64, y: f64) -> Self {
+            Point { x, y }
+        }
+    }
+blanks: [keyword]
+hints:
+  - "Four letters. Names a block that contains methods for a type. Sits between the struct declaration and the methods."
+  - "Same shape as Swift extensions or Go method blocks — but Rust uses one specific keyword."
+  - "`impl`"
+runtime: none
+notes: |
+  Drills the `impl` keyword as the attaching mechanism. Body
+  shows the `Point { x, y }` field-shorthand — same name on
+  both sides allows omission of `field: field`.

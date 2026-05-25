@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: freeform
+order: 6
+prompt: |
+  Define a struct `Point` with `f64` fields `x` and `y`, and an
+  `impl` block with a constructor `Point::new(x, y) -> Self`.
+  `main` builds `Point::new(3.0, 4.0)` and prints `x y` on one
+  line.
+
+  Output:
+
+      3 4
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Point {
+      constructor(public x: number, public y: number) {}
+    }
+    const p = new Point(3.0, 4.0);
+    console.log(p.x + " " + p.y);
+  canonical: |-
+    struct Point { x: f64, y: f64 }
+
+    impl Point {
+        fn new(x: f64, y: f64) -> Self {
+            Point { x, y }
+        }
+    }
+
+    fn main() {
+        let p = Point::new(3.0, 4.0);
+        println!("{} {}", p.x, p.y);
+    }
+expectStdout: |
+  3 4
+hints:
+  - "Three pieces: struct declaration `struct Point { x: f64, y: f64 }`, impl block with `fn new(x: f64, y: f64) -> Self`, and the body `Point { x, y }` (field-shorthand because the param names match the field names)."
+  - "Call site: `Point::new(3.0, 4.0)` — `::` accesses associated functions."
+  - |-
+    struct Point { x: f64, y: f64 }
+
+    impl Point {
+        fn new(x: f64, y: f64) -> Self {
+            Point { x, y }
+        }
+    }
+
+    fn main() {
+        let p = Point::new(3.0, 4.0);
+        println!("{} {}", p.x, p.y);
+    }
+runtime: server
+notes: |
+  First freeform — pins the full struct + impl + constructor
+  loop. The field-shorthand `Point { x, y }` only works when
+  the parameter names match the field names; that's the
+  payoff for naming params `x` and `y`.

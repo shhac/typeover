@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript class to Rust. A `Counter` starts at
+  0 and has an `inc(&mut self)` method that increments. `main`
+  builds a counter, increments twice, prints the count.
+
+  Output:
+
+      2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Counter {
+      count: number = 0;
+      static new(): Counter { return new Counter(); }
+      inc(): void { this.count += 1; }
+    }
+    const c = Counter.new();
+    c.inc();
+    c.inc();
+    console.log(c.count);
+  canonical: |-
+    struct Counter { count: i32 }
+
+    impl Counter {
+        fn new() -> Self {
+            Counter { count: 0 }
+        }
+
+        fn inc(&mut self) {
+            self.count += 1;
+        }
+    }
+
+    fn main() {
+        let mut c = Counter::new();
+        c.inc();
+        c.inc();
+        println!("{}", c.count);
+    }
+expectStdout: |
+  2
+hints:
+  - "Three pieces: struct with the `count: i32` field, impl with two methods (`new() -> Self` constructor and `inc(&mut self)` mutator), and `main` declaring `let mut c` so the call-site can take an `&mut` borrow."
+  - "`&mut self` is the mutable receiver; the binding at the call site (`let mut c`) must ALSO be `mut` to allow it."
+  - |-
+    struct Counter { count: i32 }
+
+    impl Counter {
+        fn new() -> Self {
+            Counter { count: 0 }
+        }
+
+        fn inc(&mut self) {
+            self.count += 1;
+        }
+    }
+
+    fn main() {
+        let mut c = Counter::new();
+        c.inc();
+        c.inc();
+        println!("{}", c.count);
+    }
+runtime: server
+notes: |
+  Drills `&mut self` for state-mutating methods. The
+  `let mut c` is required — `&mut self` at call site needs
+  the binding itself to be mutable.

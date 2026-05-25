@@ -1,0 +1,68 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: freeform
+order: 9
+prompt: |
+  This method tries to RETURN the name out of `self`:
+
+      error[E0507]: cannot move out of `self.name` which is behind
+      a shared reference
+
+      fn name(&self) -> String {
+          self.name
+      }
+
+  The fix is to return a REFERENCE instead of moving the field
+  out. Change the return type to `&str` and the body to `&self.name`.
+  `main` creates a `Person { name: String::from("paul") }` and
+  prints the name.
+
+  Output:
+
+      paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Person {
+      constructor(public name: string) {}
+      getName(): string { return this.name; }
+    }
+    const p = new Person("paul");
+    console.log(p.getName());
+  canonical: |-
+    struct Person { name: String }
+
+    impl Person {
+        fn name(&self) -> &str {
+            &self.name
+        }
+    }
+
+    fn main() {
+        let p = Person { name: String::from("paul") };
+        println!("{}", p.name());
+    }
+expectStdout: |
+  paul
+hints:
+  - "Two coordinated edits: return type goes from `String` to `&str` (a borrowed view, not an owned value), and the body returns `&self.name` (a reference to the field, not the field itself). The borrow lives as long as `self`."
+  - "The `&String` from `&self.name` auto-derefs to `&str` at the return type."
+  - |-
+    struct Person { name: String }
+
+    impl Person {
+        fn name(&self) -> &str {
+            &self.name
+        }
+    }
+
+    fn main() {
+        let p = Person { name: String::from("paul") };
+        println!("{}", p.name());
+    }
+runtime: server
+notes: |
+  Closes the theme by surfacing E0507. The fix favours
+  returning a borrow over `.clone()` — zero allocation, same
+  semantics, only the call-site keeps using `p` after.

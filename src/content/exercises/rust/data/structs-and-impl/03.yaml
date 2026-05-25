@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: mcq
+order: 3
+prompt: |
+  Inside `impl Point`, a constructor `fn new(x: f64, y: f64)` returns
+  a Point. Pick the idiomatic return type.
+generator:
+  kind: variant
+  variants:
+    - id: self-return
+      ts: 'class Point { static of(x: number, y: number): Point { ... } }'
+      canonical: 'fn new(x: f64, y: f64) -> Self — `Self` refers to the type the impl is for; idiomatic and rename-safe.'
+      distractors:
+        - 'fn new(x: f64, y: f64) -> Point — works, but `Self` is preferred inside an impl block (no repetition, no breakage on type rename).'
+        - 'fn new(x: f64, y: f64) -> &Self — returns a reference, not a value; the caller can''t take ownership of the new Point.'
+        - 'fn new(x: f64, y: f64) -> this — `this` is not Rust syntax; the closest equivalent is `self` (the receiver, not the type).'
+hints:
+  - "Capitalised `Self` (with a big S) refers to the TYPE the impl block is for. Lowercase `self` is the RECEIVER. The return type wants the type, so capital S."
+  - "Four letters, capital S."
+  - '`Self`'
+runtime: none
+notes: |
+  Pins `Self` as the idiomatic return type. The Point variant
+  is a valid distractor — it works, but `Self` survives a
+  type rename without further edits.

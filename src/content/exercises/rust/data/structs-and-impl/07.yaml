@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/data/structs-and-impl
+type: freeform
+order: 7
+prompt: |
+  Define a struct `Rectangle` with `f64` fields `width` and
+  `height`, and a read-only method `area(&self) -> f64` that
+  returns `width * height`. `main` builds a 3.0 × 4.0
+  rectangle and prints its area.
+
+  Output:
+
+      12
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Rectangle {
+      constructor(public width: number, public height: number) {}
+      area(): number { return this.width * this.height; }
+    }
+    const r = new Rectangle(3.0, 4.0);
+    console.log(r.area());
+  canonical: |-
+    struct Rectangle { width: f64, height: f64 }
+
+    impl Rectangle {
+        fn area(&self) -> f64 {
+            self.width * self.height
+        }
+    }
+
+    fn main() {
+        let r = Rectangle { width: 3.0, height: 4.0 };
+        println!("{}", r.area());
+    }
+expectStdout: |
+  12
+hints:
+  - "Method signature: `fn area(&self) -> f64`. The `&self` receiver means the method borrows the rectangle for reading. Body is `self.width * self.height` — one expression, no trailing semicolon."
+  - "Call site uses method syntax: `r.area()`."
+  - |-
+    struct Rectangle { width: f64, height: f64 }
+
+    impl Rectangle {
+        fn area(&self) -> f64 {
+            self.width * self.height
+        }
+    }
+
+    fn main() {
+        let r = Rectangle { width: 3.0, height: 4.0 };
+        println!("{}", r.area());
+    }
+runtime: server
+notes: |
+  Drills the read-only method with `&self`. Uses a struct
+  literal (no constructor) to keep focus on the method;
+  contrasts slot 06 which uses `Point::new`.
