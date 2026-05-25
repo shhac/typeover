@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { NavLink } from "~/components/ds/NavLink";
 import { lastTouchedExerciseId } from "~/lib/progress";
 import { useProgressListener } from "~/lib/use-progress-listener";
@@ -12,6 +12,13 @@ import { useProgressListener } from "~/lib/use-progress-listener";
  * nothing if the learner has no progress yet. The hidden state is
  * the common case for first-time visitors and gracefully avoids
  * cluttering the header.
+ *
+ * When the learner is already ON the resume target, drops the
+ * "resume — " prefix and renders the same theme/slot fragment as
+ * plain text (no link affordance — clicking a link to the page
+ * you're on is a UX no-op). The breadcrumb stays so the header
+ * chrome reads consistently across pages; "resume" reappears the
+ * moment the learner navigates somewhere else.
  *
  * Display label is derived from the exerciseId path
  * (`<module>/<theme>/<slot>`), no theme-title lookup needed —
@@ -52,6 +59,16 @@ function describe(exerciseId: string): ResumeFragment | null {
   };
 }
 
+/** Pathname of the page currently rendered. Computed lazily so
+ *  SSR doesn't crash on the missing window. Memoised inside the
+ *  component below; full-page navigation will re-mount this island
+ *  with a fresh value, which is the correct refresh signal for the
+ *  current-page check. */
+function currentPath(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.pathname;
+}
+
 export function ResumeLink() {
   const [fragment, setFragment] = createSignal<ResumeFragment | null>(null);
 
@@ -60,21 +77,42 @@ export function ResumeLink() {
     setFragment(id ? describe(id) : null);
   });
 
+  /* Are we already viewing the resume target? Memoise so the
+   * <Show> branch picks the same answer both visits. */
+  const isHere = createMemo(() => {
+    const f = fragment();
+    return f !== null && f.href === currentPath();
+  });
+
   /* Truncate the slug to keep the chrome compact on mid-width
-   * screens. Mobile (< sm) drops the entire link to give the brand
-   * + arrows + curriculum-link three children room on a single
-   * row; sm+ shows the truncated label; lg+ shows it untruncated. */
+   * screens. Mobile (< sm) drops the entire chrome to give the
+   * brand + arrows + curriculum-link three children room on a
+   * single row; sm+ shows the truncated label; lg+ shows it
+   * untruncated. */
   return (
     <Show when={fragment()}>
       {(f) => (
-        <NavLink
-          href={f().href}
-          class="hidden sm:inline-block truncate max-w-[200px] lg:max-w-none"
-          aria-label={`Resume ${f().themeSlug} ${f().slotLabel}`}
-          title={`Resume ${f().themeSlug} ${f().slotLabel}`}
+        <Show
+          when={!isHere()}
+          fallback={
+            <span
+              class="hidden sm:inline-block truncate max-w-[200px] lg:max-w-none text-fg-muted"
+              aria-current="page"
+              title={`${f().themeSlug} ${f().slotLabel}`}
+            >
+              {f().themeSlug} · {f().slotLabel}
+            </span>
+          }
         >
-          resume — {f().themeSlug} · {f().slotLabel}
-        </NavLink>
+          <NavLink
+            href={f().href}
+            class="hidden sm:inline-block truncate max-w-[200px] lg:max-w-none"
+            aria-label={`Resume ${f().themeSlug} ${f().slotLabel}`}
+            title={`Resume ${f().themeSlug} ${f().slotLabel}`}
+          >
+            resume — {f().themeSlug} · {f().slotLabel}
+          </NavLink>
+        </Show>
       )}
     </Show>
   );
