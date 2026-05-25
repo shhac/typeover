@@ -39,11 +39,8 @@ interface GoRuntime {
   run(instance: WebAssembly.Instance): Promise<void>;
 }
 
-interface YaegiResult {
-  stdout: string;
-  stderr: string;
-  error: string;
-}
+import type { WorkerEvalResult as YaegiResult } from "./types";
+import { fetchAssetOrThrow } from "./fetch-asset";
 
 let initPromise: Promise<void> | null = null;
 
@@ -51,10 +48,8 @@ let initPromise: Promise<void> | null = null;
  *  worker's globalThis. No-op if Go is already registered. */
 async function loadGoBootstrap(): Promise<void> {
   if (typeof self.Go !== "undefined") return;
-  const execSrc = await fetch("/yaegi/wasm_exec.js").then((r) => {
-    if (!r.ok) throw new Error(`wasm_exec.js fetch failed (${r.status})`);
-    return r.text();
-  });
+  const res = await fetchAssetOrThrow("/yaegi/wasm_exec.js");
+  const execSrc = await res.text();
   /* The script writes to `globalThis.Go` via the `self`/`window`
    * branch inside it. Function-constructor execution gives the
    * script global scope without the CSP cost of inline <script>. */

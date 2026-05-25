@@ -31,13 +31,12 @@ import {
 } from "@bjorn3/browser_wasi_shim";
 import { errorMessage } from "./error-message";
 
-export interface WasiRunResult {
-  stdout: string;
-  stderr: string;
-  /** Empty on a clean exit. Compile-time traps (panic, unreachable,
-   *  stack overflow) and non-zero exit codes land here. */
-  error: string;
-}
+/* The canonical worker-eval result shape lives in `./types`. Re-
+ * exporting under the historical `WasiRunResult` name so existing
+ * callers (rust-worker, zig-worker via the shared run path) don't
+ * have to update; the type is structurally identical. */
+import type { WorkerEvalResult } from "./types";
+export type WasiRunResult = WorkerEvalResult;
 
 /** Capture writes to a WASI fd into a `{ text }` accumulator.
  *

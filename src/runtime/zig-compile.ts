@@ -31,6 +31,7 @@ import {
 import { buildStdlibTree, decompressIfGzipped } from "./zig-assets";
 import { captureFd } from "./wasi-run";
 import { errorMessage } from "./error-message";
+import { fetchAssetOrThrow } from "./fetch-asset";
 
 export interface PreparedAssets {
   /* Cached compiler module — instantiated fresh per eval (each WASI
@@ -53,8 +54,7 @@ let compilerPromise: Promise<WebAssembly.Module> | null = null;
 export function loadCompilerModule(): Promise<WebAssembly.Module> {
   if (compilerPromise) return compilerPromise;
   compilerPromise = (async () => {
-    const res = await fetch("/zig/zig.wasm");
-    if (!res.ok) throw new Error(`zig.wasm fetch failed (${res.status})`);
+    const res = await fetchAssetOrThrow("/zig/zig.wasm");
     return WebAssembly.compileStreaming(res);
   })();
   return compilerPromise;
@@ -82,16 +82,14 @@ export function loadHeavyAssets(): Promise<PreparedAssets> {
 }
 
 async function fetchStdlib(): Promise<Directory> {
-  const res = await fetch("/zig/zig-stdlib.tar.gz");
-  if (!res.ok) throw new Error(`zig-stdlib.tar.gz fetch failed (${res.status})`);
+  const res = await fetchAssetOrThrow("/zig/zig-stdlib.tar.gz");
   const compressed = await res.arrayBuffer();
   const buf = await decompressIfGzipped(compressed);
   return buildStdlibTree(buf);
 }
 
 async function fetchLibCompilerRt(): Promise<Uint8Array> {
-  const res = await fetch("/zig/libcompiler_rt.a");
-  if (!res.ok) throw new Error(`libcompiler_rt.a fetch failed (${res.status})`);
+  const res = await fetchAssetOrThrow("/zig/libcompiler_rt.a");
   return new Uint8Array(await res.arrayBuffer());
 }
 

@@ -19,15 +19,7 @@
 import { expose } from "comlink";
 import { runWasiBinary } from "./wasi-run";
 import { loadCompilerModule, loadHeavyAssets, tryCompile } from "./zig-compile";
-
-interface ZigResult {
-  stdout: string;
-  stderr: string;
-  /* Empty on a clean compile + run. Compile errors land here verbatim
-   * from the Zig compiler's stderr; runtime traps (panic, unreachable)
-   * land here too. */
-  error: string;
-}
+import type { WorkerEvalResult as ZigResult } from "./types";
 
 const api = {
   /** Idempotent — first call kicks off the compiler wasm fetch. The

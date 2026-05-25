@@ -1,4 +1,5 @@
 import type { Target } from "~/lib/content-schema";
+import type { WorkerEvalResult } from "./types";
 import {
   getRunner,
   getRustRunner,
@@ -31,7 +32,7 @@ interface ClientRuntimeDescriptor {
   label: string;
   get: () => {
     ready(): Promise<void>;
-    eval(code: string): Promise<{ stdout: string; stderr: string; error: string }>;
+    eval(code: string): Promise<WorkerEvalResult>;
   };
   terminate: () => void;
 }
