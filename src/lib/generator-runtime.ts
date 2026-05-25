@@ -48,6 +48,10 @@ export type ExerciseInstance = {
    *  way as `ts`/`canonical`. The language is whatever the
    *  exercise's `target:` field declared (go/zig/rust). */
   source?: string;
+  /** For variant generators: the `id` of the picked variant.
+   *  Used by exercise-instance to avoid repeating the same
+   *  variant on consecutive reshuffles. */
+  variantId?: string;
   /** For MCQs: the shuffled option list. `correctIndex` is the index
    *  of the canonical in this list. */
   options?: string[];
@@ -68,6 +72,9 @@ export type GenerateOptions = {
   /** Var names from the template to render as input slots instead of
    *  substituted text. Engages the fill-blank-word path. */
   blanks?: string[];
+  /** For variant generators: skip this variant ID on the next pick
+   *  so consecutive reshuffles don't repeat the same variant. */
+  excludeVariantId?: string;
 };
 
 /** Strip the escape backslash from literal `\${name}` sequences in
@@ -229,15 +236,20 @@ function generateVariant(
     );
   }
   const rng = rngFromSeed(seed);
-  const variant = pickFrom(rng, spec.variants);
+  const pool =
+    opts.excludeVariantId && spec.variants.length > 1
+      ? spec.variants.filter((v) => v.id !== opts.excludeVariantId)
+      : spec.variants;
+  const variant = pickFrom(rng, pool);
 
   const sourceFields = variant.source !== undefined ? { source: variant.source } : {};
   if (!variant.distractors || variant.distractors.length === 0) {
-    return { ts: variant.ts, canonical: variant.canonical, ...sourceFields };
+    return { ts: variant.ts, canonical: variant.canonical, variantId: variant.id, ...sourceFields };
   }
   return {
     ts: variant.ts,
     canonical: variant.canonical,
+    variantId: variant.id,
     ...sourceFields,
     ...buildShuffledOptions(rng, variant.canonical, variant.distractors.map(distractorMatchText)),
   };

@@ -99,12 +99,13 @@ describe("useExerciseInstance — determinism", () => {
     });
   });
 
-  it("seed format is `${exerciseId}::${attempt}`", () => {
+  it("seed format is `${exerciseId}::${attempt}` and attempt advances on another()", () => {
     createRoot((dispose) => {
-      const { seed, another } = useExerciseInstance("foo/bar/01", TEMPLATE_SPEC);
-      expect(seed()).toBe("foo/bar/01::0");
+      const { seed, attempt, another } = useExerciseInstance("foo/bar/01", TEMPLATE_SPEC);
+      const initial = attempt();
+      expect(seed()).toBe(`foo/bar/01::${initial}`);
       another();
-      expect(seed()).toBe("foo/bar/01::1");
+      expect(seed()).toBe(`foo/bar/01::${initial + 1}`);
       dispose();
     });
   });
