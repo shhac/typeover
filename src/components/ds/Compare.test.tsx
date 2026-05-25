@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Compare } from "./Compare";
 
 /*
- * Compare — figure/figcaption wrapper around Adaptive. Pin the
+ * Compare — figure/figcaption wrapper around a translation lane. Pin the
  * semantic structure (figure + figcaption) because that's what
  * makes the comparison feel intentional vs. "two things next to
  * each other" (design-docs/15 pattern 4).
@@ -42,7 +42,7 @@ describe("<Compare>", () => {
     expect(container.querySelector("figcaption")).toBeNull();
   });
 
-  it("renders all children inside the inner Adaptive grid", () => {
+  it("renders all children inside the translation lane", () => {
     const { container } = render(() => (
       <Compare>
         <div data-testid="a">left</div>
