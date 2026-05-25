@@ -1,0 +1,52 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript read-helper into a complete Rust
+  program. `count_chars` takes a String by shared reference and
+  returns its length. `main` builds a String, calls the helper,
+  and prints both the length AND the original — meaning the
+  borrow must keep the owner alive. Output:
+
+      4
+      paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function countChars(s: string): number { return s.length; }
+    const name: string = "paul";
+    console.log(countChars(name));
+    console.log(name);
+  canonical: |-
+    fn count_chars(s: &String) -> usize {
+        s.len()
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        println!("{}", count_chars(&name));
+        println!("{}", name);
+    }
+expectStdout: |
+  4
+  paul
+runtime: server
+hints:
+  - "Two pieces: helper signature `fn count_chars(s: &String) -> usize { s.len() }`, and the call site `count_chars(&name)` with a leading `&` to borrow. After the borrow returns, `name` is still owned by `main` so the second println works."
+  - "Body of the helper is one expression — no trailing semicolon."
+  - |-
+    fn count_chars(s: &String) -> usize {
+        s.len()
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        println!("{}", count_chars(&name));
+        println!("{}", name);
+    }
+notes: |
+  Production drill for the full borrow round-trip: function
+  signature with `&`, call site with `&`, and proof that the
+  owner survives the call (the second println).

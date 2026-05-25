@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: mcq
+order: 1
+prompt: |
+  A function only needs to READ a String — log it, measure it,
+  compare it — not take ownership. Pick the idiomatic Rust
+  parameter type.
+generator:
+  kind: variant
+  variants:
+    - id: log-helper
+      ts: "function log(s: string): void { console.log(s); }"
+      canonical: '`fn log(s: &String)` — takes a shared reference; the caller keeps ownership.'
+      distractors:
+        - '`fn log(s: String)` — takes ownership; the caller can''t use `s` afterward.'
+        - '`fn log(s: &mut String)` — exclusive mutable borrow; needed only when MUTATING.'
+        - '`fn log(s: String*)` — `*` is not Rust pointer syntax.'
+hints:
+  - "If the function doesn't need to MODIFY or KEEP the value, it should BORROW. The `&` prefix on the type means shared reference — the caller stays the owner."
+  - "Pick the type that starts with `&` and doesn't have `mut`."
+  - "`fn log(s: &String)`."
+runtime: none
+notes: |
+  Introduces shared borrowing as the default for read-only
+  helpers. Distractors cover the three common slips:
+   - Take ownership when you don't need to (moves the value out
+     of the caller, common TS-dev reflex).
+   - `&mut` when read suffices (over-permissioning).
+   - C-style `*` pointer syntax — not Rust.

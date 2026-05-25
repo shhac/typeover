@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: fill-word
+order: 5
+prompt: |
+  Fill the one character that turns the call-site argument into a
+  shared borrow. The function expects `&String`.
+generator:
+  kind: template
+  vars:
+    amp: ["&"]
+    name: [name, user, label]
+  ts: |-
+    log(${name});
+  canonical: |-
+    log(${amp}${name});
+blanks: [amp]
+hints:
+  - "Same character as the parameter-type prefix in slot 04 — at the call site it's a unary operator that takes a reference TO the named binding."
+  - "One character."
+  - "`&`"
+runtime: none
+notes: |
+  Sibling drill to slot 04 — same character, different role
+  (parameter type vs unary borrow operator).

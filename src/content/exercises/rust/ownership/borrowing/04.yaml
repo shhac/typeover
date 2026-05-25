@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: fill-word
+order: 4
+prompt: |
+  Fill the one character that turns a `String` parameter into a
+  shared borrow. The function only needs to read.
+generator:
+  kind: template
+  vars:
+    amp: ["&"]
+  ts: |-
+    function log(s: string): void { console.log(s); }
+  canonical: |-
+    fn log(s: ${amp}String) {
+        println!("{}", s);
+    }
+blanks: [amp]
+hints:
+  - "One character. The same symbol C uses for 'address of', and TS uses for bitwise AND."
+  - "Slots right before the type name."
+  - "`&`"
+runtime: none
+notes: |
+  Drills the `&` borrow prefix on the parameter type. Trivial
+  single-character drill — the cognitive load is realising it's
+  the answer, not typing it.

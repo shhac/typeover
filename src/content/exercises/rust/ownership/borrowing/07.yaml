@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: fill-line
+order: 7
+prompt: |
+  The function `log` takes `&String`. Write the call-site line that
+  borrows `name` and prints — `name` must remain usable on the
+  next line.
+generator:
+  kind: template
+  vars:
+    line:
+      - "log(&name);"
+  ts: |-
+    log(name);
+    console.log(name.length);
+  canonical: |-
+    fn log(s: &String) {
+        println!("{}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        ${line}
+        println!("{}", name.len());
+    }
+  distractors:
+    - match: "log(name);"
+      explain: |-
+        That MOVES `name` into `log`. The next line that reads
+        `name.len()` fails with `borrow of moved value`. Prefix
+        the argument with `&` to borrow instead.
+    - match: "log(name.clone());"
+      explain: |-
+        Compiles, but `.clone()` allocates a new heap copy just to
+        keep `name` alive. Borrow with `&name` instead — same
+        result, zero allocation.
+    - match: "log(*name);"
+      explain: |-
+        `name` isn't a reference, so there's nothing to
+        dereference. The borrow direction is `&` (take a
+        reference TO), not `*` (deref).
+    - match: "log(&mut name);"
+      explain: |-
+        `&mut` is exclusive borrow — required only when the
+        function mutates. `log` takes `&String`, not `&mut
+        String`, so the shared borrow `&name` is the match.
+expectStdout: |
+  paul
+  4
+runtime: server
+blanks: [line]
+hints:
+  - "Prefix the argument with `&` — same character that introduced the parameter type in `log`'s signature. The unary `&` at the call site means 'take a reference TO `name`'."
+  - "Shape: `log(&<binding>);`."
+  - "`log(&name);`"
+notes: |
+  Production drill for call-site borrow. Distractors cover
+  move-instead-of-borrow, clone-instead-of-borrow, wrong-deref,
+  and exclusive-when-shared-would-do.

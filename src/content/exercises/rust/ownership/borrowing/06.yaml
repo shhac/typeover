@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: fill-line
+order: 6
+prompt: |
+  Write the function signature line. `length` takes a shared
+  reference to a `String` and returns its `usize` length. The
+  caller keeps ownership of the String.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn length(s: &String) -> usize {"
+  ts: |-
+    function length(s: string): number { return s.length; }
+    console.log(length("paul"));
+  canonical: |-
+    ${line}
+        s.len()
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        println!("{}", length(&name));
+    }
+  distractors:
+    - match: "fn length(s: String) -> usize {"
+      explain: |-
+        That takes OWNERSHIP — after the call the caller's `name`
+        is gone. For a read-only helper, prefix the type with `&`
+        to borrow instead.
+    - match: "fn length(s: &mut String) -> usize {"
+      explain: |-
+        `&mut` is exclusive (mutable) borrowing — only needed when
+        the function modifies the value. Reading is `&`, no `mut`.
+    - match: "fn length(s: &str) -> usize {"
+      explain: |-
+        `&str` works (it's even more flexible — accepts both
+        `&String` and string literals), but this theme's
+        canonical pattern is `&String` for the foundational drill.
+        `&str` is the topic of `strings-and-slices`.
+    - match: "fn length(s: &String) : usize {"
+      explain: |-
+        Return-type punctuation is `->`, not `:`. The `:` after
+        a parameter name is the parameter type; `->` between
+        parens and brace introduces the return type.
+expectStdout: |
+  4
+runtime: server
+blanks: [line]
+hints:
+  - "Two things: the parameter type starts with `&` (shared borrow), and the return type is `usize` (what `.len()` produces). Return-type punctuation is `->`."
+  - "Shape: `fn <name>(<arg>: &<type>) -> <ret> {`."
+  - "`fn length(s: &String) -> usize {`"
+notes: |
+  Production drill for the read-helper signature. Distractors
+  cover by-value (moves), `&mut` (over-permissioned), `&str`
+  (correct but off-theme), and `:` return type (wrong punctuation).

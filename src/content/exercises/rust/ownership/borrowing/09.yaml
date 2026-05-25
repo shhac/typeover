@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: freeform
+order: 9
+prompt: |
+  The program below fails to compile:
+
+      error[E0382]: borrow of moved value: `name`
+       --> src/main.rs:8:20
+        |
+      6 |     let name = String::from("paul");
+      7 |     greet(name);
+        |           ---- value moved here
+      8 |     println!("{}", name);
+        |                    ^^^^ value borrowed here after move
+
+  Broken source:
+
+      fn greet(s: String) {
+          println!("hi, {}", s);
+      }
+
+      fn main() {
+          let name = String::from("paul");
+          greet(name);
+          println!("{}", name);
+      }
+
+  Fix it by changing `greet` to BORROW instead of taking ownership.
+  Update both the signature AND the call site. Output:
+
+      hi, paul
+      paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function greet(s: string): void { console.log("hi, " + s); }
+    const name: string = "paul";
+    greet(name);
+    console.log(name);
+  canonical: |-
+    fn greet(s: &String) {
+        println!("hi, {}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        greet(&name);
+        println!("{}", name);
+    }
+expectStdout: |
+  hi, paul
+  paul
+runtime: server
+hints:
+  - "Two coordinated edits: `fn greet(s: String)` → `fn greet(s: &String)`, and `greet(name)` → `greet(&name)`. Both ends switch from move to borrow."
+  - "The println! inside `greet` doesn't change — auto-deref handles the `&` transparently."
+  - |-
+    fn greet(s: &String) {
+        println!("hi, {}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        greet(&name);
+        println!("{}", name);
+    }
+notes: |
+  Closes the theme by repairing a use-after-move via borrow.
+  Connects to compiler-feedback's "apply the diagnostic literally"
+  habit — the error here points at the move site; the fix is the
+  pair of `&` insertions.

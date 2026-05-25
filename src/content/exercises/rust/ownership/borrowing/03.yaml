@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: mcq
+order: 3
+prompt: |
+  Inside `fn count(s: &String) -> usize`, you want to return the
+  String's length. Method calls on references AUTO-DEREFERENCE —
+  pick the body that compiles.
+generator:
+  kind: variant
+  variants:
+    - id: len-body
+      ts: "TS dot-access works on references and values transparently — same in Rust for method calls."
+      canonical: '`s.len()` — auto-deref calls `String::len(&self)` on the underlying String.'
+      distractors:
+        - '`(*s).len()` — explicit deref; compiles but is unidiomatic.'
+        - '`s->len()` — `->` is not Rust syntax.'
+        - '`s.length` — `.length` is JavaScript; Rust uses `.len()`.'
+hints:
+  - "Rust's auto-deref means method calls work transparently through any number of `&` layers — `s.len()` is the same as `(*s).len()`."
+  - "Idiomatic Rust never writes the explicit deref unless it's resolving ambiguity."
+  - "`s.len()`"
+runtime: none
+notes: |
+  Auto-deref on method calls. Distractors:
+   - explicit `(*s)` — compiles, unidiomatic.
+   - C-style `->` — wrong language.
+   - `.length` — JS/TS reflex.

@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/ownership/borrowing
+type: mcq
+order: 2
+prompt: |
+  Given `fn log(s: &String)` and `let name = String::from("paul");`,
+  pick the call site that borrows `name` and lets it stay usable
+  afterward.
+generator:
+  kind: variant
+  variants:
+    - id: borrow-call
+      ts: "TS passes by reference for objects implicitly; in Rust the call site spells the borrow with `&`."
+      canonical: '`log(&name);` — takes a shared reference; `name` stays usable.'
+      distractors:
+        - '`log(name);` — moves the String into `log`; `name` is no longer usable.'
+        - '`log(*name);` — dereferences `name`, but `name` isn''t a reference yet.'
+        - '`log(name.clone());` — works but wastes a heap allocation; borrow instead.'
+hints:
+  - "At the CALL SITE, prefix the argument with `&` to take a shared reference. The parameter's type already says `&String`, so the prefix matches."
+  - "Six characters total: `log(&name);`."
+  - "`log(&name);`"
+runtime: none
+notes: |
+  Call-site borrow syntax. Distractors include the clone-when-borrow-
+  would-do reflex, mistaken dereference, and the by-value move.
