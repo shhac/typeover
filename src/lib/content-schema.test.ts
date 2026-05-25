@@ -317,17 +317,13 @@ describe("exerciseSchema — fill-line runtime mode", () => {
   });
 
   it("rejects fill-line with runtime=none", () => {
-    const r = exerciseSchema.safeParse(
-      baseFillLine({ runtime: "none", expectStdout: "x\n" }),
-    );
+    const r = exerciseSchema.safeParse(baseFillLine({ runtime: "none", expectStdout: "x\n" }));
     expect(r.success).toBe(false);
     if (!r.success) expect(paths(r.error.issues)).toContain("runtime");
   });
 
   it("accepts fill-line with yaegi runtime and expectStdout", () => {
-    const r = exerciseSchema.safeParse(
-      baseFillLine({ runtime: "yaegi", expectStdout: "x\n" }),
-    );
+    const r = exerciseSchema.safeParse(baseFillLine({ runtime: "yaegi", expectStdout: "x\n" }));
     expect(r.success).toBe(true);
   });
 
@@ -416,6 +412,74 @@ describe("exerciseSchema — alternateCanonicals scope", () => {
       }),
     );
     expect(r.success).toBe(true);
+  });
+});
+
+describe("exerciseSchema — fill-line attempt metadata", () => {
+  const fillLine = (overrides: Record<string, unknown> = {}) =>
+    baseEx({
+      type: "fill-line",
+      blanks: ["x"],
+      runtime: "yaegi",
+      expectStdout: "ok\n",
+      generator: tplGen({ vars: { x: ["answer"], n: ["2"] }, canonical: "${x}" }),
+      ...overrides,
+    });
+
+  it("accepts structured acceptedAnswers on fill-line", () => {
+    const r = exerciseSchema.safeParse(
+      fillLine({ acceptedAnswers: [{ match: "${n} * foo", prebake: true }] }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts knownAttempts with authored run output on fill-line", () => {
+    const r = exerciseSchema.safeParse(
+      fillLine({
+        knownAttempts: [
+          {
+            match: "foo + ${n}",
+            outcome: "wrong-output",
+            stdout: "23\n",
+            stderr: "",
+            error: "",
+            explain: "That adds instead of multiplying.",
+          },
+        ],
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects acceptedAnswers outside fill-line", () => {
+    const r = exerciseSchema.safeParse(baseEx({ type: "mcq", acceptedAnswers: [{ match: "x" }] }));
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("acceptedAnswers");
+  });
+
+  it("rejects knownAttempts outside fill-line", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        knownAttempts: [{ match: "x", outcome: "does-not-compile", error: "boom", explain: "bad" }],
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("knownAttempts");
+  });
+
+  it("validates template refs in acceptedAnswers and knownAttempts", () => {
+    const r = exerciseSchema.safeParse(
+      fillLine({
+        acceptedAnswers: [{ match: "${missing}" }],
+        knownAttempts: [{ match: "${alsoMissing}", outcome: "does-not-compile", explain: "bad" }],
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(paths(r.error.issues)).toContain("acceptedAnswers.0.match");
+      expect(paths(r.error.issues)).toContain("knownAttempts.0.match");
+    }
   });
 });
 

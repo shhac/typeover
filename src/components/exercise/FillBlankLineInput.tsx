@@ -4,6 +4,12 @@ import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { substituteAtBlank } from "~/lib/fill-blank";
 import { normaliseSubmission } from "~/lib/submission-normalise";
+import {
+  matchesAcceptedAnswer,
+  matchKnownAttempt,
+  type AcceptedAnswer,
+  type KnownAttempt,
+} from "~/lib/fill-line-attempts";
 import { useAutoSubmittingPhase } from "~/lib/use-auto-submitting-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
@@ -44,6 +50,8 @@ interface FillBlankLineInputProps {
    *  Paired with `successNote` so the UI explains why a perfect
    *  modern answer passed despite Yaegi's failure. */
   alternateCanonicals?: readonly string[];
+  acceptedAnswers?: readonly AcceptedAnswer[];
+  knownAttempts?: readonly KnownAttempt[];
   /** Disclosure shown alongside the correct-feedback. Surfaces the
    *  modern canonical when the graded one is intentionally a step
    *  behind for runtime-limitation reasons. */
@@ -73,6 +81,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   const runner = useRuntimeRun({
     runtime: props.runtime,
     buildProgram: () => substituteAtBlank(instance(), input()),
+    syntheticRun: () =>
+      matchKnownAttempt(input(), props.knownAttempts, instance().values)?.runResult ?? null,
   });
 
   /* Preflight WASM on mount — fill-line always uses a client-side
@@ -91,11 +101,14 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
     if (target === "") return false;
     return props.alternateCanonicals.some((alt) => normaliseSubmission(alt) === target);
   };
+  const matchesAccepted = () =>
+    matchesAcceptedAnswer(input(), props.acceptedAnswers, instance().values) !== null ||
+    matchesAlternateCanonical();
   const isCorrect = () => {
     const r = runner.runResult();
     if (r === null) return false;
     if (r.error === "" && r.stdout === props.expectStdout) return true;
-    return matchesAlternateCanonical();
+    return matchesAccepted();
   };
   /* Inner gate used by the phase handle for grading. A fresh
    * Run result is required to commit a verdict; the OUTER
@@ -110,6 +123,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
    * distractors (current 12 fill-line YAMLs) flow through unchanged
    * — no explain → generic message. */
   const wrongExplain = () => {
+    const known = matchKnownAttempt(input(), props.knownAttempts, instance().values);
+    if (known !== null) return known.explain;
     if (props.generator.kind !== "template") return null;
     return matchWrongPattern(input(), props.generator.distractors)?.explain ?? null;
   };

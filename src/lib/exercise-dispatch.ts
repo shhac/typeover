@@ -17,6 +17,7 @@
  */
 
 import { assertUnreachable } from "./assert-unreachable";
+import type { AcceptedAnswer, KnownAttempt } from "./fill-line-attempts";
 import type { SubmissionShape } from "./freeform-shape";
 
 /* Shape of the data the page hands us. The Astro file's `ex` is
@@ -30,6 +31,8 @@ interface ExerciseInput {
   expectStdout?: string;
   blanks?: string[];
   alternateCanonicals?: string[];
+  acceptedAnswers?: AcceptedAnswer[];
+  knownAttempts?: KnownAttempt[];
   submissionShape?: SubmissionShape;
 }
 
@@ -49,6 +52,8 @@ interface DispatchFillLine {
   runtime: FillLineRuntime;
   expectStdout: string;
   alternateCanonicals?: string[];
+  acceptedAnswers?: AcceptedAnswer[];
+  knownAttempts?: KnownAttempt[];
 }
 interface DispatchFreeform {
   kind: "freeform";
@@ -129,6 +134,8 @@ export function pickExerciseDispatch(ex: ExerciseInput): ExerciseDispatch {
         runtime: fillLineRuntime,
         expectStdout: ex.expectStdout,
         alternateCanonicals: ex.alternateCanonicals,
+        acceptedAnswers: ex.acceptedAnswers,
+        knownAttempts: ex.knownAttempts,
       };
     }
     case "freeform": {

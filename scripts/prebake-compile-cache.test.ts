@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   extractCanonicals,
+  substituteFillLineAnswer,
   substituteCanonicalVars,
   type ExerciseYaml,
 } from "./prebake-compile-cache.ts";
@@ -26,9 +27,7 @@ const TEMPLATE_FREEFORM: ExerciseYaml = {
 
 describe("extractCanonicals", () => {
   it("returns the single canonical for a template freeform", () => {
-    expect(extractCanonicals(TEMPLATE_FREEFORM)).toEqual([
-      'fn main() { println!("hi"); }',
-    ]);
+    expect(extractCanonicals(TEMPLATE_FREEFORM)).toEqual(['fn main() { println!("hi"); }']);
   });
 
   it("returns every variant's canonical (not just variants[0])", () => {
@@ -55,12 +54,8 @@ describe("extractCanonicals", () => {
   });
 
   it("skips exercises whose runtime isn't `server`", () => {
-    expect(
-      extractCanonicals({ ...TEMPLATE_FREEFORM, runtime: "yaegi" }),
-    ).toEqual([]);
-    expect(
-      extractCanonicals({ ...TEMPLATE_FREEFORM, runtime: "none" }),
-    ).toEqual([]);
+    expect(extractCanonicals({ ...TEMPLATE_FREEFORM, runtime: "yaegi" })).toEqual([]);
+    expect(extractCanonicals({ ...TEMPLATE_FREEFORM, runtime: "none" })).toEqual([]);
   });
 
   it("skips mcq and fill-word exercises", () => {
@@ -82,7 +77,7 @@ describe("extractCanonicals", () => {
       runtime: "server",
       generator: {
         kind: "template",
-        canonical: "fn main() {\n    ${line}\n    println!(\"{}\", x);\n}",
+        canonical: 'fn main() {\n    ${line}\n    println!("{}", x);\n}',
         vars: { line: ["let mut x: i32 = 0;"] },
       },
     };
@@ -98,12 +93,10 @@ describe("extractCanonicals", () => {
       type: "fill-line",
       order: 5,
       runtime: "server",
-      alternateCanonicals: [
-        'fn main() { let x = 1; println!("{x}"); }',
-      ],
+      alternateCanonicals: ['fn main() { let x = 1; println!("{x}"); }'],
       generator: {
         kind: "template",
-        canonical: "fn main() {\n    ${line}\n    println!(\"{}\", x);\n}",
+        canonical: 'fn main() {\n    ${line}\n    println!("{}", x);\n}',
         vars: { line: ["let x: i32 = 1;"] },
       },
     };
@@ -112,27 +105,47 @@ describe("extractCanonicals", () => {
     expect(out[0]).toContain("let x: i32 = 1;");
     expect(out[1]).toBe('fn main() { let x = 1; println!("{x}"); }');
   });
+
+  it("includes acceptedAnswers marked prebake for fill-line", () => {
+    const fillLine: ExerciseYaml = {
+      target: "rust",
+      themeId: "rust/foundations/variables",
+      type: "fill-line",
+      order: 5,
+      runtime: "server",
+      blanks: ["line"],
+      acceptedAnswers: [
+        { match: "let x = 2 * ${name};", prebake: true },
+        { match: "let x = ${name} + ${name};", prebake: false },
+      ],
+      generator: {
+        kind: "template",
+        canonical: 'fn main() {\n    let ${name} = 21;\n    ${line}\n    println!("{}", x);\n}',
+        vars: { name: ["foo"], line: ["let x = foo * 2;"] },
+      },
+    };
+    expect(extractCanonicals(fillLine)).toEqual([
+      'fn main() {\n    let foo = 21;\n    let x = foo * 2;\n    println!("{}", x);\n}',
+      'fn main() {\n    let foo = 21;\n    let x = 2 * foo;\n    println!("{}", x);\n}',
+    ]);
+  });
 });
 
 describe("substituteCanonicalVars", () => {
   it("returns the input unchanged when vars is undefined", () => {
-    expect(substituteCanonicalVars("fn main() { ${x} }", undefined)).toBe(
-      "fn main() { ${x} }",
-    );
+    expect(substituteCanonicalVars("fn main() { ${x} }", undefined)).toBe("fn main() { ${x} }");
   });
 
   it("replaces every occurrence of a single var", () => {
     /* The template can reference the same var multiple times
      * (e.g. `${name} == ${name}`); replaceAll handles that. */
-    expect(
-      substituteCanonicalVars("let ${k} = 1; print(${k});", { k: ["foo"] }),
-    ).toBe("let foo = 1; print(foo);");
+    expect(substituteCanonicalVars("let ${k} = 1; print(${k});", { k: ["foo"] })).toBe(
+      "let foo = 1; print(foo);",
+    );
   });
 
   it("replaces multiple distinct vars", () => {
-    expect(
-      substituteCanonicalVars("${a} + ${b}", { a: ["1"], b: ["2"] }),
-    ).toBe("1 + 2");
+    expect(substituteCanonicalVars("${a} + ${b}", { a: ["1"], b: ["2"] })).toBe("1 + 2");
   });
 
   it("uses options[0] only — additional options are ignored", () => {
@@ -158,6 +171,17 @@ describe("substituteCanonicalVars", () => {
     expect(extractCanonicals(bare)).toEqual([]);
   });
 
+  it("substitutes a fill-line accepted answer into the blank", () => {
+    expect(
+      substituteFillLineAnswer(
+        "fn main() { ${line} }",
+        { line: ["let x = 1;"] },
+        ["line"],
+        "let x = 2;",
+      ),
+    ).toBe("fn main() { let x = 2; }");
+  });
+
   it("filters out variant entries whose canonical isn't a string", () => {
     const mixed: ExerciseYaml = {
       target: "rust",
@@ -167,16 +191,9 @@ describe("substituteCanonicalVars", () => {
       runtime: "server",
       generator: {
         kind: "variant",
-        variants: [
-          { canonical: 'fn main() {}' },
-          {},
-          { canonical: 'fn main() { 1; }' },
-        ],
+        variants: [{ canonical: "fn main() {}" }, {}, { canonical: "fn main() { 1; }" }],
       },
     };
-    expect(extractCanonicals(mixed)).toEqual([
-      "fn main() {}",
-      "fn main() { 1; }",
-    ]);
+    expect(extractCanonicals(mixed)).toEqual(["fn main() {}", "fn main() { 1; }"]);
   });
 });

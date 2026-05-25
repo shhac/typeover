@@ -22,14 +22,15 @@ import type { GeneratorSpec } from "~/lib/generator-schema";
  * localStorage shim.
  */
 
-const { evalMock, terminateMock, zigEvalMock, zigTerminateMock, rustEvalMock, rustTerminateMock } = vi.hoisted(() => ({
-  evalMock: vi.fn(),
-  terminateMock: vi.fn(),
-  zigEvalMock: vi.fn(),
-  zigTerminateMock: vi.fn(),
-  rustEvalMock: vi.fn(),
-  rustTerminateMock: vi.fn(),
-}));
+const { evalMock, terminateMock, zigEvalMock, zigTerminateMock, rustEvalMock, rustTerminateMock } =
+  vi.hoisted(() => ({
+    evalMock: vi.fn(),
+    terminateMock: vi.fn(),
+    zigEvalMock: vi.fn(),
+    zigTerminateMock: vi.fn(),
+    rustEvalMock: vi.fn(),
+    rustTerminateMock: vi.fn(),
+  }));
 
 vi.mock("~/runtime", () => ({
   /* Distinct spies per runtime so the runtime-selection block at
@@ -66,6 +67,8 @@ beforeEach(() => {
   terminateMock.mockReset();
   zigEvalMock.mockReset();
   zigTerminateMock.mockReset();
+  rustEvalMock.mockReset();
+  rustTerminateMock.mockReset();
 });
 afterEach(() => {
   localStorage.clear();
@@ -318,6 +321,59 @@ describe("<FillBlankLineInput> — alternate canonical (Yaegi-unrunnable but per
     fireEvent.click(getByText("Submit"));
     expect(getByText("Try again")).toBeTruthy();
     expect(slot()?.instancesPassed).toBe(0);
+  });
+});
+
+describe("<FillBlankLineInput> — authored attempts", () => {
+  it("acceptedAnswers can rescue a semantically-equivalent answer after runtime mismatch", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: "", stderr: "", error: "runtime missed it" });
+    const { container } = render(() => (
+      <FillBlankLineInput
+        exerciseId={EX_ID}
+        prompt="Type the missing line."
+        generator={GEN}
+        blanks={["line"]}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="yaegi"
+        acceptedAnswers={[{ match: "count * 2" }]}
+      />
+    ));
+    setVal(lineInput(container), "count * 2");
+    fireEvent.keyDown(lineInput(container), { key: "Enter" });
+    await vi.waitFor(() => expect(slot()?.instancesPassed).toBe(1));
+    expect(evalMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("knownAttempts synthesize a Run result and skip runtime eval", async () => {
+    const { container, getByText, queryByText } = render(() => (
+      <FillBlankLineInput
+        exerciseId={EX_ID}
+        prompt="Type the missing line."
+        generator={GEN}
+        blanks={["line"]}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="yaegi"
+        knownAttempts={[
+          {
+            match: "doubled := count + 2",
+            outcome: "wrong-output",
+            stdout: "7\n",
+            stderr: "",
+            error: "",
+            explain: "That adds 2 instead of doubling count.",
+          },
+        ]}
+      />
+    ));
+    const input = lineInput(container);
+    setVal(input, "doubled := count + 2");
+    fireEvent.keyDown(input, { key: "Enter" });
+    await vi.waitFor(() => expect(queryByText("7")).toBeTruthy());
+    expect(evalMock).not.toHaveBeenCalled();
+    fireEvent.click(getByText("Submit"));
+    expect(getByText("That adds 2 instead of doubling count.")).toBeTruthy();
   });
 });
 

@@ -117,6 +117,11 @@ interface UseRuntimeRunArgs {
    *  circuits — sets runResult.error to the message and skips the
    *  worker call. */
   precheck?: () => { ok: boolean; message: string };
+  /** Optional consumer-supplied synthetic result. Used for authored
+   *  known attempts where compiling would only reproduce a predictable
+   *  wrong result. Returning a RunResult preserves the Run panel UX
+   *  while skipping the runtime call. */
+  syntheticRun?: () => RunResult | null;
 }
 
 /** How long the runtime can sit in "booting" before we surface a
@@ -232,6 +237,11 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
      * doesn't try to dereference undefined accessors. */
     if (!canRun) return;
     if (running()) return;
+    const synthetic = args.syntheticRun?.() ?? null;
+    if (synthetic !== null) {
+      setRunResult(synthetic);
+      return;
+    }
     /* Consumer-supplied pre-check — synchronous, runs before any
      * worker invocation. Catches obviously-bad input without
      * burning a compile round-trip. */

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GeneratorSchema } from "./generator-schema";
+import { extractTemplateVars, GeneratorSchema } from "./generator-schema";
 
 /*
  * Plain-Zod content schemas. Kept out of `content.config.ts` so vitest
@@ -64,6 +64,35 @@ const exerciseFields = {
    *  grader still passes them — paired with `successNote` so the
    *  UI explains why. */
   alternateCanonicals: z.array(z.string()).optional(),
+  /** Fill-line only: exact learner submissions that should be
+   *  accepted as correct in addition to the canonical blank value.
+   *  Unlike legacy `alternateCanonicals`, entries are structured so
+   *  build-time tooling can choose which alternatives to prebake. */
+  acceptedAnswers: z
+    .array(
+      z.object({
+        match: z.string(),
+        prebake: z.boolean().default(false),
+      }),
+    )
+    .optional(),
+  /** Fill-line only: exact learner submissions we know are wrong.
+   *  These short-circuit runtime execution and surface an authored
+   *  RunResult, preserving the "I ran it" UX without burning a
+   *  compile call on a predictable mistake. */
+  knownAttempts: z
+    .array(
+      z.object({
+        match: z.string(),
+        outcome: z.enum(["does-not-compile", "wrong-output"]),
+        stdout: z.string().default(""),
+        stderr: z.string().default(""),
+        error: z.string().default(""),
+        explain: z.string(),
+        durationMs: z.number().nonnegative().default(0),
+      }),
+    )
+    .optional(),
   /** Freeform only — bookend constraints on the learner's
    *  submission. After trimming whitespace, the source must
    *  start with `mustStartWith` and end with `mustEndWith` (each
@@ -257,6 +286,44 @@ function validateAlternateCanonicalsScope(ex: Exercise, ctx: Ctx): void {
   });
 }
 
+function validateAcceptedAnswersScope(ex: Exercise, ctx: Ctx): void {
+  if (!ex.acceptedAnswers || ex.acceptedAnswers.length === 0) return;
+  if (ex.type === "fill-line") return;
+  ctx.addIssue({
+    code: "custom",
+    message: `\`acceptedAnswers\` is only valid for fill-line exercises; got type "${ex.type}".`,
+    path: ["acceptedAnswers"],
+  });
+}
+
+function validateKnownAttemptsScope(ex: Exercise, ctx: Ctx): void {
+  if (!ex.knownAttempts || ex.knownAttempts.length === 0) return;
+  if (ex.type === "fill-line") return;
+  ctx.addIssue({
+    code: "custom",
+    message: `\`knownAttempts\` is only valid for fill-line exercises; got type "${ex.type}".`,
+    path: ["knownAttempts"],
+  });
+}
+
+function validateFillLineAttemptTemplateRefs(ex: Exercise, ctx: Ctx): void {
+  if (ex.type !== "fill-line" || ex.generator.kind !== "template") return;
+  const declared = new Set(Object.keys(ex.generator.vars));
+  const check = (value: string, path: (string | number)[]) => {
+    for (const ref of extractTemplateVars(value)) {
+      if (!declared.has(ref)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Template references undeclared var "\${${ref}}".`,
+          path,
+        });
+      }
+    }
+  };
+  ex.acceptedAnswers?.forEach((answer, i) => check(answer.match, ["acceptedAnswers", i, "match"]));
+  ex.knownAttempts?.forEach((attempt, i) => check(attempt.match, ["knownAttempts", i, "match"]));
+}
+
 /** submissionShape is the bookend contract on a learner's freeform
  *  submission. Only freeform exercises have a learner-supplied
  *  source to constrain — fill-word / fill-line submit single tokens
@@ -278,5 +345,8 @@ export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => 
   validateBlanksOnlyForFill(ex, ctx);
   validateRunnableExpectStdout(ex, ctx);
   validateAlternateCanonicalsScope(ex, ctx);
+  validateAcceptedAnswersScope(ex, ctx);
+  validateKnownAttemptsScope(ex, ctx);
+  validateFillLineAttemptTemplateRefs(ex, ctx);
   validateSubmissionShapeScope(ex, ctx);
 });

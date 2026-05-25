@@ -41,6 +41,8 @@ export type ExerciseYaml = {
   runtime?: string;
   expectStdout?: string;
   alternateCanonicals?: string[];
+  acceptedAnswers?: Array<{ match: string; prebake?: boolean }>;
+  blanks?: string[];
   generator?: {
     kind?: string;
     canonical?: string;
@@ -65,6 +67,22 @@ export function substituteCanonicalVars(
     if (Array.isArray(options) && typeof options[0] === "string") {
       out = out.replaceAll(`\${${name}}`, options[0]);
     }
+  }
+  return out;
+}
+
+export function substituteFillLineAnswer(
+  canonical: string,
+  vars: Record<string, string[]> | undefined,
+  blanks: readonly string[] | undefined,
+  answer: string,
+): string {
+  if (!vars || !blanks || blanks.length === 0) return substituteCanonicalVars(canonical, vars);
+  const blank = blanks[0]!;
+  let out = canonical;
+  for (const [name, options] of Object.entries(vars)) {
+    const value = name === blank ? substituteCanonicalVars(answer, vars) : options[0];
+    if (typeof value === "string") out = out.replaceAll(`\${${name}}`, value);
   }
   return out;
 }
@@ -112,6 +130,18 @@ export function extractCanonicals(data: ExerciseYaml): string[] {
     const out: string[] = [];
     if (typeof data.generator?.canonical === "string") {
       out.push(substituteCanonicalVars(data.generator.canonical, data.generator.vars));
+    }
+    for (const answer of data.acceptedAnswers ?? []) {
+      if (answer.prebake && typeof data.generator?.canonical === "string") {
+        out.push(
+          substituteFillLineAnswer(
+            data.generator.canonical,
+            data.generator.vars,
+            data.blanks,
+            answer.match,
+          ),
+        );
+      }
     }
     for (const alt of data.alternateCanonicals ?? []) {
       if (typeof alt === "string") out.push(alt);

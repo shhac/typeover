@@ -53,8 +53,8 @@ describe("pickExerciseDispatch — freeform Rust reshape", () => {
 
   it("passes submissionShape through verbatim when authored", () => {
     const submissionShape = {
-      mustStartWith: 'fn main() {',
-      mustEndWith: '}',
+      mustStartWith: "fn main() {",
+      mustEndWith: "}",
     };
     const out = pickExerciseDispatch({
       type: "freeform",
@@ -111,6 +111,8 @@ describe("pickExerciseDispatch — fill-line Rust reshape", () => {
       expectStdout: "10\n",
       blanks: ["line"],
       alternateCanonicals: undefined,
+      acceptedAnswers: undefined,
+      knownAttempts: undefined,
     });
   });
 
@@ -152,6 +154,28 @@ describe("pickExerciseDispatch — fill-line Rust reshape", () => {
       alternateCanonicals,
     });
     expect(out).toMatchObject({ kind: "fill-line", alternateCanonicals });
+  });
+
+  it("preserves acceptedAnswers and knownAttempts on the dispatch token", () => {
+    const acceptedAnswers = [{ match: "foo * 2", prebake: true }];
+    const knownAttempts = [
+      {
+        match: "foo + 2",
+        outcome: "wrong-output" as const,
+        stdout: "23\n",
+        explain: "That adds instead of doubles.",
+      },
+    ];
+    const out = pickExerciseDispatch({
+      type: "fill-line",
+      target: "rust",
+      runtime: "server",
+      expectStdout: "42\n",
+      blanks: ["expr"],
+      acceptedAnswers,
+      knownAttempts,
+    });
+    expect(out).toMatchObject({ kind: "fill-line", acceptedAnswers, knownAttempts });
   });
 });
 
@@ -209,9 +233,9 @@ describe("pickExerciseDispatch — skip branches", () => {
 
 describe("pickExerciseDispatch — trivial types", () => {
   it("dispatches mcq with the bare token", () => {
-    expect(
-      pickExerciseDispatch({ type: "mcq", target: "go", runtime: "none" }),
-    ).toEqual({ kind: "mcq" });
+    expect(pickExerciseDispatch({ type: "mcq", target: "go", runtime: "none" })).toEqual({
+      kind: "mcq",
+    });
   });
 
   it("dispatches fill-word with blanks ?? []", () => {
@@ -219,9 +243,10 @@ describe("pickExerciseDispatch — trivial types", () => {
      * [] so the component still renders (the schema separately
      * requires non-empty blanks for fill-word; this is the
      * dispatcher's defensive default). */
-    expect(
-      pickExerciseDispatch({ type: "fill-word", target: "go", runtime: "none" }),
-    ).toEqual({ kind: "fill-word", blanks: [] });
+    expect(pickExerciseDispatch({ type: "fill-word", target: "go", runtime: "none" })).toEqual({
+      kind: "fill-word",
+      blanks: [],
+    });
   });
 
   it("passes fill-word blanks through verbatim when authored", () => {
