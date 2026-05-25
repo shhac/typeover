@@ -42,3 +42,11 @@ export const ACCENT_TEXT_CLASS = {
   zig: "text-accent-zig",
   rust: "text-accent-rust",
 } as const satisfies Record<Accent, string>;
+
+export const PROSE_CODE_ACCENT = {
+  primary: "[&>code]:text-accent-primary",
+  ts: "[&>code]:text-accent-ts",
+  go: "[&>code]:text-accent-go",
+  zig: "[&>code]:text-accent-zig",
+  rust: "[&>code]:text-accent-rust",
+} as const satisfies Record<Accent, string>;

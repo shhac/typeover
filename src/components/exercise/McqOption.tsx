@@ -2,19 +2,7 @@ import { cn } from "../ds/_internal";
 import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { formatInline } from "~/lib/format-inline";
-import type { Accent } from "~/lib/lang";
-
-/* Static per-accent class strings for the prose-option `>code`
- *  selector. Has to be a literal map — Tailwind's JIT scanner can't
- *  resolve template-literal class strings, so a `[&>code]:${...}`
- *  construction silently strips the class from the bundle. */
-const PROSE_CODE_ACCENT: Record<Accent, string> = {
-  primary: "[&>code]:text-accent-primary",
-  ts: "[&>code]:text-accent-ts",
-  go: "[&>code]:text-accent-go",
-  zig: "[&>code]:text-accent-zig",
-  rust: "[&>code]:text-accent-rust",
-};
+import { PROSE_CODE_ACCENT, type Accent } from "~/lib/lang";
 
 /**
  * The four possible visual states for an MCQ option. Resolved purely

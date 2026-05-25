@@ -2,18 +2,7 @@ import { createSignal, Show } from "solid-js";
 import { Button } from "./Button";
 import { CodeBlock } from "./CodeBlock";
 import { formatInline } from "~/lib/format-inline";
-import type { Accent } from "~/lib/lang";
-
-/* Static per-accent class for inline `code` spans inside the prose
- *  canonical body. JIT can't resolve template-literal classes —
- *  mirrors the equivalent map in McqOption. */
-const PROSE_CODE_ACCENT: Record<Accent, string> = {
-  primary: "[&>code]:text-accent-primary",
-  ts: "[&>code]:text-accent-ts",
-  go: "[&>code]:text-accent-go",
-  zig: "[&>code]:text-accent-zig",
-  rust: "[&>code]:text-accent-rust",
-};
+import { PROSE_CODE_ACCENT, type Accent } from "~/lib/lang";
 
 interface RevealButtonProps {
   canonical: string;
