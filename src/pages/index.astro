@@ -2,19 +2,15 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
-  Badge,
   Button,
-  CodeBlock,
-  Compare,
   Container,
-  Divider,
-  Eyebrow,
   Heading,
   LangCrumbs,
   Stack,
   Text,
 } from "~/components/ds";
 import TrackCard from "~/components/ds/TrackCard.astro";
+import { HomepageDrill } from "~/components/home/HomepageDrill";
 
 /*
  * Landing page — design-docs/15 pattern 11. The structural
@@ -65,7 +61,7 @@ const rustThemeCount = rustThemes.length;
         {/* Hero */}
         <Stack gap="md">
           <LangCrumbs>
-            <Badge variant="primary">v0.0.0 — hello world</Badge>
+            <Text tone="muted" size="xs" family="mono">v0.0.0 — hello world</Text>
           </LangCrumbs>
           <Heading level={1}>
             <span class="text-accent-ts">type</span><span class="text-accent-primary">over</span>
@@ -79,40 +75,11 @@ const rustThemeCount = rustThemes.length;
           </Text>
         </Stack>
 
-        <Divider />
-
-        {/* Side-by-side example */}
-        <Stack gap="sm">
-          <Eyebrow>the wedge</Eyebrow>
-          <Compare
-            caption="Each lesson presents the source language and its target counterpart, then asks you to identify, translate, or write the equivalent."
-          >
-            <CodeBlock lang="ts" filename="users.ts">{`type User = {
-  id: string;
-  name: string;
-};
-
-function greet(u: User) {
-  return \`hi \${u.name}\`;
-}`}</CodeBlock>
-            <CodeBlock lang="go" filename="users.go">{`type User struct {
-    ID   string
-    Name string
-}
-
-func greet(u User) string {
-    return "hi " + u.Name
-}`}</CodeBlock>
-          </Compare>
-        </Stack>
-
-        <Divider />
+        <HomepageDrill client:visible />
 
         {/* Track offerings — Go today, future targets stack
             alongside or below. */}
         <Stack gap="md">
-          <Eyebrow>tracks</Eyebrow>
-
           <TrackCard status="available">
             <Heading level={2} size="2xl" slot="title">
               <span class="text-accent-go">Go</span> for TypeScript devs
@@ -210,8 +177,6 @@ func greet(u User) string {
             </a>
           </TrackCard>
         </Stack>
-
-        <Divider />
 
         <Stack direction="row" justify="between" align="center" wrap>
           <Text tone="muted" size="xs" family="mono">
