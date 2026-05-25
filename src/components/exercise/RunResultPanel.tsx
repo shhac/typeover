@@ -24,7 +24,7 @@ interface RunResultPanelProps {
 /*
  * Renders the {stdout, stderr, error, durationMs} produced by a
  * useRuntimeRun.run() call. Shared between Freeform, FillBlankLineInput,
- * and the dev-only YaegiSmoke probe.
+ * and the dev-only SmokeProbe.
  *
  * Two design decisions worth knowing (both per design-docs/16 F-14
  * + 18 F-11):

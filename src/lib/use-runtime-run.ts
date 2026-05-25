@@ -16,7 +16,7 @@ export {
 /*
  * Headless lifecycle for any component that runs learner code via a
  * client-side WASM runtime. Today: Freeform + FillBlankLineInput
- * (both languages) + the dev-only YaegiSmoke probe. Owns:
+ * (both languages) + the dev-only SmokeProbe. Owns:
  *
  *   - the running / runResult signals
  *   - the run() async function (timer + eval + error-coercion)
