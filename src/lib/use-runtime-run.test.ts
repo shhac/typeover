@@ -37,16 +37,16 @@ const {
   rustReadyMock,
   rustTerminateMock,
 } = vi.hoisted(() => ({
-    evalMock: vi.fn(),
-    readyMock: vi.fn(),
-    terminateMock: vi.fn(),
-    zigEvalMock: vi.fn(),
-    zigReadyMock: vi.fn(),
-    zigTerminateMock: vi.fn(),
-    rustEvalMock: vi.fn(),
-    rustReadyMock: vi.fn(),
-    rustTerminateMock: vi.fn(),
-  }));
+  evalMock: vi.fn(),
+  readyMock: vi.fn(),
+  terminateMock: vi.fn(),
+  zigEvalMock: vi.fn(),
+  zigReadyMock: vi.fn(),
+  zigTerminateMock: vi.fn(),
+  rustEvalMock: vi.fn(),
+  rustReadyMock: vi.fn(),
+  rustTerminateMock: vi.fn(),
+}));
 
 vi.mock("~/runtime", () => ({
   getRunner: () => ({ eval: evalMock, ready: readyMock }),
@@ -71,6 +71,10 @@ beforeEach(() => {
   zigReadyMock.mockReset();
   zigReadyMock.mockResolvedValue(undefined);
   zigTerminateMock.mockReset();
+  rustEvalMock.mockReset();
+  rustReadyMock.mockReset();
+  rustReadyMock.mockResolvedValue(undefined);
+  rustTerminateMock.mockReset();
 });
 
 let disposers: Array<() => void> = [];
@@ -443,6 +447,15 @@ describe("useRuntimeRun — runtime selection", () => {
     return handle;
   }
 
+  function setupRust(buildProgram: () => string = () => "fn main() {}") {
+    let handle!: ReturnType<typeof useRuntimeRun>;
+    createRoot((dispose) => {
+      handle = useRuntimeRun({ runtime: "rust", buildProgram });
+      disposers.push(dispose);
+    });
+    return handle;
+  }
+
   it("dispatches eval() to getZigRunner when runtime is zig", async () => {
     zigEvalMock.mockResolvedValueOnce({ stdout: "z", stderr: "", error: "" });
     const h = setupZig();
@@ -459,11 +472,28 @@ describe("useRuntimeRun — runtime selection", () => {
     expect(zigEvalMock).not.toHaveBeenCalled();
   });
 
+  it("dispatches eval() to getRustRunner when runtime is rust", async () => {
+    rustEvalMock.mockResolvedValueOnce({ stdout: "r", stderr: "", error: "" });
+    const h = setupRust();
+    await h.run();
+    expect(rustEvalMock).toHaveBeenCalledTimes(1);
+    expect(evalMock).not.toHaveBeenCalled();
+    expect(zigEvalMock).not.toHaveBeenCalled();
+  });
+
   it("reset() dispatches terminate to the matching runtime", () => {
     const h = setupZig();
     h.reset();
     expect(zigTerminateMock).toHaveBeenCalledTimes(1);
     expect(terminateMock).not.toHaveBeenCalled();
+  });
+
+  it("reset() dispatches terminate to the Rust runtime", () => {
+    const h = setupRust();
+    h.reset();
+    expect(rustTerminateMock).toHaveBeenCalledTimes(1);
+    expect(terminateMock).not.toHaveBeenCalled();
+    expect(zigTerminateMock).not.toHaveBeenCalled();
   });
 
   it("runtimeLabel and runtimeTarget reflect the selected runtime", () => {
@@ -474,6 +504,10 @@ describe("useRuntimeRun — runtime selection", () => {
     const zig = setupZig();
     expect(zig.runtimeLabel).toBe("Zig");
     expect(zig.runtimeTarget).toBe("zig");
+
+    const rust = setupRust();
+    expect(rust.runtimeLabel).toBe("Rust");
+    expect(rust.runtimeTarget).toBe("rust");
   });
 });
 
