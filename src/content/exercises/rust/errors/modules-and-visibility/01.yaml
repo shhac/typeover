@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: mcq
+order: 1
+prompt: |
+  Declare an INLINE module called `math` containing one
+  function. Pick the idiomatic Rust syntax.
+generator:
+  kind: variant
+  variants:
+    - id: mod-decl
+      ts: 'namespace math { export function add(a: number, b: number) { return a + b; } }'
+      canonical: 'mod math { fn add(a: i32, b: i32) -> i32 { a + b } } — `mod <name> { ... }` introduces an inline module body in the current file.'
+      distractors:
+        - 'namespace math { ... } — that''s the C++/TypeScript keyword; Rust uses `mod`.'
+        - 'module math { ... } — full word; Rust spells it as the three-letter abbreviation `mod`.'
+        - 'mod math: { ... } — no colon between the module name and the body block.'
+hints:
+  - "Three letters. Same word the C++/Python ecosystems use as a prefix; Rust spells it as the abbreviation. Followed by a name and a brace block."
+  - "Shape: `<keyword> <name> { ... }`."
+  - "`mod math { ... }`"
+runtime: none
+notes: |
+  Pins the inline module shape. Distractors cover TS/C++
+  `namespace`, the spelled-out `module` keyword, and a
+  punctuation typo.

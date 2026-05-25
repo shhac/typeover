@@ -1,0 +1,33 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: fill-word
+order: 4
+prompt: |
+  Fill the item name in the `use` path so `math::add` is
+  brought into scope as `add`.
+generator:
+  kind: template
+  vars:
+    item: ["add"]
+  ts: |-
+    import { add } from "./math";
+  canonical: |-
+    mod math {
+        pub fn add(a: i32, b: i32) -> i32 { a + b }
+    }
+
+    use math::${item};
+
+    fn main() {
+        let _ = ${item}(2, 3);
+    }
+blanks: [item]
+hints:
+  - "Three letters. Same name as the function being imported — `use` brings the symbol into scope under that name."
+  - "Just the function name."
+  - "`add`"
+runtime: none
+notes: |
+  Drills `use <path>::<item>;`. Mirrors TS named imports;
+  the path before the last `::` is the module, the last
+  segment is the item.

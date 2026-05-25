@@ -1,0 +1,86 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: freeform
+order: 8
+prompt: |
+  Translate the TS `export class Counter` pattern. Inline
+  module `types` exposes a struct `Counter` with a public
+  `count` field, plus `new()` and `inc(&mut self)` methods.
+  `main` imports via `use types::Counter;`, builds one, calls
+  `inc()` once, prints `count`.
+
+  Output:
+
+      1
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    namespace types {
+      export class Counter {
+        count: number = 0;
+        inc(): void { this.count += 1; }
+      }
+    }
+    const c = new types.Counter();
+    c.inc();
+    console.log(c.count);
+  canonical: |-
+    mod types {
+        pub struct Counter {
+            pub count: i32,
+        }
+
+        impl Counter {
+            pub fn new() -> Self {
+                Counter { count: 0 }
+            }
+
+            pub fn inc(&mut self) {
+                self.count += 1;
+            }
+        }
+    }
+
+    use types::Counter;
+
+    fn main() {
+        let mut c = Counter::new();
+        c.inc();
+        println!("{}", c.count);
+    }
+expectStdout: |
+  1
+hints:
+  - "Four `pub` modifiers needed: on the struct itself, on its `count` field (so callers can read it), on `new`, and on `inc`. Forgetting any of them leaves part of the API invisible to `main`."
+  - "Five pubs counting the field; `mod types { pub struct Counter { pub count: i32 } impl Counter { pub fn new ... pub fn inc ... } }`."
+  - |-
+    mod types {
+        pub struct Counter {
+            pub count: i32,
+        }
+
+        impl Counter {
+            pub fn new() -> Self {
+                Counter { count: 0 }
+            }
+
+            pub fn inc(&mut self) {
+                self.count += 1;
+            }
+        }
+    }
+
+    use types::Counter;
+
+    fn main() {
+        let mut c = Counter::new();
+        c.inc();
+        println!("{}", c.count);
+    }
+runtime: server
+notes: |
+  Translates a TS class with public fields and methods.
+  Rust requires `pub` per-item: on the struct, on each
+  field meant to be exposed, on each method. Forgetting
+  the field's `pub` is a common trap (caught in slot 09).

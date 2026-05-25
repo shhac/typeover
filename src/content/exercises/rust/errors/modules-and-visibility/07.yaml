@@ -1,0 +1,71 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: freeform
+order: 7
+prompt: |
+  Two sibling inline modules in one file: `math` exposes
+  `add(a, b)`; `app` brings `add` into scope via
+  `use super::math::add;` and exposes a `pub fn run() -> i32`
+  that calls `add(2, 3)`. `main` calls `app::run()` and prints.
+
+  Output:
+
+      5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    namespace math {
+      export function add(a: number, b: number): number { return a + b; }
+    }
+    namespace app {
+      import add = math.add;
+      export function run(): number { return add(2, 3); }
+    }
+    console.log(app.run());
+  canonical: |-
+    mod math {
+        pub fn add(a: i32, b: i32) -> i32 {
+            a + b
+        }
+    }
+
+    mod app {
+        use super::math::add;
+
+        pub fn run() -> i32 {
+            add(2, 3)
+        }
+    }
+
+    fn main() {
+        println!("{}", app::run());
+    }
+expectStdout: |
+  5
+hints:
+  - "Three pieces: declare two sibling modules `math` (with `pub fn add`) and `app` (with `pub fn run`); inside `app` use `super::math::add` to import from the sibling — `super::` walks one level up to the parent (the root in this case). `main` calls `app::run()`."
+  - "Inside `app`, the `use` line is `use super::math::add;`."
+  - |-
+    mod math {
+        pub fn add(a: i32, b: i32) -> i32 {
+            a + b
+        }
+    }
+
+    mod app {
+        use super::math::add;
+
+        pub fn run() -> i32 {
+            add(2, 3)
+        }
+    }
+
+    fn main() {
+        println!("{}", app::run());
+    }
+runtime: server
+notes: |
+  Drills `super::` for sibling-module paths. Same idea as
+  `../` in TS imports — walk up one scope, then descend
+  into the target module.

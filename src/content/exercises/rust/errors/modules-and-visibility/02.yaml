@@ -1,0 +1,38 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: mcq-explain
+order: 2
+prompt: |
+  rustc rejects the program below with `error[E0603]: function
+  `add` is private`. Pick the explanation that names the rule.
+generator:
+  kind: variant
+  variants:
+    - id: private-by-default
+      ts: |-
+        // TS modules export NOTHING by default — symbols are
+        // module-local until you write `export`. Rust takes
+        // the same stance with a different keyword.
+      source: |-
+        mod math {
+            fn add(a: i32, b: i32) -> i32 { a + b }
+        }
+
+        fn main() {
+            println!("{}", math::add(2, 3));
+        }
+      canonical: 'Module items are PRIVATE by default. `math::add` is not visible outside the module — add `pub` in front of `fn add` to make it part of the module''s exported API.'
+      distractors:
+        - '`math::add` is missing parens after the call; the function is being referenced, not invoked.'
+        - 'The `mod math` declaration must appear at the TOP of the file, before `fn main`.'
+        - 'Rust requires a `use math::add;` at the top to call cross-module functions; the qualified path alone is insufficient.'
+hints:
+  - "The diagnostic says the function is PRIVATE, not that the call is malformed. The fix is a visibility modifier on the declaration — same intuition as TS `export`."
+  - "Three letters."
+  - 'Items are private by default; add `pub`.'
+runtime: none
+notes: |
+  Names privacy-by-default. The distractors target three
+  plausible-but-wrong hypotheses: call-syntax, declaration-
+  order, missing-use. The actual fix is the visibility
+  modifier.

@@ -1,0 +1,51 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: freeform
+order: 6
+prompt: |
+  Define an INLINE module `math` exposing one PUBLIC function
+  `add(a: i32, b: i32) -> i32` that returns `a + b`. `main`
+  calls `math::add(2, 3)` (no `use` import) and prints.
+
+  Output:
+
+      5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    namespace math {
+      export function add(a: number, b: number): number { return a + b; }
+    }
+    console.log(math.add(2, 3));
+  canonical: |-
+    mod math {
+        pub fn add(a: i32, b: i32) -> i32 {
+            a + b
+        }
+    }
+
+    fn main() {
+        println!("{}", math::add(2, 3));
+    }
+expectStdout: |
+  5
+hints:
+  - "Two pieces: an inline `mod math { ... }` containing a `pub fn add(...)`, and `main` calling it via the qualified path `math::add(2, 3)`. Without `pub` the function would be private and the call would fail with E0603."
+  - "Qualified path uses `::` (not `.`) — `math::add(2, 3)`."
+  - |-
+    mod math {
+        pub fn add(a: i32, b: i32) -> i32 {
+            a + b
+        }
+    }
+
+    fn main() {
+        println!("{}", math::add(2, 3));
+    }
+runtime: server
+notes: |
+  First module-with-pub-API freeform. The qualified-path
+  call (no `use`) shows that `pub` alone is enough for
+  cross-module access — `use` is a convenience, not a
+  requirement.

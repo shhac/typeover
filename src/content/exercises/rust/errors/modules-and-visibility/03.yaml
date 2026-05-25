@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: mcq
+order: 3
+prompt: |
+  Inside a module, you want a function callable from OUTSIDE
+  the module. Pick the modifier that exposes it.
+generator:
+  kind: variant
+  variants:
+    - id: pub-modifier
+      ts: 'export function add(a: number, b: number): number { return a + b; }'
+      canonical: 'pub fn foo() {} — `pub` is the three-letter modifier that exposes the item to consumers outside the module.'
+      distractors:
+        - 'export fn foo() {} — `export` is the TS keyword; Rust uses `pub`.'
+        - 'extern fn foo() {} — `extern` declares FFI bindings (functions defined in non-Rust code); it''s about linkage, not module visibility.'
+        - 'public fn foo() {} — full English word; Rust uses the three-letter abbreviation.'
+hints:
+  - "Three letters. Same idea as TS `export` — the modifier goes BEFORE the declaration kind (`fn`, `struct`, `enum`, …)."
+  - "Shape: `pub <kind> <name> ...`."
+  - "`pub fn foo() {}`"
+runtime: none
+notes: |
+  Pins `pub` as the visibility opt-in. Distractors cover
+  TS `export`, `extern` (FFI, not modules), and the
+  spelled-out word.

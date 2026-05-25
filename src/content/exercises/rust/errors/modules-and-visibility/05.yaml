@@ -1,0 +1,33 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: fill-word
+order: 5
+prompt: |
+  Fill the visibility modifier that exposes an item WITHIN the
+  current crate, but NOT to external consumers.
+generator:
+  kind: template
+  vars:
+    vis: ["pub(crate)"]
+  ts: |-
+    // TS has no equivalent — `export` is binary (public or not).
+    // Some bundlers add `@internal` JSDoc tags as a convention.
+  canonical: |-
+    mod internals {
+        ${vis} fn helper() -> i32 { 42 }
+    }
+
+    fn main() {
+        let _ = internals::helper();
+    }
+blanks: [vis]
+hints:
+  - "Three pieces: the three-letter base modifier, parens, and the keyword that names the visibility scope (one word, five letters)."
+  - "Shape: `<base>(<scope>)` — `pub` plus `(crate)`."
+  - "`pub(crate)`"
+runtime: none
+notes: |
+  Drills the `pub(crate)` restricted-visibility modifier.
+  Useful for items that need to be shared across modules
+  within the crate but should NOT be part of the
+  published API.

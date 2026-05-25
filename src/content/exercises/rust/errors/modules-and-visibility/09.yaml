@@ -1,0 +1,86 @@
+target: rust
+themeId: rust/errors/modules-and-visibility
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0616]: field `count` of struct
+  `Counter` is private`:
+
+      mod types {
+          pub struct Counter {
+              count: i32,
+          }
+
+          impl Counter {
+              pub fn new() -> Self {
+                  Counter { count: 0 }
+              }
+          }
+      }
+
+      fn main() {
+          let c = types::Counter::new();
+          println!("{}", c.count);
+      }
+
+  The struct is public but its FIELDS are not — `pub struct`
+  only makes the type name visible. Fix it by adding `pub` to
+  the `count` field.
+
+  Output:
+
+      0
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Counter {
+      count: number = 0;
+    }
+    const c = new Counter();
+    console.log(c.count);
+  canonical: |-
+    mod types {
+        pub struct Counter {
+            pub count: i32,
+        }
+
+        impl Counter {
+            pub fn new() -> Self {
+                Counter { count: 0 }
+            }
+        }
+    }
+
+    fn main() {
+        let c = types::Counter::new();
+        println!("{}", c.count);
+    }
+expectStdout: |
+  0
+hints:
+  - "One coordinated edit: add `pub` to the `count: i32` field declaration. `pub struct` only exports the TYPE NAME; each field needs its own `pub` to be visible from outside the module."
+  - "Change `count: i32,` to `pub count: i32,`."
+  - |-
+    mod types {
+        pub struct Counter {
+            pub count: i32,
+        }
+
+        impl Counter {
+            pub fn new() -> Self {
+                Counter { count: 0 }
+            }
+        }
+    }
+
+    fn main() {
+        let c = types::Counter::new();
+        println!("{}", c.count);
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "pub struct doesn't
+  pub the fields" trap. The fix is per-field; the
+  granularity is intentional so structs can have a public
+  type name with internal state.
