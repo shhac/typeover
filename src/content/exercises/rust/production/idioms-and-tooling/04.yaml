@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: fill-line
+order: 4
+prompt: |
+  Fill the `main` signature that lets you use `?` at the TOP
+  LEVEL for error propagation. End with the opening brace.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn main() -> Result<(), Box<dyn std::error::Error>> {"
+  ts: |-
+    // TS top-level await handles errors via try/catch.
+  canonical: |-
+    ${line}
+        let n: i32 = "42".parse()?;
+        println!("{}", n);
+        Ok(())
+    }
+  distractors:
+    - match: "fn main() {"
+      explain: |-
+        Bare `fn main()` returns `()`. The `?` operator
+        requires the enclosing function to return `Result`
+        (or `Option`).
+    - match: "fn main() -> Result<(), String> {"
+      explain: |-
+        Works for `String` errors, but `Box<dyn Error>`
+        accepts ANY error type via `From` impls — more
+        flexible for a program that may hit multiple error
+        kinds.
+    - match: "fn main() -> Result<()> {"
+      explain: |-
+        Missing the error type parameter. `Result<T, E>`
+        needs two type arguments; there is no `Result<T>`
+        alias in std.
+    - match: "fn main() -> Result<(), Box<dyn std::error::Error>>"
+      explain: |-
+        Missing the opening brace `{`. Like every Rust
+        function, the body starts with `{`.
+expectStdout: |
+  42
+runtime: server
+blanks: [line]
+hints:
+  - "Return type: `Result<(), Box<dyn std::error::Error>>`. The unit `()` is the success type (main returns nothing on success). `Box<dyn Error>` is the catch-all error type."
+  - "Shape: `fn main() -> Result<(), Box<dyn std::error::Error>> {`."
+  - "`fn main() -> Result<(), Box<dyn std::error::Error>> {`"
+notes: |
+  Drills the idiomatic main-returns-Result signature.
+  Unlocks `?` at the top level — the program exits with
+  a non-zero status and prints the error if main returns
+  `Err`.

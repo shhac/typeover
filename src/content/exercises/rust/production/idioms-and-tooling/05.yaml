@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: fill-word
+order: 5
+prompt: |
+  Fill the Rust DOC-COMMENT prefix — the one that generates
+  HTML via `cargo doc`.
+generator:
+  kind: template
+  vars:
+    prefix: ["///"]
+  ts: |-
+    /** Returns the area. */
+    function area(w: number, h: number): number { return w * h; }
+  canonical: |-
+    ${prefix} Returns the area of the rectangle.
+    fn area(w: f64, h: f64) -> f64 {
+        w * h
+    }
+blanks: [prefix]
+hints:
+  - "Three characters. Same as a line comment (`//`) plus one more slash."
+  - "`///` — the triple-slash doc comment."
+  - "`///`"
+runtime: none
+notes: |
+  Pins `///` as the doc-comment prefix. Inner doc comments
+  (`//!`) document the enclosing module; outer doc comments
+  (`///`) document the following item. `cargo doc` renders
+  both.

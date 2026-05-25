@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: freeform
+order: 9
+prompt: |
+  Refactor this rough program. Replace the verbose `Vec::new` +
+  three `push`es with a `vec![]` literal, replace `.clone().
+  into_iter().sum::<i32>()` with `.iter().sum()` (no clone, no
+  turbofish — type annotation on the binding instead), and
+  remove the redundant `.clone()` on the `i32` sum.
+
+  Broken source:
+
+      fn main() {
+          let v: Vec<i32> = Vec::new();
+          let mut v = v;
+          v.push(1);
+          v.push(2);
+          v.push(3);
+          let s: i32 = v.clone().into_iter().sum::<i32>();
+          println!("{}", s.clone());
+      }
+
+  Output:
+
+      6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const v = [1, 2, 3];
+    const s = v.reduce((a, b) => a + b, 0);
+    console.log(s);
+  canonical: |-
+    fn main() {
+        let v = vec![1, 2, 3];
+        let s: i32 = v.iter().sum();
+        println!("{}", s);
+    }
+expectStdout: |
+  6
+hints:
+  - "Three refactors: `vec![1, 2, 3]` replaces new+push+push+push, `.iter().sum()` replaces `.clone().into_iter().sum::<i32>()` (clone was wasteful, turbofish unnecessary with the type annotation on `s`), bare `s` replaces `s.clone()` (i32 is Copy)."
+  - "Four lines: `let v = vec![1, 2, 3]; let s: i32 = v.iter().sum(); println!(\"{}\", s);`."
+  - |-
+    fn main() {
+        let v = vec![1, 2, 3];
+        let s: i32 = v.iter().sum();
+        println!("{}", s);
+    }
+runtime: server
+notes: |
+  Closes the entire Rust curriculum by refactoring a
+  rough draft into idiomatic code. Every fix pulls from
+  a lesson taught earlier: `vec![]` literal (collections),
+  `.iter()` not `.into_iter()` (iterators), type-annotation
+  vs turbofish (generics), no-clone on Copy types
+  (derive-and-common-traits).

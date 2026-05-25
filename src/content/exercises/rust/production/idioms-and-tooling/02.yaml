@@ -1,0 +1,34 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: mcq-explain
+order: 2
+prompt: |
+  Clippy suggests replacing `**x > 0` inside a closure with
+  a destructuring pattern `|&&x|`. Pick the reason.
+generator:
+  kind: variant
+  variants:
+    - id: clippy-deref
+      ts: |-
+        // TS: no equivalent — closures receive values
+        // directly, no deref layers.
+      source: |-
+        // Before (Clippy warns):
+        xs.iter().filter(|x| **x > 0)
+
+        // After (Clippy-clean):
+        xs.iter().filter(|&&x| x > 0)
+      canonical: 'The double-deref `**x` is unnecessary noise. Destructuring `&&x` in the closure parameter binds `x` directly as the inner value — same semantics, cleaner read. Clippy flags readability, not performance.'
+      distractors:
+        - '`**x` is slower because it produces two pointer chases at runtime — Clippy is optimising performance.'
+        - 'Clippy requires all closures to use pattern matching — function-pointer style closures are forbidden.'
+        - '`**x` borrows the value mutably, causing a borrow conflict that `&&x` avoids.'
+hints:
+  - "Clippy's lint is about READABILITY, not performance. Both forms compile to the same code."
+  - "The destructuring pattern avoids writing the deref explicitly."
+  - 'Readability — destructuring replaces explicit double-deref.'
+runtime: none
+notes: |
+  Surfaces Clippy as a readability/idiom tool, not just a
+  correctness checker. The performance distractor targets
+  the "deref is slow" myth — for references it's zero-cost.

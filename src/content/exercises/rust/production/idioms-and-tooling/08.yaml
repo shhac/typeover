@@ -1,0 +1,41 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: freeform
+order: 8
+prompt: |
+  Translate the TS script to idiomatic Rust. Filter even numbers,
+  sum them, print with a label.
+
+  Output:
+
+      sum of evens: 6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3, 4, 5];
+    const evens = xs.filter((x) => x % 2 === 0);
+    const sum = evens.reduce((a, b) => a + b, 0);
+    console.log("sum of evens: " + sum);
+  canonical: |-
+    fn main() {
+        let xs = vec![1, 2, 3, 4, 5];
+        let sum: i32 = xs.iter().filter(|&&x| x % 2 == 0).sum();
+        println!("sum of evens: {}", sum);
+    }
+expectStdout: |
+  sum of evens: 6
+hints:
+  - "Three idioms: `vec![...]` literal, `.iter().filter(|&&x| ...)` with destructuring pattern (not `**x`), `.sum()` with a type annotation on the binding to pin the output type."
+  - "Body: `let sum: i32 = xs.iter().filter(|&&x| x % 2 == 0).sum();`."
+  - |-
+    fn main() {
+        let xs = vec![1, 2, 3, 4, 5];
+        let sum: i32 = xs.iter().filter(|&&x| x % 2 == 0).sum();
+        println!("sum of evens: {}", sum);
+    }
+runtime: server
+notes: |
+  Brings together vec-literal, iterator chain, destructuring-
+  filter, and type-annotated sum — four idioms from earlier
+  themes in one concise program.

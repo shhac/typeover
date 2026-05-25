@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: freeform
+order: 7
+prompt: |
+  This program has two NEEDLESS clones. Remove them both —
+  neither is required for the program to compile.
+
+  Broken source:
+
+      fn greet(name: &str) -> String {
+          let s = name.to_string().clone();
+          format!("hi, {}", s)
+      }
+
+      fn main() {
+          let name = String::from("paul");
+          println!("{}", greet(&name.clone()));
+      }
+
+  Output:
+
+      hi, paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function greet(name: string): string { return "hi, " + name; }
+    console.log(greet("paul"));
+  canonical: |-
+    fn greet(name: &str) -> String {
+        format!("hi, {}", name)
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        println!("{}", greet(&name));
+    }
+expectStdout: |
+  hi, paul
+hints:
+  - "Two removals: `.clone()` after `name.to_string()` (already owned, cloning produces a wasteful duplicate) and `.clone()` on `&name` in main (unnecessary — `&name` already borrows, the `.clone()` allocates a copy that is then immediately borrowed again)."
+  - "Simplified body: `format!(\"hi, {}\", name)` — `name` is already `&str`, which `format!` accepts directly."
+  - |-
+    fn greet(name: &str) -> String {
+        format!("hi, {}", name)
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        println!("{}", greet(&name));
+    }
+runtime: server
+notes: |
+  Drills the "remove needless clone" reflex. Clippy's
+  `redundant_clone` and `unnecessary_to_owned` lints
+  catch these. The rule: don't clone unless the type
+  system demands it.

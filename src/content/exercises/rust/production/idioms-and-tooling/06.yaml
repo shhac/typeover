@@ -1,0 +1,42 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: freeform
+order: 6
+prompt: |
+  Write a polished CLI-style `main` that returns
+  `Result<(), Box<dyn std::error::Error>>`. Parse `"42"` as
+  `i32` via `?`, print it, return `Ok(())`.
+
+  Output:
+
+      42
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n = parseInt("42", 10);
+    if (Number.isNaN(n)) throw new Error("parse failed");
+    console.log(n);
+  canonical: |-
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let n: i32 = "42".parse()?;
+        println!("{}", n);
+        Ok(())
+    }
+expectStdout: |
+  42
+hints:
+  - "Three pieces: signature `fn main() -> Result<(), Box<dyn std::error::Error>>`, body uses `\"42\".parse::<i32>()?` (or type-annotated `let n: i32 = \"42\".parse()?`), trailing `Ok(())`."
+  - "Body: `let n: i32 = \"42\".parse()?; println!(\"{}\", n); Ok(())`."
+  - |-
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let n: i32 = "42".parse()?;
+        println!("{}", n);
+        Ok(())
+    }
+runtime: server
+notes: |
+  Drills the canonical top-level-`?` main. The `Box<dyn
+  Error>` return type accepts any error — the `?` on
+  `.parse()` auto-converts `ParseIntError` via the
+  blanket `From` impl.

@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: mcq
+order: 1
+prompt: |
+  Pick the Cargo command that auto-formats every `.rs` file in
+  the project to the community style.
+generator:
+  kind: variant
+  variants:
+    - id: cargo-fmt
+      ts: 'npx prettier --write .'
+      canonical: 'cargo fmt — runs `rustfmt` on every source file in the workspace. Non-negotiable in teams; CI usually gates on it.'
+      distractors:
+        - 'cargo lint — no such built-in command. Linting is `cargo clippy`.'
+        - 'cargo check --format — `cargo check` type-checks but doesn''t format.'
+        - 'rustfmt --all — works but `cargo fmt` is the idiomatic wrapper that discovers all files via Cargo.'
+hints:
+  - "Two words. The first is the build tool; the second is three letters, short for 'format'."
+  - "`cargo fmt`."
+  - '`cargo fmt`'
+runtime: none
+notes: |
+  Pins `cargo fmt` as the canonical formatter command.
+  `rustfmt` is the underlying tool; `cargo fmt` is the
+  project-aware wrapper.

@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/idioms-and-tooling
+type: mcq
+order: 3
+prompt: |
+  A parse MIGHT fail, and if it does you want a CLEAR panic
+  message rather than the generic "called unwrap on Err". Pick
+  the method.
+generator:
+  kind: variant
+  variants:
+    - id: expect-over-unwrap
+      ts: '// TS: `throw new Error("failed to parse config")`'
+      canonical: '.expect("failed to parse config") — panics with YOUR message, making the crash site immediately identifiable in logs.'
+      distractors:
+        - '.unwrap() — panics with a generic message ("called `Option::unwrap()` on a `None` value"); no context about WHICH unwrap or why.'
+        - '.unwrap_or_default() — doesn''t panic at all; silently uses the type''s `Default`. Fine when that''s intentional, but hides the error.'
+        - '.ok() — converts `Result` to `Option`, discarding the error. Doesn''t panic, doesn''t provide a message.'
+hints:
+  - "Six letters. Same word as the English verb meaning 'anticipate'. The string argument IS the panic message — write it as if it'll show up in a 3 AM log."
+  - "`.expect(\"...\")` — between `.unwrap()` (too silent) and full `match` (too verbose) when you genuinely intend to crash."
+  - '`.expect("failed to parse config")`'
+runtime: none
+notes: |
+  Pins `.expect()` as the intentional-panic idiom. Clippy's
+  `unwrap_used` lint can enforce this project-wide.
