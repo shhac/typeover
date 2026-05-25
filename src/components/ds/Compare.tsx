@@ -48,9 +48,7 @@ export function Compare(props: ParentProps<CompareProps>) {
           →
         </div>
         <div class="min-w-0">{second()}</div>
-        <For each={extra()}>
-          {(item) => <div class="min-w-0 lg:col-span-3">{item}</div>}
-        </For>
+        <For each={extra()}>{(item) => <div class="min-w-0 lg:col-span-3">{item}</div>}</For>
       </div>
       <Show when={local.caption}>
         <figcaption class="font-sans text-fg-muted text-sm">{local.caption}</figcaption>

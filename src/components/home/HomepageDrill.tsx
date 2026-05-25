@@ -59,13 +59,17 @@ export function HomepageDrill() {
                 Try the translation move
               </Text>
               <Text tone="secondary" size="md">
-                Same TypeScript intent. Different target-language reflexes.
-                Pick any answer; all three are valid in their own language.
+                Same TypeScript intent. Different target-language reflexes. Pick any answer; all
+                three are valid in their own language.
               </Text>
             </Stack>
             <CodeBlock lang="ts" filename="count.ts">{`const count = users.length;
 console.log(count);`}</CodeBlock>
-            <div class="flex flex-row flex-wrap gap-2" role="group" aria-label="Choose a target language">
+            <div
+              class="flex flex-row flex-wrap gap-2"
+              role="group"
+              aria-label="Choose a target language"
+            >
               <For each={order}>
                 {(id) => (
                   <Button
@@ -83,7 +87,9 @@ console.log(count);`}</CodeBlock>
         </div>
         <div class="p-4 sm:p-6 bg-bg-base/30">
           <Stack gap="md">
-            <CodeBlock lang={selected()} filename={current().filename}>{current().code}</CodeBlock>
+            <CodeBlock lang={selected()} filename={current().filename}>
+              {current().code}
+            </CodeBlock>
             <Text tone="secondary" size="sm">
               {current().note}
             </Text>
