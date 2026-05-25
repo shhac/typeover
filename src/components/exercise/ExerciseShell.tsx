@@ -335,21 +335,10 @@ export function ExerciseShell(props: ExerciseShellProps) {
                 </Show>
               </Match>
               <Match when={phase() === "right"}>
-                <Show
-                  when={props.nextExerciseHref}
-                  fallback={
-                    <Show when={props.themeHref}>
-                      {(href) => (
-                        <ButtonLink href={href()} variant="primary">
-                          Back to theme overview
-                        </ButtonLink>
-                      )}
-                    </Show>
-                  }
-                >
+                <Show when={props.nextExerciseHref ?? props.themeHref}>
                   {(href) => (
                     <ButtonLink href={href()} variant="primary">
-                      Next exercise →
+                      {props.nextExerciseHref ? "Next exercise →" : "Back to theme overview"}
                     </ButtonLink>
                   )}
                 </Show>
