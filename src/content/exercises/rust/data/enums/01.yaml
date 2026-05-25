@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/enums
+type: mcq
+order: 1
+prompt: |
+  Declare a `TrafficLight` with three states (Red, Yellow, Green).
+  Pick the idiomatic Rust enum.
+generator:
+  kind: variant
+  variants:
+    - id: traffic-light
+      ts: 'type TrafficLight = "red" | "yellow" | "green";'
+      canonical: 'enum TrafficLight { Red, Yellow, Green } — unit variants, comma-separated, PascalCase.'
+      distractors:
+        - 'enum TrafficLight = Red | Yellow | Green; — TS-style union syntax; Rust uses `{ ... }` with commas.'
+        - 'type TrafficLight = Red | Yellow | Green; — `type` declares a type ALIAS in Rust, not an enum.'
+        - 'class TrafficLight { Red; Yellow; Green; } — Rust has no `class`; data declarations are `struct` or `enum`.'
+hints:
+  - "Keyword is four letters (the same one used in C, Go, Swift). Variants live INSIDE braces, separated by commas, named in PascalCase."
+  - "Shape: `enum <Name> { <Variant>, <Variant>, ... }`."
+  - '`enum TrafficLight { Red, Yellow, Green }`'
+runtime: none
+notes: |
+  Establishes the unit-variant enum shape. Distractors cover
+  TS union syntax, `type`-vs-`enum` confusion, and the `class`
+  reflex.

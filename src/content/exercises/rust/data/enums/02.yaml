@@ -1,0 +1,32 @@
+target: rust
+themeId: rust/data/enums
+type: mcq
+order: 2
+prompt: |
+  An enum's variants can carry payload — positional, named, or none.
+  Pick the declaration that uses ALL THREE shapes: one tuple-like
+  variant, one struct-like variant, and one unit variant.
+generator:
+  kind: variant
+  variants:
+    - id: mixed-shapes
+      ts: |-
+        type Shape =
+          | { kind: "circle"; r: number }
+          | { kind: "rect"; w: number; h: number }
+          | { kind: "square" };
+      canonical: 'enum Shape { Circle(f64), Rectangle { w: f64, h: f64 }, Square } — `Circle(f64)` is tuple-like; `Rectangle { ... }` is struct-like; `Square` is a unit variant.'
+      distractors:
+        - 'enum Shape { Circle: f64, Rectangle: (f64, f64), Square } — `:` is not the variant-payload syntax; tuple-like uses parens, struct-like uses braces.'
+        - 'enum Shape { Circle(f64) | Rectangle(f64, f64) | Square } — TS-style `|` separator; Rust uses commas inside `{ ... }`.'
+        - 'enum Shape { Circle = f64, Rectangle = (f64, f64), Square = () } — `=` assigns DISCRIMINANT values (integers), not payload types.'
+hints:
+  - "Tuple-like variants put types in PARENS after the variant name (`Circle(f64)`). Struct-like variants put `field: Type` pairs in BRACES (`Rectangle { w: f64, h: f64 }`). Unit variants have neither (`Square`)."
+  - "Three different syntaxes — parens, braces, nothing — separated by commas."
+  - '`enum Shape { Circle(f64), Rectangle { w: f64, h: f64 }, Square }`'
+runtime: none
+notes: |
+  Establishes the three variant payload shapes. The fourth
+  distractor (`=` discriminant) is a real Rust feature for
+  C-style integer enums — distractor exists to surface that
+  it's separate from payload-carrying enums.

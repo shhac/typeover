@@ -1,0 +1,70 @@
+target: rust
+themeId: rust/data/enums
+type: freeform
+order: 7
+prompt: |
+  Define an enum `Message` with two variants: `Quit` (unit) and
+  `Echo(String)` (tuple-like, carrying owned text). Write
+  `handle(m: Message)` that prints "goodbye" for `Quit` and the
+  inner string for `Echo`. `main` calls
+  `handle(Message::Echo(String::from("hi")))`.
+
+  Output:
+
+      hi
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Message =
+      | { kind: "quit" }
+      | { kind: "echo"; text: string };
+    function handle(m: Message): void {
+      if (m.kind === "quit") console.log("goodbye");
+      else console.log(m.text);
+    }
+    handle({ kind: "echo", text: "hi" });
+  canonical: |-
+    enum Message {
+        Quit,
+        Echo(String),
+    }
+
+    fn handle(m: Message) {
+        match m {
+            Message::Quit => println!("goodbye"),
+            Message::Echo(s) => println!("{}", s),
+        }
+    }
+
+    fn main() {
+        handle(Message::Echo(String::from("hi")));
+    }
+expectStdout: |
+  hi
+hints:
+  - "Tuple-like variant: `Echo(String)` declares the payload type; the `match` arm `Message::Echo(s) => ...` BINDS the payload to a local `s` you can use in the arm's body."
+  - "Construction mirrors a function call: `Message::Echo(String::from(\"hi\"))`."
+  - |-
+    enum Message {
+        Quit,
+        Echo(String),
+    }
+
+    fn handle(m: Message) {
+        match m {
+            Message::Quit => println!("goodbye"),
+            Message::Echo(s) => println!("{}", s),
+        }
+    }
+
+    fn main() {
+        handle(Message::Echo(String::from("hi")));
+    }
+runtime: server
+notes: |
+  First data-carrying variant. The `Echo(s)` pattern binds
+  the inner String to `s` — a learner who comes from
+  TS-discriminated-unions would otherwise reach for
+  `m.text`-style field access, which doesn't apply to
+  tuple-style variants.

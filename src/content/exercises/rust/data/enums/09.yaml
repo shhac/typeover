@@ -1,0 +1,76 @@
+target: rust
+themeId: rust/data/enums
+type: freeform
+order: 9
+prompt: |
+  Model a small `Door` state machine as an enum. Variants:
+  `Closed` (unit), `Open` (unit), `Locked(String)` (carries the
+  key name). Write `describe(d: Door) -> String` that returns
+  "closed", "open", or "locked with <key>". `main` calls
+  `describe(Door::Locked(String::from("brass")))`.
+
+  Output:
+
+      locked with brass
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Door =
+      | { kind: "closed" }
+      | { kind: "open" }
+      | { kind: "locked"; key: string };
+    function describe(d: Door): string {
+      switch (d.kind) {
+        case "closed": return "closed";
+        case "open": return "open";
+        case "locked": return "locked with " + d.key;
+      }
+    }
+    console.log(describe({ kind: "locked", key: "brass" }));
+  canonical: |-
+    enum Door {
+        Closed,
+        Open,
+        Locked(String),
+    }
+
+    fn describe(d: Door) -> String {
+        match d {
+            Door::Closed => String::from("closed"),
+            Door::Open => String::from("open"),
+            Door::Locked(key) => format!("locked with {}", key),
+        }
+    }
+
+    fn main() {
+        println!("{}", describe(Door::Locked(String::from("brass"))));
+    }
+expectStdout: |
+  locked with brass
+hints:
+  - "Mix of unit and data-carrying variants in one enum. The two unit arms return `String::from(\"...\")` because the return type is `String`; the data-carrying arm uses `format!` to interpolate the bound `key`."
+  - "Pattern `Door::Locked(key)` binds the inner String to `key` for the arm's body."
+  - |-
+    enum Door {
+        Closed,
+        Open,
+        Locked(String),
+    }
+
+    fn describe(d: Door) -> String {
+        match d {
+            Door::Closed => String::from("closed"),
+            Door::Open => String::from("open"),
+            Door::Locked(key) => format!("locked with {}", key),
+        }
+    }
+
+    fn main() {
+        println!("{}", describe(Door::Locked(String::from("brass"))));
+    }
+runtime: server
+notes: |
+  Closes the theme with a mixed-payload state machine. Three
+  arms each return `String`; the unit arms convert literals,
+  the data-carrying arm `format!`s the bound payload.

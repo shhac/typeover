@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/data/enums
+type: fill-word
+order: 4
+prompt: |
+  Fill the variant name. `job` should be the unit-variant for a
+  job that hasn't started yet.
+generator:
+  kind: template
+  vars:
+    variant: ["Pending"]
+  ts: |-
+    const job = { kind: "pending" };
+  canonical: |-
+    enum Job { Pending, Running, Done }
+    let job = Job::${variant};
+blanks: [variant]
+hints:
+  - "PascalCase. Seven letters. The word matches the JS object's `kind` literal."
+  - "Names a job that hasn't started — same prefix as the verb 'pend' + a participle ending."
+  - "`Pending`"
+runtime: none
+notes: |
+  Drills the `Type::Variant` construction shape for unit
+  variants. PascalCase matches the declaration in slot 01.

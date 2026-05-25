@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/enums
+type: fill-word
+order: 5
+prompt: |
+  Fill the type annotation. `light` is one of the three
+  `TrafficLight` states.
+generator:
+  kind: template
+  vars:
+    type_: ["TrafficLight"]
+  ts: |-
+    const light = "red";
+  canonical: |-
+    enum TrafficLight { Red, Yellow, Green }
+    let light: ${type_} = TrafficLight::Red;
+blanks: [type_]
+hints:
+  - "The type is the ENUM name itself — not a variant. Goes after the colon, before `=`."
+  - "PascalCase, twelve characters."
+  - "`TrafficLight`"
+runtime: none
+notes: |
+  Pins the enum-name-as-type pattern. A binding's type is the
+  enum, not one of its variants — `TrafficLight::Red` is
+  one of the values of type `TrafficLight`.

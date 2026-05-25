@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/data/enums
+type: mcq-explain
+order: 3
+prompt: |
+  A function accepts a "kind" parameter from a small fixed set:
+  pending, ready, failed. Pick the STRONGEST reason to model it as
+  a Rust `enum` rather than a `String`.
+generator:
+  kind: variant
+  variants:
+    - id: enum-vs-string
+      ts: |-
+        // TS handles this with a string-literal union:
+        //   type Kind = "pending" | "ready" | "failed";
+        // — checked at the type level, but not at runtime.
+      canonical: 'The enum makes the legal set EXPLICIT to the compiler; `match` is checked for exhaustiveness, so a typo or a new state is a compile error rather than a silent fallthrough at runtime.'
+      distractors:
+        - 'Enums use less memory because variants are stored as integers — true but minor; correctness, not size, is the win.'
+        - 'Enums are faster to compare because no string comparison is involved — minor perf difference; not the structural reason.'
+        - 'Rust does not have a `String` type at the function-parameter level; you must use an enum — false; `&str` and `String` work fine as parameters.'
+hints:
+  - "The thing a string can't give you is COMPILE-TIME exhaustiveness checking. With an enum, adding a new variant breaks every `match` site until the new arm is added — fail loudly, never silently."
+  - "The word that names the property: ex-h-a-u-s-t-i-v-e."
+  - 'Compile-time exhaustiveness checking via `match`.'
+runtime: none
+notes: |
+  Pins the real motivation for enums over string tags:
+  exhaustiveness, not micro-perf. The TS-side note frames it
+  as "type-level only" — TS string unions catch *some* misuse
+  at compile time but the runtime parameter remains a string.

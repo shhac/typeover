@@ -1,0 +1,64 @@
+target: rust
+themeId: rust/data/enums
+type: freeform
+order: 6
+prompt: |
+  Define an enum `Color` with three unit variants Red, Green,
+  Blue. Write `describe(c: Color) -> &'static str` that uses
+  `match` to return one of "red", "green", "blue" — exhaustive.
+  `main` calls `describe(Color::Green)` and prints.
+
+  Output:
+
+      green
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Color = "red" | "green" | "blue";
+    function describe(c: Color): string {
+      switch (c) {
+        case "red": return "red";
+        case "green": return "green";
+        case "blue": return "blue";
+      }
+    }
+    console.log(describe("green"));
+  canonical: |-
+    enum Color { Red, Green, Blue }
+
+    fn describe(c: Color) -> &'static str {
+        match c {
+            Color::Red => "red",
+            Color::Green => "green",
+            Color::Blue => "blue",
+        }
+    }
+
+    fn main() {
+        println!("{}", describe(Color::Green));
+    }
+expectStdout: |
+  green
+hints:
+  - "Three pieces: enum declaration `enum Color { Red, Green, Blue }`, function with `match c { Color::Red => \"red\", ... }`, and `main` calling `describe(Color::Green)`. `match` arms use `=>` (not `:`)."
+  - "Return type `&'static str` because the values are string literals — they live for the whole program."
+  - |-
+    enum Color { Red, Green, Blue }
+
+    fn describe(c: Color) -> &'static str {
+        match c {
+            Color::Red => "red",
+            Color::Green => "green",
+            Color::Blue => "blue",
+        }
+    }
+
+    fn main() {
+        println!("{}", describe(Color::Green));
+    }
+runtime: server
+notes: |
+  First exhaustive `match`. Removing one arm produces an
+  E0004 — exhaustiveness is the headline reason to prefer
+  enums over string tags (slot 03).

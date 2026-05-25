@@ -1,0 +1,68 @@
+target: rust
+themeId: rust/data/enums
+type: freeform
+order: 8
+prompt: |
+  Translate the TS discriminated union to Rust. `Outcome::Ok(i32)`
+  carries a value; `Outcome::Err(String)` carries a reason.
+  `show` returns a `String` with one of `"ok <value>"` or
+  `"err <reason>"`. `main` calls `show(Outcome::Ok(42))`.
+
+  Output:
+
+      ok 42
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Outcome =
+      | { kind: "ok"; value: number }
+      | { kind: "err"; reason: string };
+    function show(r: Outcome): string {
+      if (r.kind === "ok") return "ok " + r.value;
+      return "err " + r.reason;
+    }
+    console.log(show({ kind: "ok", value: 42 }));
+  canonical: |-
+    enum Outcome {
+        Ok(i32),
+        Err(String),
+    }
+
+    fn show(r: Outcome) -> String {
+        match r {
+            Outcome::Ok(v) => format!("ok {}", v),
+            Outcome::Err(reason) => format!("err {}", reason),
+        }
+    }
+
+    fn main() {
+        println!("{}", show(Outcome::Ok(42)));
+    }
+expectStdout: |
+  ok 42
+hints:
+  - "Two pieces: enum with two tuple-like variants (`Ok(i32)`, `Err(String)`), and a `match` with two arms binding the payloads via `Ok(v)` / `Err(reason)`. Use `format!` to build the returned String."
+  - "`format!` is the String-building cousin of `println!` — same `{}` placeholders, returns the result instead of printing it."
+  - |-
+    enum Outcome {
+        Ok(i32),
+        Err(String),
+    }
+
+    fn show(r: Outcome) -> String {
+        match r {
+            Outcome::Ok(v) => format!("ok {}", v),
+            Outcome::Err(reason) => format!("err {}", reason),
+        }
+    }
+
+    fn main() {
+        println!("{}", show(Outcome::Ok(42)));
+    }
+runtime: server
+notes: |
+  Closes the parallel with TS discriminated unions. The
+  Rust shape collapses the `kind` discriminator field — the
+  enum variant IS the tag. `format!` builds the result
+  string idiomatically.
