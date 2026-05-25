@@ -1,17 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { parserFor, highlightedTokens, type Lang } from "./CodeHighlight";
+import { loadParser, highlightedTokens, type Lang } from "./CodeHighlight";
 
 /*
- * Pin the parserFor coverage matrix and the tokenizer's token-
- * concatenation invariant.
+ * Pin the parser load + tokenizer concatenation invariants.
  *
- * The earlier `if`-chain version of parserFor silently returned
- * null for "rust" because the branch was never added — Rust code
- * blocks shipped as unstyled plaintext while the type union
- * advertised Rust as a supported lang. The switch+assertUnreachable
- * form now makes that class of regression a typecheck failure,
- * and these tests pin the per-lang coverage so a future addition
- * (e.g. Python) can't ship before its parser branch lands.
+ * `loadParser` is async now (each grammar is dynamic-imported per
+ * commit hash). The coverage matrix below makes a future addition
+ * (e.g. Python) impossible to ship without its parser branch
+ * landing here. The earlier static-import `if`-chain silently
+ * returned null for unmatched langs — that footgun is what produced
+ * the unhighlighted-Rust regression that prompted the Rust branch
+ * to land.
  *
  * The tokenizer tests pin the concatenation invariant: every
  * highlighted span's text, joined in order, must equal the input.
@@ -20,9 +19,9 @@ import { parserFor, highlightedTokens, type Lang } from "./CodeHighlight";
  * the right colors.
  */
 
-describe("parserFor — language coverage", () => {
-  it.each(["ts", "go", "zig", "rust"] as const)("returns a non-null parser for %s", (lang) => {
-    const parser = parserFor(lang);
+describe("loadParser — language coverage", () => {
+  it.each(["ts", "go", "zig", "rust"] as const)("resolves a non-null parser for %s", async (lang) => {
+    const parser = await loadParser(lang);
     expect(parser).not.toBeNull();
     /* The parser surface we actually use is `.parse(string) → Tree`.
      * Verify the method exists rather than asserting a specific
@@ -30,25 +29,38 @@ describe("parserFor — language coverage", () => {
     expect(typeof parser?.parse).toBe("function");
   });
 
-  it("returns null for shell (no syntax highlight, no error)", () => {
-    expect(parserFor("shell")).toBeNull();
+  it("resolves null for shell (no syntax highlight, no error)", async () => {
+    expect(await loadParser("shell")).toBeNull();
   });
 
-  it("returns null for plain (no syntax highlight, no error)", () => {
-    expect(parserFor("plain")).toBeNull();
+  it("resolves null for plain (no syntax highlight, no error)", async () => {
+    expect(await loadParser("plain")).toBeNull();
+  });
+
+  it("caches resolved parsers — repeated calls return the same instance", async () => {
+    /* The cache is what keeps the per-grammar chunk from being
+     * fetched multiple times on a page that mounts multiple
+     * <CodeHighlight lang="go"> panes. Identity equality is the
+     * cheap proxy for "we didn't go through the import() round
+     * trip again". */
+    const a = await loadParser("go");
+    const b = await loadParser("go");
+    expect(a).toBe(b);
   });
 });
 
 describe("highlightedTokens — fallback paths", () => {
-  it("returns a single plaintext token for an empty string", () => {
-    expect(highlightedTokens("", "go")).toEqual([{ text: "" }]);
+  it("returns a single plaintext token for an empty string", async () => {
+    const parser = await loadParser("go");
+    expect(highlightedTokens("", parser)).toEqual([{ text: "" }]);
   });
 
-  it("returns a single plaintext token for unsupported lang", () => {
-    /* shell + plain have no parser; the source should still render
-     * verbatim, just without per-token classes. */
-    expect(highlightedTokens("echo hi", "shell")).toEqual([{ text: "echo hi" }]);
-    expect(highlightedTokens("anything", "plain")).toEqual([{ text: "anything" }]);
+  it("returns a single plaintext token when parser is null", () => {
+    /* The component renders this branch while a grammar chunk is
+     * still loading — `parser()` is undefined and the fallback
+     * <Show> renders the raw code. Pin that the same shape is
+     * what `highlightedTokens(null, ...)` produces. */
+    expect(highlightedTokens("echo hi", null)).toEqual([{ text: "echo hi" }]);
   });
 });
 
@@ -69,17 +81,19 @@ describe("highlightedTokens — concatenation invariant", () => {
   ];
 
   for (const { lang, code } of fixtures) {
-    it(`reconstructs the input verbatim for ${lang}`, () => {
-      const tokens = highlightedTokens(code, lang);
+    it(`reconstructs the input verbatim for ${lang}`, async () => {
+      const parser = await loadParser(lang);
+      const tokens = highlightedTokens(code, parser);
       expect(tokens.map((t) => t.text).join("")).toBe(code);
     });
 
-    it(`produces at least one classed token for ${lang}`, () => {
+    it(`produces at least one classed token for ${lang}`, async () => {
       /* If highlighting silently broke (e.g. the highlighter
        * stopped emitting ranges), the only token would be the
        * unclassed fallback. Pin "we emit at least one classed
        * token" to catch that regression. */
-      const tokens = highlightedTokens(code, lang);
+      const parser = await loadParser(lang);
+      const tokens = highlightedTokens(code, parser);
       const classed = tokens.filter((t) => t.className !== undefined);
       expect(classed.length).toBeGreaterThan(0);
     });

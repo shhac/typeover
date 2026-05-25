@@ -1,11 +1,34 @@
 import type { JSX } from "solid-js";
-import { For } from "solid-js";
-import { goLanguage } from "@codemirror/lang-go";
-import { typescriptLanguage } from "@codemirror/lang-javascript";
-import { rustLanguage } from "@codemirror/lang-rust";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { highlightTree, tagHighlighter, tags } from "@lezer/highlight";
-import { zigLanguage } from "@ndim/codemirror-lang-zig";
+import type { Parser } from "@lezer/common";
 import { assertUnreachable } from "~/lib/assert-unreachable";
+
+/*
+ * Solid-side syntax highlighter for read-only code panes.
+ *
+ * Each language grammar is dynamic-imported. Static imports here
+ * previously hoisted four ~100 KB CodeMirror language packs into
+ * the shared `CodeBlock` client chunk (594 KB minified — over Vite's
+ * 500 KB warning). Splitting them per language means the homepage
+ * `HomepageDrill` no longer ships the Go + Zig + Rust grammars for
+ * a TS-only drill, and exercise pages only pay for the grammar
+ * their target uses.
+ *
+ * Loading shape:
+ *   - On mount the parser for `props.lang` is requested via
+ *     `createResource`. First paint renders the raw `props.code` as
+ *     a single unhighlighted `<span>` — the "plain" fallback path.
+ *   - When the parser resolves, the resource updates and the
+ *     component re-renders tokenised output.
+ *   - `parserCache` memoises the resolved parser per Lang so each
+ *     grammar's chunk is fetched at most once per session
+ *     regardless of how many `<CodeHighlight>` instances mount.
+ *
+ * The shape of `cmLanguageExtension` in `src/lib/codemirror-lang.ts`
+ * is the same pattern on the editor side; keep them in lock-step
+ * when adding a new language.
+ */
 
 export type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
 
@@ -33,22 +56,44 @@ const highlighter = tagHighlighter([
   { tag: tags.meta, class: "text-fg-muted" },
 ]);
 
-/* Switch + `assertUnreachable` on the `default` so adding a new
- * Lang member to the union without a matching branch here fails
- * typecheck — the if-chain that used to live here silently
- * returned `null` for any unmatched lang, which is exactly how
- * the missing Rust branch (commit 94f56b5) shipped to production
- * undetected. */
-export function parserFor(lang: Lang) {
+/* Memoise resolved parsers so a page that renders multiple
+ * `<CodeHighlight lang="go">` panes only pays the grammar download
+ * once. The cached value can be `null` (shell / plain — no parser);
+ * an absent key means "not yet loaded". */
+const parserCache = new Map<Lang, Parser | null>();
+
+/** Dynamic-import the Lezer parser for a given language. Returns
+ *  `null` for langs without a parser (shell / plain). Each `case`
+ *  emits a separate chunk; the `switch + assertUnreachable` makes
+ *  adding a new Lang member fail typecheck until a matching branch
+ *  lands. */
+export async function loadParser(lang: Lang): Promise<Parser | null> {
+  const cached = parserCache.get(lang);
+  if (cached !== undefined) return cached;
+
+  const parser = await resolveParser(lang);
+  parserCache.set(lang, parser);
+  return parser;
+}
+
+async function resolveParser(lang: Lang): Promise<Parser | null> {
   switch (lang) {
-    case "go":
+    case "go": {
+      const { goLanguage } = await import("@codemirror/lang-go");
       return goLanguage.parser;
-    case "ts":
+    }
+    case "ts": {
+      const { typescriptLanguage } = await import("@codemirror/lang-javascript");
       return typescriptLanguage.parser;
-    case "zig":
+    }
+    case "zig": {
+      const { zigLanguage } = await import("@ndim/codemirror-lang-zig");
       return zigLanguage.parser;
-    case "rust":
+    }
+    case "rust": {
+      const { rustLanguage } = await import("@codemirror/lang-rust");
       return rustLanguage.parser;
+    }
     case "shell":
     case "plain":
       return null;
@@ -57,8 +102,11 @@ export function parserFor(lang: Lang) {
   }
 }
 
-export function highlightedTokens(code: string, lang: Lang): Token[] {
-  const parser = parserFor(lang);
+/** Tokenise `code` against a resolved Lezer parser. Returns a
+ *  single plaintext token when the parser is null (unsupported
+ *  lang or grammar not yet loaded) or the code is empty. Pure —
+ *  takes a parser rather than re-resolving inside. */
+export function highlightedTokens(code: string, parser: Parser | null): Token[] {
   if (!parser || code === "") return [{ text: code }];
 
   const ranges: Array<{ from: number; to: number; className: string }> = [];
@@ -80,6 +128,25 @@ export function highlightedTokens(code: string, lang: Lang): Token[] {
 }
 
 export function CodeHighlight(props: { code: string; lang: Lang }): JSX.Element {
-  const tokens = () => highlightedTokens(props.code, props.lang);
-  return <For each={tokens()}>{(token) => <span class={token.className}>{token.text}</span>}</For>;
+  /* Solid SSR can't serialize a Lezer Parser (deep internal state +
+   * Uint16Array tables — seroval throws on unsupported types). Use
+   * a plain signal loaded inside `onMount` so SSR renders the
+   * unhighlighted fallback, then the hydrated client fetches the
+   * grammar chunk and rerenders with tokenized output. */
+  const [parser, setParser] = createSignal<Parser | null>(null);
+  onMount(() => {
+    void loadParser(props.lang).then(setParser);
+  });
+  return (
+    <Show
+      when={parser()}
+      fallback={<span>{props.code}</span>}
+    >
+      {(p) => (
+        <For each={highlightedTokens(props.code, p())}>
+          {(token) => <span class={token.className}>{token.text}</span>}
+        </For>
+      )}
+    </Show>
+  );
 }
