@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { tryShare } from "./ModuleCompleteCard";
+import { tryShare } from "./try-share";
 
 /*
  * Direct unit tests for the pure share-cascade helper. Extracted
