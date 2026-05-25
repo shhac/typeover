@@ -1,0 +1,78 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: freeform
+order: 7
+prompt: |
+  Tests can return `Result<(), E>` to use `?` for fallible
+  setup. Write `parse_age(s: &str) -> Result<i32, String>`
+  (via `.parse::<i32>().map_err(|e| e.to_string())`), then
+  a `#[cfg(test)] mod tests` containing one
+  `#[test] fn parses_valid() -> Result<(), String>` that
+  uses `?` and `assert_eq!`. `main` prints
+  `parse_age("27")` with `{:?}`.
+
+  Output:
+
+      Ok(27)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number {
+      const n = Number(s);
+      if (Number.isNaN(n)) throw new Error(s);
+      return n;
+    }
+    // tests in vitest can be `async () => { ... }` for awaitable ops.
+    console.log(parseAge("27"));
+  canonical: |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| e.to_string())
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn parses_valid() -> Result<(), String> {
+            let n = parse_age("27")?;
+            assert_eq!(n, 27);
+            Ok(())
+        }
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+expectStdout: |
+  Ok(27)
+hints:
+  - "Test signature: `#[test] fn parses_valid() -> Result<(), String>`. Body uses `?` to early-out on parse failure (which would FAIL the test with that error), `assert_eq!` to check the value, and `Ok(())` as the trailing expression for success."
+  - "Test body: `let n = parse_age(\"27\")?; assert_eq!(n, 27); Ok(())`."
+  - |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| e.to_string())
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn parses_valid() -> Result<(), String> {
+            let n = parse_age("27")?;
+            assert_eq!(n, 27);
+            Ok(())
+        }
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+runtime: server
+notes: |
+  Drills `?`-friendly test signatures. A test returning
+  `Result<(), E>` fails if it returns `Err`; the trailing
+  `Ok(())` is the success terminator. Cleaner than
+  `.unwrap()`-littered tests.

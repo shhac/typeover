@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: mcq-explain
+order: 1
+prompt: |
+  A new Rust project ships a `Cargo.toml`. Pick the statement
+  that best describes what this file does.
+generator:
+  kind: variant
+  variants:
+    - id: cargo-toml
+      ts: |-
+        // TS equivalents: package.json (npm) + tsconfig.json.
+        // Cargo.toml combines metadata + deps in one place.
+      canonical: 'It declares the package name, version, edition, dependencies, and other crate metadata — the manifest that `cargo build` and `cargo test` read to know how to compile the crate.'
+      distractors:
+        - 'It lists every Rust source file the compiler should include; without it, source files are ignored.'
+        - 'It configures rustfmt and clippy lints for the project; not used by `cargo build` itself.'
+        - 'It maps crate names to compile flags for FFI bindings.'
+hints:
+  - "Think `package.json` for Rust: name, version, dependencies, edition. Cargo reads it before doing anything; missing or broken Cargo.toml = `cargo build` won't run."
+  - "Three pieces: metadata, edition, dependencies."
+  - 'Package manifest — metadata, edition, dependencies.'
+runtime: none
+notes: |
+  Pins Cargo.toml as the manifest. Distractors target real
+  but wrong purposes: source-file enumeration (Cargo
+  auto-discovers from src/), formatter config (rustfmt.toml
+  is separate), FFI flags (build.rs / [target.*]).

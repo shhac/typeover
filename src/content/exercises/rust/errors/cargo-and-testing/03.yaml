@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: mcq
+order: 3
+prompt: |
+  Pick the attribute that marks a function as a UNIT TEST
+  runnable by `cargo test`.
+generator:
+  kind: variant
+  variants:
+    - id: test-attr
+      ts: |-
+        // Vitest / Jest: `it("name", () => { ... })` — function call.
+        // Rust uses an attribute on the fn declaration.
+      canonical: '#[test] — the attribute placed on the line ABOVE the function declaration.'
+      distractors:
+        - '@Test — Java/JUnit annotation syntax; Rust uses `#[...]`.'
+        - '#[unit_test] — the attribute name is `test`, not `unit_test`.'
+        - '// test — a comment; comments don''t drive cargo behaviour.'
+hints:
+  - "Attribute syntax: hash, square brackets. Inside: one short word."
+  - "`#[test]`"
+  - '`#[test]`'
+runtime: none
+notes: |
+  Pins `#[test]` as the attribute. Distractors cover
+  Java/JUnit (`@Test`), the verbose-name reflex
+  (`unit_test`), and a "convention" comment fallback.

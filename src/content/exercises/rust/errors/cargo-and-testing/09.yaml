@@ -1,0 +1,55 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: freeform
+order: 9
+prompt: |
+  A real Cargo project would have `src/lib.rs` exposing the
+  library API and `src/main.rs` consuming it. Translate that
+  split into a SINGLE-FILE Rust program: declare an inline
+  module `lib_part` that exposes `pub fn greet(name: &str) ->
+  String` returning `"hi, <name>"`, and a `main` that calls
+  `lib_part::greet("paul")` and prints.
+
+  Output:
+
+      hi, paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // src/lib.ts
+    export function greet(name: string): string { return "hi, " + name; }
+    // src/main.ts
+    import { greet } from "./lib";
+    console.log(greet("paul"));
+  canonical: |-
+    mod lib_part {
+        pub fn greet(name: &str) -> String {
+            format!("hi, {}", name)
+        }
+    }
+
+    fn main() {
+        println!("{}", lib_part::greet("paul"));
+    }
+expectStdout: |
+  hi, paul
+hints:
+  - "Two pieces: an inline `mod lib_part { pub fn greet(name: &str) -> String { format!(\"hi, {}\", name) } }`, and a `main` that calls it via the qualified path. In a real cargo project the module body would live in `src/lib.rs` and `main` in `src/main.rs`; here it's one file."
+  - "Use `format!` to build the owned String — same `{}` placeholders as `println!`."
+  - |-
+    mod lib_part {
+        pub fn greet(name: &str) -> String {
+            format!("hi, {}", name)
+        }
+    }
+
+    fn main() {
+        println!("{}", lib_part::greet("paul"));
+    }
+runtime: server
+notes: |
+  Closes the theme by demonstrating the library/binary
+  split idea in a single file. The lesson is the API
+  shape: `lib_part`'s `pub` surface is what consumers
+  see; `main` calls it through the qualified path.

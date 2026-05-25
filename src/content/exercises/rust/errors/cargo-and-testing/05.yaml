@@ -1,0 +1,66 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: fill-line
+order: 5
+prompt: |
+  Inside a `#[cfg(test)] mod tests` block, write the line that
+  imports the parent module's public items into the tests
+  namespace.
+generator:
+  kind: template
+  vars:
+    line:
+      - "use super::*;"
+  ts: |-
+    // TS test files do explicit named imports:
+    //   import { add } from "../src/math";
+  canonical: |-
+    fn add(a: i32, b: i32) -> i32 { a + b }
+
+    #[cfg(test)]
+    mod tests {
+        ${line}
+
+        #[test]
+        fn it_adds() {
+            assert_eq!(add(2, 3), 5);
+        }
+    }
+
+    fn main() {
+        println!("{}", add(2, 3));
+    }
+  distractors:
+    - match: "use super::*"
+      explain: |-
+        Missing trailing semicolon. All Rust statements end
+        with `;` — `use` lines included.
+    - match: "use *;"
+      explain: |-
+        Missing the path. `use *;` doesn't resolve to anything
+        — Rust needs a path before the wildcard. From inside
+        `mod tests`, the parent is `super`.
+    - match: "use crate::*;"
+      explain: |-
+        Works for crate-root imports, but `super::` is more
+        portable — it walks ONE level up and stays correct if
+        `mod tests` moves into a sub-module. `use super::*;`
+        is the canonical test-module idiom.
+    - match: "use super;"
+      explain: |-
+        Imports the `super` MODULE itself, not its items.
+        Inside the tests body you'd then have to write
+        `super::add(2, 3)`. The `*` glob is what brings the
+        items into scope directly.
+expectStdout: |
+  5
+runtime: server
+blanks: [line]
+hints:
+  - "Three tokens: the `use` keyword, the path expression `super::*` (parent module + glob), and a semicolon."
+  - "`super` walks one level up; `*` brings all the parent's public items into scope."
+  - "`use super::*;`"
+notes: |
+  Drills the canonical test-module import. The `use
+  super::*;` idiom is so common that Cargo's `cargo new
+  --lib` scaffolds it into the default test module.

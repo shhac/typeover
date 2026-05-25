@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: fill-word
+order: 4
+prompt: |
+  Fill the assertion MACRO that checks two values are equal and
+  prints both sides on failure.
+generator:
+  kind: template
+  vars:
+    macro_: ["assert_eq"]
+  ts: |-
+    expect(add(2, 3)).toBe(5); // Vitest / Jest
+  canonical: |-
+    fn add(a: i32, b: i32) -> i32 { a + b }
+
+    #[test]
+    fn it_adds() {
+        ${macro_}!(add(2, 3), 5);
+    }
+blanks: [macro_]
+hints:
+  - "Two halves: the four-letter assertion verb + the two-letter operator name, separated by an underscore. Followed by `!` (it's a macro) and parens."
+  - "Same shape as `assert`-something — two args, equality."
+  - "`assert_eq`"
+runtime: none
+notes: |
+  Drills `assert_eq!`. Distinct from `assert!` (single
+  boolean arg, no diff on failure) — the `_eq` variant is
+  preferred for equality checks because failures show
+  both sides.

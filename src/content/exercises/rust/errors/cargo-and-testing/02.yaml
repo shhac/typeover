@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: mcq
+order: 2
+prompt: |
+  A Cargo project has BOTH a binary and a library inside the
+  same package. Pick the two files Cargo treats as the
+  CRATE ROOTS.
+generator:
+  kind: variant
+  variants:
+    - id: crate-roots
+      ts: "package.json's `\"main\"` and `\"bin\"` entries point to JS entry files; Rust has fixed defaults."
+      canonical: 'src/main.rs (binary crate root) and src/lib.rs (library crate root) — Cargo discovers them by convention.'
+      distractors:
+        - 'src/main.rs and Cargo.toml — `Cargo.toml` is the manifest, not a crate root.'
+        - 'src/main.rs and src/main_test.rs — there is no `main_test.rs` convention in Rust.'
+        - 'src/index.rs and src/lib.rs — Cargo does NOT default to `index.rs` (that''s the Node convention).'
+hints:
+  - "Two well-known filenames Cargo auto-discovers. One for an executable, one for a library — both inside `src/`."
+  - "`src/main.rs` and `src/lib.rs`."
+  - '`src/main.rs` and `src/lib.rs`'
+runtime: none
+notes: |
+  Pins the convention-based crate-root filenames. A
+  package can have both, and they each become their own
+  crate at compile time.

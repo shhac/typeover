@@ -1,0 +1,71 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: freeform
+order: 6
+prompt: |
+  Write a single Rust file with: an `add(a: i32, b: i32) -> i32`
+  function, a `#[cfg(test)] mod tests` block containing
+  `use super::*;` and one `#[test] fn it_adds()` that asserts
+  `add(2, 3) == 5` via `assert_eq!`, and a `main` that prints
+  `add(2, 3)`. The `#[cfg(test)]` gate keeps the test code out
+  of release builds.
+
+  Output (from `main`):
+
+      5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function add(a: number, b: number): number { return a + b; }
+    // tests in a separate file with vitest:
+    //   import { add } from "./math";
+    //   test("it adds", () => expect(add(2, 3)).toBe(5));
+    console.log(add(2, 3));
+  canonical: |-
+    fn add(a: i32, b: i32) -> i32 {
+        a + b
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn it_adds() {
+            assert_eq!(add(2, 3), 5);
+        }
+    }
+
+    fn main() {
+        println!("{}", add(2, 3));
+    }
+expectStdout: |
+  5
+hints:
+  - "Three pieces: the production function, a `#[cfg(test)] mod tests { ... }` block (compiled only for `cargo test`), and `main`. Inside the test module: `use super::*;` to access the parent's items, then `#[test]` on the test function, then `assert_eq!` for the check."
+  - "Module shape: `#[cfg(test)] mod tests { use super::*; #[test] fn it_adds() { assert_eq!(add(2, 3), 5); } }`."
+  - |-
+    fn add(a: i32, b: i32) -> i32 {
+        a + b
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn it_adds() {
+            assert_eq!(add(2, 3), 5);
+        }
+    }
+
+    fn main() {
+        println!("{}", add(2, 3));
+    }
+runtime: server
+notes: |
+  First unit-test freeform. The `#[cfg(test)]` attribute
+  means the `mod tests` block is ONLY compiled during
+  `cargo test`; the prebake builds the binary, so the
+  test code is stripped and only `main` runs.

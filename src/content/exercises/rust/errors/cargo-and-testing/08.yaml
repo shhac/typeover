@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/errors/cargo-and-testing
+type: freeform
+order: 8
+prompt: |
+  Translate the Vitest/Jest test to Rust. Production function
+  `multiply(a, b) -> i32`. `#[cfg(test)] mod tests` contains
+  one `#[test] fn multiplies_two_numbers()` asserting
+  `multiply(3, 4) == 12`. `main` prints `multiply(3, 4)`.
+
+  Output:
+
+      12
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    import { describe, it, expect } from "vitest";
+    function multiply(a: number, b: number): number {
+      return a * b;
+    }
+    describe("multiply", () => {
+      it("multiplies two numbers", () => {
+        expect(multiply(3, 4)).toBe(12);
+      });
+    });
+  canonical: |-
+    fn multiply(a: i32, b: i32) -> i32 {
+        a * b
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn multiplies_two_numbers() {
+            assert_eq!(multiply(3, 4), 12);
+        }
+    }
+
+    fn main() {
+        println!("{}", multiply(3, 4));
+    }
+expectStdout: |
+  12
+hints:
+  - "TS `describe` becomes the Rust test MODULE (`mod tests`); TS `it` becomes a `#[test] fn`; `expect(...).toBe(...)` becomes `assert_eq!(actual, expected);`. Three reflex-shifts."
+  - "Test function: `#[test] fn multiplies_two_numbers() { assert_eq!(multiply(3, 4), 12); }`."
+  - |-
+    fn multiply(a: i32, b: i32) -> i32 {
+        a * b
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn multiplies_two_numbers() {
+            assert_eq!(multiply(3, 4), 12);
+        }
+    }
+
+    fn main() {
+        println!("{}", multiply(3, 4));
+    }
+runtime: server
+notes: |
+  Closes the TS-to-Rust test parallel. Vitest's nested
+  `describe`/`it` blocks compress into a single test
+  module + `#[test]` functions in Rust — flatter, no
+  closure wrappers.
