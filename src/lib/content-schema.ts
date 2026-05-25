@@ -132,16 +132,17 @@ function validateFillBlanks(ex: Exercise, ctx: Ctx): void {
 }
 
 /** fill-line is graded by running the substituted canonical through
- *  a client-side runtime and comparing stdout. Same shape as freeform
- *  but with one blank line of user input embedded in the scaffold.
+ *  a runtime and comparing stdout. Same shape as freeform but with
+ *  one blank line of user input embedded in the scaffold.
  *
- *  Requires `expectStdout` (the oracle) and a client-side runtime
- *  (today: `"yaegi"` for Go, `"zig"` for Zig). The legacy MCQ-as-
- *  tiles UX was retired once all fill-line exercises migrated to the
- *  input+runtime UX; the distractors field is kept on the generator
- *  schema as a known-wrong-pattern bank for targeted feedback in a
- *  later iteration. */
-const FILL_LINE_RUNTIMES = ["yaegi", "zig"] as const;
+ *  Requires `expectStdout` (the oracle) and a non-`"none"` runtime.
+ *  `"yaegi"` is Go, `"zig"` is Zig, and `"server"` is the Rust
+ *  compile-service path (reshaped to runtime=rust at the page
+ *  boundary by exercise-dispatch). The legacy MCQ-as-tiles UX was
+ *  retired once all fill-line exercises migrated to the input+runtime
+ *  UX; the distractors field is kept on the generator schema as a
+ *  known-wrong-pattern bank for targeted feedback. */
+const FILL_LINE_RUNTIMES = ["yaegi", "zig", "server"] as const;
 function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
   if (ex.type !== "fill-line" || ex.generator.kind !== "template") return;
   if (ex.expectStdout === undefined) {

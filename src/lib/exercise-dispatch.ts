@@ -34,7 +34,7 @@ interface ExerciseInput {
 }
 
 type FreeformRuntime = "yaegi" | "zig" | "rust" | "server";
-type FillLineRuntime = "yaegi" | "zig";
+type FillLineRuntime = "yaegi" | "zig" | "rust";
 
 interface DispatchMcq {
   kind: "mcq";
@@ -107,13 +107,26 @@ export function pickExerciseDispatch(ex: ExerciseInput): ExerciseDispatch {
       if (ex.expectStdout === undefined) {
         return { kind: "skip", reason: "fill-line missing expectStdout" };
       }
-      if (ex.runtime !== "yaegi" && ex.runtime !== "zig") {
-        return { kind: "skip", reason: `fill-line requires yaegi/zig runtime, got ${ex.runtime}` };
+      /* Reshape (target=rust, runtime=server) → "rust" at the
+       * page boundary, mirroring the freeform path. The FillLine
+       * component drives the same useRuntimeRun hook as Freeform;
+       * accepts the concrete client-side runtime ids. */
+      const fillLineRuntime: FillLineRuntime | null =
+        ex.target === "rust" && ex.runtime === "server"
+          ? "rust"
+          : ex.runtime === "yaegi" || ex.runtime === "zig"
+            ? ex.runtime
+            : null;
+      if (!fillLineRuntime) {
+        return {
+          kind: "skip",
+          reason: `fill-line requires yaegi/zig/rust runtime, got ${ex.runtime} (target=${ex.target})`,
+        };
       }
       return {
         kind: "fill-line",
         blanks: ex.blanks ?? [],
-        runtime: ex.runtime,
+        runtime: fillLineRuntime,
         expectStdout: ex.expectStdout,
         alternateCanonicals: ex.alternateCanonicals,
       };

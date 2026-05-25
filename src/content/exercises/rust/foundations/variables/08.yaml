@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/foundations/variables
+type: freeform
+order: 8
+prompt: |
+  Write a Rust program that:
+
+  1. Declares a mutable counter `count: i32` initialised to `0`.
+  2. Adds `7` to it.
+  3. Prints the result.
+
+  Output should be exactly:
+
+      7
+
+  Use `let mut`, arithmetic assignment (`count = count + 7;` or
+  `count += 7;`), and `println!`. The grader compiles your
+  program on the server and matches stdout.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let count: number = 0;
+    count = count + 7;
+    console.log(count);
+  canonical: |-
+    fn main() {
+        let mut count: i32 = 0;
+        count = count + 7;
+        println!("{}", count);
+    }
+expectStdout: |
+  7
+runtime: server
+hints:
+  - "Three lines inside `main`: the `let mut` declaration, the reassignment, and the `println!`. The format string `\"{}\"` substitutes the next argument — that's how you print an `i32`."
+  - "Skeleton: `fn main() { let mut count: i32 = 0; count = count + 7; println!(\"{}\", count); }`. Braces required even for a three-line body."
+  - "Canonical program:\n\n```rust\nfn main() {\n    let mut count: i32 = 0;\n    count = count + 7;\n    println!(\"{}\", count);\n}\n```"
+notes: |
+  First freeform in the variables theme. Forces the learner to
+  produce a complete program that exercises the three reflex
+  shifts the theme has been building up:
+   - `let mut` not just `let`
+   - `: i32` annotation
+   - `println!("{}", x)` format-string interpolation instead of
+     `console.log(x)`
+
+  The grader is stdout-equality, so `count += 7;` and
+  `count = count + 7;` both pass. The prompt allows either; we
+  don't grade code shape.
+
+  Canonical is small and deterministic so prebake covers it in
+  a single SHA-256-keyed lookup; the SW intercepts the POST and
+  serves the static wasm without ever hitting Vercel's free tier.

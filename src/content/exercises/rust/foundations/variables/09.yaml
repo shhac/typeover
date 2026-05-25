@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/foundations/variables
+type: freeform
+order: 9
+prompt: |
+  Write a Rust program that uses *shadowing* to transform a `&str`
+  into its trimmed length, in two steps:
+
+  1. Declare `text: &str` bound to `"  hi  "` (two leading and two
+     trailing spaces).
+  2. Shadow `text` with the trimmed version (`.trim()` returns
+     `&str`).
+  3. Shadow `text` again with its length as a `usize` (`.len()`).
+  4. Print the result.
+
+  Output should be exactly:
+
+      2
+
+  Use shadowing (a fresh `let` for each step), not `let mut` —
+  the type changes from `&str` to `usize`, which reassignment
+  can't do.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const text: string = "  hi  ";
+    const text: string = text.trim();
+    const text: number = text.length;
+    console.log(text);
+  canonical: |-
+    fn main() {
+        let text: &str = "  hi  ";
+        let text: &str = text.trim();
+        let text: usize = text.len();
+        println!("{}", text);
+    }
+expectStdout: |
+  2
+runtime: server
+hints:
+  - "Three `let` lines, all with the same name `text`. Each `let` creates a fresh binding that shadows the previous — different types are fine because each step is a NEW binding, not a reassignment."
+  - "Shape: `fn main() { let text: &str = \"  hi  \"; let text: &str = text.trim(); let text: usize = text.len(); println!(\"{}\", text); }`."
+  - "Canonical program:\n\n```rust\nfn main() {\n    let text: &str = \"  hi  \";\n    let text: &str = text.trim();\n    let text: usize = text.len();\n    println!(\"{}\", text);\n}\n```"
+notes: |
+  Caps the theme by combining shadowing (slot 04 MCQ + slot 06
+  fill-line) with method calls (`.trim()`, `.len()`) and the
+  type transition `&str` → `&str` → `usize` that *only* works
+  via shadowing.
+
+  Three `let`s, same name, three different types on the third
+  one — would be a hard compile error under reassignment
+  (`mismatched types: expected &str, found usize`). The TS
+  counterpart deliberately tries the same shape so the learner
+  sees TS's `Cannot redeclare block-scoped variable` reflex and
+  contrasts it with Rust's "shadowing is idiomatic" reflex.
+
+  Canonical is small and deterministic for prebake. The exact
+  whitespace `"  hi  "` matters — the canonical wins on
+  `text.trim().len() == 2`.

@@ -1,0 +1,67 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-line
+order: 5
+prompt: |
+  The program below needs the missing line. The next statement
+  reassigns `total`, so the declaration must opt into mutability.
+  Type the idiomatic Rust line that declares `total` as a mutable
+  `i32` initialised to `0`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let mut total: i32 = 0;"
+  ts: |-
+    let total: number = 0;
+    total = total + 10;
+    console.log(total);
+  canonical: |-
+    fn main() {
+        ${line}
+        total = total + 10;
+        println!("{}", total);
+    }
+  distractors:
+    - match: "let total: i32 = 0;"
+      explain: |-
+        That compiles for the declaration, but the next line
+        `total = total + 10` won't — Rust defaults to immutable,
+        so reassignment needs `let mut`. The compiler error you'd
+        see is "cannot assign twice to immutable variable `total`".
+    - match: "let mut total = 0;"
+      explain: |-
+        Close — and this actually compiles, because Rust infers
+        the type from the literal `0` as `i32`. But this exercise
+        wants the explicit annotation. Add `: i32` between the
+        name and the `=`.
+    - match: "const total: i32 = 0;"
+      explain: |-
+        `const` in Rust is for compile-time constants only — they
+        must be initialised with a constant expression and can
+        never be reassigned. For a regular mutable binding, use
+        `let mut`.
+    - match: "var total: i32 = 0;"
+      explain: |-
+        `var` isn't a Rust keyword. Rust uses `let` for bindings,
+        with `mut` to opt into reassignment.
+expectStdout: |
+  10
+runtime: server
+blanks: [line]
+hints:
+  - "Two things to get right: the declaration must allow reassignment (next line: `total = total + 10`), and you want the explicit `: i32` annotation. The keyword that opts into mutability slots between `let` and the name."
+  - "Shape: `let mut <name>: <type> = <value>;`. The semicolon is required."
+  - "Type `let mut total: i32 = 0;`."
+notes: |
+  First Rust fill-line exercise. Drills the `let mut` declaration
+  shape under runtime grading — the learner has to produce a
+  declaration that not only parses but actually permits the next
+  line's reassignment. A subtle compiler-error nudge that
+  TypeScript's reflex (just write `let`) gets you a clean message
+  pointing at the right fix.
+
+  Runtime is `server` (compile to wasm in the cache or in the
+  Sandbox; reshape to runtime=rust at the page boundary). The
+  canonical is small and deterministic, so prebake covers it
+  in one hash.

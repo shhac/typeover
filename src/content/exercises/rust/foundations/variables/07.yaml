@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/foundations/variables
+type: mcq
+order: 7
+prompt: |
+  Rust has TWO ways to name an unchanging value: `let` (which is
+  immutable by default — a normal binding to a runtime value) and
+  `const` (a true compile-time constant — has to be initialised
+  with a constant expression and is conventionally `SCREAMING_SNAKE`).
+  Pick the correct way to declare PI as a true constant for use
+  in `main`.
+generator:
+  kind: variant
+  variants:
+    - id: pi
+      ts: "const PI: number = 3.14159;"
+      canonical: "const PI: f64 = 3.14159;"
+      distractors:
+        - "let PI: f64 = 3.14159;"
+        - "let const PI: f64 = 3.14159;"
+        - "const PI = 3.14159;"
+    - id: max-retries
+      ts: "const MAX_RETRIES: number = 3;"
+      canonical: "const MAX_RETRIES: u32 = 3;"
+      distractors:
+        - "let MAX_RETRIES: u32 = 3;"
+        - "const MAX_RETRIES = 3;"
+        - "const mut MAX_RETRIES: u32 = 3;"
+hints:
+  - "Two reflexes to get right: (a) `const` (not `let`) when the value is genuinely never going to change, especially at module scope; (b) the type annotation is **required** for `const` — it's not optional like for `let` where the compiler can infer."
+  - "Shape: `const <NAME>: <type> = <constant-expression>;`. Conventionally the name is SCREAMING_SNAKE_CASE."
+  - "For the PI variant: `const PI: f64 = 3.14159;`."
+runtime: none
+notes: |
+  Disambiguates `let` (immutable binding to a runtime value) from
+  `const` (true compile-time constant, type annotation REQUIRED).
+  This trips TS devs in two ways:
+   - TS's `const` is more like Rust's `let` — it just means
+     "don't reassign this binding." Rust's `const` is stricter:
+     constant-expression-only, no shadowing, no `mut`, and the
+     annotation is required.
+   - The SCREAMING_SNAKE naming is a Rust convention enforced
+     by clippy but not by the compiler — distractors don't test
+     the naming, just the keyword choice.
+
+  Distractors model the most common slips:
+   - `let PI: f64 = ...` — works syntactically (immutable binding)
+     but loses the compile-time-constant + module-scope intent.
+   - `let const PI: f64 = ...` — keyword salad. There's no such
+     combination in Rust.
+   - `const PI = 3.14159;` — drops the required type annotation.
+     `const` in Rust always demands the annotation; the compiler
+     refuses to infer for module-scope constants.
+   - `const mut MAX_RETRIES` — `const` and `mut` are mutually
+     exclusive by definition. The compiler error reads
+     "expected identifier, found keyword `mut`".

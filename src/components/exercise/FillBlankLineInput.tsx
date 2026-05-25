@@ -29,10 +29,13 @@ interface FillBlankLineInputProps {
    *  the learner's input is correct. */
   expectStdout: string;
   /** Which client-side runtime to grade against. `"yaegi"` for the
-   *  Go track, `"zig"` for the Zig track. Schema's
-   *  `validateFillLineMode` restricts to these. The hook below
-   *  dispatches to the right worker accessor based on this prop. */
-  runtime: "yaegi" | "zig";
+   *  Go track, `"zig"` for the Zig track, `"rust"` for Rust (the
+   *  worker proxies to /api/compile/rust, SW intercepts for cache
+   *  hits). The schema's `validateFillLineMode` admits the wider
+   *  `runtime: server` and exercise-dispatch reshapes
+   *  (target=rust, runtime=server) → `"rust"` at the page boundary
+   *  before it reaches this prop. */
+  runtime: "yaegi" | "zig" | "rust";
   /** Alternate submission strings that grade correct even when
    *  Yaegi can't run them (e.g. Go 1.21+ generic-stdlib forms our
    *  Yaegi build doesn't support yet). Whitespace-normalised match.

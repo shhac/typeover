@@ -1,0 +1,70 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-line
+order: 6
+prompt: |
+  The program reads a `&str` and needs to *shadow* it — declare
+  a fresh `len` binding of a different type from a method call on
+  the original. The missing line is the shadow declaration that
+  computes the length of `text` as a `usize`. Type the idiomatic
+  Rust line.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let len: usize = text.len();"
+  ts: |-
+    const text: string = "hello";
+    const text: number = text.length;
+    console.log(text);
+  canonical: |-
+    fn main() {
+        let text: &str = "hello";
+        ${line}
+        println!("{}", len);
+    }
+  distractors:
+    - match: "let mut len: usize = text.len();"
+      explain: |-
+        `mut` would only matter if you reassigned `len` later;
+        here it's a one-shot declaration, so the idiomatic shape
+        is plain `let`. Adding `mut` you don't use earns a
+        compiler warning in real code.
+    - match: "let text: usize = text.len();"
+      explain: |-
+        That actually shadows `text` itself — replacing the
+        `&str` with a `usize` of the same name. Valid Rust!
+        But the canonical scaffold expects a binding named `len`
+        so the `println!` line resolves; the exercise drills
+        *shadowing-with-rename*, not shadowing-the-same-name.
+    - match: "let len = text.len();"
+      explain: |-
+        That compiles — Rust infers `usize` from `text.len()`.
+        The exercise wants the explicit `: usize` annotation
+        so the learner sees the actual type name that `.len()`
+        returns.
+    - match: "let len: i32 = text.len();"
+      explain: |-
+        `.len()` returns `usize`, not `i32`. The compiler error
+        is `expected i32, found usize`. Lengths and indices in
+        Rust are `usize` — width-tied to the host pointer size.
+expectStdout: |
+  5
+runtime: server
+blanks: [line]
+hints:
+  - "Shadowing in Rust means writing another `let` for the same scope — but here we're declaring a *new* name (`len`) bound to the result of a method call on the previous one. Just the `let <name>: <type> = <expr>;` shape — no `mut` needed because we never reassign."
+  - "The type of `.len()` is `usize` (pointer-width unsigned integer)."
+  - "Type `let len: usize = text.len();`."
+notes: |
+  Pairs with slot 04 (the shadowing MCQ). Where 04 covered
+  shadowing-the-same-name (the classic `let raw: &str ...; let raw: i32 ...`
+  rename via parse), this slot covers the more common pattern:
+  introducing a derived binding from a method call. The TS
+  counterpart deliberately reuses `text` for both bindings (which
+  TS forbids in the same scope) so the learner sees the explicit
+  shape difference.
+
+  `.len()` and its `usize` return type slip in here naturally;
+  this is the first exposure but the slice/index theme later
+  will revisit it.
