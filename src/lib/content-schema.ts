@@ -273,39 +273,21 @@ function validateRunnableExpectStdout(ex: Exercise, ctx: Ctx): void {
   }
 }
 
-/** `alternateCanonicals` is graded by whitespace-normalised string
- *  match against the learner's typed submission — that only makes
- *  sense on fill-line, which renders ONE input line. MCQ/fill-word
- *  use selection/per-blank grading; freeform compares whole-program
- *  stdout. Reject elsewhere so an author doesn't add the field on
- *  the wrong type and silently see no effect. */
-function validateAlternateCanonicalsScope(ex: Exercise, ctx: Ctx): void {
-  if (!ex.alternateCanonicals || ex.alternateCanonicals.length === 0) return;
+/** Shared guard for fields that only make sense on fill-line
+ *  exercises. Rejects the field on other types so authors don't
+ *  add it on the wrong type and silently see no effect. */
+function validateFillLineOnlyField(
+  ex: Exercise,
+  ctx: Ctx,
+  fieldName: string,
+  value: unknown[] | undefined,
+): void {
+  if (!value || value.length === 0) return;
   if (ex.type === "fill-line") return;
   ctx.addIssue({
     code: "custom",
-    message: `\`alternateCanonicals\` is only valid for fill-line exercises; got type "${ex.type}".`,
-    path: ["alternateCanonicals"],
-  });
-}
-
-function validateAcceptedAnswersScope(ex: Exercise, ctx: Ctx): void {
-  if (!ex.acceptedAnswers || ex.acceptedAnswers.length === 0) return;
-  if (ex.type === "fill-line") return;
-  ctx.addIssue({
-    code: "custom",
-    message: `\`acceptedAnswers\` is only valid for fill-line exercises; got type "${ex.type}".`,
-    path: ["acceptedAnswers"],
-  });
-}
-
-function validateKnownAttemptsScope(ex: Exercise, ctx: Ctx): void {
-  if (!ex.knownAttempts || ex.knownAttempts.length === 0) return;
-  if (ex.type === "fill-line") return;
-  ctx.addIssue({
-    code: "custom",
-    message: `\`knownAttempts\` is only valid for fill-line exercises; got type "${ex.type}".`,
-    path: ["knownAttempts"],
+    message: `\`${fieldName}\` is only valid for fill-line exercises; got type "${ex.type}".`,
+    path: [fieldName],
   });
 }
 
@@ -379,9 +361,9 @@ export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => 
   validateSourceScope(ex, ctx);
   validateBlanksOnlyForFill(ex, ctx);
   validateRunnableExpectStdout(ex, ctx);
-  validateAlternateCanonicalsScope(ex, ctx);
-  validateAcceptedAnswersScope(ex, ctx);
-  validateKnownAttemptsScope(ex, ctx);
+  validateFillLineOnlyField(ex, ctx, "alternateCanonicals", ex.alternateCanonicals);
+  validateFillLineOnlyField(ex, ctx, "acceptedAnswers", ex.acceptedAnswers);
+  validateFillLineOnlyField(ex, ctx, "knownAttempts", ex.knownAttempts);
   validateFillLineAttemptTemplateRefs(ex, ctx);
   validateSubmissionShapeScope(ex, ctx);
 });
