@@ -18,15 +18,19 @@ import type { ExerciseProgress, Progress } from "./progress-schema";
  */
 
 const slot = (overrides: Partial<ExerciseProgress> = {}): ExerciseProgress => ({
+  firstSeenAt: "2026-05-25T00:00:00.000Z",
+  lastSeenAt: "2026-05-25T00:00:00.000Z",
   instancesSeen: 1,
   instancesPassed: 0,
   instancesFailed: 0,
-  lastTouchedAt: 1_700_000_000_000,
+  hintsUsedTotal: 0,
   ...overrides,
 });
 
 const progressOf = (entries: Record<string, ExerciseProgress>): Progress => ({
-  version: 4,
+  version: 1,
+  startedAt: "2026-05-25T00:00:00.000Z",
+  lastSeenAt: "2026-05-25T00:00:00.000Z",
   exercises: entries,
 });
 
