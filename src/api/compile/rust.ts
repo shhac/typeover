@@ -17,15 +17,18 @@
  * Auth: the @vercel/sandbox SDK reads VERCEL_OIDC_TOKEN from the
  * Function's environment automatically — no manual token handling.
  *
- * Lives at the project root (`/api/compile/rust.ts`) rather than
- * inside `src/pages/api/` to keep Astro in `output: "static"` mode.
- * Vercel auto-detects top-level `/api/` as serverless Functions on
- * any deploy. design-docs/32.
+ * Sources live under `src/api/compile/`; this file is bundled by
+ * `scripts/build-api.mjs` into `api/compile/rust.mjs` at the project
+ * root, which Vercel auto-detects as a Serverless Function. The
+ * bundle is self-contained — Vercel never runs `tsc` on the
+ * source, so the `moduleResolution: nodenext` extension-policing
+ * doesn't apply and we keep the regular Astro/TS import style
+ * everywhere. design-docs/32.
  */
 
-import { SandboxTransport } from "../../src/lib/compile-service/transports/sandbox";
-import type { CompileTransport } from "../../src/lib/compile-service/transports/types";
-import { validateRustSource } from "../../src/lib/compile-service/validate-rust-source";
+import { SandboxTransport } from "../../lib/compile-service/transports/sandbox";
+import type { CompileTransport } from "../../lib/compile-service/transports/types";
+import { validateRustSource } from "../../lib/compile-service/validate-rust-source";
 
 function errorResponse(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: message }), {

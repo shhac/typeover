@@ -1,6 +1,11 @@
 # Build output
 dist/
 .astro/
+# Bundled Vercel Functions — source lives in src/api/, the bundles
+# are produced by scripts/build-api.mjs during `pnpm build` (via
+# the prebuild hook). Vercel's CI runs that prebuild and deploys
+# the resulting bundles; we don't check the artifacts in.
+/api/
 
 # Dependencies
 node_modules/

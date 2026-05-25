@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CompileTransport } from "../../src/lib/compile-service/transports/types";
+import type { CompileTransport } from "../../lib/compile-service/transports/types";
 import { createRustCompilePostHandler, GET } from "./rust";
 
 function request(body: BodyInit): Request {
