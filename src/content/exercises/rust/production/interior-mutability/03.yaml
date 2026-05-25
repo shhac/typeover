@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: mcq
+order: 3
+prompt: |
+  A struct holds a single `u32` counter that needs to update
+  through `&self`. The value is `Copy` and never needs to be
+  borrowed by reference. Pick the cheapest wrapper.
+generator:
+  kind: variant
+  variants:
+    - id: cell-copy
+      ts: 'this.count += 1;'
+      canonical: 'Cell<u32> — for `Copy` types; `.get()` reads a copy, `.set()` overwrites. No runtime borrow check, no `RefMut` guard.'
+      distractors:
+        - 'RefCell<u32> — works, but pays runtime borrow-check cost and the guard-object overhead. Overkill for a `Copy` field.'
+        - 'Mutex<u32> — synchronisation primitive for threads; needless cost single-threaded.'
+        - 'AtomicU32 — works (and is `Sync`!), but introduces atomic ordering choices the single-thread case doesn''t need.'
+hints:
+  - "Four letters, PascalCase. Same family as `RefCell` but without the guard objects."
+  - "`Cell`."
+  - '`Cell<u32>`'
+runtime: none
+notes: |
+  Pins `Cell<T>` as the lightest-weight interior-mut
+  primitive. Restriction: T must be `Copy`. For non-Copy
+  inner types you need `RefCell`'s guard machinery.

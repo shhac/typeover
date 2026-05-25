@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: freeform
+order: 7
+prompt: |
+  Use the `Rc<RefCell<T>>` pattern to share a mutable `i32`
+  across two bindings. Mutate through one binding, mutate
+  through the other, then read — both bindings see the same
+  cell.
+
+  Output:
+
+      11
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const cell = { value: 0 };
+    const alias = cell;
+    alias.value += 1;
+    cell.value += 10;
+    console.log(cell.value);
+  canonical: |-
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    fn main() {
+        let shared = Rc::new(RefCell::new(0_i32));
+        let alias = Rc::clone(&shared);
+        *alias.borrow_mut() += 1;
+        *shared.borrow_mut() += 10;
+        println!("{}", shared.borrow());
+    }
+expectStdout: |
+  11
+hints:
+  - "Wrap order: `Rc::new(RefCell::new(0_i32))` — the inner `RefCell` is the interior-mutability layer, the outer `Rc` is the shared-ownership layer. `*x.borrow_mut() += n` is the canonical mutate-through-shared-ref shape."
+  - "Two `*x.borrow_mut() += n;` lines, then a final `shared.borrow()` read in the println."
+  - |-
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    fn main() {
+        let shared = Rc::new(RefCell::new(0_i32));
+        let alias = Rc::clone(&shared);
+        *alias.borrow_mut() += 1;
+        *shared.borrow_mut() += 10;
+        println!("{}", shared.borrow());
+    }
+runtime: server
+notes: |
+  Drills the canonical `Rc<RefCell<T>>` shape — the
+  workhorse for "multiple owners, mutable" in single-
+  threaded Rust. Both bindings hand to the same cell;
+  the two `+=` updates compose because each `borrow_mut`
+  scope drops before the next.

@@ -1,0 +1,82 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: freeform
+order: 6
+prompt: |
+  Define `struct Counter { count: Cell<u32> }` with an impl
+  exposing `new() -> Self` and `inc(&self)` (note: `&self`,
+  not `&mut self` — interior mutability lets you mutate
+  through a shared reference). `main` builds a counter, calls
+  `inc()` twice via shared `&self`, prints `count.get()`.
+
+  Output:
+
+      2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Counter {
+      count = 0;
+      inc(): void { this.count += 1; }
+    }
+    const c = new Counter();
+    c.inc(); c.inc();
+    console.log(c.count);
+  canonical: |-
+    use std::cell::Cell;
+
+    struct Counter {
+        count: Cell<u32>,
+    }
+
+    impl Counter {
+        fn new() -> Self {
+            Counter { count: Cell::new(0) }
+        }
+
+        fn inc(&self) {
+            self.count.set(self.count.get() + 1);
+        }
+    }
+
+    fn main() {
+        let c = Counter::new();
+        c.inc();
+        c.inc();
+        println!("{}", c.count.get());
+    }
+expectStdout: |
+  2
+hints:
+  - "Three pieces: struct with `count: Cell<u32>`, impl with `inc(&self)` calling `self.count.set(self.count.get() + 1)`, and `main` calling `inc()` through a non-mut binding. The `&self` (not `&mut self`) is the payoff of interior mutability."
+  - "`inc` body: `self.count.set(self.count.get() + 1);`."
+  - |-
+    use std::cell::Cell;
+
+    struct Counter {
+        count: Cell<u32>,
+    }
+
+    impl Counter {
+        fn new() -> Self {
+            Counter { count: Cell::new(0) }
+        }
+
+        fn inc(&self) {
+            self.count.set(self.count.get() + 1);
+        }
+    }
+
+    fn main() {
+        let c = Counter::new();
+        c.inc();
+        c.inc();
+        println!("{}", c.count.get());
+    }
+runtime: server
+notes: |
+  Drills `Cell` for cheap interior mut on a `Copy` field.
+  The `&self` receiver on `inc` is the structural
+  payoff — the caller can call it through any shared
+  reference without `let mut`.

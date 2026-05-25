@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: fill-word
+order: 4
+prompt: |
+  Fill the associated function that wraps an `i32` value in a
+  `RefCell<i32>`.
+generator:
+  kind: template
+  vars:
+    call: ["RefCell::new"]
+  ts: |-
+    const r = { value: 0 };
+  canonical: |-
+    use std::cell::RefCell;
+
+    let r = ${call}(0_i32);
+blanks: [call]
+hints:
+  - "Type name + `::new` — same constructor pattern as `Box::new`, `Rc::new`, etc."
+  - "Shape: `<Type>::new`."
+  - "`RefCell::new`"
+runtime: none
+notes: |
+  Drills the standard constructor shape. The
+  `0_i32` literal suffix is needed because the wrapped
+  type would otherwise be `RefCell<i32>` only if context
+  pins it — explicit type pinning at the literal is the
+  most local fix.

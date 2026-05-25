@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: mcq
+order: 2
+prompt: |
+  Given `let cell = RefCell::new(0_i32);`, pick the call that
+  returns a `RefMut<i32>` — a guard you can dereference and
+  assign through.
+generator:
+  kind: variant
+  variants:
+    - id: borrow-mut
+      ts: 'cell.value = newValue; // direct assignment in TS'
+      canonical: 'cell.borrow_mut() — returns `RefMut<T>`; deref-assign with `*` (e.g. `*cell.borrow_mut() += 1`).'
+      distractors:
+        - 'cell.borrow() — returns `Ref<T>` (read-only); doesn''t allow assignment through deref.'
+        - '&mut *cell — bypasses RefCell''s runtime check entirely; compile error because `cell` is not `&mut RefCell`.'
+        - 'cell.get_mut() — only works on `&mut RefCell` (which defeats the point of interior mutability); needs an exclusive outer borrow.'
+hints:
+  - "Method name pairs with `.borrow()` for the read-only flavour. Two words concatenated by an underscore."
+  - "`borrow_mut`."
+  - '`cell.borrow_mut()`'
+runtime: none
+notes: |
+  Pins `borrow_mut` as the mutable-guard method. The
+  `get_mut` distractor surfaces a real alternative for
+  the (rare) case when you already have `&mut RefCell`.

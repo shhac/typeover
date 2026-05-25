@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: freeform
+order: 9
+prompt: |
+  This program PANICS at runtime — `RefCell` enforces the
+  borrow rules dynamically and refuses to hand out a
+  `borrow_mut` while an outstanding `borrow` is alive:
+
+      thread 'main' panicked at 'already borrowed'
+
+      use std::cell::RefCell;
+
+      fn main() {
+          let c = RefCell::new(0);
+          let r = c.borrow();
+          *c.borrow_mut() += 1;
+          println!("{}", r);
+      }
+
+  Fix it by SHORTENING the shared borrow — use an inner block
+  so `r` drops before `c.borrow_mut()` runs. Print `r` inside
+  the inner block, then increment and print the final value.
+
+  Output:
+
+      0
+      1
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const c = { value: 0 };
+    console.log(c.value); // 0
+    c.value += 1;
+    console.log(c.value); // 1
+  canonical: |-
+    use std::cell::RefCell;
+
+    fn main() {
+        let c = RefCell::new(0);
+        {
+            let r = c.borrow();
+            println!("{}", r);
+        }
+        *c.borrow_mut() += 1;
+        println!("{}", c.borrow());
+    }
+expectStdout: |
+  0
+  1
+hints:
+  - "Two coordinated edits: wrap `let r = c.borrow(); println!(...)` in an inner `{ ... }` block, then call `*c.borrow_mut() += 1;` AFTER the block (so `r` has dropped). The runtime borrow check passes because the borrows no longer overlap."
+  - "Inner block scopes the `Ref<T>` guard; closing brace drops it."
+  - |-
+    use std::cell::RefCell;
+
+    fn main() {
+        let c = RefCell::new(0);
+        {
+            let r = c.borrow();
+            println!("{}", r);
+        }
+        *c.borrow_mut() += 1;
+        println!("{}", c.borrow());
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical RefCell panic. The
+  cost of interior mutability is that errors move from
+  compile time (clear) to runtime (a panic with a
+  thread name and no stack-trace by default). The fix
+  is structural — shrink the borrow scope.

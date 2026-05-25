@@ -1,0 +1,71 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: freeform
+order: 8
+prompt: |
+  Translate the TS "function mutates a passed-in object"
+  pattern. Struct `Counter { count: RefCell<i32> }`, function
+  `inc(c: &Counter)` (note: `&Counter`, not `&mut`). `main`
+  builds a Counter, calls `inc` twice, prints.
+
+  Output:
+
+      2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const counter = { count: 0 };
+    function inc(c: { count: number }): void { c.count += 1; }
+    inc(counter);
+    inc(counter);
+    console.log(counter.count);
+  canonical: |-
+    use std::cell::RefCell;
+
+    struct Counter {
+        count: RefCell<i32>,
+    }
+
+    fn inc(c: &Counter) {
+        *c.count.borrow_mut() += 1;
+    }
+
+    fn main() {
+        let counter = Counter {
+            count: RefCell::new(0),
+        };
+        inc(&counter);
+        inc(&counter);
+        println!("{}", counter.count.borrow());
+    }
+expectStdout: |
+  2
+hints:
+  - "Function parameter is `&Counter` (shared borrow) — interior mutability lets the body still write to `c.count`. Body: `*c.count.borrow_mut() += 1;`. The `*` dereferences the `RefMut<i32>` to do an arithmetic-assign."
+  - "Inc body: `*c.count.borrow_mut() += 1;`."
+  - |-
+    use std::cell::RefCell;
+
+    struct Counter {
+        count: RefCell<i32>,
+    }
+
+    fn inc(c: &Counter) {
+        *c.count.borrow_mut() += 1;
+    }
+
+    fn main() {
+        let counter = Counter {
+            count: RefCell::new(0),
+        };
+        inc(&counter);
+        inc(&counter);
+        println!("{}", counter.count.borrow());
+    }
+runtime: server
+notes: |
+  Closes the TS "pass-and-mutate" parallel. TS treats
+  shared mutation as the default; Rust requires opting
+  in via RefCell, and the caller still works with a
+  shared borrow (`&counter`).

@@ -1,0 +1,61 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: fill-line
+order: 5
+prompt: |
+  Inside an inner block, write the line that mutably borrows
+  `cell` into a local `b`. The next line `*b += 1;` will use
+  it. End the line with a semicolon.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let mut b = cell.borrow_mut();"
+  ts: |-
+    cell.value += 1; // direct mutation in TS
+  canonical: |-
+    use std::cell::RefCell;
+
+    fn main() {
+        let cell = RefCell::new(0_i32);
+        {
+            ${line}
+            *b += 1;
+        }
+        println!("{}", cell.borrow());
+    }
+  distractors:
+    - match: "let b = cell.borrow_mut();"
+      explain: |-
+        Missing `mut` on the BINDING. `*b += 1` desugars
+        to `*b = *b + 1` which uses `DerefMut::deref_mut`,
+        and that needs `b` itself to be mutable. Use
+        `let mut b = ...`.
+    - match: "let mut b = cell.borrow();"
+      explain: |-
+        `.borrow()` returns `Ref<T>` (read-only); deref-
+        assignment through `*b += 1` requires the mutable
+        guard `RefMut<T>` from `.borrow_mut()`.
+    - match: "let mut b = &mut cell;"
+      explain: |-
+        `&mut cell` is a compile-time exclusive borrow of
+        the RefCell ITSELF — defeats the point of interior
+        mutability (and won't compile because `cell` is
+        `let`, not `let mut`).
+    - match: "let mut b = cell.borrow_mut()"
+      explain: |-
+        Missing trailing semicolon. The line is a let
+        statement and must end with `;`.
+expectStdout: |
+  1
+runtime: server
+blanks: [line]
+hints:
+  - "Three tokens: `let mut b = cell.borrow_mut();`. `mut` is on the BINDING because the next line's `*b += 1` invokes `DerefMut`."
+  - "`let mut b = cell.borrow_mut();`."
+  - "`let mut b = cell.borrow_mut();`"
+notes: |
+  Drills the scoped-mut-borrow shape. The inner-block
+  scope drops the `RefMut` guard before the outer
+  `cell.borrow()` runs — without that scope, the latter
+  would panic at runtime (already borrowed mutably).

@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/production/interior-mutability
+type: mcq
+order: 1
+prompt: |
+  A struct field needs to mutate through a SHARED reference
+  (`&self`). Single-threaded. Pick the wrapper that moves
+  borrow checks to runtime.
+generator:
+  kind: variant
+  variants:
+    - id: refcell-wrapper
+      ts: 'class C { count = 0; inc() { this.count += 1; } } // TS allows freely.'
+      canonical: 'RefCell<T> — runtime-checked interior mutability; `.borrow()` / `.borrow_mut()` panic on misuse but enforce the borrow rules dynamically.'
+      distractors:
+        - 'Cell<T> — only works for `Copy` types (uses `.get()` / `.set()`); can''t hand out references to the inner value.'
+        - 'Mutex<T> — designed for thread-safety; locks are unnecessary cost in single-threaded code.'
+        - '&mut T — a compile-time exclusive borrow; the whole reason for interior mutability is that an `&mut` isn''t available.'
+hints:
+  - "Seven letters, PascalCase. Same `Cell` family as `Cell<T>` but allows non-Copy types and lends out borrowed references."
+  - "`RefCell`."
+  - '`RefCell<T>`'
+runtime: none
+notes: |
+  Pins `RefCell<T>` as the canonical single-threaded
+  interior-mutability wrapper. Distractors cover Cell
+  (Copy-only), Mutex (thread overkill), `&mut` (compile-
+  time only).
