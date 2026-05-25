@@ -1,21 +1,9 @@
-import { createSignal, For } from "solid-js";
+import { For } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
-import { useExerciseInstance } from "~/lib/exercise-instance";
-import { useExercisePhase } from "~/lib/exercise-phase";
 import { ExerciseShell } from "./ExerciseShell";
 import { McqOption } from "./McqOption";
+import { useMcqState } from "./useMcqState";
 
-/**
- * MCQ variant whose options are PROSE explanations of a piece of
- * source, not language translations. The source pane on the shell
- * gains a tab strip so the learner can flip between the TS reference
- * and the target-language source the question asks about; the
- * options on the right render as prose (no monospace shell) with
- * inline backticks highlighted via formatInline.
- *
- * Sibling of `Mcq` — identical lifecycle and submission shape; only
- * the surface rendering differs.
- */
 interface McqExplainProps {
   exerciseId: string;
   prompt: string;
@@ -24,31 +12,14 @@ interface McqExplainProps {
   successNote?: string;
   nextExerciseHref?: string;
   themeHref?: string;
-  /** Language the `generator.source` pane displays. Driven by the
-   *  exercise's `target:` field at the page boundary. */
   sourceLang: "go" | "zig" | "rust";
 }
 
 export function McqExplain(props: McqExplainProps) {
-  const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
-
-  const [selected, setSelected] = createSignal<number | null>(null);
-
-  const options = () => instance().options ?? [];
-  const correctIndex = () => instance().correctIndex ?? -1;
-  const isCorrect = () => selected() === correctIndex();
-  const canSubmit = () => selected() !== null;
-
-  const phase = useExercisePhase({
-    exerciseId: props.exerciseId,
-    isCorrect,
-    canSubmit,
-    onAnother: () => {
-      another();
-      setSelected(null);
-    },
-    onTryAgain: () => setSelected(null),
-  });
+  const { instance, selected, setSelected, options, correctIndex, phase } = useMcqState(
+    props.exerciseId,
+    props.generator,
+  );
 
   return (
     <ExerciseShell

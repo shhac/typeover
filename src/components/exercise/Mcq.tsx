@@ -1,9 +1,8 @@
-import { createSignal, For } from "solid-js";
+import { For } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
-import { useExerciseInstance } from "~/lib/exercise-instance";
-import { useExercisePhase } from "~/lib/exercise-phase";
 import { ExerciseShell } from "./ExerciseShell";
 import { McqOption } from "./McqOption";
+import { useMcqState } from "./useMcqState";
 
 interface McqProps {
   exerciseId: string;
@@ -16,25 +15,10 @@ interface McqProps {
 }
 
 export function Mcq(props: McqProps) {
-  const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
-
-  const [selected, setSelected] = createSignal<number | null>(null);
-
-  const options = () => instance().options ?? [];
-  const correctIndex = () => instance().correctIndex ?? -1;
-  const isCorrect = () => selected() === correctIndex();
-  const canSubmit = () => selected() !== null;
-
-  const phase = useExercisePhase({
-    exerciseId: props.exerciseId,
-    isCorrect,
-    canSubmit,
-    onAnother: () => {
-      another();
-      setSelected(null);
-    },
-    onTryAgain: () => setSelected(null),
-  });
+  const { instance, selected, setSelected, options, correctIndex, phase } = useMcqState(
+    props.exerciseId,
+    props.generator,
+  );
 
   return (
     <ExerciseShell
@@ -52,9 +36,6 @@ export function Mcq(props: McqProps) {
       <fieldset
         class="flex flex-col gap-2 m-0 p-0 border-0"
         onKeyDown={(e) => {
-          /* Enter on a selected option submits — without this, a
-           * keyboard-only learner has to Tab past every option to
-           * reach Submit. design-docs/19 F-11. */
           if (e.key === "Enter" && phase.canSubmit() && !phase.submitted()) {
             e.preventDefault();
             phase.submit();
