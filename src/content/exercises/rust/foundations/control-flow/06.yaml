@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: fill-line
+order: 6
+prompt: |
+  Write the Rust `while` line that loops as long as `n` is greater
+  than zero. The body decrements and the program prints how many
+  iterations ran.
+generator:
+  kind: template
+  vars:
+    line:
+      - "while n > 0 {"
+  ts: |-
+    let n: number = 3;
+    let count: number = 0;
+    while (n > 0) { n = n - 1; count = count + 1; }
+    console.log(count);
+  canonical: |-
+    fn main() {
+        let mut n: i32 = 3;
+        let mut count: i32 = 0;
+        ${line}
+            n = n - 1;
+            count = count + 1;
+        }
+        println!("{}", count);
+    }
+  distractors:
+    - match: "while (n > 0) {"
+      explain: |-
+        Rust doesn't put parens around the condition. The compiler
+        accepts them as a grouping expression but clippy warns —
+        idiomatic Rust drops them.
+    - match: "while n > 0:"
+      explain: |-
+        Python-style. Rust needs an opening `{` after the condition
+        — no colons.
+    - match: "while n > 0"
+      explain: |-
+        Missing the opening brace. Rust REQUIRES braces around the
+        loop body — there's no single-statement shorthand.
+    - match: "loop n > 0 {"
+      explain: |-
+        `loop` in Rust takes no condition — it's the infinite form
+        you exit with `break`. For a guarded loop use `while`.
+expectStdout: |
+  3
+runtime: server
+blanks: [line]
+hints:
+  - "Rust drops the parens around the condition. The body braces are required. Same `n > 0` predicate as the TS reference."
+  - "Shape: `while <condition> {`. The closing `}` is already there in the scaffold."
+  - "`while n > 0 {`"
+notes: |
+  Production drill for `while` under runtime grading. The fill is
+  the opening line — the rest of the body is scaffolded so the
+  exercise focuses on the parens-off / brace-on reflex. Four
+  distractors cover paren, colon, brace-missing, and `loop`-misuse
+  reflexes.

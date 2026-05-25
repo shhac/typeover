@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: mcq
+order: 2
+prompt: |
+  In Rust, `if` is an EXPRESSION — it produces a value you can bind
+  to a `let`. Pick the idiomatic Rust translation of the TS ternary.
+generator:
+  kind: variant
+  variants:
+    - id: max
+      ts: "const big: number = a > b ? a : b;"
+      canonical: "let big: i32 = if a > b { a } else { b };"
+      distractors:
+        - "let big: i32 = a > b ? a : b;"
+        - "let big: i32; if a > b { big = a; } else { big = b; }"
+        - "let big: i32 = if (a > b) a else b;"
+    - id: sign
+      ts: "const sign: number = n >= 0 ? 1 : -1;"
+      canonical: "let sign: i32 = if n >= 0 { 1 } else { -1 };"
+      distractors:
+        - "let sign: i32 = n >= 0 ? 1 : -1;"
+        - "let mut sign: i32 = 0; if n >= 0 { sign = 1; } else { sign = -1; }"
+        - "let sign = if n >= 0 then 1 else -1;"
+hints:
+  - "Rust has no `?:` ternary — `if/else` IS the expression form. Each branch is a block whose last line (no semicolon) is the produced value."
+  - "Shape: `let <name>: <type> = if <cond> { <val> } else { <other> };`. Semicolon at the END of the `let`, not after the `}`."
+  - "For max: `let big: i32 = if a > b { a } else { b };`."
+runtime: none
+notes: |
+  Introduces if-as-expression. Distractors:
+   - `?:` — not in Rust at all.
+   - `let mut + assign in branches` — works but verbose; the
+     expression form is idiomatic.
+   - `if (cond) val else other` — Pascal/JS-like; not Rust.

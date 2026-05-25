@@ -1,0 +1,46 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: freeform
+order: 9
+prompt: |
+  Write a Rust program that iterates `i` from 1 through 5
+  inclusive and prints only the EVEN values. Output should be
+  exactly:
+
+      2
+      4
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    for (let i = 1; i <= 5; i++) {
+        if (i % 2 === 0) { console.log(i); }
+    }
+  canonical: |-
+    fn main() {
+        for i in 1..=5 {
+            if i % 2 == 0 {
+                println!("{}", i);
+            }
+        }
+    }
+expectStdout: |
+  2
+  4
+runtime: server
+hints:
+  - "Two layers: a `for ... in 1..=5` outer loop (inclusive range so 5 is included even though you don't print it) and an `if i % 2 == 0` inner guard. `println!(\"{}\", i)` emits each surviving value on its own line."
+  - "Shape: `fn main() { for i in 1..=5 { if i % 2 == 0 { println!(\"{}\", i); } } }`."
+  - |-
+    fn main() {
+        for i in 1..=5 {
+            if i % 2 == 0 {
+                println!("{}", i);
+            }
+        }
+    }
+notes: |
+  Closes the theme by combining the inclusive range (slot 03/07)
+  with the if-without-parens (slot 01/08). The TS reference uses
+  the C-style for so the contrast with Rust's `for ... in` is
+  visible side-by-side.

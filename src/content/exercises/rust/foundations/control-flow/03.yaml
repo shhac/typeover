@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: mcq
+order: 3
+prompt: |
+  Pick the idiomatic Rust loop that prints `0` through `4`. Rust's
+  numeric `for` always iterates over an iterator — the range
+  operator builds one.
+generator:
+  kind: variant
+  variants:
+    - id: zero-to-four
+      ts: "for (let i = 0; i < 5; i++) { console.log(i); }"
+      canonical: "for i in 0..5 { println!(\"{}\", i); }"
+      distractors:
+        - "for (let i = 0; i < 5; i++) { println!(\"{}\", i); }"
+        - "for i in 0..=5 { println!(\"{}\", i); }"
+        - "for i = 0; i < 5; i++ { println!(\"{}\", i); }"
+    - id: one-to-three
+      ts: "for (let i = 1; i <= 3; i++) { console.log(i); }"
+      canonical: "for i in 1..=3 { println!(\"{}\", i); }"
+      distractors:
+        - "for i in 1..3 { println!(\"{}\", i); }"
+        - "for (let i = 1; i <= 3; i++) { println!(\"{}\", i); }"
+        - "for i = 1; i <= 3; i++ { println!(\"{}\", i); }"
+hints:
+  - "Rust has no C-style 3-clause `for`. The loop is always `for <pattern> in <iter> { ... }`. Ranges: `start..end` is half-open (excludes end), `start..=end` is inclusive."
+  - "For zero-to-four (0,1,2,3,4): use `0..5` (half-open). For one-to-three (1,2,3): use `1..=3` (inclusive)."
+  - "For zero-to-four: `for i in 0..5 { println!(\"{}\", i); }`."
+runtime: none
+notes: |
+  Two variants pin the half-open vs inclusive range distinction
+  via the same loop shape. Distractors:
+   - C-style 3-clause `for` — not Rust syntax.
+   - Wrong range operator for the desired endpoint.

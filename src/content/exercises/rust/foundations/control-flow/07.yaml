@@ -1,0 +1,57 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: fill-line
+order: 7
+prompt: |
+  Write the Rust `for` line that iterates `i` over `1`, `2`, `3`
+  (inclusive of `3`). The body sums them and the program prints
+  the total.
+generator:
+  kind: template
+  vars:
+    line:
+      - "for i in 1..=3 {"
+  ts: |-
+    let total: number = 0;
+    for (let i = 1; i <= 3; i++) { total = total + i; }
+    console.log(total);
+  canonical: |-
+    fn main() {
+        let mut total: i32 = 0;
+        ${line}
+            total = total + i;
+        }
+        println!("{}", total);
+    }
+  distractors:
+    - match: "for i in 1..3 {"
+      explain: |-
+        That's the HALF-OPEN range — it iterates 1 and 2 only, not
+        3. The total would be 3, not 6. Use the inclusive form `..=`.
+    - match: "for (let i = 1; i <= 3; i++) {"
+      explain: |-
+        That's the JS / C `for` shape. Rust always uses
+        `for <pattern> in <iter> { ... }`. The 3-clause form
+        doesn't exist.
+    - match: "for i = 1; i <= 3; i++ {"
+      explain: |-
+        Same as above without the `let` — still not Rust.
+    - match: "for i in [1, 2, 3] {"
+      explain: |-
+        Works! Same end result. But the range form `1..=3` is the
+        idiomatic shape for "all integers from a to b" because it
+        doesn't materialise a Vec.
+expectStdout: |
+  6
+runtime: server
+blanks: [line]
+hints:
+  - "Rust ranges: `..` is half-open (excludes the end), `..=` is inclusive. You want 1, 2, AND 3 — pick the inclusive operator."
+  - "Shape: `for <name> in <range> {`. Closing brace is in the scaffold."
+  - "`for i in 1..=3 {`"
+notes: |
+  Production drill for inclusive-range + Rust `for` shape under
+  runtime grading. Four distractors cover the wrong range
+  operator, JS for-shape, JS for-shape without `let`, and a
+  works-but-less-idiomatic array form (with explain text that
+  affirms it works and points at why the range form is better).

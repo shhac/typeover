@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: fill-word
+order: 5
+prompt: |
+  Fill the keyword that exits a `loop` AND returns a value from it.
+  Five letters.
+generator:
+  kind: template
+  vars:
+    keyword: ["break"]
+  ts: |-
+    let result = (() => { while (true) return 42; })();
+  canonical: |-
+    let result: i32 = loop {
+        ${keyword} 42;
+    };
+blanks: [keyword]
+hints:
+  - "Same English word JavaScript uses to leave a loop — but in Rust `loop` (the infinite form), the keyword can also carry a value back. The expression-form `loop` evaluates to whatever the keyword threw out."
+  - "Five letters."
+  - "`break`"
+runtime: none
+notes: |
+  Drills `loop` as an expression that produces a value via
+  `break <value>;`. The TS reference uses an IIFE because TS has
+  no native loop-as-expression — Rust's form is more direct.

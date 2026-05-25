@@ -1,0 +1,48 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript branching code. The program prints
+  `even` if `n` is even, otherwise `odd`. With `n = 7` the output
+  should be exactly:
+
+      odd
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n: number = 7;
+    if (n % 2 === 0) {
+        console.log("even");
+    } else {
+        console.log("odd");
+    }
+  canonical: |-
+    fn main() {
+        let n: i32 = 7;
+        if n % 2 == 0 {
+            println!("even");
+        } else {
+            println!("odd");
+        }
+    }
+expectStdout: |
+  odd
+runtime: server
+hints:
+  - "Three shifts: drop the parens around the condition, use `==` (not `===`), and the body braces are required. Rest of the shape — `if`/`else`, `%` for mod — carries over from TS."
+  - "Shape: `fn main() { let n: i32 = 7; if n % 2 == 0 { println!(\"even\"); } else { println!(\"odd\"); } }`."
+  - |-
+    fn main() {
+        let n: i32 = 7;
+        if n % 2 == 0 {
+            println!("even");
+        } else {
+            println!("odd");
+        }
+    }
+notes: |
+  Production drill for `if`/`else` in a complete program. Three
+  shifts a TS dev has to remember (parens-off, single `==`,
+  braces required). Canonical small for prebake.

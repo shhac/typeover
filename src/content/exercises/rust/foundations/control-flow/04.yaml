@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: fill-word
+order: 4
+prompt: |
+  Fill the Rust range operator that iterates `start` UP TO BUT NOT
+  INCLUDING `end`. Two characters.
+generator:
+  kind: template
+  vars:
+    range: [".."]
+    start: ["0"]
+    end: ["10"]
+  ts: |-
+    for (let i = ${start}; i < ${end}; i++) { console.log(i); }
+  canonical: |-
+    for i in ${start}${range}${end} {
+        println!("{}", i);
+    }
+blanks: [range]
+hints:
+  - "Two dots. Rust's half-open range operator. Inclusive (closed) is the SAME plus an `=` — `..=` — but the slot wants half-open."
+  - "Two characters: dot dot."
+  - "`..`"
+runtime: none
+notes: |
+  Production drill for `..` half-open. Sibling vocabulary (`..=`,
+  step ranges via `.step_by()`) is introduced in collections/iterators.

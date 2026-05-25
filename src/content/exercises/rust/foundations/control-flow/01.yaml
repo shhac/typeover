@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/foundations/control-flow
+type: mcq
+order: 1
+prompt: |
+  Pick the idiomatic Rust `if` statement. Unlike TypeScript, Rust
+  doesn't wrap the condition in parentheses — and the body braces
+  are NOT optional.
+generator:
+  kind: variant
+  variants:
+    - id: positive
+      ts: "if (n > 0) { console.log(n); }"
+      canonical: "if n > 0 { println!(\"{}\", n); }"
+      distractors:
+        - "if (n > 0) { println!(\"{}\", n); }"
+        - "if n > 0: println!(\"{}\", n);"
+        - "if n > 0 println!(\"{}\", n);"
+    - id: empty
+      ts: "if (items.length === 0) { return; }"
+      canonical: "if items.is_empty() { return; }"
+      distractors:
+        - "if (items.is_empty()) { return; }"
+        - "if items.is_empty(): return;"
+        - "if items.length == 0 { return; }"
+hints:
+  - "Rust drops the parens around the condition and REQUIRES the braces around the body. There's no single-statement form without braces."
+  - "Shape: `if <condition> { <body> }`. No parens; braces always."
+  - 'For positive: `if n > 0 { println!("{}", n); }`.'
+runtime: none
+notes: |
+  Sets the parens-off / braces-required reflex. Distractors:
+   - C/TS parens around the condition — compiles in Rust (the parens
+     are treated as a grouping expression) but lints as unidiomatic.
+   - Python-style `:` — not Rust syntax.
+   - Missing braces — Rust REQUIRES them even for one-statement bodies,
+     compile error.
