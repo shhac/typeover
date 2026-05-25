@@ -21,10 +21,10 @@ describe("RevealButton", () => {
   });
 
   it("first click shows the canonical and flips the label", () => {
-    const { getByRole, getByText } = render(() => <RevealButton canonical={CANONICAL} />);
+    const { container, getByRole } = render(() => <RevealButton canonical={CANONICAL} />);
     fireEvent.click(getByRole("button"));
     expect(getByRole("button").textContent).toBe("Hide answer");
-    expect(getByText(CANONICAL)).toBeTruthy();
+    expect(container.textContent).toContain(CANONICAL);
   });
 
   it("second click hides the canonical again", () => {

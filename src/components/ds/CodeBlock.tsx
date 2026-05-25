@@ -5,6 +5,7 @@ import { IconFileGo } from "~/components/icons/icon-file-go";
 import { IconFileRs } from "~/components/icons/icon-file-rs";
 import { IconFileTs } from "~/components/icons/icon-file-ts";
 import { IconFileZig } from "~/components/icons/icon-file-zig";
+import { CodeHighlight } from "./CodeHighlight";
 import { cn } from "./_internal";
 
 type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
@@ -67,6 +68,14 @@ function interactiveTabClass(selected: boolean): string {
   );
 }
 
+function codeText(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
+    return value.join("");
+  }
+  return null;
+}
+
 export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const [local, rest] = splitProps(props, [
     "lang",
@@ -80,6 +89,7 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const lang = local.lang ?? "plain";
   const showLang = local.showLang ?? true;
   const hasTabs = () => (local.tabs?.length ?? 0) > 0;
+  const highlightedText = () => codeText(local.children);
   /* Prefer filename; fall back to label. Both render in the same
    * mono-muted slot but stay typed as separate props so consumers
    * don't conflate filenames (real file paths) with prose
@@ -132,7 +142,11 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
         {...rest}
         class="px-4 py-4 overflow-x-auto text-fg-primary font-mono text-code leading-relaxed"
       >
-        <code>{local.children}</code>
+        <code>
+          <Show when={highlightedText()} fallback={local.children}>
+            {(text) => <CodeHighlight code={text()} lang={lang} />}
+          </Show>
+        </code>
       </pre>
     </div>
   );
