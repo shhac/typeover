@@ -154,34 +154,27 @@ const rustThemeCount = rustThemes.length;
               <span class="text-accent-rust">Rust</span> for TypeScript devs
             </Heading>
             <Fragment slot="dek">
-              Foundations ships {rustExerciseCount} runnable exercises today,
-              graded by a server-compile pipeline (Vercel Sandbox → wasm
-              → in-browser run) with a service-worker L1 cache so canonical
-              answers never burn Vercel CPU. Modules 2–7 ship their theme
-              spines today — {rustThemeCount} themes across all modules — with
-              exercises arriving next.
+              Foundations ships {rustExerciseCount} runnable exercises today.
+              Your code compiles to wasm in a tiny sandbox and runs back in
+              the browser, with cached answers served straight from the
+              CDN. The full curriculum — {rustThemeCount} themes across
+              7 modules — is mapped out and ready for exercises.
             </Fragment>
             <Stack gap="xs" slot="modules">
               <Text tone="muted" size="sm" family="mono">
-                <span class="text-accent-rust">1.</span> Foundations · partial
+                <span class="text-accent-rust">1.</span> Foundations · in progress
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>2.</span> Ownership &amp; borrowing · spine
+                <span>2.</span> Ownership &amp; borrowing · soon
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>3.</span> Data modeling · spine
+                <span>3.</span> Data modeling · soon
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>4.</span> Collections &amp; iteration · spine
+                <span>4.</span> Collections &amp; iteration · soon
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>5.</span> Errors, crates &amp; tests · spine
-              </Text>
-              <Text tone="faint" size="sm" family="mono">
-                <span>6.</span> Traits &amp; generics · spine
-              </Text>
-              <Text tone="faint" size="sm" family="mono">
-                <span>7.</span> Production Rust · spine
+                <span>5–7.</span> Errors, traits, production · soon
               </Text>
             </Stack>
             <a href="/rust/foundations/hello-and-printing/01" class="inline-flex">
@@ -198,7 +191,7 @@ const rustThemeCount = rustThemes.length;
             typeover · 2026 · built with astro + solid + tailwind
           </Text>
           <Text tone="faint" size="xs" family="mono">
-            yaegi + zig in browser · rust server-compiled + SW-cached
+            go + zig in browser · rust compiled to wasm + cached
           </Text>
         </Stack>
       </Stack>
