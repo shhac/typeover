@@ -1,0 +1,57 @@
+target: rust
+themeId: rust/abstractions/generics
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0277]: `T` doesn't implement
+  `std::fmt::Display``:
+
+      fn announce<T>(x: T) {
+          println!("got {}", x);
+      }
+
+      fn main() {
+          announce(42);
+      }
+
+  Fix it by adding the SMALLEST required bound — `T:
+  std::fmt::Display` — so `{}` formatting resolves.
+
+  Output:
+
+      got 42
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function announce<T>(x: T): void {
+      console.log("got", x); // TS doesn't need a bound.
+    }
+    announce(42);
+  canonical: |-
+    fn announce<T: std::fmt::Display>(x: T) {
+        println!("got {}", x);
+    }
+
+    fn main() {
+        announce(42);
+    }
+expectStdout: |
+  got 42
+hints:
+  - "One edit: change `fn announce<T>(x: T)` to `fn announce<T: std::fmt::Display>(x: T)`. `{}` formatting calls into `Display::fmt`; without the bound, the compiler refuses because not every `T` implements `Display`."
+  - "Insert `: std::fmt::Display` after `T`."
+  - |-
+    fn announce<T: std::fmt::Display>(x: T) {
+        println!("got {}", x);
+    }
+
+    fn main() {
+        announce(42);
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "missing trait bound"
+  fix. The rule: bound only the trait you actually use.
+  Resist the temptation to add `T: Debug + Clone + Send +
+  Sync + ...`; one bound was all that was missing.

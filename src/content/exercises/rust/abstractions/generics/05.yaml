@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/abstractions/generics
+type: fill-word
+order: 5
+prompt: |
+  Fill the trait bound. The function needs to CLONE its input
+  to return two copies.
+generator:
+  kind: template
+  vars:
+    bound: ["T: Clone"]
+  ts: |-
+    function duplicate<T>(x: T): [T, T] { return [x, x]; }
+    // TS doesn't need a bound — JS values copy by sharing references.
+  canonical: |-
+    fn duplicate<${bound}>(x: T) -> (T, T) {
+        (x.clone(), x)
+    }
+blanks: [bound]
+hints:
+  - "Two pieces separated by a colon: the type parameter name + the trait it must satisfy. The trait is the one that names the `.clone()` method."
+  - "Five letters, capital first letter, identifies the trait."
+  - "`T: Clone`"
+runtime: none
+notes: |
+  Drills the inline trait-bound shape `<T: Trait>`.
+  `Clone` is required because `.clone()` is the method
+  from that trait; without the bound, the call doesn't
+  resolve.

@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/abstractions/generics
+type: freeform
+order: 6
+prompt: |
+  Write `fn identity<T>(x: T) -> T` returning its input
+  unchanged. `main` calls `identity(42)` and `identity("hi")`
+  and prints them space-separated. Two different concrete
+  `T`s, one generic function.
+
+  Output:
+
+      42 hi
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function identity<T>(x: T): T { return x; }
+    console.log(identity(42), identity("hi"));
+  canonical: |-
+    fn identity<T>(x: T) -> T {
+        x
+    }
+
+    fn main() {
+        println!("{} {}", identity(42), identity("hi"));
+    }
+expectStdout: |
+  42 hi
+hints:
+  - "Two pieces: signature `fn identity<T>(x: T) -> T`, body is one expression `x` (no semicolon). Type-inference at the call site pins `T` to `i32` for one call and `&str` for the other — the compiler generates a specialised copy of `identity` for each."
+  - "Body: `x` (single expression, no trailing semicolon)."
+  - |-
+    fn identity<T>(x: T) -> T {
+        x
+    }
+
+    fn main() {
+        println!("{}", identity(42));
+        println!("{}", identity("hi"));
+    }
+runtime: server
+notes: |
+  First generic-function freeform. Two calls with
+  different concrete types demonstrate monomorphisation —
+  the compiler emits two specialised copies, no runtime
+  cost.

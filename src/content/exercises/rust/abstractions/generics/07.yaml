@@ -1,0 +1,65 @@
+target: rust
+themeId: rust/abstractions/generics
+type: freeform
+order: 7
+prompt: |
+  Define a generic container `struct Pair<T> { first: T, second: T }`
+  with an `impl<T>` block exposing `fn new(a: T, b: T) -> Self`.
+  `main` builds `Pair::new(1, 2)` and prints both fields
+  space-separated.
+
+  Output:
+
+      1 2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Pair<T> {
+      constructor(public first: T, public second: T) {}
+    }
+    const p = new Pair(1, 2);
+    console.log(p.first, p.second);
+  canonical: |-
+    struct Pair<T> {
+        first: T,
+        second: T,
+    }
+
+    impl<T> Pair<T> {
+        fn new(a: T, b: T) -> Self {
+            Pair { first: a, second: b }
+        }
+    }
+
+    fn main() {
+        let p = Pair::new(1, 2);
+        println!("{} {}", p.first, p.second);
+    }
+expectStdout: |
+  1 2
+hints:
+  - "Three pieces: generic struct (`<T>` on the type name), generic impl block (`<T>` AFTER `impl`, BEFORE the type name: `impl<T> Pair<T> { ... }`), and a `new` constructor returning `Self`. The struct itself has no bound — bounds only show up where behaviour is needed."
+  - "Impl-block shape: `impl<T> Pair<T> { ... }` — note the type parameter appears in BOTH places (declaration after `impl`, instantiation after `Pair`)."
+  - |-
+    struct Pair<T> {
+        first: T,
+        second: T,
+    }
+
+    impl<T> Pair<T> {
+        fn new(a: T, b: T) -> Self {
+            Pair { first: a, second: b }
+        }
+    }
+
+    fn main() {
+        let p = Pair::new(1, 2);
+        println!("{} {}", p.first, p.second);
+    }
+runtime: server
+notes: |
+  Drills generic structs + impl. The repeated `<T>` on
+  `impl<T> Pair<T>` is required — Rust needs to declare
+  the parameter (after `impl`) AND name the
+  instantiation (after `Pair`).

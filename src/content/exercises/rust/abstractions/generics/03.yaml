@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/generics
+type: mcq
+order: 3
+prompt: |
+  A generic function prints its argument with `{}`. Pick the
+  trait bound it needs on `T`.
+generator:
+  kind: variant
+  variants:
+    - id: display-bound
+      ts: '// TS has no trait bounds — it would just check the call sites.'
+      canonical: '<T: std::fmt::Display> — the `Display` trait is the one `{}` uses; without it the compiler refuses with E0277.'
+      distractors:
+        - '<T: ToString> — `.to_string()` requires `ToString` (which is automatic when Display is implemented), but `{}` calls into Display directly. Bound the trait you actually use.'
+        - '<T: std::fmt::Debug> — that''s for the `{:?}` (DEBUG) format specifier, not `{}`.'
+        - '<T> — no bound; the body uses `{}` which requires Display, so the compiler refuses with E0277.'
+hints:
+  - "The bound names the trait `{}` calls into. Seven letters (the trait name), under `std::fmt::`."
+  - "Same name as the verb meaning 'show'."
+  - '`<T: std::fmt::Display>`'
+runtime: none
+notes: |
+  Pins `Display` as the bound for `{}`. Distractors target
+  three real similar-but-wrong choices: `ToString` (less
+  direct), `Debug` (for `{:?}` only), and no-bound
+  (compile error).

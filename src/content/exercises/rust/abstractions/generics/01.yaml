@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/generics
+type: mcq
+order: 1
+prompt: |
+  Declare a function `identity` that takes a value of any type
+  `T` and returns it unchanged. Pick the idiomatic Rust generic
+  function signature.
+generator:
+  kind: variant
+  variants:
+    - id: identity-generic
+      ts: 'function identity<T>(x: T): T { return x; }'
+      canonical: 'fn identity<T>(x: T) -> T { x } — type parameter declared in `<...>` between the function name and the parameter list; return type uses `->`.'
+      distractors:
+        - 'fn identity<T>(x: T): T { return x; } — `:` for return type is TS syntax; Rust uses `->`. Body returns by trailing expression, no `return` keyword needed.'
+        - 'fn<T> identity(x: T) -> T { x } — generic parameters go AFTER the function name, not before.'
+        - 'fn identity(x: T) -> T { x } — `<T>` declaration is missing; without it, `T` is undeclared.'
+hints:
+  - "Three pieces: `fn <name><<TypeParams>>(<args>) -> <ret> { ... }`. Type params come right after the name, in angle brackets."
+  - "Shape: `fn identity<T>(x: T) -> T { x }`."
+  - "`fn identity<T>(x: T) -> T { x }`"
+runtime: none
+notes: |
+  Pins the generic function shape. Distractors cover the
+  three common TS-leaning typos: `:` return, generic-params-
+  before-name, and forgetting the declaration entirely.

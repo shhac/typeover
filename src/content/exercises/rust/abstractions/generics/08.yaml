@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/abstractions/generics
+type: freeform
+order: 8
+prompt: |
+  Translate the TS generic helper to Rust. `pair(a, b)` returns
+  a tuple of the two inputs. `main` calls `pair(1, 2)` and
+  prints both elements space-separated using tuple-index
+  access (`p.0`, `p.1`).
+
+  Output:
+
+      1 2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function pair<T>(a: T, b: T): [T, T] { return [a, b]; }
+    const p = pair(1, 2);
+    console.log(p[0], p[1]);
+  canonical: |-
+    fn pair<T>(a: T, b: T) -> (T, T) {
+        (a, b)
+    }
+
+    fn main() {
+        let p = pair(1, 2);
+        println!("{} {}", p.0, p.1);
+    }
+expectStdout: |
+  1 2
+hints:
+  - "Two pieces: generic function `fn pair<T>(a: T, b: T) -> (T, T)` returning a tuple `(a, b)`, and `main` accessing the tuple with `p.0` / `p.1` (NOT `p[0]` — Rust tuples use field-style indexing)."
+  - "Tuple indexing in Rust: `p.0`, `p.1`. Not `p[0]`."
+  - |-
+    fn pair<T>(a: T, b: T) -> (T, T) {
+        (a, b)
+    }
+
+    fn main() {
+        let p = pair(1, 2);
+        println!("{} {}", p.0, p.1);
+    }
+runtime: server
+notes: |
+  Pairs the TS tuple-return pattern with Rust tuples.
+  The `(T, T)` return type and `p.0`/`p.1` access are the
+  Rust idioms; TS arrays-as-tuples translate to Rust
+  tuples specifically, not `Vec`.

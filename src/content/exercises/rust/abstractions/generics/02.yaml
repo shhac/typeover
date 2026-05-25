@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/abstractions/generics
+type: mcq
+order: 2
+prompt: |
+  Pick the type name that means "vector of T" where `T` is a
+  type parameter — the generic, owned, growable collection.
+generator:
+  kind: variant
+  variants:
+    - id: vec-of-t
+      ts: 'type IntArray = Array<number>;'
+      canonical: 'Vec<T> — generic vector; angle brackets for the type parameter; same shape as TS `Array<T>` but Rust calls it `Vec`.'
+      distractors:
+        - 'Vec[T] — square brackets are for fixed-size arrays (`[T; N]`) and slice TYPES (`[T]`), not generic instantiation.'
+        - 'Array<T> — JS/TS name; Rust uses `Vec`.'
+        - 'List<T> — Java / C# / Kotlin name; Rust uses `Vec`.'
+hints:
+  - "Three letters, capital V, generic over the element type — same type used throughout the collections module."
+  - "`Vec`."
+  - '`Vec<T>`'
+runtime: none
+notes: |
+  Re-grounds `Vec<T>` as the generic Rust vector after the
+  collections module. Distractors target the JS/Java/C#
+  naming reflexes.

@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/generics
+type: fill-word
+order: 4
+prompt: |
+  Fill the generic parameter declaration so this function takes
+  one type parameter named `T`.
+generator:
+  kind: template
+  vars:
+    params: ["<T>"]
+  ts: |-
+    function first<T>(xs: T[]): T { return xs[0]; }
+  canonical: |-
+    fn first${params}(xs: &[T]) -> &T {
+        &xs[0]
+    }
+blanks: [params]
+hints:
+  - "Three characters: opening angle bracket, one uppercase letter, closing angle bracket. Sits between the function name and the parameter list."
+  - "`<T>`."
+  - "`<T>`"
+runtime: none
+notes: |
+  Drills the generic-parameter declaration on functions.
+  Convention names the first type parameter `T` — short for
+  "type" — same idiom as TS / C# / C++.
