@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: fill-line
+order: 5
+prompt: |
+  When you only care about ONE variant, `if let` is the shorthand
+  for "match this pattern, ignore the rest." Write the line that
+  opens an `if let` matching `Outcome::Err(e)` against `o`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "if let Outcome::Err(e) = o {"
+  ts: |-
+    type Outcome = { kind: "ok"; v: number } | { kind: "err"; e: string };
+    const o: Outcome = { kind: "err", e: "nope" };
+    if (o.kind === "err") {
+      console.log("err: " + o.e);
+    }
+  canonical: |-
+    enum Outcome { Ok(i32), Err(String) }
+
+    fn main() {
+        let o = Outcome::Err(String::from("nope"));
+        ${line}
+            println!("err: {}", e);
+        }
+    }
+  distractors:
+    - match: "if let Outcome::Err(e) = o"
+      explain: |-
+        Missing opening brace `{`. `if let` is followed by a
+        block, just like a regular `if`.
+    - match: "if let Outcome::Err(e) == o {"
+      explain: |-
+        `==` is the equality operator. `if let` uses `=` to
+        bind the destructured value — it's a pattern, not a
+        comparison.
+    - match: "if Outcome::Err(e) = o {"
+      explain: |-
+        Missing the `let` keyword. The pattern-binding shape
+        is `if let <pattern> = <expr> {`.
+    - match: "if let Outcome::Err = o {"
+      explain: |-
+        Doesn't destructure the payload. Put the binding
+        inside the parens: `Outcome::Err(e)`.
+expectStdout: |
+  err: nope
+runtime: server
+blanks: [line]
+hints:
+  - "Shape: `if let <pattern> = <expression> {`. Three keywords (`if`, `let`), a pattern, a single equals sign, the scrutinee, opening brace."
+  - "The pattern uses parens to bind the payload: `Outcome::Err(e)`."
+  - "`if let Outcome::Err(e) = o {`"
+notes: |
+  Drills the `if let` shorthand. Distractors target the
+  three common typos: missing brace, `==`-instead-of-`=`,
+  missing `let`, and no-binding.

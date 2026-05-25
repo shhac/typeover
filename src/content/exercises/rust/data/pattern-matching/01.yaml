@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: mcq
+order: 1
+prompt: |
+  Given `enum Sign { Pos, Neg, Zero }`, pick the `match` that
+  COMPILES (no E0004 "non-exhaustive patterns").
+generator:
+  kind: variant
+  variants:
+    - id: exhaustive
+      ts: |-
+        type Sign = "pos" | "neg" | "zero";
+        function value(s: Sign): number {
+          switch (s) {
+            case "pos": return 1;
+            case "neg": return -1;
+            case "zero": return 0;
+          }
+        }
+      canonical: 'match s { Sign::Pos => 1, Sign::Neg => -1, Sign::Zero => 0, } — all three variants covered.'
+      distractors:
+        - 'match s { Sign::Pos => 1, Sign::Neg => -1, } — missing `Sign::Zero`; compiler refuses to compile.'
+        - 'match s { Pos => 1, Neg => -1, Zero => 0, } — bare variant names bind locals; the arms catch ANY value but produce warnings, not a compile failure (and never reach `Neg`/`Zero` because `Pos` already matched everything).'
+        - 'match s { Sign::Pos: 1, Sign::Neg: -1, Sign::Zero: 0, } — `:` is not the match-arm syntax; the arrow is `=>`.'
+hints:
+  - "Exhaustive means EVERY variant has an arm. The compiler checks this at build time — E0004 fires the moment a variant is missing."
+  - "Three arms, one per variant, qualified with `Sign::`, arrow is `=>`."
+  - '`match s { Sign::Pos => 1, Sign::Neg => -1, Sign::Zero => 0, }`'
+runtime: none
+notes: |
+  Pins exhaustiveness as the structural reason for `match`.
+  Distractors cover missing-arm (E0004), bare-name binding
+  (compiles to one-arm catch-all + dead-code warnings), and
+  `:`-vs-`=>` arrow confusion.

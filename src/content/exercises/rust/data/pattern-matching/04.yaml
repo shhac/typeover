@@ -1,0 +1,66 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: fill-line
+order: 4
+prompt: |
+  Fill the missing match arm. Destructure `Outcome::Err(reason)`
+  and print `"err: <reason>"`. End the line with a comma.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'Outcome::Err(reason) => println!("err: {}", reason),'
+  ts: |-
+    type Outcome = { kind: "ok"; v: number } | { kind: "err"; reason: string };
+    function show(o: Outcome): void {
+      if (o.kind === "ok") console.log("ok: " + o.v);
+      else console.log("err: " + o.reason);
+    }
+    show({ kind: "err", reason: "nope" });
+  canonical: |-
+    enum Outcome { Ok(i32), Err(String) }
+
+    fn show(o: Outcome) {
+        match o {
+            Outcome::Ok(v) => println!("ok: {}", v),
+            ${line}
+        }
+    }
+
+    fn main() {
+        show(Outcome::Err(String::from("nope")));
+    }
+  distractors:
+    - match: 'Outcome::Err(reason) => println!("err: {}", reason)'
+      explain: |-
+        Missing trailing comma. Match arms are comma-separated
+        unless the body is a block `{ ... }` — single-expression
+        arms need the comma so the parser closes them.
+    - match: 'Outcome::Err => println!("err: {}", reason),'
+      explain: |-
+        Doesn't destructure — the bare `Outcome::Err` matches
+        the variant but binds no payload, so `reason` is
+        undefined in the arm's body. Put the binding inside
+        the parens: `Outcome::Err(reason)`.
+    - match: 'Outcome::Err(_) => println!("err: nope"),'
+      explain: |-
+        That hardcodes the message and ignores the actual
+        payload. Bind the payload (`reason`) so any value
+        prints through.
+    - match: '_ => println!("err: nope"),'
+      explain: |-
+        Catch-all loses the structure — works for this
+        specific Err but doesn't generalise, and isn't the
+        explicit arm the exercise asks for.
+expectStdout: |
+  err: nope
+runtime: server
+blanks: [line]
+hints:
+  - "Shape: `<Type>::<Variant>(<binding>) => <expression>,`. Three pieces — the variant pattern, the arrow `=>`, and the call to `println!` using the bound name."
+  - "Match arms end with a comma when the body is a single expression."
+  - '`Outcome::Err(reason) => println!("err: {}", reason),`'
+notes: |
+  Production drill for the destructuring-arm shape. Distractors
+  cover missing-comma, no-binding, payload-ignored, and
+  catch-all-instead-of-explicit.

@@ -1,0 +1,33 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: mcq
+order: 2
+prompt: |
+  A match handles two specific variants explicitly and wants a
+  CATCH-ALL for everything else. Pick the wildcard arm.
+generator:
+  kind: variant
+  variants:
+    - id: wildcard
+      ts: |-
+        switch (kind) {
+          case "a": ...;
+          case "b": ...;
+          default: ...;
+        }
+      canonical: '_ => default_action(), — `_` is the wildcard pattern; matches any remaining value, does not bind it.'
+      distractors:
+        - '* => default_action(), — `*` is not a match pattern in Rust; `*` is for dereferencing references.'
+        - 'else => default_action(), — `else` is not a match-arm keyword in Rust; it''s an if-statement keyword.'
+        - 'default => default_action(), — this is legal syntax but binds the value to a local named `default`, not a wildcard. The arm name itself overrides the function call meaning.'
+hints:
+  - "One character. The same character Rust uses for placeholder-binding (`let _ = expr;`) and unused parameters."
+  - "Underscore."
+  - "`_`"
+runtime: none
+notes: |
+  The fourth distractor surfaces a real subtle bug: any
+  lowercase identifier in pattern position binds the value
+  to that name, so `default => ...` works as a catch-all but
+  for the wrong reason (binding, not wildcard). Use `_`
+  when you genuinely want to ignore.

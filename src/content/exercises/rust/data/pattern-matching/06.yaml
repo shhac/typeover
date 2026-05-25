@@ -1,0 +1,67 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: freeform
+order: 6
+prompt: |
+  Define `enum Direction { North, South, East, West }`. Write
+  `name(d: Direction) -> &'static str` that uses `match` to
+  return one of `"north"`, `"south"`, `"east"`, `"west"` —
+  exhaustive. `main` calls `name(Direction::West)`.
+
+  Output:
+
+      west
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Direction = "north" | "south" | "east" | "west";
+    function name(d: Direction): string {
+      switch (d) {
+        case "north": return "north";
+        case "south": return "south";
+        case "east": return "east";
+        case "west": return "west";
+      }
+    }
+    console.log(name("west"));
+  canonical: |-
+    enum Direction { North, South, East, West }
+
+    fn name(d: Direction) -> &'static str {
+        match d {
+            Direction::North => "north",
+            Direction::South => "south",
+            Direction::East => "east",
+            Direction::West => "west",
+        }
+    }
+
+    fn main() {
+        println!("{}", name(Direction::West));
+    }
+expectStdout: |
+  west
+hints:
+  - "Four arms, one per variant, each qualifying with `Direction::`. Return type `&'static str` because the values are string literals — they live for the whole program."
+  - "Each arm: `Direction::<Variant> => \"<lower>\",`."
+  - |-
+    enum Direction { North, South, East, West }
+
+    fn name(d: Direction) -> &'static str {
+        match d {
+            Direction::North => "north",
+            Direction::South => "south",
+            Direction::East => "east",
+            Direction::West => "west",
+        }
+    }
+
+    fn main() {
+        println!("{}", name(Direction::West));
+    }
+runtime: server
+notes: |
+  Drills exhaustive `match` returning a value. Removing any
+  arm fails with E0004 — the structural payoff of the enum
+  + match pair.

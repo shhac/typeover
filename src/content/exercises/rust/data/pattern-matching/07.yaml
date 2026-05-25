@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: freeform
+order: 7
+prompt: |
+  Define an enum `Shape` with a struct-style variant
+  `Point { x: i32, y: i32 }` and a tuple-style variant
+  `Square(i32)`. Write `show(s: Shape)` that uses `match`
+  to print:
+
+      x=<x>, y=<y>    for `Point { x, y }`
+      square: <side>  for `Square(side)`
+
+  `main` calls `show(Shape::Point { x: 3, y: 4 })`.
+
+  Output:
+
+      x=3, y=4
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Shape =
+      | { kind: "point"; x: number; y: number }
+      | { kind: "square"; side: number };
+    function show(s: Shape): void {
+      if (s.kind === "point") console.log("x=" + s.x + ", y=" + s.y);
+      else console.log("square: " + s.side);
+    }
+    show({ kind: "point", x: 3, y: 4 });
+  canonical: |-
+    enum Shape {
+        Point { x: i32, y: i32 },
+        Square(i32),
+    }
+
+    fn show(s: Shape) {
+        match s {
+            Shape::Point { x, y } => println!("x={}, y={}", x, y),
+            Shape::Square(side) => println!("square: {}", side),
+        }
+    }
+
+    fn main() {
+        show(Shape::Point { x: 3, y: 4 });
+    }
+expectStdout: |
+  x=3, y=4
+hints:
+  - "Struct-style variants destructure with braces `{ field, field }` (or `{ field: <pattern> }`). Same name on both sides allows the field-shorthand form `{ x, y }`."
+  - "Match arms: `Shape::Point { x, y } => ...,` and `Shape::Square(side) => ...,`."
+  - |-
+    enum Shape {
+        Point { x: i32, y: i32 },
+        Square(i32),
+    }
+
+    fn show(s: Shape) {
+        match s {
+            Shape::Point { x, y } => println!("x={}, y={}", x, y),
+            Shape::Square(side) => println!("square: {}", side),
+        }
+    }
+
+    fn main() {
+        show(Shape::Point { x: 3, y: 4 });
+    }
+runtime: server
+notes: |
+  Drills struct-style destructuring. The `{ x, y }` shorthand
+  binds each field to a local of the same name — same
+  payoff as the `Point { x, y }` construction shorthand in
+  `structs-and-impl/06`.

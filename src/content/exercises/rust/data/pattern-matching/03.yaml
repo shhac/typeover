@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: mcq
+order: 3
+prompt: |
+  Given `enum Msg { Echo(String) }`, pick the arm that BINDS the
+  inner String to a local name `s` you can use in the arm's body.
+generator:
+  kind: variant
+  variants:
+    - id: bind-payload
+      ts: |-
+        if (m.kind === "echo") console.log(m.text);
+      canonical: 'Msg::Echo(s) => println!("{}", s), — the parens-with-name pattern destructures the variant and binds the payload to `s`.'
+      distractors:
+        - 'Msg::Echo => println!("{}", s), — no destructuring; the arm matches `Echo` but the body references an undefined `s`.'
+        - 'Msg::Echo(_) => println!("{}", _), — `_` matches the payload but does NOT bind it; `_` is not a name you can reference.'
+        - 'Msg::Echo(String) => println!("{}", String), — `String` is a TYPE, but in PATTERN position it becomes a fresh BINDING named `String` — shadows the type, hides the bug. Use a normal lowercase name like `s`.'
+hints:
+  - "Pattern position turns identifiers into BINDINGS. Put the variable name you want INSIDE the variant's parens — the inner value is bound to that name for the arm's body."
+  - "Shape: `Msg::Echo(<binding>) => ...`."
+  - '`Msg::Echo(s) => println!("{}", s),`'
+runtime: none
+notes: |
+  Pattern bindings are the destructuring superpower of
+  `match`. The fourth distractor surfaces a real foot-gun
+  (capitalised type name shadowing the type via binding).

@@ -1,0 +1,80 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0004]: non-exhaustive patterns:
+  `Light::Yellow` not covered`:
+
+      enum Light { Red, Yellow, Green }
+
+      fn action(l: Light) -> &'static str {
+          match l {
+              Light::Red => "stop",
+              Light::Green => "go",
+          }
+      }
+
+      fn main() {
+          println!("{}", action(Light::Yellow));
+      }
+
+  Fix it by adding the missing `Light::Yellow` arm returning
+  `"wait"`.
+
+  Output:
+
+      wait
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Light = "red" | "yellow" | "green";
+    function action(l: Light): string {
+      switch (l) {
+        case "red": return "stop";
+        case "yellow": return "wait";
+        case "green": return "go";
+      }
+    }
+    console.log(action("yellow"));
+  canonical: |-
+    enum Light { Red, Yellow, Green }
+
+    fn action(l: Light) -> &'static str {
+        match l {
+            Light::Red => "stop",
+            Light::Yellow => "wait",
+            Light::Green => "go",
+        }
+    }
+
+    fn main() {
+        println!("{}", action(Light::Yellow));
+    }
+expectStdout: |
+  wait
+hints:
+  - "The compiler tells you which variant is missing. Add the explicit arm — don't reach for `_ => \"...\"`, which would silently swallow any future variant."
+  - "Insert `Light::Yellow => \"wait\",` between the existing arms."
+  - |-
+    enum Light { Red, Yellow, Green }
+
+    fn action(l: Light) -> &'static str {
+        match l {
+            Light::Red => "stop",
+            Light::Yellow => "wait",
+            Light::Green => "go",
+        }
+    }
+
+    fn main() {
+        println!("{}", action(Light::Yellow));
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical E0004 fix: add the
+  explicit arm. `_` is a tempting fix but defeats the
+  exhaustiveness check; future-you adding a new variant
+  should hit a compile error here, not silently land in
+  the catch-all.

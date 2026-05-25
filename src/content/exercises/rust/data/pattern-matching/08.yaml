@@ -1,0 +1,77 @@
+target: rust
+themeId: rust/data/pattern-matching
+type: freeform
+order: 8
+prompt: |
+  Translate the TS event union to Rust. `Event` has three
+  variants: `Click { x, y }` (struct), `Key(String)` (tuple),
+  `Close` (unit). `name(e)` returns `"click"`, `"key:<code>"`,
+  or `"close"`. `main` calls
+  `name(Event::Key(String::from("Esc")))`.
+
+  Output:
+
+      key:Esc
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type Event =
+      | { kind: "click"; x: number; y: number }
+      | { kind: "key"; code: string }
+      | { kind: "close" };
+    function name(e: Event): string {
+      switch (e.kind) {
+        case "click": return "click";
+        case "key": return "key:" + e.code;
+        case "close": return "close";
+      }
+    }
+    console.log(name({ kind: "key", code: "Esc" }));
+  canonical: |-
+    enum Event {
+        Click { x: i32, y: i32 },
+        Key(String),
+        Close,
+    }
+
+    fn name(e: Event) -> String {
+        match e {
+            Event::Click { .. } => String::from("click"),
+            Event::Key(code) => format!("key:{}", code),
+            Event::Close => String::from("close"),
+        }
+    }
+
+    fn main() {
+        println!("{}", name(Event::Key(String::from("Esc"))));
+    }
+expectStdout: |
+  key:Esc
+hints:
+  - "Three different variant shapes, three different arm patterns: `{ .. }` to ignore all fields of a struct-style variant, `(code)` to bind the tuple-style payload, bare `Event::Close` for the unit."
+  - "`{ .. }` is the struct-pattern wildcard — matches any field values without binding them."
+  - |-
+    enum Event {
+        Click { x: i32, y: i32 },
+        Key(String),
+        Close,
+    }
+
+    fn name(e: Event) -> String {
+        match e {
+            Event::Click { .. } => String::from("click"),
+            Event::Key(code) => format!("key:{}", code),
+            Event::Close => String::from("close"),
+        }
+    }
+
+    fn main() {
+        println!("{}", name(Event::Key(String::from("Esc"))));
+    }
+runtime: server
+notes: |
+  Drills the three-shape arm vocabulary in one match. The
+  `{ .. }` rest-pattern is the struct-style equivalent of
+  the tuple-style `(_)` — match the variant, ignore the
+  fields.
