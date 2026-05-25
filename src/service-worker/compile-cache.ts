@@ -23,10 +23,9 @@
 
 import { LANGUAGE_REGISTRY } from "~/lib/compile-service/normalize";
 import { handleCompileRequest } from "~/lib/compile-service/sw-handler";
+import { shouldHandleCompileRequest } from "./should-handle";
 
 declare const self: ServiceWorkerGlobalScope;
-
-const COMPILE_PREFIX = "/api/compile/";
 
 /* Skip the standard install/activate dance — claim immediately so
  * the first navigation after a fresh deploy uses the new SW
@@ -40,16 +39,15 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
-  if (event.request.method !== "POST") return;
-  if (url.origin !== self.location.origin) return;
-  if (!url.pathname.startsWith(COMPILE_PREFIX)) return;
-
-  const lang = url.pathname.slice(COMPILE_PREFIX.length);
-  if (!LANGUAGE_REGISTRY[lang]) return;
+  const match = shouldHandleCompileRequest(
+    event.request,
+    self.location.origin,
+    LANGUAGE_REGISTRY,
+  );
+  if (!match) return;
 
   event.respondWith(
-    handleCompileRequest(event.request, lang, {
+    handleCompileRequest(event.request, match.lang, {
       fetch: self.fetch.bind(self),
       registry: LANGUAGE_REGISTRY,
     }),

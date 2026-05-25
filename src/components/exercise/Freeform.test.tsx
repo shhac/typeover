@@ -64,6 +64,8 @@ beforeEach(() => {
   terminateMock.mockReset();
   zigEvalMock.mockReset();
   zigTerminateMock.mockReset();
+  rustEvalMock.mockReset();
+  rustTerminateMock.mockReset();
 });
 afterEach(() => {
   localStorage.clear();
@@ -290,6 +292,77 @@ describe("<Freeform> — runtime dispatch", () => {
     fireEvent.click(getAllByText("Run")[0]!);
     await vi.waitFor(() => expect(zigEvalMock).toHaveBeenCalledTimes(1));
     expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  const renderRust = () =>
+    render(() => (
+      <Freeform
+        exerciseId={EX_ID}
+        prompt="Print hello."
+        generator={GEN}
+        hints={HINTS}
+        expectStdout={EXPECTED_STDOUT}
+        runtime="rust"
+      />
+    ));
+
+  it("Run dispatches eval to the Rust runner when runtime is rust", async () => {
+    /* The (target=rust, runtime=server) page-boundary reshape in
+     * exercise-dispatch.ts collapses to runtime="rust" before
+     * reaching Freeform — so the component sees a concrete runtime
+     * and the dispatch is a single descriptor lookup. This pins
+     * that lookup so a regression mapping rust→yaegi or rust→zig
+     * shows up at test time, not in the browser. */
+    rustEvalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container, getAllByText } = renderRust();
+    setVal(textarea(container), 'fn main() { println!("hello"); }');
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => expect(rustEvalMock).toHaveBeenCalledTimes(1));
+    expect(evalMock).not.toHaveBeenCalled();
+    expect(zigEvalMock).not.toHaveBeenCalled();
+    /* The source the runner receives is the textarea content
+     * verbatim — no client-side normalization at this layer (the
+     * SW handles normalization on the network boundary). */
+    expect(rustEvalMock.mock.calls[0]?.[0]).toContain('println!("hello")');
+  });
+
+  it("Rust success path records a pass and locks the textarea", async () => {
+    rustEvalMock.mockResolvedValueOnce({ stdout: EXPECTED_STDOUT, stderr: "", error: "" });
+    const { container, getAllByText, getByText } = renderRust();
+    const ta = textarea(container);
+    setVal(ta, 'fn main() { println!("hello"); }');
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(slot()?.instancesPassed).toBe(1);
+    expect(slot()?.instancesFailed).toBe(0);
+    expect(ta.disabled).toBe(true);
+  });
+
+  it("Rust compile / runtime error surfaces wrong-phase UI without recording pass", async () => {
+    /* Rust's failure mode is richer than Yaegi's: a compile error
+     * comes back as `{ error: "<rustc diagnostic>" }` from the
+     * server. The Freeform run-result path treats any non-empty
+     * `error` as a failed run, same as a Yaegi panic — pin that
+     * shape works for runtime="rust" too. */
+    rustEvalMock.mockResolvedValueOnce({
+      stdout: "",
+      stderr: "",
+      error: "error[E0425]: cannot find value `hllo` in this scope",
+    });
+    const { container, getAllByText, getByText } = renderRust();
+    setVal(textarea(container), "fn main() { hllo(); }");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(getByText("Try again")).toBeTruthy();
+    expect(getByText("Reveal answer (counts as fail)")).toBeTruthy();
+    expect(slot()?.instancesPassed).toBe(0);
+    expect(slot()?.instancesFailed).toBe(0);
   });
 
   it("server runtime disables Run — canRun gates the button", async () => {

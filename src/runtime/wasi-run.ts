@@ -81,22 +81,26 @@ export async function runWasiBinary(
     const instance = await WebAssembly.instantiate(module, {
       wasi_snapshot_preview1: wasi.wasiImport,
     });
-    /* The shim's `wasi.start` expects an instance shape that's
-     * compatible with what `WebAssembly.instantiate` returns; the
-     * small lib type diff doesn't matter at runtime. */
-    wasi.start(instance as unknown as Parameters<typeof wasi.start>[0]);
-  } catch (err) {
-    /* WASI exits propagate as a thrown WASIExit; treat exitCode === 0
-     * as success (no error), anything else as a runtime trap. */
-    const e = err as { exitCode?: number; message?: string };
-    if (typeof e.exitCode === "number") {
-      if (e.exitCode !== 0) {
-        error =
-          stderrBuf.text.trim() || `program exited with code ${e.exitCode}`;
-      }
-    } else {
-      error = e.message || String(err);
+    /* The shim's `wasi.start` catches WASIProcExit internally and
+     * returns the exit code; only "real" traps (unreachable,
+     * div-by-zero, etc.) propagate as a thrown Error. So capture
+     * the return value here — without it, non-zero exits would
+     * silently drop and the freeform UI would render success.
+     *
+     * The shim's start signature uses an Instance type alias that
+     * doesn't quite match what `WebAssembly.instantiate` returns;
+     * the cast is purely a lib-types compat shim. */
+    const exitCode = wasi.start(
+      instance as unknown as Parameters<typeof wasi.start>[0],
+    );
+    if (exitCode !== 0) {
+      error =
+        stderrBuf.text.trim() || `program exited with code ${exitCode}`;
     }
+  } catch (err) {
+    /* Compile failure or wasm trap — surface the message. */
+    const e = err as { message?: string };
+    error = e.message || String(err);
   }
 
   return { stdout: stdoutBuf.text, stderr: stderrBuf.text, error };
