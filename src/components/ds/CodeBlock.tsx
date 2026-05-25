@@ -18,36 +18,44 @@ interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
    *  variants: instructions belong above the CodeBlock, not in the
    *  filename strip. */
   label?: string;
-  /** Show the language label in the corner. */
+  /** Show the file icon in the tab. */
   showLang?: boolean;
 }
 
-const langLabel: Record<Lang, string> = {
-  ts: "TS",
-  go: "GO",
-  zig: "ZIG",
-  rust: "RS",
-  shell: "SH",
-  plain: "",
+const langIconClass: Record<Lang, string> = {
+  ts: "text-accent-ts",
+  go: "text-accent-go",
+  zig: "text-accent-zig",
+  rust: "text-accent-rust",
+  shell: "text-accent-primary",
+  plain: "text-fg-muted",
 };
 
-const langAccent: Record<Lang, string> = {
-  ts: "text-accent-ts border-accent-ts/40",
-  go: "text-accent-go border-accent-go/40",
-  zig: "text-accent-zig border-accent-zig/40",
-  rust: "text-accent-rust border-accent-rust/40",
-  shell: "text-accent-primary border-accent-primary/40",
-  plain: "text-fg-muted border-border-default",
-};
-
-const langBarBg: Record<Lang, string> = {
-  ts: "bg-accent-ts/5",
-  go: "bg-accent-go/5",
-  zig: "bg-accent-zig/5",
-  rust: "bg-accent-rust/5",
-  shell: "bg-accent-primary/5",
-  plain: "bg-bg-inset",
-};
+function FileIcon(props: { lang: Lang }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      class={cn("size-4 shrink-0", langIconClass[props.lang])}
+    >
+      <path
+        d="M3.5 1.75h5.2l3.8 3.8v8.7H3.5z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.25"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M8.7 1.75v3.8h3.8"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.25"
+        stroke-linejoin="round"
+      />
+      <path d="M5.5 11.25h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+    </svg>
+  );
+}
 
 export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const [local, rest] = splitProps(props, [
@@ -66,30 +74,22 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
    * instructions. */
   const headerText = () => local.filename ?? local.label;
   return (
-    <div class={cn("border border-border-default rounded-sm overflow-hidden", local.class)}>
+    <div
+      class={cn("border border-border-default rounded-sm overflow-hidden bg-bg-inset", local.class)}
+    >
       <Show when={headerText() !== undefined || showLang}>
-        <div
-          class={cn(
-            "flex items-center justify-between px-3 py-1.5 border-b border-border-default",
-            langBarBg[lang],
-          )}
-        >
-          <span class="font-mono text-micro text-fg-muted">{headerText()}</span>
-          <Show when={showLang && langLabel[lang]}>
-            <span
-              class={cn(
-                "font-mono text-micro uppercase tracking-widest px-1.5 py-0.5 border rounded-sm",
-                langAccent[lang],
-              )}
-            >
-              {langLabel[lang]}
-            </span>
-          </Show>
+        <div class="flex items-end px-2 pt-2 bg-bg-panel border-b border-border-default">
+          <div class="inline-flex items-center gap-2 max-w-full px-3 py-1.5 -mb-px bg-bg-inset border border-border-default border-b-bg-inset rounded-t-sm">
+            <Show when={showLang}>
+              <FileIcon lang={lang} />
+            </Show>
+            <span class="font-mono text-micro text-fg-muted truncate">{headerText()}</span>
+          </div>
         </div>
       </Show>
       <pre
         {...rest}
-        class="px-4 py-3 overflow-x-auto bg-bg-inset text-fg-primary font-mono text-code leading-relaxed"
+        class="px-4 py-4 overflow-x-auto text-fg-primary font-mono text-code leading-relaxed"
       >
         <code>{local.children}</code>
       </pre>

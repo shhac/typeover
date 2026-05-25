@@ -1,20 +1,18 @@
 import type { JSX, ParentProps } from "solid-js";
-import { children, For, Show, splitProps } from "solid-js";
+import { Show, splitProps } from "solid-js";
 import { cn } from "./_internal";
 
 /*
- * Source-to-target translation primitive. Renders the first two
- * children as a stacked mobile pair and a desktop translation lane
- * with an explicit center gutter.
+ * Source-to-target translation primitive. Renders slotted children
+ * directly into a stacked mobile / side-by-side desktop grid.
  *
- * Designed for the TS↔target translation moments — the killer move
- * pattern 4 in design-docs/15 picks out. The center gutter makes the
- * relationship read as "this intent becomes this syntax", not merely
- * "two code blocks happened to be adjacent".
+ * Designed for TS↔target translation moments: source and target code
+ * panes belong to one figure with a single shared caption.
  *
- * Why not Adaptive? Adaptive is a layout primitive — it has no
- * semantic about what it's laying out. Compare is a product object:
- * source, arrow lane, target, then optional shared caption.
+ * Why not per-child wrappers? Astro passes Solid children as a slot;
+ * wrapping "first" and "second" in Solid can collapse both panes into
+ * the first column. Direct slot rendering lets the browser grid place
+ * the actual slotted code-block elements.
  *
  * Children are expected to be two elements (typically <CodeBlock>).
  * Three or more children still render correctly via the underlying
@@ -28,29 +26,9 @@ interface CompareProps extends JSX.HTMLAttributes<HTMLElement> {
 
 export function Compare(props: ParentProps<CompareProps>) {
   const [local, rest] = splitProps(props, ["caption", "class", "children"]);
-  const resolved = children(() => local.children);
-  const items = () => {
-    const value = resolved();
-    const list = Array.isArray(value) ? value : [value];
-    return list.filter((item) => typeof item !== "string" || item.trim() !== "");
-  };
-  const first = () => items()[0];
-  const second = () => items()[1];
-  const extra = () => items().slice(2);
-
   return (
     <figure {...rest} class={cn("flex flex-col gap-3 m-0", local.class)}>
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_2.5rem_minmax(0,1fr)] gap-3 lg:gap-0 items-stretch">
-        <div class="min-w-0">{first()}</div>
-        <div
-          class="hidden lg:flex items-center justify-center border-x border-border-default text-fg-faint font-mono text-xs"
-          aria-hidden="true"
-        >
-          →
-        </div>
-        <div class="min-w-0">{second()}</div>
-        <For each={extra()}>{(item) => <div class="min-w-0 lg:col-span-3">{item}</div>}</For>
-      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-start">{local.children}</div>
       <Show when={local.caption}>
         <figcaption class="font-sans text-fg-muted text-sm">{local.caption}</figcaption>
       </Show>
