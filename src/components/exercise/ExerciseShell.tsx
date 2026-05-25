@@ -39,12 +39,15 @@ interface ExerciseShellProps {
    *  once. */
   phase: ExercisePhaseHandle;
 
-  /** Inserted between Submit and the rest of the picking-phase row.
-   *  e.g. FillBlankWord's "Clear" button. */
-  extraPickingActions?: JSX.Element;
-  /** Inserted between Try-again and Different-exercise in the wrong-phase
-   *  row. e.g. FillBlankWord's "Clear" button. */
-  extraWrongActions?: JSX.Element;
+  /** Inserted between Submit and the rest of the picking-phase row,
+   *  AND between Try-again and Different-exercise in the wrong-phase
+   *  row. e.g. FillBlankWord's "Clear" button, Freeform/FillBlankLineInput's
+   *  RunToolbar. Every existing caller passes the same JSX to both
+   *  rows, so one prop covers both slots; the shell renders it twice.
+   *  If a future surface needs different actions per phase, accept a
+   *  `{ picking, wrong }` object — until then the single prop saves
+   *  the "did I remember both?" footgun. */
+  extraActions?: JSX.Element;
 
   /** Override the default "Correct — and idiomatic." message. */
   correctMessage?: JSX.Element;
@@ -194,13 +197,13 @@ export function ExerciseShell(props: ExerciseShellProps) {
                 >
                   Submit
                 </Button>
-                {props.extraPickingActions}
+                {props.extraActions}
               </Match>
               <Match when={phase() === "wrong"}>
                 <Button variant="secondary" onClick={() => props.phase.tryAgain()}>
                   Try again
                 </Button>
-                {props.extraWrongActions}
+                {props.extraActions}
                 <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
                   Reshuffle this exercise
                 </Button>

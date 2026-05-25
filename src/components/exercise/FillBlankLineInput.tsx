@@ -190,8 +190,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
       phase={ownPhase.phase}
       ownsReveal
       successNote={props.successNote}
-      extraPickingActions={toolbar}
-      extraWrongActions={toolbar}
+      extraActions={toolbar}
       correctMessage={<span>Correct — your line produces the expected output.</span>}
       wrongMessage={
         <Show

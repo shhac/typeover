@@ -132,8 +132,7 @@ export function FillBlankWord(props: FillBlankWordProps) {
       hintValues={instance().values}
       phase={phase}
       successNote={props.successNote}
-      extraPickingActions={clearButton}
-      extraWrongActions={clearButton}
+      extraActions={clearButton}
       correctMessage={<span>Correct — every blank matches.</span>}
       wrongMessage={
         <span>

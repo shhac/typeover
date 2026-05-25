@@ -151,8 +151,7 @@ export function Freeform(props: FreeformProps) {
       phase={phase}
       ownsReveal
       successNote={props.successNote}
-      extraPickingActions={toolbar}
-      extraWrongActions={toolbar}
+      extraActions={toolbar}
       correctMessage={<span>Correct — your program prints the expected output.</span>}
       wrongMessage={
         <span>
