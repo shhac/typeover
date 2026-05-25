@@ -27,7 +27,7 @@ export type ClientRuntime = "yaegi" | "zig" | "rust";
  *  hook. */
 export type AcceptedRuntime = ClientRuntime | "server";
 
-export interface ClientRuntimeDescriptor {
+interface ClientRuntimeDescriptor {
   target: Target;
   label: string;
   get: () => {
