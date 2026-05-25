@@ -98,22 +98,22 @@ const sampleExerciseIds = sampleTheme
             <Compare
               caption="<Compare> renders a source-to-target lane: stacked on mobile, joined by an arrow gutter on desktop. Used wherever TS-to-target translation is the point."
             >
-              <CodeBlock lang="ts" filename="users.ts">{`type User = {
+              <CodeBlock lang="ts" filename="users.ts" code={`type User = {
   id: string;
   name: string;
 };
 
 function greet(u: User) {
   return \`hi \${u.name}\`;
-}`}</CodeBlock>
-              <CodeBlock lang="go" filename="users.go">{`type User struct {
+}`} />
+              <CodeBlock lang="go" filename="users.go" code={`type User struct {
     ID   string
     Name string
 }
 
 func greet(u User) string {
     return "hi " + u.Name
-  }`}</CodeBlock>
+  }`} />
             </Compare>
           </Stack>
 
@@ -130,15 +130,15 @@ func greet(u User) string {
                   <Text tone="muted" size="xs" family="mono" class="mb-3">
                     TypeScript reference
                   </Text>
-                  <CodeBlock lang="ts" filename="reference.ts">{`let total = items.length;
-console.log(total);`}</CodeBlock>
+                  <CodeBlock lang="ts" filename="reference.ts" code={`let total = items.length;
+console.log(total);`} />
                 </div>
                 <div class="p-4 sm:p-6 bg-bg-base/30">
                   <Text tone="muted" size="xs" family="mono" class="mb-3">
                     Your move
                   </Text>
-                  <CodeBlock lang="go" filename="answer.go">{`total := len(items)
-fmt.Println(total)`}</CodeBlock>
+                  <CodeBlock lang="go" filename="answer.go" code={`total := len(items)
+fmt.Println(total)`} />
                 </div>
               </div>
               <div class="p-4 sm:p-6 flex flex-row flex-wrap gap-3">

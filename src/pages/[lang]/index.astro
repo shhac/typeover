@@ -134,8 +134,8 @@ const translationTarget = translationTargetByLang[lang] ?? translationTargetByLa
           <Compare
             caption="Same intent, two syntaxes. typeover's whole shape is teaching the second one by leaning on what you already know about the first."
           >
-            <CodeBlock lang="ts" filename="variables.ts">{translationTs}</CodeBlock>
-            <CodeBlock lang={lang} filename={translationTarget.filename}>{translationTarget.code}</CodeBlock>
+            <CodeBlock lang="ts" filename="variables.ts" code={translationTs} />
+            <CodeBlock lang={lang} filename={translationTarget.filename} code={translationTarget.code} />
           </Compare>
         </Stack>
 

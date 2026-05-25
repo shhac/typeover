@@ -20,6 +20,11 @@ interface CodeBlockTab {
 
 interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
   lang?: Lang;
+  /** Source text to render. Prefer this from .astro callers because
+   *  Astro slot children do not always arrive as a plain string for
+   *  Solid-side syntax highlighting. JSX callers can still use
+   *  children for static snippets. */
+  code?: string;
   /** Optional filename shown in the header. Use for real filenames
    *  (`users.ts`, `main.go`) — anything that would round-trip
    *  through a copy-to-clipboard "filename" path. */
@@ -79,6 +84,7 @@ function codeText(value: unknown): string | null {
 export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const [local, rest] = splitProps(props, [
     "lang",
+    "code",
     "filename",
     "label",
     "showLang",
@@ -89,7 +95,7 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
   const lang = local.lang ?? "plain";
   const showLang = local.showLang ?? true;
   const hasTabs = () => (local.tabs?.length ?? 0) > 0;
-  const highlightedText = () => codeText(local.children);
+  const highlightedText = () => local.code ?? codeText(local.children);
   /* Prefer filename; fall back to label. Both render in the same
    * mono-muted slot but stay typed as separate props so consumers
    * don't conflate filenames (real file paths) with prose
