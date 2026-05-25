@@ -49,6 +49,25 @@ const preloadWasm: { href: string } | null = path.startsWith("/go/")
     : null;
 const isExerciseRoute = preloadWasm !== null;
 
+/* Detect which track the visitor is currently inside so the
+ * header's "curriculum →" link points back to the right index
+ * (not always /go) and the label tells them which track it is.
+ * A null result means we're on a non-track page (/, /settings,
+ * /design-system) — the header falls back to a plain
+ * "curriculum →" link to /. */
+const TRACK_LANGS = ["go", "zig", "rust"] as const;
+type TrackLang = (typeof TRACK_LANGS)[number];
+function detectTrack(p: string): TrackLang | null {
+  const first = p.split("/")[1] ?? "";
+  return (TRACK_LANGS as readonly string[]).includes(first)
+    ? (first as TrackLang)
+    : null;
+}
+const currentTrack = detectTrack(path);
+const trackIndexPath = currentTrack ? `/${currentTrack}` : "/";
+const trackLinkLabel = currentTrack ? `${currentTrack} curriculum` : "curriculum";
+const onTrackIndex = path === trackIndexPath;
+
 /* Inline script body: prefetches the runtime WASM on first hover /
  * focus / touch over an in-curriculum link from off-route pages.
  * Picks the right runtime by sniffing the anchor's href prefix. */
@@ -194,9 +213,9 @@ const runtimePrefetchScript = `(function () {
               </a>
             )}
           </div>
-          {Astro.url.pathname !== "/go" && (
-            <a href="/go" class={`${NAV_LINK_CLASS} shrink-0`}>
-              curriculum<span class="hidden sm:inline"> →</span>
+          {!onTrackIndex && (
+            <a href={trackIndexPath} class={`${NAV_LINK_CLASS} shrink-0`}>
+              {trackLinkLabel}<span class="hidden sm:inline"> →</span>
             </a>
           )}
         </div>
@@ -224,10 +243,10 @@ const runtimePrefetchScript = `(function () {
           typeover
         </a>
         <a
-          href="/go"
+          href={trackIndexPath}
           class="hover:text-fg-secondary transition-colors focus-ring"
         >
-          curriculum
+          {trackLinkLabel}
         </a>
         <a
           href="/settings"
