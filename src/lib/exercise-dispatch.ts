@@ -99,6 +99,20 @@ function resolveFreeformRuntime(ex: ExerciseInput): FreeformRuntime {
   return ex.runtime;
 }
 
+/* Resolve the runtime a fill-line component should receive.
+ *
+ * Mirror of `resolveFreeformRuntime` but for the narrower fill-
+ * line runtime union (no `"server"` — fill-line always has a
+ * client-side runner because the SW caches canonical answers).
+ * Returns `null` for combos the page boundary can't render (e.g.
+ * runtime="none" on a fill-line), which the caller turns into a
+ * named skip token. */
+function resolveFillLineRuntime(ex: ExerciseInput): FillLineRuntime | null {
+  if (ex.target === "rust" && ex.runtime === "server") return "rust";
+  if (ex.runtime === "yaegi" || ex.runtime === "zig") return ex.runtime;
+  return null;
+}
+
 /** Turn an exercise content entry into a typed dispatch token.
  *  The Astro page then switches on `kind` and renders the right
  *  Solid component with the typed props attached. */
@@ -112,16 +126,7 @@ export function pickExerciseDispatch(ex: ExerciseInput): ExerciseDispatch {
       if (ex.expectStdout === undefined) {
         return { kind: "skip", reason: "fill-line missing expectStdout" };
       }
-      /* Reshape (target=rust, runtime=server) → "rust" at the
-       * page boundary, mirroring the freeform path. The FillLine
-       * component drives the same useRuntimeRun hook as Freeform;
-       * accepts the concrete client-side runtime ids. */
-      const fillLineRuntime: FillLineRuntime | null =
-        ex.target === "rust" && ex.runtime === "server"
-          ? "rust"
-          : ex.runtime === "yaegi" || ex.runtime === "zig"
-            ? ex.runtime
-            : null;
+      const fillLineRuntime = resolveFillLineRuntime(ex);
       if (!fillLineRuntime) {
         return {
           kind: "skip",
