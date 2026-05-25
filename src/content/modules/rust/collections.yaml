@@ -1,0 +1,7 @@
+target: rust
+title: Collections & iteration
+order: 4
+summary: |
+  Practical data work in Rust. Vectors, hash maps, arrays, tuples,
+  iterator adapters, closures, and the ownership rules that appear when
+  collections hold or yield values.

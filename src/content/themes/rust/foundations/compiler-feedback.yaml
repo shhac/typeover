@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/foundations
+title: Compiler feedback
+order: 6
+prerequisites: [rust/foundations/functions-and-expressions]
+intro: |
+  Rust is learned with the compiler, not around it. Before ownership
+  starts, learners need the habit of reading `error[E...]`, spans,
+  notes, and `help:` suggestions. Planned exercises: 1. identify the
+  primary error line. 2. recognise a `help:` suggestion. 3. choose the
+  fix for a type mismatch. 4. fill a corrected variable name. 5. fill
+  a corrected type. 6. apply a compiler hint to one line. 7. explain
+  why a warning is not an error. 8. fix a short program from a rustc
+  diagnostic. 9. use the diagnostic to repair a function.

@@ -1,0 +1,8 @@
+target: rust
+title: Data modeling
+order: 3
+summary: |
+  The Rust way to model domain data: structs with `impl` blocks, enums
+  as tagged unions, pattern matching, `Option`, and destructuring. This
+  is where TypeScript object and union habits become Rust algebraic data
+  types.

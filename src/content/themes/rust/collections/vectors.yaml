@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/collections
+title: Vectors
+order: 1
+prerequisites: [rust/ownership/strings-and-slices]
+intro: |
+  `Vec<T>` is Rust's growable array. This theme teaches `vec![]`,
+  `push`, indexing, `.get`, ownership of elements, and passing vectors
+  by value or slice. Planned exercises: 1. choose `Vec<T>`. 2. recognise
+  `vec![...]`. 3. choose `.get()` for optional access. 4. fill `push`.
+  5. fill a slice parameter. 6. write a vector builder. 7. write a
+  function that reads `&[T]`. 8. translate TS array code. 9. fix a move
+  caused by iterating a vector by value.

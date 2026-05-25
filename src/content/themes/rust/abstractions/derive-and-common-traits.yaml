@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/abstractions
+title: Derive and common traits
+order: 2
+prerequisites: [rust/abstractions/traits]
+intro: |
+  Rust leans on a small set of common traits: `Debug`, `Clone`, `Copy`,
+  `Default`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash`. Derive
+  is the idiomatic way to ask the compiler for boring implementations.
+  Planned exercises: 1. choose `#[derive(Debug)]`. 2. recognise derived
+  equality. 3. choose `Clone` vs `Copy`. 4. fill a derive list. 5. fill a
+  `Debug` print. 6. write a comparable struct. 7. write a default value.
+  8. translate TS equality assumptions. 9. fix a `HashMap` key type that
+  lacks the required traits.

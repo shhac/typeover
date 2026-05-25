@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/ownership
+title: Shared borrowing
+order: 2
+prerequisites: [rust/ownership/moves-and-copy]
+intro: |
+  Borrowing is how Rust lets code inspect data without taking it. `&T`
+  references are shared, read-only views whose owner remains somewhere
+  else. Planned exercises: 1. choose `&String` over `String` for a read
+  helper. 2. recognise call-site borrowing with `&name`. 3. choose
+  dereference-free field or method access. 4. fill an `&` parameter. 5.
+  fill an `&` argument. 6. write a read-only helper. 7. write a caller
+  that keeps using the owner afterward. 8. translate a TS read helper.
+  9. fix a function that accidentally takes ownership.

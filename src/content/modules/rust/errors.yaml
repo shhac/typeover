@@ -1,0 +1,7 @@
+target: rust
+title: Errors, crates & tests
+order: 5
+summary: |
+  The everyday shape of real Rust programs: `Result`, `?`, custom error
+  enums, module boundaries, Cargo packages, visibility, and tests. The
+  learner moves from snippets to small crates.

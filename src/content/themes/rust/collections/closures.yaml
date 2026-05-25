@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/collections
+title: Closures
+order: 4
+prerequisites: [rust/collections/iterators]
+intro: |
+  Rust closures look like compact TypeScript arrow functions, but they
+  capture by borrow, mutable borrow, or move depending on use. Planned
+  exercises: 1. choose closure syntax. 2. recognise inferred parameter
+  types. 3. choose `move` only when ownership must transfer. 4. fill a
+  predicate closure. 5. fill a mapping closure. 6. write a closure used
+  with `sort_by_key`. 7. write a closure that captures a threshold. 8.
+  translate TS arrow functions in array methods. 9. fix a closure capture
+  that conflicts with a later borrow.

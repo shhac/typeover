@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/production
+title: Idioms and tooling
+order: 5
+prerequisites: [rust/errors/cargo-and-testing, rust/abstractions/derive-and-common-traits]
+intro: |
+  This final theme is the code-review survival kit: `rustfmt`, Clippy,
+  docs, `Result` in `main`, `todo!` vs `unimplemented!`, prelude habits,
+  and avoiding needless `clone`, `unwrap`, and type annotations. Planned
+  exercises: 1. choose `cargo fmt`. 2. recognise a Clippy suggestion. 3.
+  choose `expect` over blind `unwrap` when panicking is intentional. 4.
+  fill a `main() -> Result`. 5. fill a doc comment. 6. write a small
+  polished CLI-style main. 7. remove needless clones. 8. translate a TS
+  script into idiomatic Rust structure. 9. refactor a rough program into
+  the idioms taught across the course.

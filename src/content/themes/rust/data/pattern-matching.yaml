@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/data
+title: Pattern matching
+order: 3
+prerequisites: [rust/data/enums]
+intro: |
+  `match` is not a switch statement with nicer syntax. It destructures,
+  binds names, checks exhaustiveness, and returns values. Planned
+  exercises: 1. choose exhaustive `match`. 2. recognise wildcard `_`. 3.
+  choose binding inside a variant. 4. fill a match arm. 5. fill an `if
+  let` for one interesting case. 6. write a match returning a string. 7.
+  write destructuring for a struct variant. 8. translate TS discriminant
+  checks. 9. fix a non-exhaustive match.

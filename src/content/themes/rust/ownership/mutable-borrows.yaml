@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/ownership
+title: Mutable borrowing
+order: 3
+prerequisites: [rust/ownership/borrowing]
+intro: |
+  The borrow checker's headline rule is simple but unfamiliar: many
+  shared borrows or one mutable borrow, never both at the same time.
+  This theme teaches `&mut T`, reborrowing, and scope as the tool for
+  ending borrows. Planned exercises: 1. choose `&mut` for an updater.
+  2. recognise the one-mutable-borrow rule. 3. choose a smaller scope.
+  4. fill a mutable parameter. 5. fill a mutable call site. 6. write an
+  in-place updater. 7. write code that reads after a mutable borrow
+  ends. 8. translate TS mutation into Rust borrowing. 9. fix overlapping
+  borrow diagnostics.

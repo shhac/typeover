@@ -1,0 +1,8 @@
+target: rust
+title: Production Rust
+order: 7
+summary: |
+  The patterns that show up in code review: smart pointers, interior
+  mutability, concurrency, async fundamentals, common standard-library
+  traits, project layout, formatting, Clippy, and the edges where Rust
+  asks for explicit tradeoffs.

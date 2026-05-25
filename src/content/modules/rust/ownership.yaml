@@ -1,0 +1,7 @@
+target: rust
+title: Ownership & borrowing
+order: 2
+summary: |
+  Rust's core alien model. Moves, copies, references, mutable borrows,
+  slices, `String` vs `&str`, and enough lifetime intuition to make the
+  borrow checker feel like a set of rules rather than a personality.

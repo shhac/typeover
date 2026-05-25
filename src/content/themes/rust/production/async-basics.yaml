@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/production
+title: Async basics
+order: 4
+prerequisites: [rust/abstractions/impl-trait-and-trait-objects, rust/errors/result-and-question-mark]
+intro: |
+  Rust async is explicit: `async fn` returns a future, `.await` yields
+  within an executor, and most real async code is runtime-specific. This
+  theme stays runtime-light and focuses on the mental model. Planned
+  exercises: 1. choose `async fn`. 2. recognise `.await`. 3. choose
+  `Result` in async functions. 4. fill an async call. 5. fill an awaited
+  result. 6. write a small async helper signature. 7. compose two awaited
+  operations. 8. translate TS promise code. 9. fix a future that was
+  created but never awaited.

@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/abstractions
+title: Generics
+order: 3
+prerequisites: [rust/abstractions/traits, rust/collections/vectors]
+intro: |
+  Rust generics are monomorphized and usually constrained with traits.
+  TypeScript's generic syntax transfers conceptually, but Rust wants
+  bounds where behavior is used. Planned exercises: 1. choose generic
+  function syntax. 2. recognise `Vec<T>`. 3. choose a trait bound for
+  formatting or comparison. 4. fill `<T>`. 5. fill `T: Clone`. 6. write
+  a generic identity function. 7. write a generic container struct. 8.
+  translate a TS generic helper. 9. fix a generic function by adding the
+  smallest required bound.

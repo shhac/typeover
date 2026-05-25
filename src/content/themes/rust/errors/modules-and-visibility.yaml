@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/errors
+title: Modules and visibility
+order: 3
+prerequisites: [rust/data/structs-and-impl]
+intro: |
+  Rust modules are not files by accident; they are the visibility and
+  namespace system. This theme covers `mod`, `use`, `pub`, `pub(crate)`,
+  and paths with `crate::` and `super::`. Planned exercises: 1. choose
+  `mod` syntax. 2. recognise private-by-default items. 3. choose `pub`
+  for exported APIs. 4. fill a `use` path. 5. fill `pub(crate)`. 6.
+  write a small module API. 7. write imports from sibling modules. 8.
+  translate TS exports/imports. 9. fix a private-field or private-item
+  compile error.

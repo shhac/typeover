@@ -1,6 +1,6 @@
 target: rust
 moduleId: rust/foundations
-title: "Variables and mutability"
+title: "Bindings and mutability"
 order: 2
 prerequisites: [rust/foundations/hello-and-printing]
 intro: |
@@ -9,6 +9,9 @@ intro: |
   annotations come after the name (`let x: i32 = 5`), and the
   numeric primitives are width-specific (`i32`, `u64`, `f64`)
   instead of TS's single `number`. Shadowing is allowed and idiomatic
-  — re-bind the same name to a new value (or even a new type) in
-  the same scope. This is *not* the same as `let mut` — it's a fresh
-  binding that happens to reuse the name.
+  because it creates a fresh binding that happens to reuse the name.
+  Planned exercises: 1. choose immutable `let`. 2. choose `let mut`.
+  3. recognise type annotations. 4. distinguish mutation from
+  shadowing. 5. fill `mut`. 6. fill a type annotation. 7. write a
+  rebinding line. 8. translate several TS bindings. 9. fix a program
+  that tries to mutate an immutable binding.

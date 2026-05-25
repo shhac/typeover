@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/errors
+title: Result and the question mark operator
+order: 1
+prerequisites: [rust/data/option, rust/foundations/functions-and-expressions]
+intro: |
+  Recoverable errors are values: `Result<T, E>`. The `?` operator either
+  unwraps `Ok(T)` or returns the `Err(E)` early from the current function.
+  Planned exercises: 1. choose `Result<T, E>`. 2. recognise `Ok` and
+  `Err`. 3. choose `?` over nested matches for propagation. 4. fill an
+  `Ok(value)`. 5. fill a function return type. 6. write a parser helper.
+  7. write a function with two `?` calls. 8. translate TS throw/catch
+  code. 9. fix a function whose return type cannot use `?` yet.

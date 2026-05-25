@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/abstractions
+title: Traits
+order: 1
+prerequisites: [rust/data/structs-and-impl, rust/errors/cargo-and-testing]
+intro: |
+  Traits describe behavior a type provides. They feel partly like
+  TypeScript interfaces, but implementation is explicit and coherence
+  rules decide where impls may live. Planned exercises: 1. choose trait
+  declaration syntax. 2. recognise `impl Trait for Type`. 3. choose a
+  trait method receiver. 4. fill a trait method signature. 5. fill an
+  impl block. 6. write a small trait and impl. 7. write a function that
+  accepts a trait bound. 8. translate a TS interface plus class. 9. fix
+  a missing trait import or missing impl error.

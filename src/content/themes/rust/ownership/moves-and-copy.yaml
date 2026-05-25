@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/ownership
+title: Moves and Copy
+order: 1
+prerequisites: [rust/foundations/compiler-feedback]
+intro: |
+  TypeScript variables point at values managed by a garbage collector;
+  Rust bindings own values unless the type is `Copy`. This theme makes
+  moves concrete before references appear. Planned exercises: 1. choose
+  which binding owns a `String`. 2. recognise a move. 3. recognise a
+  `Copy` integer. 4. fill the line that avoids using a moved value. 5.
+  fill a `clone()` only where an owned duplicate is intended. 6. write
+  a function that takes ownership. 7. write a function that returns
+  ownership. 8. translate TS object passing into Rust moves. 9. fix a
+  use-after-move compiler error.

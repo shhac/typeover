@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/production
+title: Threads and channels
+order: 3
+prerequisites: [rust/production/smart-pointers, rust/errors/result-and-question-mark]
+intro: |
+  Rust's ownership rules extend into concurrency. This theme covers
+  `thread::spawn`, `move` closures, `JoinHandle`, message passing with
+  channels, and shared state with `Arc<Mutex<T>>`. Planned exercises: 1.
+  choose `move` for spawned threads. 2. recognise `join`. 3. choose a
+  channel for message passing. 4. fill `thread::spawn`. 5. fill
+  `Arc::clone`. 6. write a thread that returns a value. 7. write a
+  channel sender and receiver. 8. translate TS async-looking work into
+  threaded Rust. 9. fix shared mutable state with `Arc<Mutex<_>>`.

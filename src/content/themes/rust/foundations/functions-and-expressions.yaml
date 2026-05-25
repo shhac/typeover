@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/foundations
+title: Functions and expressions
+order: 5
+prerequisites: [rust/foundations/variables, rust/foundations/control-flow]
+intro: |
+  Rust functions use explicit parameter and return types. Blocks can
+  produce values, and the final expression has no semicolon. This is
+  the first theme where a missing or extra semicolon changes meaning.
+  Planned exercises: 1. choose `fn` syntax. 2. recognise `->` return
+  types. 3. choose final-expression return. 4. fill a parameter type.
+  5. fill a return type. 6. write a simple pure function. 7. write an
+  `if` expression return. 8. translate TS helper functions. 9. fix a
+  function where a semicolon accidentally returns `()`.

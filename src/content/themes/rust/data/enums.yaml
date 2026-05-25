@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/data
+title: Enums as tagged unions
+order: 2
+prerequisites: [rust/foundations/control-flow, rust/data/structs-and-impl]
+intro: |
+  Rust enums are real sum types: each variant can carry different data.
+  This is the closest Rust analogue to TypeScript discriminated unions,
+  but the compiler enforces exhaustiveness. Planned exercises: 1. choose
+  enum syntax. 2. recognise tuple-like and struct-like variants. 3.
+  choose an enum over string tags. 4. fill a variant constructor. 5. fill
+  an enum type annotation. 6. write a small enum. 7. write a value of a
+  data-carrying variant. 8. translate a TS discriminated union. 9. model
+  a small state machine with enum variants.

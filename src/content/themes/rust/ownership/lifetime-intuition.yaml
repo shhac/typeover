@@ -1,0 +1,16 @@
+target: rust
+moduleId: rust/ownership
+title: Lifetime intuition
+order: 5
+prerequisites: [rust/ownership/borrowing, rust/ownership/strings-and-slices]
+intro: |
+  Lifetimes are not a separate runtime feature; they describe how long
+  references are valid. This theme avoids advanced annotation syntax at
+  first and focuses on why Rust rejects dangling references. Planned
+  exercises: 1. choose the value that lives long enough. 2. recognise a
+  dangling reference. 3. choose owned return instead of borrowed return.
+  4. fill a scope change that extends an owner. 5. fill a returned
+  `String`. 6. write a function that returns one of two borrowed inputs
+  with an explicit lifetime. 7. write code that avoids returning a local
+  reference. 8. translate a TS closure over local data. 9. fix a lifetime
+  error by changing ownership rather than adding random annotations.

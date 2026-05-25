@@ -1,0 +1,16 @@
+target: rust
+moduleId: rust/abstractions
+title: impl Trait and trait objects
+order: 4
+prerequisites: [rust/abstractions/generics, rust/ownership/borrowing]
+intro: |
+  Rust has two styles of polymorphism: static dispatch with generics or
+  `impl Trait`, and dynamic dispatch with `dyn Trait`. This theme teaches
+  when each is appropriate and why trait objects usually live behind a
+  pointer such as `&dyn Trait` or `Box<dyn Trait>`. Planned exercises: 1.
+  choose `impl Trait` for an argument. 2. recognise `dyn Trait`. 3.
+  choose `Box<dyn Trait>` for heterogeneous owned values. 4. fill an
+  `impl Iterator` return. 5. fill `&dyn Display`. 6. write a static
+  dispatch helper. 7. write a trait-object collection. 8. translate TS
+  interface polymorphism. 9. fix an attempt to return two concrete types
+  from one `impl Trait` function.

@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/production
+title: Smart pointers
+order: 1
+prerequisites: [rust/abstractions/impl-trait-and-trait-objects, rust/ownership/lifetime-intuition]
+intro: |
+  Smart pointers encode ownership strategies in types. This theme covers
+  `Box<T>` for heap allocation and recursive types, `Rc<T>` for shared
+  single-thread ownership, and `Arc<T>` for shared thread-safe ownership.
+  Planned exercises: 1. choose `Box` for recursive data. 2. recognise
+  shared ownership with `Rc`. 3. choose `Arc` across threads. 4. fill
+  `Box::new`. 5. fill `Rc::clone`. 6. write a boxed enum node. 7. write
+  shared ownership without cloning the inner value. 8. translate TS
+  shared object references. 9. fix a type whose size would otherwise be
+  infinite.

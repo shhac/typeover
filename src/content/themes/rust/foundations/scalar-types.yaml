@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/foundations
+title: Scalar types
+order: 3
+prerequisites: [rust/foundations/variables]
+intro: |
+  TypeScript gives beginners one `number`; Rust asks what number you
+  mean. This theme introduces signed and unsigned integers, `usize`,
+  `f32` and `f64`, `bool`, `char`, explicit casts with `as`, and the
+  lack of implicit numeric conversion. Planned exercises: 1. choose
+  `i32` for an integer. 2. choose `f64` for a float. 3. recognise
+  `usize` for indexes and lengths. 4. fill a boolean type. 5. fill a
+  cast. 6. write an annotated numeric binding. 7. write a safe length
+  comparison. 8. translate TS numeric code with explicit Rust types.
+  9. fix a mixed-integer compile error.

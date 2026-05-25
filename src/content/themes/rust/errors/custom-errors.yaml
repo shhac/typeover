@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/errors
+title: Custom error enums
+order: 2
+prerequisites: [rust/errors/result-and-question-mark, rust/data/enums]
+intro: |
+  Small Rust programs often use an enum for domain errors. This theme
+  teaches error variants, carrying context, `Display`, and using `From`
+  so `?` can convert lower-level errors. Planned exercises: 1. choose an
+  error enum. 2. recognise context-carrying variants. 3. choose `From`
+  for conversion. 4. fill an `Err(MyError::...)`. 5. fill a `Display`
+  arm. 6. write a domain error enum. 7. write a conversion with `From`.
+  8. translate TS custom error classes. 9. fix an error propagation type
+  mismatch.

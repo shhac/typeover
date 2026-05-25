@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/ownership
+title: Strings and slices
+order: 4
+prerequisites: [rust/ownership/borrowing]
+intro: |
+  Rust has owned strings (`String`) and borrowed string slices (`&str`).
+  The same borrowed-view idea applies to slices like `&[T]`. This theme
+  teaches the signature reflex: accept `&str` or `&[T]` when you only
+  read, return `String` or `Vec<T>` when you create owned data. Planned
+  exercises: 1. choose `&str` for a read-only parameter. 2. choose
+  `String` for owned output. 3. recognise slice syntax. 4. fill
+  `.to_string()`. 5. fill a slice parameter. 6. write a string-reading
+  helper. 7. write a slice-summing helper. 8. translate TS string code.
+  9. fix a function that returns a reference to a temporary string.

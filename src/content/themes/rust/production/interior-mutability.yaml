@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/production
+title: Interior mutability
+order: 2
+prerequisites: [rust/production/smart-pointers, rust/ownership/mutable-borrows]
+intro: |
+  Sometimes Rust permits mutation through a shared reference by moving
+  borrow checks to runtime. This theme teaches `Cell`, `RefCell`, and the
+  `Rc<RefCell<T>>` pattern as tools with costs, not escape hatches.
+  Planned exercises: 1. choose `RefCell` for runtime-checked mutation. 2.
+  recognise `borrow_mut`. 3. choose `Cell` for small copy values. 4. fill
+  `RefCell::new`. 5. fill a scoped mutable borrow. 6. write a counter
+  using `Cell`. 7. write a shared mutable graph edge with `Rc<RefCell<_>>`.
+  8. translate TS shared mutation deliberately. 9. fix a runtime borrow
+  panic by shortening a borrow.

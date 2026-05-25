@@ -9,5 +9,8 @@ intro: |
   no-newline variant. Format placeholders use `{}` instead of
   TypeScript's template-literal `${...}`. Macros, format strings,
   and the no-newline-by-default `print!` are the three reflex
-  shifts here — none of them touch ownership yet, so they're the
-  cheap first step.
+  shifts here. Planned exercises: 1. choose `fn main()`. 2. choose
+  `println!`. 3. recognise macro calls by `!`. 4. fill the `println!`
+  macro name. 5. fill a `{}` format placeholder. 6. write one print
+  line. 7. write a formatted greeting. 8. translate a complete hello
+  program. 9. write a tiny program that prints two lines.

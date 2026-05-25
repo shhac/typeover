@@ -1,0 +1,7 @@
+target: rust
+title: Traits & generics
+order: 6
+summary: |
+  Rust's abstraction toolkit. Traits, trait bounds, derives, generic
+  functions and types, associated types, `impl Trait`, and when dynamic
+  dispatch with trait objects is the right tradeoff.

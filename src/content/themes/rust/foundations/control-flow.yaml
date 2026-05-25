@@ -1,0 +1,15 @@
+target: rust
+moduleId: rust/foundations
+title: Control flow
+order: 4
+prerequisites: [rust/foundations/variables, rust/foundations/scalar-types]
+intro: |
+  Rust's `if` and loops look familiar, but they are expressions more
+  often than TypeScript developers expect. This theme covers `if`,
+  `else if`, `loop`, `while`, `for`, ranges, `break`, `continue`, and
+  `match` only as a first glimpse. Planned exercises: 1. choose Rust
+  `if` syntax without parentheses. 2. choose an `if` expression value.
+  3. recognise `for n in 0..5`. 4. fill a range. 5. fill `break` with
+  a value from `loop`. 6. write a `while` condition. 7. write a `for`
+  loop over a range. 8. translate TS branching code. 9. write a small
+  counter that prints selected values.

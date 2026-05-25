@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/data
+title: Option instead of null
+order: 4
+prerequisites: [rust/data/pattern-matching]
+intro: |
+  Rust does not have `null`; absence is `Option<T>`. TypeScript users
+  already know `T | null`; Rust makes the check mandatory before access.
+  Planned exercises: 1. choose `Option<T>`. 2. recognise `Some` and
+  `None`. 3. choose `match` over unchecked access. 4. fill `Some(value)`.
+  5. fill `unwrap_or`. 6. write a function returning `Option`. 7. write
+  `if let Some`. 8. translate TS nullable code. 9. fix a program by
+  handling the `None` case explicitly.

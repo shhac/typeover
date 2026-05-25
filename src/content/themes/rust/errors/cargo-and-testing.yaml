@@ -1,0 +1,14 @@
+target: rust
+moduleId: rust/errors
+title: Cargo and testing
+order: 4
+prerequisites: [rust/errors/result-and-question-mark, rust/errors/modules-and-visibility]
+intro: |
+  Cargo is Rust's build tool, package manager, test runner, and project
+  skeleton. This theme teaches `Cargo.toml`, crates, binaries vs
+  libraries, unit tests, integration tests, and `assert_eq!`. Planned
+  exercises: 1. choose the purpose of `Cargo.toml`. 2. recognise crate
+  roots. 3. choose `#[test]`. 4. fill `assert_eq!`. 5. fill a module
+  test path. 6. write a unit test. 7. write a result-returning test. 8.
+  translate a TS test into Rust assertions. 9. organise a tiny library
+  and binary split.

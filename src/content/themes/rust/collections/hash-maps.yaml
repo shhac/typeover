@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/collections
+title: Hash maps
+order: 2
+prerequisites: [rust/collections/vectors, rust/data/option]
+intro: |
+  `HashMap<K, V>` replaces many TypeScript object-as-map patterns, but
+  lookups return `Option<&V>` and insertion may move keys and values.
+  Planned exercises: 1. choose `HashMap`. 2. recognise `insert`. 3.
+  choose `.get()` return type. 4. fill an import from `std::collections`.
+  5. fill `entry(...).or_insert(...)`. 6. write a frequency counter. 7.
+  write a lookup with a fallback. 8. translate TS record code. 9. fix a
+  borrowed-key lookup without cloning unnecessarily.

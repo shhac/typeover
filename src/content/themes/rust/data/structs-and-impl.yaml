@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/data
+title: Structs and impl blocks
+order: 1
+prerequisites: [rust/ownership/borrowing]
+intro: |
+  Rust separates data declarations from method implementations. A
+  `struct` names fields; an `impl` block attaches constructors and
+  methods. Planned exercises: 1. choose struct declaration syntax. 2.
+  recognise named-field literals. 3. choose `Self` in a constructor. 4.
+  fill an `impl` block. 5. fill a `&self` method. 6. write a constructor.
+  7. write a read-only method. 8. translate a TS object with methods.
+  9. fix an accidental move out of `self`.

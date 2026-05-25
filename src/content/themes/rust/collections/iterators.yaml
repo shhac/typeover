@@ -1,0 +1,13 @@
+target: rust
+moduleId: rust/collections
+title: Iterators
+order: 3
+prerequisites: [rust/collections/vectors, rust/ownership/mutable-borrows]
+intro: |
+  Idiomatic Rust often transforms data with iterators instead of manual
+  indexing. The key ownership distinction is `.iter()`, `.iter_mut()`,
+  and `.into_iter()`. Planned exercises: 1. choose `.iter()` for reading.
+  2. recognise `.into_iter()` moves. 3. choose `.map(...).collect()`. 4.
+  fill `.filter`. 5. fill `.sum::<i32>()`. 6. write a map-collect. 7.
+  write an iterator chain that borrows. 8. translate TS `map` and
+  `filter`. 9. fix a chain that consumes a vector too early.
