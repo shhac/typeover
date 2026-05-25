@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: fill-word
+order: 5
+prompt: |
+  Fill the parameter type. The function takes a borrowed
+  reference to ANY type implementing `Display`, with dynamic
+  dispatch (NOT generics).
+generator:
+  kind: template
+  vars:
+    ty: ["&dyn Display"]
+  ts: 'function printIt(x: { toString(): string }): void { console.log(String(x)); }'
+  canonical: |-
+    use std::fmt::Display;
+
+    fn print_it(x: ${ty}) {
+        println!("{}", x);
+    }
+blanks: [ty]
+hints:
+  - "Three parts: the borrow `&`, the dyn keyword, the trait name. Same dispatch style as slot 02."
+  - "Shape: `&dyn <Trait>`."
+  - "`&dyn Display`"
+runtime: none
+notes: |
+  Drills the `&dyn Trait` parameter shape. Borrowed trait
+  object — works for any type implementing Display
+  without monomorphisation, at the cost of a vtable
+  lookup per call.

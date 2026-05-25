@@ -1,0 +1,34 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: fill-word
+order: 4
+prompt: |
+  Fill the keyword in the return type so this function returns
+  an opaque type implementing `Iterator<Item = i32>` (static
+  dispatch — the actual return type is decided at compile time).
+generator:
+  kind: template
+  vars:
+    kw: ["impl"]
+  ts: |-
+    function* evens() { for (let n = 0; n < 10; n += 2) yield n; }
+  canonical: |-
+    fn evens() -> ${kw} Iterator<Item = i32> {
+        (0..10).filter(|n| n % 2 == 0)
+    }
+
+    fn main() {
+        let count = evens().count();
+        println!("{}", count);
+    }
+blanks: [kw]
+hints:
+  - "Same keyword as slot 01 — the one for STATIC dispatch. Four letters."
+  - "`impl`."
+  - "`impl`"
+runtime: none
+notes: |
+  Drills `impl Trait` in return position. The opaque
+  return type lets the function return a complex iterator
+  chain without spelling out its full type (which would
+  be unwieldy: `Filter<Range<i32>, ...>`).

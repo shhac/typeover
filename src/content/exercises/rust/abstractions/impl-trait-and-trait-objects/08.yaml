@@ -1,0 +1,105 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: freeform
+order: 8
+prompt: |
+  Translate TS interface polymorphism. Trait `Speaker`,
+  structs `Dog` and `Cow` impl it ("woof" / "moo"), function
+  `chorus(speakers: &[Box<dyn Speaker>])` prints each. `main`
+  builds a `vec![Box::new(Dog), Box::new(Cow)]` and calls
+  `chorus(&speakers)`.
+
+  Output:
+
+      woof
+      moo
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Speaker { say(): string; }
+    class Dog implements Speaker { say(): string { return "woof"; } }
+    class Cow implements Speaker { say(): string { return "moo"; } }
+    function chorus(speakers: Speaker[]): void {
+      for (const s of speakers) console.log(s.say());
+    }
+    chorus([new Dog(), new Cow()]);
+  canonical: |-
+    trait Speaker {
+        fn say(&self) -> String;
+    }
+
+    struct Dog;
+    struct Cow;
+
+    impl Speaker for Dog {
+        fn say(&self) -> String {
+            String::from("woof")
+        }
+    }
+
+    impl Speaker for Cow {
+        fn say(&self) -> String {
+            String::from("moo")
+        }
+    }
+
+    fn chorus(speakers: &[Box<dyn Speaker>]) {
+        for s in speakers {
+            println!("{}", s.say());
+        }
+    }
+
+    fn main() {
+        let speakers: Vec<Box<dyn Speaker>> = vec![
+            Box::new(Dog),
+            Box::new(Cow),
+        ];
+        chorus(&speakers);
+    }
+expectStdout: |
+  woof
+  moo
+hints:
+  - "Function parameter is `&[Box<dyn Speaker>]` — borrowed slice of boxed trait objects. The `&` outside is the slice borrow, the `Box` inside owns each value, `dyn Speaker` is the trait-object type. Call site: `chorus(&speakers)` to take the slice borrow from the owning Vec."
+  - "Slice param: `&[Box<dyn Speaker>]`."
+  - |-
+    trait Speaker {
+        fn say(&self) -> String;
+    }
+
+    struct Dog;
+    struct Cow;
+
+    impl Speaker for Dog {
+        fn say(&self) -> String {
+            String::from("woof")
+        }
+    }
+
+    impl Speaker for Cow {
+        fn say(&self) -> String {
+            String::from("moo")
+        }
+    }
+
+    fn chorus(speakers: &[Box<dyn Speaker>]) {
+        for s in speakers {
+            println!("{}", s.say());
+        }
+    }
+
+    fn main() {
+        let speakers: Vec<Box<dyn Speaker>> = vec![
+            Box::new(Dog),
+            Box::new(Cow),
+        ];
+        chorus(&speakers);
+    }
+runtime: server
+notes: |
+  Drills the canonical "function over heterogeneous
+  collection" shape. The slice parameter `&[Box<dyn T>]`
+  is symmetric with `&[T]` from the slices theme — same
+  borrow shape, trait-object elements instead of plain
+  T's.

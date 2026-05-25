@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: mcq
+order: 3
+prompt: |
+  A `Vec` stores a HETEROGENEOUS mix of values — different
+  concrete types, all implementing `Greeter`. Each value must
+  be OWNED. Pick the element type.
+generator:
+  kind: variant
+  variants:
+    - id: box-dyn
+      ts: 'const greeters: Greeter[] = [new Robot(), new Cat()];'
+      canonical: 'Vec<Box<dyn Greeter>> — owned trait objects on the heap. `Box` provides the indirection (`dyn Trait` is unsized); the Vec owns the boxes.'
+      distractors:
+        - 'Vec<dyn Greeter> — `dyn Trait` is UNSIZED; cannot be stored inline. Each element needs an indirection.'
+        - 'Vec<impl Greeter> — `impl Trait` resolves to ONE concrete type; can''t mix different types under it.'
+        - 'Vec<&dyn Greeter> — borrowed references; the Vec wouldn''t OWN the values (and the original locations would need to outlive the vec).'
+hints:
+  - "Two indirections: the Vec stores `Box<...>` (owned pointer to heap), and the Box wraps `dyn Trait` (the trait object). Box gives `dyn Trait` a known size — the size of a pointer."
+  - "`Vec<<box>> <<dyn>> <trait>>`."
+  - '`Vec<Box<dyn Greeter>>`'
+runtime: none
+notes: |
+  Pins `Vec<Box<dyn Trait>>` as the owned-heterogeneous-
+  collection idiom. Both layers (Vec + Box) are owned;
+  `dyn Trait` is what makes them heterogeneous.

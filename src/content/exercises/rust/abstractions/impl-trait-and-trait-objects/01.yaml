@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: mcq
+order: 1
+prompt: |
+  A function accepts ANY value that implements `Greeter`. Pick
+  the SHORTEST idiomatic argument-position spelling that uses
+  static dispatch.
+generator:
+  kind: variant
+  variants:
+    - id: impl-arg
+      ts: 'function announce(g: Greeter): void { ... }'
+      canonical: 'fn announce(g: impl Greeter) — argument-position `impl Trait`; sugar for a hidden type parameter, monomorphised at compile time.'
+      distractors:
+        - 'fn announce<G: Greeter>(g: G) — semantically equivalent but more verbose for this simple case; useful when the type appears in multiple positions or has multiple bounds.'
+        - 'fn announce(g: dyn Greeter) — `dyn Trait` is UNSIZED; cannot be passed by value, only behind a pointer (`&dyn`, `Box<dyn>`).'
+        - 'fn announce(g: Greeter) — bare `Greeter` is a TRAIT, not a TYPE; in argument position it does not compile without `impl`/`dyn`.'
+hints:
+  - "Same number of characters as 'dyn' before the trait name. Static dispatch — the compiler picks the concrete type at the call site."
+  - "Four letters: `impl`."
+  - '`fn announce(g: impl Greeter)`'
+runtime: none
+notes: |
+  Pins `impl Trait` in argument position. The generic
+  distractor is a real, correct alternative; the question
+  selects on brevity for the simple one-bound case.

@@ -1,0 +1,113 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: freeform
+order: 9
+prompt: |
+  This program fails because `impl Trait` in RETURN position
+  must resolve to ONE concrete type — the two branches
+  return different structs:
+
+      error[E0308]: `if` and `else` have incompatible types
+
+      fn make_greeting(kind: i32) -> impl Greeter {
+          if kind == 1 {
+              Robot
+          } else {
+              Cat
+          }
+      }
+
+  Fix it by switching the return type to `Box<dyn Greeter>`
+  (dynamic dispatch) and wrapping each branch in `Box::new(...)`.
+  `main` calls `make_greeting(2)` and prints `g.greet()`.
+
+  Output:
+
+      meow
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot implements Greeter { greet(): string { return "beep"; } }
+    class Cat implements Greeter { greet(): string { return "meow"; } }
+    function makeGreeting(kind: number): Greeter {
+      return kind === 1 ? new Robot() : new Cat();
+    }
+    console.log(makeGreeting(2).greet());
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+    struct Cat;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    impl Greeter for Cat {
+        fn greet(&self) -> String {
+            String::from("meow")
+        }
+    }
+
+    fn make_greeting(kind: i32) -> Box<dyn Greeter> {
+        if kind == 1 {
+            Box::new(Robot)
+        } else {
+            Box::new(Cat)
+        }
+    }
+
+    fn main() {
+        let g = make_greeting(2);
+        println!("{}", g.greet());
+    }
+expectStdout: |
+  meow
+hints:
+  - "Two coordinated edits: change `-> impl Greeter` to `-> Box<dyn Greeter>`, and wrap each branch in `Box::new(...)`. `impl Trait` in return position is for ONE concrete type the function decides; multiple concrete returns need the boxed trait object."
+  - "Return type: `Box<dyn Greeter>`. Branches: `Box::new(Robot)` and `Box::new(Cat)`."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+    struct Cat;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    impl Greeter for Cat {
+        fn greet(&self) -> String {
+            String::from("meow")
+        }
+    }
+
+    fn make_greeting(kind: i32) -> Box<dyn Greeter> {
+        if kind == 1 {
+            Box::new(Robot)
+        } else {
+            Box::new(Cat)
+        }
+    }
+
+    fn main() {
+        let g = make_greeting(2);
+        println!("{}", g.greet());
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "impl Trait return
+  branch mismatch" trap. The fix surfaces the
+  static-vs-dynamic dispatch tradeoff: `impl Trait` is
+  zero-cost but constrains to one concrete type; `Box<dyn
+  Trait>` allows heterogeneous returns at vtable cost.

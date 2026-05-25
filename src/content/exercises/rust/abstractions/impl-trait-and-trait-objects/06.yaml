@@ -1,0 +1,72 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: freeform
+order: 6
+prompt: |
+  Write a trait `Greeter` with `greet(&self) -> String`. Impl
+  for `struct Robot` returning `"beep"`. Write a function
+  `announce(g: impl Greeter)` (argument-position impl Trait —
+  static dispatch) that prints `"I say: <greet>"`. `main`
+  calls `announce(Robot)`.
+
+  Output:
+
+      I say: beep
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot implements Greeter { greet(): string { return "beep"; } }
+    function announce(g: Greeter): void { console.log("I say: " + g.greet()); }
+    announce(new Robot());
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn announce(g: impl Greeter) {
+        println!("I say: {}", g.greet());
+    }
+
+    fn main() {
+        announce(Robot);
+    }
+expectStdout: |
+  I say: beep
+hints:
+  - "Three pieces: trait declaration, impl for Robot, and `fn announce(g: impl Greeter) { ... }` — the `impl Trait` sugar for a generic type parameter. The call site passes `Robot` by value."
+  - "Argument: `g: impl Greeter`."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn announce(g: impl Greeter) {
+        println!("I say: {}", g.greet());
+    }
+
+    fn main() {
+        announce(Robot);
+    }
+runtime: server
+notes: |
+  Drills argument-position `impl Trait`. The shape is
+  semantically identical to `fn announce<G: Greeter>(g: G)`
+  — same monomorphisation, same zero runtime cost.

@@ -1,0 +1,93 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: freeform
+order: 7
+prompt: |
+  Two structs (`Robot`, `Cat`) implement the SAME trait
+  (`Greeter`) with DIFFERENT bodies. Build a
+  `Vec<Box<dyn Greeter>>` containing one of each, iterate
+  it with `for g in &greeters`, and print each `g.greet()`.
+
+  Output:
+
+      beep
+      meow
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot implements Greeter { greet(): string { return "beep"; } }
+    class Cat implements Greeter { greet(): string { return "meow"; } }
+    const greeters: Greeter[] = [new Robot(), new Cat()];
+    for (const g of greeters) console.log(g.greet());
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+    struct Cat;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    impl Greeter for Cat {
+        fn greet(&self) -> String {
+            String::from("meow")
+        }
+    }
+
+    fn main() {
+        let greeters: Vec<Box<dyn Greeter>> = vec![
+            Box::new(Robot),
+            Box::new(Cat),
+        ];
+        for g in &greeters {
+            println!("{}", g.greet());
+        }
+    }
+expectStdout: |
+  beep
+  meow
+hints:
+  - "Two trait impls (one per struct), then `vec![Box::new(Robot), Box::new(Cat)]` — each value wrapped in a `Box` so the heterogeneous types share a uniform `Box<dyn Greeter>` element type. Loop borrows the vec via `for g in &greeters` (no consume); inside the loop `g` is `&Box<dyn Greeter>`, which auto-derefs to call `g.greet()`."
+  - "Vec literal: `vec![Box::new(Robot), Box::new(Cat)]`. Loop: `for g in &greeters { println!(\"{}\", g.greet()); }`."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+    struct Cat;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    impl Greeter for Cat {
+        fn greet(&self) -> String {
+            String::from("meow")
+        }
+    }
+
+    fn main() {
+        let greeters: Vec<Box<dyn Greeter>> = vec![
+            Box::new(Robot),
+            Box::new(Cat),
+        ];
+        for g in &greeters {
+            println!("{}", g.greet());
+        }
+    }
+runtime: server
+notes: |
+  Drills the heterogeneous collection idiom. `Box<dyn T>`
+  is what unblocks "store different concrete types in
+  one Vec" — TS has this freely; Rust requires explicit
+  indirection.

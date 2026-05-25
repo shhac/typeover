@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/impl-trait-and-trait-objects
+type: mcq
+order: 2
+prompt: |
+  A function takes a BORROWED reference to ANY value that
+  implements `Greeter` — concrete type unknown until runtime
+  (dynamic dispatch via vtable). Pick the type spelling.
+generator:
+  kind: variant
+  variants:
+    - id: dyn-trait
+      ts: 'function announce(g: Greeter): void { /* runtime dispatch */ }'
+      canonical: '&dyn Greeter — borrowed trait object; dynamic dispatch through a vtable. Three letters (`dyn`) make the dispatch style explicit.'
+      distractors:
+        - '&Greeter — implicit-dyn was deprecated in Rust 2018; explicit `dyn` is required since.'
+        - '&impl Greeter — `impl Trait` is for STATIC dispatch (one concrete type); for runtime polymorphism use `dyn`.'
+        - 'dyn &Greeter — word order swapped; `dyn` comes BETWEEN `&` and the trait name.'
+hints:
+  - "Three letters between `&` and the trait name. The dispatch style is opposite of slot 01's `impl`."
+  - "`dyn`."
+  - '`&dyn Greeter`'
+runtime: none
+notes: |
+  Pins `&dyn Trait` as the borrowed trait-object form.
+  The `dyn` keyword was added in 2018 to make the
+  dispatch-style explicit; bare `&Trait` is an error.
