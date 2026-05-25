@@ -19,11 +19,11 @@ generator:
       ts: |-
         // TS surfaces a hint inline in the message:
         //   Did you mean to call '.toString()'?
-      canonical: '`help: consider converting the value with `.parse::<i32>()`` — `help:` lines hold the suggested fix, often pasteable as-is.'
+      canonical: 'The `help: consider converting the value with .parse::<i32>()` line — `help:` lines hold the suggested fix, often pasteable as-is.'
       distractors:
-        - '`error[E0277]: cannot multiply ...` — that''s the error header.'
-        - '`= note: the trait `Mul<&str>` is not implemented ...` — a related fact, not an action.'
-        - '`--> src/main.rs:4:9` — the file/line/column span.'
+        - 'The `error[E0277]: cannot multiply ...` line — that''s the error header.'
+        - 'The `= note: the trait Mul<&str> is not implemented ...` line — a related fact, not an action.'
+        - 'The `--> src/main.rs:4:9` line — the file/line/column span.'
 hints:
   - "Lines that start with `help:` are rustc's suggested fixes — sometimes literal source the learner can paste in."
   - "The other three lines are the error header, the file/line span, and a related-trait note."

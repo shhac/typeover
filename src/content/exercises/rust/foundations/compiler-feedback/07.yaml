@@ -3,7 +3,7 @@ themeId: rust/foundations/compiler-feedback
 type: mcq-explain
 order: 7
 prompt: |
-  rustc emits `warning: unused variable: `extra`` but the program
+  rustc emits `warning: unused variable: extra` but the program
   STILL compiles and runs. Pick the statement that correctly
   describes the warning-vs-error distinction.
 generator:

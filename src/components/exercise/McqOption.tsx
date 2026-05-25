@@ -2,6 +2,19 @@ import { cn } from "../ds/_internal";
 import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
 import { formatInline } from "~/lib/format-inline";
+import type { Accent } from "~/lib/lang";
+
+/* Static per-accent class strings for the prose-option `>code`
+ *  selector. Has to be a literal map — Tailwind's JIT scanner can't
+ *  resolve template-literal class strings, so a `[&>code]:${...}`
+ *  construction silently strips the class from the bundle. */
+const PROSE_CODE_ACCENT: Record<Accent, string> = {
+  primary: "[&>code]:text-accent-primary",
+  ts: "[&>code]:text-accent-ts",
+  go: "[&>code]:text-accent-go",
+  zig: "[&>code]:text-accent-zig",
+  rust: "[&>code]:text-accent-rust",
+};
 
 /**
  * The four possible visual states for an MCQ option. Resolved purely
@@ -67,6 +80,12 @@ interface McqOptionProps {
    *  highlighted — for `mcq-explain`, where the answers are
    *  explanations of behaviour, not language translations. */
   kind?: "code" | "prose";
+  /** Accent for inline `code` spans in prose mode. Driven by the
+   *  exercise's target language so the code identifiers in the
+   *  answer text read as "this is Rust we're discussing" rather
+   *  than colour-less. Ignored in code mode (CodeMirror handles
+   *  highlighting). */
+  accent?: Accent;
 }
 
 export function McqOption(props: McqOptionProps) {
@@ -109,7 +128,11 @@ export function McqOption(props: McqOptionProps) {
       {props.kind === "prose" ? (
         <div
           id={`opt-${props.groupName}-${props.index}-text`}
-          class="flex-1 min-w-0 text-sm text-fg-primary leading-relaxed [&>code]:font-mono [&>code]:text-fg-primary [&>code]:bg-bg-inset [&>code]:rounded-sm [&>code]:px-1"
+          class={cn(
+            "flex-1 min-w-0 text-sm text-fg-primary leading-relaxed",
+            "[&>code]:font-mono [&>code]:bg-bg-inset [&>code]:rounded-sm [&>code]:px-1",
+            props.accent ? PROSE_CODE_ACCENT[props.accent] : "[&>code]:text-fg-primary",
+          )}
           innerHTML={formatInline(props.text)}
         />
       ) : isCodeMirrorTestEnv() ? (

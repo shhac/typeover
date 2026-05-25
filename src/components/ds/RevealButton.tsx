@@ -1,10 +1,32 @@
 import { createSignal, Show } from "solid-js";
 import { Button } from "./Button";
 import { CodeBlock } from "./CodeBlock";
+import { formatInline } from "~/lib/format-inline";
+import type { Accent } from "~/lib/lang";
+
+/* Static per-accent class for inline `code` spans inside the prose
+ *  canonical body. JIT can't resolve template-literal classes —
+ *  mirrors the equivalent map in McqOption. */
+const PROSE_CODE_ACCENT: Record<Accent, string> = {
+  primary: "[&>code]:text-accent-primary",
+  ts: "[&>code]:text-accent-ts",
+  go: "[&>code]:text-accent-go",
+  zig: "[&>code]:text-accent-zig",
+  rust: "[&>code]:text-accent-rust",
+};
 
 interface RevealButtonProps {
   canonical: string;
   lang?: "go" | "ts";
+  /** Rendering kind for the canonical body. `"code"` (default) wraps
+   *  it in a CodeBlock with syntax highlighting; `"prose"` renders
+   *  it as plain text via formatInline (inline `backticks` still
+   *  highlighted), for mcq-explain whose canonical is a prose
+   *  explanation, not a code snippet. */
+  kind?: "code" | "prose";
+  /** Accent for inline `code` spans in prose mode. Driven by the
+   *  exercise's target language. Ignored in code mode. */
+  accent?: Accent;
   /** Called when the learner reveals. */
   onReveal?: () => void;
 }
@@ -41,9 +63,19 @@ export function RevealButton(props: RevealButtonProps) {
         {shown() ? "Hide answer" : "Show answer"}
       </Button>
       <Show when={shown()}>
-        <CodeBlock lang={props.lang ?? "go"} filename="answer">
-          {props.canonical}
-        </CodeBlock>
+        <Show
+          when={props.kind === "prose"}
+          fallback={
+            <CodeBlock lang={props.lang ?? "go"} filename="answer">
+              {props.canonical}
+            </CodeBlock>
+          }
+        >
+          <div
+            class={`px-4 py-3 bg-bg-inset border border-border-default rounded-sm text-sm text-fg-primary leading-relaxed [&>code]:font-mono [&>code]:bg-bg-panel [&>code]:rounded-sm [&>code]:px-1 ${props.accent ? PROSE_CODE_ACCENT[props.accent] : "[&>code]:text-fg-primary"}`}
+            innerHTML={formatInline(props.canonical)}
+          />
+        </Show>
       </Show>
     </div>
   );

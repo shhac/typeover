@@ -23,11 +23,11 @@ generator:
         // A TS error has one location and message:
         // error TS2362: The left-hand side of an arithmetic operation
         //   must be of type 'any', 'number', 'bigint' or an enum type.
-      canonical: '`error[E0277]: cannot multiply ...` — the bracketed code + short summary names the error.'
+      canonical: 'The `error[E0277]: cannot multiply ...` line — bracketed error code + short summary.'
       distractors:
-        - '`--> src/main.rs:4:9` — that''s the file/line/column span.'
-        - '`= note: the trait `Mul<&str>` is not implemented ...` — that''s a related-fact note, not the headline.'
-        - '`help: consider converting the value with `.parse::<i32>()`` — that''s a suggested fix, not the error itself.'
+        - 'The `--> src/main.rs:4:9` line — that''s the file/line/column span.'
+        - 'The `= note: the trait Mul<&str> is not implemented ...` line — a related-fact note, not the headline.'
+        - 'The `help: consider converting the value ...` line — a suggested fix, not the error itself.'
 hints:
   - "The primary line starts with `error[EXXXX]:` — bracketed numeric error code, colon, summary."
   - "Not the `-->` (file:line:col span), not the `= note:` (related fact), not the `help:` (suggested fix)."

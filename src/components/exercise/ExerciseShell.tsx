@@ -131,6 +131,15 @@ interface ExerciseShellProps {
   sourceLang?: "go" | "zig" | "rust";
   /** Canonical Go answer. Surfaced by the on-demand RevealButton. */
   canonical: string;
+  /** Render kind for the footer RevealButton's canonical body.
+   *  `"code"` (default) renders in a CodeBlock; `"prose"` renders
+   *  as plain text (used by mcq-explain whose canonical is an
+   *  explanation, not a code snippet). */
+  canonicalKind?: "code" | "prose";
+  /** Accent for inline `code` spans in a prose canonical body.
+   *  Driven by the target language so the code-identifier spans
+   *  inside the reveal read as language-flavoured. */
+  canonicalAccent?: "go" | "zig" | "rust";
   /** Three-layer hint stack. */
   hints: readonly [string, string, string];
   /** Resolved instance values, passed to HintButton so a hint like
@@ -368,6 +377,8 @@ export function ExerciseShell(props: ExerciseShellProps) {
               <RevealButton
                 canonical={props.canonical}
                 lang="go"
+                kind={props.canonicalKind}
+                accent={props.canonicalAccent}
                 onReveal={() => recordHintUsed(props.exerciseId)}
               />
             </Show>

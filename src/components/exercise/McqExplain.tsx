@@ -58,6 +58,8 @@ export function McqExplain(props: McqExplainProps) {
       source={instance().source}
       sourceLang={props.sourceLang}
       canonical={instance().canonical}
+      canonicalKind="prose"
+      canonicalAccent={props.sourceLang}
       hints={props.hints}
       hintValues={instance().values}
       phase={phase}
@@ -82,6 +84,7 @@ export function McqExplain(props: McqExplainProps) {
               index={idx()}
               text={opt}
               kind="prose"
+              accent={props.sourceLang}
               selected={selected() === idx()}
               submitted={phase.submitted()}
               revealed={phase.revealed()}
