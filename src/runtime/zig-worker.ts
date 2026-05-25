@@ -30,17 +30,16 @@
 
 import { expose } from "comlink";
 import {
-  ConsoleStdout,
   Directory,
   File,
   OpenFile,
   PreopenDirectory,
   WASI,
-  wasi as wasiDefs,
   type Fd,
   type Inode,
 } from "@bjorn3/browser_wasi_shim";
 import { buildStdlibTree, decompressIfGzipped } from "./zig-assets";
+import { captureFd, runWasiBinary } from "./wasi-run";
 
 interface ZigResult {
   stdout: string;
@@ -114,18 +113,8 @@ async function fetchLibCompilerRt(): Promise<Uint8Array> {
   return new Uint8Array(await res.arrayBuffer());
 }
 
-/* Captures stdout/stderr from a WASI program. The shim ships
- * `ConsoleStdout.lineBuffered`, but it ignores partial trailing lines
- * — the Zig compiler emits unterminated `error: ...` lines on failure
- * and we'd lose them. Roll our own that just appends every write. */
-function captureFd(buf: { text: string }): ConsoleStdout {
-  const dec = new TextDecoder("utf-8", { fatal: false });
-  const fd = new ConsoleStdout((chunk) => {
-    buf.text += dec.decode(chunk, { stream: true });
-  });
-  fd.fd_pwrite = () => ({ ret: wasiDefs.ERRNO_SPIPE, nwritten: 0 });
-  return fd;
-}
+/* `captureFd` (binary-safe stdio capture) lives in `./wasi-run.ts`
+ * and is shared with the Rust worker. */
 
 /* WASI bytecode → JS exit-code triage. Returns either a clean exit
  * or a rich error reason; never throws. Centralised so the compile
@@ -133,26 +122,12 @@ function captureFd(buf: { text: string }): ConsoleStdout {
  * try/catch + exit-code-non-zero plumbing twice. */
 type WasiOutcome = { ok: true; exitCode: number } | { ok: false; reason: string };
 
-function runWasi(
+async function runWasi(
   module: WebAssembly.Module,
   wasi: WASI,
   stderrBuf: { text: string },
-): Promise<WasiOutcome>;
-function runWasi(
-  module: ArrayBuffer,
-  wasi: WASI,
-  stderrBuf: { text: string },
-): Promise<WasiOutcome>;
-async function runWasi(
-  moduleOrBytes: WebAssembly.Module | ArrayBuffer,
-  wasi: WASI,
-  stderrBuf: { text: string },
 ): Promise<WasiOutcome> {
-  const mod =
-    moduleOrBytes instanceof WebAssembly.Module
-      ? moduleOrBytes
-      : await WebAssembly.compile(moduleOrBytes);
-  const instance = await WebAssembly.instantiate(mod, {
+  const instance = await WebAssembly.instantiate(module, {
     wasi_snapshot_preview1: wasi.wasiImport,
   });
   try {
@@ -243,33 +218,12 @@ async function compile(source: string, assets: PreparedAssets): Promise<ArrayBuf
 }
 
 /* Stage 2: run the compiled program. Separate WASI context, separate
- * memory — the compiler's address space is irrelevant. We give it a
- * read-only stdin and capture stdout/stderr the same way as compile.
- * If wasi.start throws, it's typically a Zig trap (panic, unreachable,
- * stack overflow) — `runWasi` surfaces that as `outcome.reason`. */
-async function run(
-  wasmBytes: ArrayBuffer,
-): Promise<{ stdout: string; stderr: string; error: string }> {
-  const stdoutBuf = { text: "" };
-  const stderrBuf = { text: "" };
-
-  const fds: Fd[] = [
-    new OpenFile(new File([])),
-    captureFd(stdoutBuf),
-    captureFd(stderrBuf),
-    new PreopenDirectory(".", new Map<string, Inode>()),
-  ];
-  const wasi = new WASI(["main.wasm"], [], fds, { debug: false });
-  const outcome = await runWasi(wasmBytes, wasi, stderrBuf);
-
-  let error = "";
-  if (!outcome.ok) {
-    error = outcome.reason;
-  } else if (outcome.exitCode !== 0) {
-    error = stderrBuf.text || `program exited with code ${outcome.exitCode}`;
-  }
-  return { stdout: stdoutBuf.text, stderr: stderrBuf.text, error };
-}
+ * memory — the compiler's address space is irrelevant. Identical
+ * pattern to the Rust worker's post-compile run; shared via
+ * `runWasiBinary` in wasi-run.ts. Zig's lower-level `runWasi`
+ * (below) stays put because the compile stage needs the cached
+ * WebAssembly.Module + custom fd table form. */
+const run = runWasiBinary;
 
 const api = {
   /** Idempotent — first call kicks off the compiler wasm fetch. The
@@ -284,15 +238,27 @@ const api = {
    *  compile errors and runtime traps both surface there. */
   async eval(code: string): Promise<ZigResult> {
     const assets = await loadHeavyAssets();
-    let wasm: ArrayBuffer;
-    try {
-      wasm = await compile(code, assets);
-    } catch (err) {
-      return { stdout: "", stderr: "", error: err instanceof Error ? err.message : String(err) };
+    const compiled = await tryCompile(code, assets);
+    if (!compiled.ok) {
+      return { stdout: "", stderr: "", error: compiled.error };
     }
-    return run(wasm);
+    return run(compiled.bytes);
   },
 };
+
+/** `compile()` throws on either a compile failure or an internal
+ *  trap; this thin wrapper turns that into a result type so `eval`
+ *  reads as a flat early-return chain. */
+async function tryCompile(
+  code: string,
+  assets: PreparedAssets,
+): Promise<{ ok: true; bytes: ArrayBuffer } | { ok: false; error: string }> {
+  try {
+    return { ok: true, bytes: await compile(code, assets) };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
 
 expose(api);
 

@@ -4,14 +4,13 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
-import { useRuntimeRun } from "~/lib/use-runtime-run";
+import { useRuntimeRun, runtimeToTarget } from "~/lib/use-runtime-run";
 import {
   LANGUAGE_FREEFORM_SCAFFOLD,
   resolveSubmissionShape,
   validateSubmissionShape,
   type SubmissionShape,
 } from "~/lib/freeform-shape";
-import { assertUnreachable } from "~/lib/assert-unreachable";
 import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "../ds/CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
@@ -62,29 +61,13 @@ interface FreeformProps {
 export function Freeform(props: FreeformProps) {
   const { instance, another } = useExerciseInstance(props.exerciseId, props.generator);
 
-  /* Per-target scaffold lookup — replaces the historical hardcoded
-   * Go scaffold. The runtime → target mapping happens via the
-   * hook below; we don't have it here at construction time, so map
-   * directly from the runtime prop. The switch is exhaustive
-   * (assertUnreachable) so adding a runtime to the prop type
-   * surfaces a TS error here rather than silently picking the Go
-   * default. The "server" branch can never actually run; we still
-   * pick a sensible default so the editor isn't empty if someone
-   * navigates to a future server-only exercise. */
-  const initialScaffold = ((): string => {
-    switch (props.runtime) {
-      case "yaegi":
-        return LANGUAGE_FREEFORM_SCAFFOLD.go;
-      case "zig":
-        return LANGUAGE_FREEFORM_SCAFFOLD.zig;
-      case "rust":
-        return LANGUAGE_FREEFORM_SCAFFOLD.rust;
-      case "server":
-        return LANGUAGE_FREEFORM_SCAFFOLD.go;
-      default:
-        return assertUnreachable(props.runtime);
-    }
-  })();
+  /* Per-target scaffold lookup. `runtimeToTarget` is the single
+   * source of truth (also used inside the hook); reading it here
+   * removes the second copy of the runtime→target mapping. The
+   * "server" runtime resolves to Go as a placeholder — the editor
+   * never actually runs in that branch (canRun is false), but the
+   * scaffold needs something non-empty. */
+  const initialScaffold = LANGUAGE_FREEFORM_SCAFFOLD[runtimeToTarget(props.runtime)];
   const [code, setCode] = createSignal(initialScaffold);
   let editorHandle: CodeMirrorEditorHandle | undefined;
 

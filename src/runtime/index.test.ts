@@ -117,45 +117,90 @@ describe("getZigRunner / terminateZigRunner", () => {
   });
 });
 
-describe("yaegi and zig singletons are isolated", () => {
-  /* Catches a copy-paste regression where someone refactored the
-   * two accessors into a shared singleton, or swapped the worker
-   * URLs between getRunner and getZigRunner. The browser would
-   * eventually show the symptoms, but a unit test catches it
-   * before it ships. */
+describe("getRustRunner / terminateRustRunner", () => {
+  /* Mirrors the Yaegi/Zig suites. The Rust runner was added with
+   * the server-compile path; its accessor lifecycle must match so
+   * `useRuntimeRun` can drive it interchangeably. */
+  it("constructs a worker on first call and caches the wrapped proxy", async () => {
+    const mod = await import("./index");
+    const a = mod.getRustRunner();
+    const b = mod.getRustRunner();
+    expect(workerCtor).toHaveBeenCalledTimes(1);
+    expect(a).toBe(b);
+  });
 
-  it("getRunner and getZigRunner return distinct proxies", async () => {
+  it("terminate clears the singleton so the next call respawns the worker", async () => {
+    const mod = await import("./index");
+    const first = mod.getRustRunner();
+    mod.terminateRustRunner();
+    const second = mod.getRustRunner();
+    expect(workerCtor).toHaveBeenCalledTimes(2);
+    expect(first).not.toBe(second);
+  });
+});
+
+describe("all three runtime singletons are isolated", () => {
+  /* Catches a copy-paste regression where someone refactored the
+   * accessors into a shared singleton, or swapped the worker URLs
+   * between accessors. The browser would eventually show the
+   * symptoms, but a unit test catches it before it ships. The
+   * factory-based pattern in src/runtime/index.ts (one closure per
+   * language) is specifically defended by this suite. */
+
+  it("all three accessors return mutually distinct proxies", async () => {
     const mod = await import("./index");
     const yaegi = mod.getRunner();
     const zig = mod.getZigRunner();
+    const rust = mod.getRustRunner();
     expect(yaegi).not.toBe(zig);
-    expect(workerCtor).toHaveBeenCalledTimes(2);
+    expect(yaegi).not.toBe(rust);
+    expect(zig).not.toBe(rust);
+    expect(workerCtor).toHaveBeenCalledTimes(3);
   });
 
   it("each accessor constructs a worker from its own module URL", async () => {
     const mod = await import("./index");
     mod.getRunner();
     mod.getZigRunner();
-    expect(workerCtor).toHaveBeenCalledTimes(2);
+    mod.getRustRunner();
+    expect(workerCtor).toHaveBeenCalledTimes(3);
     const urls = workerCtor.mock.calls.map((c) => String(c[0]));
-    /* Each call passes a different module URL (the worker file
-     * literal). A regression that pointed both at the same file
-     * would fail this. */
-    expect(urls[0]).not.toBe(urls[1]);
-    /* And spot-check the names match the expected worker files. */
+    /* All three URLs distinct. A regression that pointed two
+     * accessors at the same file would fail this. */
+    expect(new Set(urls).size).toBe(3);
+    /* Spot-check the names match the expected worker files. */
     expect(urls.some((u) => u.includes("yaegi-worker"))).toBe(true);
     expect(urls.some((u) => u.includes("zig-worker"))).toBe(true);
+    expect(urls.some((u) => u.includes("rust-worker"))).toBe(true);
   });
 
-  it("terminating Yaegi does not respawn the Zig worker (and vice versa)", async () => {
+  it("terminating one runtime does not respawn the others", async () => {
     const mod = await import("./index");
+    const yaegiBefore = mod.getRunner();
     const zigBefore = mod.getZigRunner();
-    mod.getRunner();
-    expect(workerCtor).toHaveBeenCalledTimes(2);
+    const rustBefore = mod.getRustRunner();
+    expect(workerCtor).toHaveBeenCalledTimes(3);
+
+    /* Terminate Yaegi → Zig + Rust singletons survive. */
     mod.terminateRunner();
-    const zigAfter = mod.getZigRunner();
-    /* The Zig singleton survives the Yaegi terminate. */
-    expect(zigAfter).toBe(zigBefore);
-    expect(workerCtor).toHaveBeenCalledTimes(2);
+    expect(mod.getZigRunner()).toBe(zigBefore);
+    expect(mod.getRustRunner()).toBe(rustBefore);
+    expect(workerCtor).toHaveBeenCalledTimes(3);
+
+    /* Terminate Zig → Rust + (respawned) Yaegi survive each other. */
+    mod.terminateZigRunner();
+    const yaegiAgain = mod.getRunner();
+    expect(yaegiAgain).not.toBe(yaegiBefore);
+    expect(mod.getRustRunner()).toBe(rustBefore);
+    expect(workerCtor).toHaveBeenCalledTimes(4);
+
+    /* Terminate Rust → Yaegi + Zig survive Rust. */
+    mod.terminateRustRunner();
+    const yaegiStill = mod.getRunner();
+    expect(yaegiStill).toBe(yaegiAgain);
+    /* Zig was terminated above; calling getZigRunner here would
+     * spawn a fresh worker. We only assert non-respawn of the
+     * untouched runtimes, so don't re-fetch Zig. */
+    expect(workerCtor).toHaveBeenCalledTimes(4);
   });
 });

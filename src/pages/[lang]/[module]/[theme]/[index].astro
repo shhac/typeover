@@ -29,6 +29,7 @@ import {
 } from "~/lib/curriculum";
 import { LANG_DISPLAY } from "~/lib/lang";
 import { formatBlock } from "~/lib/format-block";
+import { pickExerciseDispatch } from "~/lib/exercise-dispatch";
 
 type ExerciseEntry = CollectionEntry<"exercises">;
 
@@ -93,6 +94,13 @@ function resolvePrevExerciseHref(): string | undefined {
 const nextExerciseHref = resolveNextExerciseHref();
 const prevExerciseHref = resolvePrevExerciseHref();
 const parentThemeHref = themeHref(themeEntry.id);
+
+/* Typed dispatch: turns the four `ex.type === ...` clauses below
+ * into one switch over a discriminated union — exhaustive via
+ * assertUnreachable, so a new schema exercise type fails the
+ * build instead of silently rendering nothing. Also lifts the
+ * (target=rust, runtime=server) → "rust" reshape out of JSX. */
+const dispatch = pickExerciseDispatch(ex);
 ---
 
 <BaseLayout
@@ -125,7 +133,7 @@ const parentThemeHref = themeHref(themeEntry.id);
         </Stack>
 
         <Panel padding="airy" tone="default">
-          {ex.type === "mcq" && (
+          {dispatch.kind === "mcq" && (
             <Mcq
               client:visible
               exerciseId={entry.id}
@@ -137,13 +145,13 @@ const parentThemeHref = themeHref(themeEntry.id);
               themeHref={parentThemeHref}
             />
           )}
-          {ex.type === "fill-word" && (
+          {dispatch.kind === "fill-word" && (
             <FillBlankWord
               client:visible
               exerciseId={entry.id}
               prompt={ex.prompt}
               generator={ex.generator}
-              blanks={ex.blanks ?? []}
+              blanks={dispatch.blanks}
               hints={ex.hints}
               target={ex.target}
               successNote={ex.successNote}
@@ -151,32 +159,32 @@ const parentThemeHref = themeHref(themeEntry.id);
               themeHref={parentThemeHref}
             />
           )}
-          {ex.type === "fill-line" && ex.expectStdout !== undefined && (ex.runtime === "yaegi" || ex.runtime === "zig") && (
+          {dispatch.kind === "fill-line" && (
             <FillBlankLineInput
               client:only="solid-js"
               exerciseId={entry.id}
               prompt={ex.prompt}
               generator={ex.generator}
-              blanks={ex.blanks ?? []}
+              blanks={dispatch.blanks}
               hints={ex.hints}
-              expectStdout={ex.expectStdout}
-              runtime={ex.runtime}
-              alternateCanonicals={ex.alternateCanonicals}
+              expectStdout={dispatch.expectStdout}
+              runtime={dispatch.runtime}
+              alternateCanonicals={dispatch.alternateCanonicals}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}
             />
           )}
-          {ex.type === "freeform" && ex.expectStdout !== undefined && ex.runtime !== "none" && (
+          {dispatch.kind === "freeform" && (
             <Freeform
               client:only="solid-js"
               exerciseId={entry.id}
               prompt={ex.prompt}
               generator={ex.generator}
               hints={ex.hints}
-              expectStdout={ex.expectStdout}
-              runtime={ex.target === "rust" && ex.runtime === "server" ? "rust" : ex.runtime}
-              submissionShape={ex.submissionShape}
+              expectStdout={dispatch.expectStdout}
+              runtime={dispatch.runtime}
+              submissionShape={dispatch.submissionShape}
               successNote={ex.successNote}
               nextExerciseHref={nextExerciseHref}
               themeHref={parentThemeHref}

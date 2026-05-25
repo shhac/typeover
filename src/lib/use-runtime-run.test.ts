@@ -427,12 +427,12 @@ describe("useRuntimeRun — generation-tagged settlements", () => {
 });
 
 describe("useRuntimeRun — runtime selection", () => {
-  /* The hook chooses {get, terminate} accessors from RUNTIME_ACCESSORS
+  /* The hook chooses its `{get, terminate}` pair from CLIENT_RUNTIMES
    * by indexing on `args.runtime`. Distinct spies per runtime catch
-   * a regression that hard-codes `RUNTIME_ACCESSORS.yaegi` or
-   * accidentally maps both branches to the same accessor pair —
-   * neither would fail any test in the lifecycle block above
-   * because the historical mock shared one set of spies. */
+   * a regression that hard-codes `CLIENT_RUNTIMES.yaegi` or
+   * accidentally maps both branches to the same descriptor — neither
+   * would fail any test in the lifecycle block above because the
+   * historical mock shared one set of spies. */
 
   function setupZig(buildProgram: () => string = () => 'const std = @import("std");') {
     let handle!: ReturnType<typeof useRuntimeRun>;

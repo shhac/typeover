@@ -1,4 +1,5 @@
 import { pickFrom, rngFromSeed, shuffle } from "./seed";
+import { assertUnreachable } from "./assert-unreachable";
 import {
   distractorMatchText,
   PLACEHOLDER_RE,
@@ -244,5 +245,10 @@ export function generate(
       return generateVariant(spec, seed, opts);
     case "procedural":
       throw new Error("Procedural generators not implemented yet (no exercises use them)");
+    default:
+      /* Widening GeneratorSpec without a matching case fails at
+       * typecheck rather than slipping past the existing
+       * "procedural throws" runtime catch. */
+      return assertUnreachable(spec);
   }
 }

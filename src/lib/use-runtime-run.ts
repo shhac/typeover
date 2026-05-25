@@ -41,7 +41,7 @@ import { LANG_DISPLAY } from "./lang";
  */
 
 /** Client-side runtimes the hook actually drives. Each maps to a
- *  Web Worker accessor in `RUNTIME_ACCESSORS` below.
+ *  descriptor in `CLIENT_RUNTIMES` below.
  *
  *  `rust` is the server-compile path — the worker POSTs source to
  *  /api/compile/rust and runs the returned wasm. From the hook's
@@ -58,42 +58,58 @@ export type ClientRuntime = "yaegi" | "zig" | "rust";
  *  hook. */
 export type AcceptedRuntime = ClientRuntime | "server";
 
-/* Which curriculum-target language each runtime grades. Drives
- * both the display label (via `LANG_DISPLAY`) and the handle's
- * `runtimeTarget` field. Internal; consumers read the per-handle
- * `runtimeTarget` instead. */
-const RUNTIME_TARGET: Record<ClientRuntime, Target> = {
-  yaegi: "go",
-  zig: "zig",
-  rust: "rust",
-};
-
-/* Human-facing label per runtime. Derived from RUNTIME_TARGET +
- * LANG_DISPLAY so the display strings live in one place
- * (LANG_DISPLAY). Internal; surfaced through the handle's
- * `runtimeLabel` field so shared UI (toolbar boot badge) doesn't
- * need to maintain its own lookup. */
-const RUNTIME_LABELS: Record<ClientRuntime, string> = {
-  yaegi: LANG_DISPLAY[RUNTIME_TARGET.yaegi],
-  zig: LANG_DISPLAY[RUNTIME_TARGET.zig],
-  rust: LANG_DISPLAY[RUNTIME_TARGET.rust],
-};
-
-/* Internal — keep the {get, terminate} pair per runtime so the
- * hook body stays branch-free. Each accessor is the worker
- * singleton from src/runtime/index.ts; lazy-spawning lives there. */
-interface RuntimeAccessors {
+/* One descriptor per client runtime — all the per-language wiring
+ * collapses to a single row. Adding a fourth runtime is one entry
+ * in this table; the hook body stays branch-free.
+ *
+ * - `target` drives the handle's `runtimeTarget` field plus the
+ *   curriculum-target lookups (CodeMirror grammar, scaffold).
+ * - `label` is the human-facing string (boot badge).
+ * - `get` / `terminate` are the lazy worker singletons from
+ *   src/runtime/index.ts.
+ */
+interface ClientRuntimeDescriptor {
+  target: Target;
+  label: string;
   get: () => {
     ready(): Promise<void>;
     eval(code: string): Promise<{ stdout: string; stderr: string; error: string }>;
   };
   terminate: () => void;
 }
-const RUNTIME_ACCESSORS: Record<ClientRuntime, RuntimeAccessors> = {
-  yaegi: { get: getRunner, terminate: terminateRunner },
-  zig: { get: getZigRunner, terminate: terminateZigRunner },
-  rust: { get: getRustRunner, terminate: terminateRustRunner },
+const CLIENT_RUNTIMES: Record<ClientRuntime, ClientRuntimeDescriptor> = {
+  yaegi: {
+    target: "go",
+    label: LANG_DISPLAY.go,
+    get: getRunner,
+    terminate: terminateRunner,
+  },
+  zig: {
+    target: "zig",
+    label: LANG_DISPLAY.zig,
+    get: getZigRunner,
+    terminate: terminateZigRunner,
+  },
+  rust: {
+    target: "rust",
+    label: LANG_DISPLAY.rust,
+    get: getRustRunner,
+    terminate: terminateRustRunner,
+  },
 };
+
+/** Map an `AcceptedRuntime` (which includes the `"server"`
+ *  placeholder) to its curriculum target. Lets consumers thread
+ *  the right target/scaffold without re-deriving the mapping in
+ *  every freeform-like site. The `"server"` runtime resolves to
+ *  Go today as a placeholder — that branch never actually runs
+ *  (canRun is false), and the page boundary reshapes Rust's
+ *  (target=rust, runtime=server) into runtime="rust" upstream of
+ *  the hook. */
+export function runtimeToTarget(runtime: AcceptedRuntime): Target {
+  if (runtime === "server") return "go";
+  return CLIENT_RUNTIMES[runtime].target;
+}
 
 export interface RunResult {
   stdout: string;
@@ -187,11 +203,11 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
    * `runner.canRun`, so the labels never matter to the learner. */
   const canRun = args.runtime !== "server";
   /* TS doesn't narrow `args.runtime` through the const above; use a
-   * type guard so the indexed lookups stay safe. */
+   * type guard so the descriptor lookup stays safe. */
   const clientRuntime: ClientRuntime = args.runtime === "server" ? "yaegi" : args.runtime;
-  const accessors = RUNTIME_ACCESSORS[clientRuntime];
-  const runtimeLabel = RUNTIME_LABELS[clientRuntime];
-  const runtimeTarget = RUNTIME_TARGET[clientRuntime];
+  const descriptor = CLIENT_RUNTIMES[clientRuntime];
+  const runtimeLabel = descriptor.label;
+  const runtimeTarget = descriptor.target;
 
   const [runResult, setRunResult] = createSignal<RunResult | null>(null);
   const [running, setRunning] = createSignal(false);
@@ -274,7 +290,7 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     setStatus("booting");
     setBootError(null);
     armStallTimer(bootGen);
-    attachBootHandlers(bootGen, accessors.get().ready());
+    attachBootHandlers(bootGen, descriptor.get().ready());
   }
 
   async function run(): Promise<void> {
@@ -306,7 +322,7 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     setRunning(true);
     const t0 = performance.now();
     try {
-      const runner = accessors.get();
+      const runner = descriptor.get();
       const r = await runner.eval(args.buildProgram());
       if (gen !== currentGen()) return; /* stale — reset/clear happened mid-flight */
       setRunResult({
@@ -340,7 +356,7 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
      * terminated. Bumping the generation invalidates any in-flight
      * eval; its eventual rejection won't touch runResult. */
     bumpGen();
-    accessors.terminate();
+    descriptor.terminate();
     setRunning(false);
     /* Runtime is gone — flip back to "uninit" so a subsequent
      * preflight() / run() triggers a fresh boot. Without this the

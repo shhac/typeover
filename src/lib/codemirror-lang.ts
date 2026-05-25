@@ -22,6 +22,7 @@ import type { Extension } from "@codemirror/state";
 import { go } from "@codemirror/lang-go";
 import { javascript } from "@codemirror/lang-javascript";
 import { zigLanguage } from "@ndim/codemirror-lang-zig";
+import { assertUnreachable } from "./assert-unreachable";
 
 /** Canonical language union for every CodeMirror editor surface. */
 export type CmLanguage = "go" | "ts" | "zig" | "rust";
@@ -44,5 +45,10 @@ export function cmLanguageExtension(lang: CmLanguage): Extension {
        * the fallback empty keeps the bundle lean until the Rust
        * track justifies the dependency. */
       return [];
+    default:
+      /* Widening CmLanguage without a matching case here is a
+       * compile-time failure rather than a silent fall-through
+       * returning undefined. */
+      return assertUnreachable(lang);
   }
 }

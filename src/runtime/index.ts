@@ -17,79 +17,86 @@ import type { RustWorkerAPI } from "./rust-worker";
  * Terminate hooks are provided for when we want to hard-reset a
  * worker between exercises (e.g. learner triggered an infinite loop
  * and we want to recover without a page reload).
+ *
+ * Each language registers via `makeRunnerAccessor` — a closure-based
+ * factory that owns the singleton + worker pair. Eliminates the
+ * copy-paste-with-renames pattern that would otherwise repeat once
+ * per language, and prevents the per-language drift mode the
+ * `index.test.ts` "singletons are isolated" suite was created to
+ * catch.
  */
 
 export type YaegiRunner = Remote<YaegiWorkerAPI>;
 export type ZigRunner = Remote<ZigWorkerAPI>;
 export type RustRunner = Remote<RustWorkerAPI>;
 
-let yaegiRunner: YaegiRunner | null = null;
-let yaegiWorker: Worker | null = null;
-
-export function getRunner(): YaegiRunner {
-  if (yaegiRunner) return yaegiRunner;
-  yaegiWorker = new Worker(new URL("./yaegi-worker.ts", import.meta.url), {
-    type: "module",
-  });
-  yaegiRunner = wrap<YaegiWorkerAPI>(yaegiWorker);
-  /* Kick off the WASM load immediately. `ready()` is idempotent on
-   * the worker side, so an exercise component awaiting it later
-   * piggybacks on this in-flight init rather than starting a second. */
-  void yaegiRunner.ready();
-  return yaegiRunner;
+/* Every worker API exposes a `ready()` for the lazy WASM-load
+ * piggyback below — constrain the factory's API generic to that
+ * shape so `runner.ready()` typechecks without a cast. */
+interface RunnerLike {
+  ready(): Promise<void>;
 }
 
-/** Kill the Yaegi worker. Next `getRunner()` will spawn a fresh one
- *  with a fresh WASM load. Use this after a runaway-loop watchdog or
+interface RunnerAccessor<API extends RunnerLike> {
+  get(): Remote<API>;
+  terminate(): void;
+}
+
+/** Build a lazy-singleton accessor pair for a worker module. The
+ *  worker URL is captured at registration time; the singleton +
+ *  underlying `Worker` instance live in the returned closure so
+ *  each language has its own isolated state — no module-level
+ *  `let runner; let worker;` proliferation. */
+function makeRunnerAccessor<API extends RunnerLike>(workerUrl: URL): RunnerAccessor<API> {
+  let runner: Remote<API> | null = null;
+  let worker: Worker | null = null;
+  return {
+    get(): Remote<API> {
+      if (runner) return runner;
+      worker = new Worker(workerUrl, { type: "module" });
+      runner = wrap<API>(worker);
+      /* Kick off the WASM (or compile-service) load immediately.
+       * `ready()` is idempotent on the worker side, so an exercise
+       * component awaiting it later piggybacks on this in-flight
+       * init rather than starting a second. */
+      void runner.ready();
+      return runner;
+    },
+    terminate(): void {
+      worker?.terminate();
+      worker = null;
+      runner = null;
+    },
+  };
+}
+
+const yaegiAccessor = makeRunnerAccessor<YaegiWorkerAPI>(
+  new URL("./yaegi-worker.ts", import.meta.url),
+);
+const zigAccessor = makeRunnerAccessor<ZigWorkerAPI>(
+  new URL("./zig-worker.ts", import.meta.url),
+);
+const rustAccessor = makeRunnerAccessor<RustWorkerAPI>(
+  new URL("./rust-worker.ts", import.meta.url),
+);
+
+/** Lazy accessor for the Yaegi runner. */
+export const getRunner = (): YaegiRunner => yaegiAccessor.get();
+/** Kill the Yaegi worker. Next `getRunner()` spawns a fresh one
+ *  with a fresh WASM load. Use after a runaway-loop watchdog or
  *  when the learner clicks "Stop" in the freeform component. */
-export function terminateRunner(): void {
-  yaegiWorker?.terminate();
-  yaegiWorker = null;
-  yaegiRunner = null;
-}
+export const terminateRunner = (): void => yaegiAccessor.terminate();
 
-let zigRunner: ZigRunner | null = null;
-let zigWorker: Worker | null = null;
-
-/** Lazy accessor for the Zig runner. Boots the compiler wasm on first
- *  call; the heavier stdlib bundle is deferred to the first eval()
- *  (see comment in zig-worker.ts on the split-loading model). */
-export function getZigRunner(): ZigRunner {
-  if (zigRunner) return zigRunner;
-  zigWorker = new Worker(new URL("./zig-worker.ts", import.meta.url), {
-    type: "module",
-  });
-  zigRunner = wrap<ZigWorkerAPI>(zigWorker);
-  void zigRunner.ready();
-  return zigRunner;
-}
-
-export function terminateZigRunner(): void {
-  zigWorker?.terminate();
-  zigWorker = null;
-  zigRunner = null;
-}
-
-let rustRunner: RustRunner | null = null;
-let rustWorker: Worker | null = null;
+/** Lazy accessor for the Zig runner. Boots the compiler wasm on
+ *  first call; the heavier stdlib bundle is deferred to the first
+ *  eval() (see comment in zig-worker.ts on the split-loading model). */
+export const getZigRunner = (): ZigRunner => zigAccessor.get();
+export const terminateZigRunner = (): void => zigAccessor.terminate();
 
 /** Lazy accessor for the Rust runner. Boots a worker that proxies
  *  compile requests to /api/compile/rust (intercepted by the SW
  *  for L1 cache hits) and runs returned wasm via
  *  @bjorn3/browser_wasi_shim. No compiler payload to fetch
  *  ahead-of-time — `ready()` is a no-op. */
-export function getRustRunner(): RustRunner {
-  if (rustRunner) return rustRunner;
-  rustWorker = new Worker(new URL("./rust-worker.ts", import.meta.url), {
-    type: "module",
-  });
-  rustRunner = wrap<RustWorkerAPI>(rustWorker);
-  void rustRunner.ready();
-  return rustRunner;
-}
-
-export function terminateRustRunner(): void {
-  rustWorker?.terminate();
-  rustWorker = null;
-  rustRunner = null;
-}
+export const getRustRunner = (): RustRunner => rustAccessor.get();
+export const terminateRustRunner = (): void => rustAccessor.terminate();

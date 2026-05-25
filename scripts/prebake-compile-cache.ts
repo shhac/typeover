@@ -36,7 +36,7 @@ const root = join(here, "..");
 const exercisesRoot = join(root, "src/content/exercises/rust");
 const cacheRoot = join(root, "public/compile-cache/rust");
 
-type ExerciseYaml = {
+export type ExerciseYaml = {
   target: string;
   themeId: string;
   type: string;
@@ -55,6 +55,30 @@ interface CanonicalEntry {
   source: string;
 }
 
+/** Pure: extract every canonical source the prebake should compile
+ *  from one exercise yaml. Returns:
+ *   - 0 entries when the exercise isn't freeform+server-runtime, or
+ *     has no canonical/variants
+ *   - 1 entry for a `template` generator (single `canonical` field)
+ *   - N entries for a `variant` generator (one per variant)
+ *
+ *  Splitting this out (a) lets the test suite assert all variants
+ *  get prebaked (previously the loop took only `variants[0]`,
+ *  silently leaving subsequent variants paying cold-compile on
+ *  first hit), and (b) keeps the directory walker pure I/O. */
+export function extractCanonicals(data: ExerciseYaml): string[] {
+  if (data.runtime !== "server") return [];
+  if (data.type !== "freeform") return [];
+  const out: string[] = [];
+  if (typeof data.generator?.canonical === "string") {
+    out.push(data.generator.canonical);
+  }
+  for (const v of data.generator?.variants ?? []) {
+    if (typeof v.canonical === "string") out.push(v.canonical);
+  }
+  return out;
+}
+
 async function collectCanonicals(): Promise<CanonicalEntry[]> {
   if (!existsSync(exercisesRoot)) return [];
   const entries: CanonicalEntry[] = [];
@@ -68,20 +92,19 @@ async function collectCanonicals(): Promise<CanonicalEntry[]> {
       } else if (item.name.endsWith(".yaml")) {
         const raw = await readFile(full, "utf8");
         const data = parse(raw) as ExerciseYaml;
-        if (data.runtime !== "server") continue;
-        if (data.type !== "freeform") continue;
-        /* Resolve canonical source — single (variant) or first
-         * (template) for simplicity. The Rust track currently
-         * pre-bakes one canonical per exercise; if a future
-         * exercise has multiple canonicals, extend here. */
-        const canonical =
-          data.generator?.canonical ??
-          data.generator?.variants?.[0]?.canonical;
-        if (typeof canonical !== "string") continue;
+        const sources = extractCanonicals(data);
+        if (sources.length === 0) continue;
         const idPath = relative(exercisesRoot, full).replace(/\.yaml$/, "");
-        entries.push({
-          exerciseId: `rust/${idPath}`,
-          source: canonical,
+        sources.forEach((source, idx) => {
+          /* When an exercise has multiple variants, append a suffix
+           * so the log distinguishes which one's being baked. The
+           * hash key is the only thing the SW actually looks up,
+           * so the suffix is purely cosmetic. */
+          const suffix = sources.length > 1 ? `#${idx}` : "";
+          entries.push({
+            exerciseId: `rust/${idPath}${suffix}`,
+            source,
+          });
         });
       }
     }

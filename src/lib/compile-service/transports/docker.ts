@@ -25,6 +25,7 @@ import type {
   CompileResult,
   CompileTransport,
 } from "./types";
+import { rustcCompileArgs } from "./sandbox-config.ts";
 
 interface DockerTransportOptions {
   /** Docker image to run. Default: `rust:1.83-slim`. */
@@ -83,20 +84,18 @@ export class DockerTransport implements CompileTransport {
         "/work",
         this.image,
       ];
+      /* `rustup target add wasm32-wasip1` is idempotent inside the
+       * image — first invocation downloads ~30s of stdlib,
+       * subsequent invocations are no-ops. Caching the host image
+       * layer covers cold-start cost across runs. The rustc flags
+       * are shared with the sandbox transport via sandbox-config. */
+      const rustcArgs = rustcCompileArgs("/work/main.rs", "/work/out.wasm");
       const result = await runDocker(
         [
           ...dockerArgs,
           "sh",
           "-c",
-          /* `rustup target add wasm32-wasip1` is idempotent inside
-           * the image — first invocation downloads ~30s of stdlib,
-           * subsequent invocations are no-ops. Caching the host
-           * image layer covers cold-start cost across runs. */
-          "rustup target add wasm32-wasip1 >/dev/null 2>&1 && " +
-            "rustc --target wasm32-wasip1 " +
-            "-C opt-level=z -C strip=symbols -C debuginfo=0 " +
-            "-C panic=abort " +
-            "/work/main.rs -o /work/out.wasm 2>&1",
+          `rustup target add wasm32-wasip1 >/dev/null 2>&1 && rustc ${rustcArgs.join(" ")} 2>&1`,
         ],
         this.timeoutSeconds * 1000,
       );

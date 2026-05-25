@@ -21,6 +21,12 @@
 
 import { Sandbox } from "@vercel/sandbox";
 
+import {
+  RUST_RUNTIME,
+  RUST_SANDBOX_NETWORK_ALLOW,
+  rustInstallCommand,
+} from "../src/lib/compile-service/transports/sandbox-config.ts";
+
 /* Env loading: the npm script runs node with
  * `--env-file-if-exists=.env.local` so `vercel env pull` output is
  * picked up automatically. Inside Vercel's CI the env is already
@@ -37,31 +43,25 @@ async function warmShard(shardIndex: number): Promise<void> {
   let installRan = false;
   const sandbox = await Sandbox.getOrCreate({
     name,
-    runtime: "node24",
-    networkPolicy: {
-      allow: [
-        "*.rust-lang.org",
-        "static.rust-lang.org",
-        "sh.rustup.rs",
-        "static.crates.io",
-        "*.crates.io",
-      ],
-    },
+    runtime: RUST_RUNTIME,
+    networkPolicy: { allow: [...RUST_SANDBOX_NETWORK_ALLOW] },
     /* Generous one-time install budget. After this run, the
      * sandbox's auto-snapshot captures the toolchain. */
     timeout: 10 * 60 * 1000,
     onCreate: async (sbx) => {
       installRan = true;
       console.log(`  [${name}] fresh sandbox — installing rustup + wasm32-wasip1`);
+      /* Run the shared install command, then echo the resulting
+       * rustc + target inventory so the bootstrap log shows what
+       * the snapshot actually contains. */
+      const installArgs = rustInstallCommand().args;
       const cmd = await sbx.runCommand({
         cmd: "bash",
         args: [
           "-lc",
-          "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs " +
-            "| sh -s -- -y --default-toolchain stable -t wasm32-wasip1 " +
-            "--profile minimal && " +
-            "~/.cargo/bin/rustc --version && " +
-            "~/.cargo/bin/rustup target list --installed",
+          installArgs[1] +
+            " && ~/.cargo/bin/rustc --version " +
+            "&& ~/.cargo/bin/rustup target list --installed",
         ],
       });
       if (cmd.exitCode !== 0) {
