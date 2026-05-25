@@ -1,0 +1,36 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: mcq-explain
+order: 2
+prompt: |
+  rustc rejects the program below with `error[E0499]: cannot borrow
+  `s` as mutable more than once at a time`. Pick the explanation
+  that names the rule being violated.
+generator:
+  kind: variant
+  variants:
+    - id: e0499
+      ts: |-
+        let s = "hi";
+        // TS lets any number of references coexist —
+        // there is no exclusivity rule.
+      source: |-
+        let mut s = String::from("hi");
+        let a = &mut s;
+        let b = &mut s;
+        println!("{} {}", a, b);
+      canonical: 'The borrow checker permits AT MOST one mutable borrow at a time. `b` tries to take a second `&mut` while `a` is still alive — both must be in scope to print, so the rule fires.'
+      distractors:
+        - 'Mutable references cannot be `println!`-ed without an explicit dereference like `*a`.'
+        - '`s` was declared `let mut`, so further `&mut` borrows are blocked; remove the `mut` from `let`.'
+        - 'Two `&mut` references work fine, but only if they have different lifetimes annotated.'
+hints:
+  - "The borrow checker's headline rule: `&` and `&mut` follow a SHARING vs EXCLUSIVITY split — any number of shared borrows OR exactly one exclusive (mutable) borrow, never both, never multiple `&mut`."
+  - "The error is about EXCLUSIVITY, not about syntax or lifetimes."
+  - 'Rust permits at most one `&mut` to the same value at a time; `b` overlaps with `a`.'
+runtime: none
+notes: |
+  Teaches the one-mutable-borrow rule via the canonical E0499
+  diagnostic. Distractors cover three plausible-but-wrong
+  hypotheses a TS-leaning learner reaches for: missing deref,
+  blame the `let mut`, blame the missing lifetime annotation.

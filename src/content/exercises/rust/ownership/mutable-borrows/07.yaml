@@ -1,0 +1,53 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: freeform
+order: 7
+prompt: |
+  Write a Rust program that:
+  1. Owns a mutable `String` in `main`.
+  2. Passes a `&mut String` to a helper `punctuate` that pushes
+     a '!' onto it.
+  3. AFTER the helper returns, reads the String and prints both
+     the string and its length on one line.
+
+  Output:
+
+      hi! 3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function punctuate(s: { v: string }): void { s.v += "!"; }
+    const msg = { v: "hi" };
+    punctuate(msg);
+    console.log(msg.v + " " + msg.v.length);
+  canonical: |-
+    fn punctuate(s: &mut String) {
+        s.push('!');
+    }
+
+    fn main() {
+        let mut msg = String::from("hi");
+        punctuate(&mut msg);
+        println!("{} {}", msg, msg.len());
+    }
+expectStdout: |
+  hi! 3
+runtime: server
+hints:
+  - "Two pieces and a third detail: signature `fn punctuate(s: &mut String) { s.push('!'); }`, call site `punctuate(&mut msg)` with the `&mut` prefix, and the read after the call works because the borrow has ended by then (NLL)."
+  - "`msg` must be declared with `let mut` — without it, the call site `&mut msg` fails to compile."
+  - |-
+    fn punctuate(s: &mut String) {
+        s.push('!');
+    }
+
+    fn main() {
+        let mut msg = String::from("hi");
+        punctuate(&mut msg);
+        println!("{} {}", msg, msg.len());
+    }
+notes: |
+  Full round-trip drill: declare-mut, borrow-mut, mutate
+  through reference, read-after-borrow-ends. The owner survives
+  because NLL ends the borrow at the function-call site.

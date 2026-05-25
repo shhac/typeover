@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: fill-line
+order: 6
+prompt: |
+  Write the function signature for `append_bang`. It takes a
+  mutable borrow of a `String` and returns nothing — it pushes a
+  '!' onto the String in place.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn append_bang(s: &mut String) {"
+  ts: |-
+    function appendBang(s: string): string { return s + "!"; }
+  canonical: |-
+    ${line}
+        s.push('!');
+    }
+
+    fn main() {
+        let mut greeting = String::from("hi");
+        append_bang(&mut greeting);
+        println!("{}", greeting);
+    }
+  distractors:
+    - match: "fn append_bang(s: &String) {"
+      explain: |-
+        That's a SHARED borrow — readable but not mutable. The
+        body's `s.push('!')` would fail to compile. Add `mut`
+        between `&` and `String` to make it exclusive.
+    - match: "fn append_bang(s: String) {"
+      explain: |-
+        That takes OWNERSHIP. The function can mutate, but the
+        caller's `greeting` is gone after the call. For an
+        in-place updater that lets the caller keep using the
+        value, borrow exclusively with `&mut String`.
+    - match: "fn append_bang(mut s: String) {"
+      explain: |-
+        `mut s` makes the BINDING mutable, but `s` still moved
+        IN from the caller — the caller still loses the
+        original. The reference-level fix is `&mut String`.
+    - match: "fn append_bang(s: &mut String) -> () {"
+      explain: |-
+        Compiles, but the `-> ()` return type is implicit when
+        omitted; idiomatic Rust drops it. Match the canonical
+        shape without the explicit unit.
+expectStdout: |
+  hi!
+runtime: server
+blanks: [line]
+hints:
+  - "Two halves: the parameter type is `&mut String` (exclusive borrow), and the return type is omitted (the function returns `()`). Skip the `->` block entirely."
+  - "Shape: `fn <name>(<arg>: &mut <type>) {`."
+  - "`fn append_bang(s: &mut String) {`"
+notes: |
+  Production drill for the in-place-updater signature.
+  Distractors cover shared-when-mutable-needed, move-when-
+  borrow-would-do, mutable-binding-but-not-mutable-reference,
+  and explicit-unit-return.

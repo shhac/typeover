@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: mcq
+order: 1
+prompt: |
+  A function appends an exclamation mark to a String in place. Pick
+  the idiomatic Rust parameter type.
+generator:
+  kind: variant
+  variants:
+    - id: push-bang
+      ts: 'function exclaim(s: string): string { return s + "!"; }'
+      canonical: 'fn exclaim(s: &mut String) — exclusive mutable borrow; the function modifies in place and the caller keeps ownership.'
+      distractors:
+        - 'fn exclaim(s: &String) — shared borrow; the function cannot mutate.'
+        - 'fn exclaim(s: String) — takes ownership; the caller loses the String after the call.'
+        - 'fn exclaim(mut s: String) — mutable BINDING, but still takes ownership; the caller still loses the original.'
+hints:
+  - "If the function MUTATES the value but the caller should keep it, the parameter is an EXCLUSIVE reference — written `&mut T`. Shared `&T` can read; only `&mut T` can write."
+  - "Two characters before `String`."
+  - '`fn exclaim(s: &mut String)`'
+runtime: none
+notes: |
+  Drills the `&mut T` parameter for in-place updaters. Distractors
+  cover the three slips: shared-when-mutable-needed, move-when-
+  borrow-would-do, and `mut s: T` (mutable binding ≠ mutable
+  reference).

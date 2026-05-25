@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: fill-word
+order: 5
+prompt: |
+  Fill the qualifier at the CALL SITE that hands `s` to a function
+  expecting `&mut String`. The function will mutate `s` in place.
+generator:
+  kind: template
+  vars:
+    qualifier: ["&mut"]
+    name: [s, msg, greeting]
+  ts: |-
+    exclaim(${name});
+  canonical: |-
+    exclaim(${qualifier} ${name});
+blanks: [qualifier]
+hints:
+  - "Same two tokens as the parameter type — at the call site they're a unary operator that takes an EXCLUSIVE reference TO the binding."
+  - "Four characters; goes directly before the variable name."
+  - "`&mut`"
+runtime: none
+notes: |
+  Sibling drill to slot 04 — call-site `&mut` mirrors the
+  parameter type, same shape as `borrowing/05`'s shared `&`.

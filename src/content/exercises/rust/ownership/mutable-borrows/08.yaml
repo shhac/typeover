@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript array-mutator into Rust. `double_all`
+  takes a mutable borrow of a `Vec<i32>` and doubles every element
+  in place. `main` builds a vec of `[1, 2, 3]`, calls the helper,
+  and prints the result space-separated.
+
+  Output:
+
+      2 4 6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function doubleAll(arr: number[]): void {
+      for (let i = 0; i < arr.length; i++) arr[i] *= 2;
+    }
+    const xs = [1, 2, 3];
+    doubleAll(xs);
+    console.log(xs[0] + " " + xs[1] + " " + xs[2]);
+  canonical: |-
+    fn double_all(xs: &mut Vec<i32>) {
+        for x in xs.iter_mut() {
+            *x *= 2;
+        }
+    }
+
+    fn main() {
+        let mut xs = vec![1, 2, 3];
+        double_all(&mut xs);
+        println!("{} {} {}", xs[0], xs[1], xs[2]);
+    }
+expectStdout: |
+  2 4 6
+runtime: server
+hints:
+  - "Two reflex-shifts from TS: (1) the parameter type is `&mut Vec<i32>`, not `Vec<i32>`; (2) to mutate inside the loop you need `xs.iter_mut()` AND `*x` to dereference and assign through the mutable reference."
+  - "Body shape: `for x in xs.iter_mut() { *x *= 2; }`."
+  - |-
+    fn double_all(xs: &mut Vec<i32>) {
+        for x in xs.iter_mut() {
+            *x *= 2;
+        }
+    }
+
+    fn main() {
+        let mut xs = vec![1, 2, 3];
+        double_all(&mut xs);
+        println!("{} {} {}", xs[0], xs[1], xs[2]);
+    }
+notes: |
+  Drills `&mut` against a collection. `.iter_mut()` is the
+  idiomatic mutable-iteration shape — the borrow is exclusive
+  for the loop's duration; `*x` deref-assigns through the
+  reference.

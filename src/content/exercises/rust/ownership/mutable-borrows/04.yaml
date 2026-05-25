@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: fill-word
+order: 4
+prompt: |
+  Fill the qualifier that turns this `String` parameter into a
+  MUTABLE borrow so the function can `.push('!')`.
+generator:
+  kind: template
+  vars:
+    qualifier: ["&mut"]
+  ts: |-
+    function exclaim(s: string): string { return s + "!"; }
+  canonical: |-
+    fn exclaim(s: ${qualifier} String) {
+        s.push('!');
+    }
+blanks: [qualifier]
+hints:
+  - "Two tokens: the same `&` used for shared borrows, plus the keyword that signals exclusivity. Without the second token, the function can read but not modify."
+  - "Four characters total. Goes directly before the type name."
+  - "`&mut`"
+runtime: none
+notes: |
+  Drills the `&mut` parameter prefix. Sibling to `borrowing/04`
+  (single `&`) — the `mut` keyword is what changes a shared
+  borrow into an exclusive one.

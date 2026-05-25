@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: mcq-explain
+order: 3
+prompt: |
+  When does a mutable borrow END, releasing the value so the owner
+  (or a fresh borrow) can use it again?
+generator:
+  kind: variant
+  variants:
+    - id: nll
+      ts: |-
+        // TS has no borrow concept; references are GC-collected
+        // when nothing reaches them. The lifetime question
+        // doesn't arise.
+      source: |-
+        let mut s = String::from("hi");
+        let r = &mut s;
+        r.push('!');
+        // r is never used past this point
+        println!("{}", s);  // ← does this compile?
+      canonical: 'At the LAST USE of the reference. Under non-lexical lifetimes (NLL — stable since 2018), `r` ends at `r.push(''!'')`; the println on `s` compiles because the borrow no longer overlaps.'
+      distractors:
+        - 'At the end of the enclosing `{}` block, always — Rust uses strictly lexical lifetimes.'
+        - 'Only when you call `drop(r)` explicitly to end the borrow.'
+        - 'When the owner `s` is reassigned with `let s = ...` shadowing the old binding.'
+hints:
+  - "Modern rustc shrinks borrow scope to the smallest region in which the reference is actually used — the borrow ends at its LAST USE, not at the `}` closing the block."
+  - "The feature has a three-letter acronym."
+  - 'NLL — non-lexical lifetimes — ends the borrow at the reference''s last use.'
+runtime: none
+notes: |
+  Teaches NLL as the real mental model for "scope as the tool for
+  ending borrows." The first distractor is the pre-2018
+  mental model; the second is the explicit-drop reflex from
+  RAII-heavy languages; the third confuses shadowing with borrow
+  scope.

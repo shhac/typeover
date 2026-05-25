@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/ownership/mutable-borrows
+type: freeform
+order: 9
+prompt: |
+  The program below fails with `error[E0499]: cannot borrow `s` as
+  mutable more than once at a time`:
+
+      fn main() {
+          let mut s = String::from("hi");
+          let a = &mut s;
+          let b = &mut s;
+          a.push('!');
+          b.push('?');
+          println!("{}", s);
+      }
+
+  Fix it by reordering the borrows so each `&mut` ends (last use)
+  BEFORE the next one starts. Output:
+
+      hi!?
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let s = "hi";
+    s += "!";
+    s += "?";
+    console.log(s);
+  canonical: |-
+    fn main() {
+        let mut s = String::from("hi");
+        let a = &mut s;
+        a.push('!');
+        let b = &mut s;
+        b.push('?');
+        println!("{}", s);
+    }
+expectStdout: |
+  hi!?
+runtime: server
+hints:
+  - "Two `&mut`s can't OVERLAP. The original program declares `a` and `b` back-to-back, then uses both — so both are alive at the same time. Move `a.push('!')` UP between the two `let`s; under NLL, `a`'s last use ends its borrow before `b` is born."
+  - "Order: `let a = &mut s; a.push('!'); let b = &mut s; b.push('?');`."
+  - |-
+    fn main() {
+        let mut s = String::from("hi");
+        let a = &mut s;
+        a.push('!');
+        let b = &mut s;
+        b.push('?');
+        println!("{}", s);
+    }
+notes: |
+  Practical NLL fix for overlapping `&mut`. The rule "one
+  mutable borrow at a time" is satisfied by sequencing: a's
+  last use ends its lifetime BEFORE b is created, so the
+  borrow checker sees them as non-overlapping.
