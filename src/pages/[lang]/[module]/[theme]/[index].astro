@@ -27,6 +27,7 @@ import {
   lastExerciseOfPreviousTheme,
   loadExerciseContext,
 } from "~/lib/curriculum-nav";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 import { LANG_DISPLAY } from "~/lib/lang";
 import { formatBlock } from "~/lib/format-block";
 import { pickExerciseDispatch } from "~/lib/exercise-dispatch";
@@ -51,11 +52,10 @@ const ex = entry.data;
 const lang = ex.target;
 const langLabel = LANG_DISPLAY[lang];
 
-const [modules, themes, exercises] = await Promise.all([
-  getCollection("modules"),
-  getCollection("themes"),
-  getCollection("exercises"),
-]);
+/* Use the shared per-language loader. The helper returns
+ * collections already filtered to `lang` — `loadExerciseContext`
+ * + the adjacency walks below only need the within-track entries. */
+const { modules, themes, exercises } = await loadLangCollections(lang);
 const ctx = loadExerciseContext(entry, { modules, themes });
 if (!ctx) {
   throw new Error(

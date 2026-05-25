@@ -4,6 +4,7 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import { Container, Heading, Panel, Stack, Text } from "~/components/ds";
 import { ModuleCompleteCard } from "~/components/completion/ModuleCompleteCard";
 import { byOrder, exerciseHref, langHref, paramsForModule } from "~/lib/curriculum";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 import { LANG_DISPLAY } from "~/lib/lang";
 
 /*
@@ -37,11 +38,11 @@ const moduleData = entry.data;
 const moduleId = entry.id;
 const lang = moduleData.target;
 
-const [allModules, allThemes, allExercises] = await Promise.all([
-  getCollection("modules"),
-  getCollection("themes"),
-  getCollection("exercises"),
-]);
+/* Use the shared per-language loader rather than three inline
+ * `getCollection × filter` calls — the helper's doc-comment
+ * explicitly warns about the drift class that landed here. */
+const { modules: allModules, themes: allThemes, exercises: allExercises } =
+  await loadLangCollections(lang);
 
 const themes = allThemes
   .filter((t) => t.data.moduleId === moduleId)
@@ -62,11 +63,9 @@ const themes = allThemes
  *     OR the next module has no content yet)
  *
  * Cross-language hop is intentionally NOT bridged here — finishing
- * Go's last module sends the learner back to /go, not on to Zig. */
-const sortedModules = allModules
-  .filter((m) => m.data.target === lang)
-  .slice()
-  .sort(byOrder);
+ * Go's last module sends the learner back to /go, not on to Zig.
+ * `allModules` is already lang-filtered by `loadLangCollections`. */
+const sortedModules = allModules.slice().sort(byOrder);
 const i = sortedModules.findIndex((m) => m.id === moduleId);
 const nextModule = sortedModules[i + 1];
 const nextModuleFirstExercise = nextModule

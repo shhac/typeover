@@ -18,6 +18,7 @@ import {
   moduleHref,
   paramsForTheme,
 } from "~/lib/curriculum";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 import { loadThemeContext } from "~/lib/curriculum-nav";
 import { LANG_DISPLAY } from "~/lib/lang";
 import { formatInline } from "~/lib/format-inline";
@@ -42,10 +43,11 @@ const { theme } = Astro.props;
 const lang = theme.data.target;
 const langLabel = LANG_DISPLAY[lang];
 
-const [modules, exercises] = await Promise.all([
-  getCollection("modules"),
-  getCollection("exercises"),
-]);
+/* Use the shared per-language loader rather than inline
+ * `getCollection` calls — `loadLangCollections` returns the
+ * already-filtered modules + exercises for `lang`, which is what
+ * `loadThemeContext` walks below. */
+const { modules, exercises } = await loadLangCollections(lang);
 
 const ctx = loadThemeContext(theme, { modules, exercises });
 if (!ctx) {
