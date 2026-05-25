@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: mcq
+order: 3
+prompt: |
+  A function takes a `&str` and returns a NEW string with extra
+  characters. The new string is built inside the function. Pick
+  the return type that lets it escape.
+generator:
+  kind: variant
+  variants:
+    - id: owned-vs-borrowed
+      ts: 'function tag(name: string): string { return "@" + name; }'
+      canonical: 'fn tag(name: &str) -> String — return OWNED; the function builds new data, the caller takes ownership.'
+      distractors:
+        - 'fn tag(name: &str) -> &str — the new string is a local; returning a reference to it would dangle.'
+        - 'fn tag<''a>(name: &''a str) -> &''a str — adding a lifetime annotation does not give the local a longer life.'
+        - 'fn tag(name: &str) -> &''static str — only constants and string literals have `&''static`; runtime-built strings do not.'
+hints:
+  - "If the function CREATES new data, the caller must take OWNERSHIP — there is no other value for the reference to refer to once the function returns."
+  - "Six characters, capital S."
+  - '`fn tag(name: &str) -> String`'
+runtime: none
+notes: |
+  Pairs with slot 02 — same principle, MCQ form. Distractors
+  parade the three "annotation-is-magic" reflexes: bare `&str`,
+  `<'a>`-annotated `&str`, and `&'static`. None of them help;
+  the only working answer is to return owned `String`.

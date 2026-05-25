@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: mcq-explain
+order: 2
+prompt: |
+  rustc rejects this function with `error[E0515]: cannot return
+  reference to local variable `s``. Pick the explanation that
+  names the real problem.
+generator:
+  kind: variant
+  variants:
+    - id: e0515
+      ts: |-
+        function first(s: string): string {
+          return s;
+        }
+        // TS strings are owned values — no dangling-reference problem.
+      source: |-
+        fn first(s: String) -> &str {
+            &s
+        }
+      canonical: '`s` is OWNED by the function (moved in by value). When the function returns, `s` is dropped — the returned reference would point at freed memory. The fix is to change the signature: either accept `&str` and return `&str` (caller keeps the value alive), or return `String` (transfer ownership out).'
+      distractors:
+        - 'The signature needs a lifetime annotation: `fn first<''a>(s: String) -> &''a str` — that tells the compiler the lifetime relationship.'
+        - 'String slicing must use `s.as_str()` rather than `&s`; the explicit method bypasses the borrow checker.'
+        - '`&s` is `&String` — `&String` does not auto-deref to `&str` in return position; replace with `&s[..]`.'
+hints:
+  - "The error is about LIFETIMES, but the root cause is OWNERSHIP. The function owns `s`, so the function drops it on return. Annotations describe lifetimes; they don't create them."
+  - "The fix is structural: either don't take ownership (`&str` in), or transfer it out (`String` out)."
+  - 'Change the signature so the function does not own `s`, OR returns `String`.'
+runtime: none
+notes: |
+  Pins the "annotations describe, don't create" principle. The
+  first distractor is the classic TS-dev reflex: assume the
+  type system needs more decoration. The third distractor
+  surfaces a real auto-deref subtlety that ALSO doesn't fix
+  the lifetime problem.

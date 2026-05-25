@@ -1,0 +1,36 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: fill-word
+order: 4
+prompt: |
+  `r` is declared in the outer scope, then assigned inside a block.
+  Fill the keyword that gives `s` its OWN outer-scope binding so
+  the borrow `&s` is valid when `r` is printed.
+generator:
+  kind: template
+  vars:
+    keyword: ["let"]
+  ts: |-
+    const s = "hi";
+    let r: string | null = null;
+    {
+      r = s;
+    }
+    console.log(r);
+  canonical: |-
+    ${keyword} s = String::from("hi");
+    let r;
+    {
+        r = &s;
+    }
+    println!("{}", r);
+blanks: [keyword]
+hints:
+  - "Three letters — the same keyword that introduced the inner reference. Without it, `s` has no outer binding and the borrow inside the block points to nothing."
+  - "Goes at the very top, before `s`."
+  - "`let`"
+runtime: none
+notes: |
+  Drills the structural fix from slot 01 as a typing reflex.
+  The `let` that gives `s` an OUTER scope IS the lifetime
+  extension; no annotation needed.

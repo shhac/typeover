@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: freeform
+order: 6
+prompt: |
+  Write a function `longer` that takes TWO `&str` arguments and
+  returns the one with greater (or equal) length. The function
+  must compile — the compiler cannot infer which input the
+  return borrows from, so an explicit lifetime annotation is
+  required. `main` calls it with two `String`s and prints the
+  result.
+
+  Output:
+
+      piper
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function longer(a: string, b: string): string {
+      return a.length >= b.length ? a : b;
+    }
+    console.log(longer("paul", "piper"));
+  canonical: |-
+    fn longer<'a>(a: &'a str, b: &'a str) -> &'a str {
+        if a.len() >= b.len() { a } else { b }
+    }
+
+    fn main() {
+        let x = String::from("paul");
+        let y = String::from("piper");
+        println!("{}", longer(&x, &y));
+    }
+expectStdout: |
+  piper
+hints:
+  - "Three lifetime slots all share the SAME name (`'a` is the convention). Two parameters and one return value, each annotated. The compiler refuses to elide here because the return could borrow from either input."
+  - "Signature shape: `fn longer<'a>(a: &'a str, b: &'a str) -> &'a str`. Body is a single `if`-expression — no trailing semicolon."
+  - |-
+    fn longer<'a>(a: &'a str, b: &'a str) -> &'a str {
+        if a.len() >= b.len() { a } else { b }
+    }
+
+    fn main() {
+        let x = String::from("paul");
+        let y = String::from("piper");
+        println!("{}", longer(&x, &y));
+    }
+runtime: server
+notes: |
+  Theme's first exercise that actually NEEDS an explicit
+  lifetime — the elision rules can't pick between `a` and `b`
+  for the return. Single `'a` ties all three together; the
+  caller's longest input wins.

@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: freeform
+order: 9
+prompt: |
+  This program reaches for lifetime annotations to fix a borrow
+  error — but the annotations CAN'T help, because the function
+  creates new data and returns a reference to that local data.
+  Fix it by returning OWNED `String` instead.
+
+  Broken source:
+
+      fn build_label<'a>(name: &'a str) -> &'a str {
+          let label = String::from("user: ") + name;
+          &label
+      }
+
+      fn main() {
+          println!("{}", build_label("paul"));
+      }
+
+  Output:
+
+      user: paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function buildLabel(name: string): string {
+      const label = "user: " + name;
+      return label;
+    }
+    console.log(buildLabel("paul"));
+  canonical: |-
+    fn build_label(name: &str) -> String {
+        String::from("user: ") + name
+    }
+
+    fn main() {
+        println!("{}", build_label("paul"));
+    }
+expectStdout: |
+  user: paul
+hints:
+  - "Two coordinated edits: drop the `<'a>` and the `&` from the return type (return `String`, not `&'a str`), and drop the intermediate `let label = ...; &label`. The body becomes one expression: `String::from(\"user: \") + name`."
+  - "Annotations describe lifetimes; they don't extend them. The local `label` dies at function-end regardless of `<'a>`."
+  - |-
+    fn build_label(name: &str) -> String {
+        String::from("user: ") + name
+    }
+
+    fn main() {
+        println!("{}", build_label("paul"));
+    }
+runtime: server
+notes: |
+  Closes the theme: the right fix for "this local doesn't live
+  long enough" is almost never "add annotations." It's "return
+  ownership." Annotations describe lifetimes; ownership creates
+  them.

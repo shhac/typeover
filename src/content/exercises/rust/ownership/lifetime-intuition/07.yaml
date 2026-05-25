@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: freeform
+order: 7
+prompt: |
+  Write a function `make_counter_value` that takes a `&str`
+  `label` and returns a NEW owned `String` of the form
+  `"label: 0"` (build with `String::from(label)` then
+  `.push_str(": 0")`). `main` calls it with `"count"` and prints.
+  Return owned — do NOT return a borrowed slice into a local.
+
+  Output:
+
+      count: 0
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function makeCounterValue(label: string): string {
+      let out = label;
+      out += ": 0";
+      return out;
+    }
+    console.log(makeCounterValue("count"));
+  canonical: |-
+    fn make_counter_value(label: &str) -> String {
+        let mut out = String::from(label);
+        out.push_str(": 0");
+        out
+    }
+
+    fn main() {
+        println!("{}", make_counter_value("count"));
+    }
+expectStdout: |
+  count: 0
+hints:
+  - "Three pieces: signature `fn make_counter_value(label: &str) -> String`, body builds a mutable `String` from `label`, pushes `\": 0\"`, and returns the String directly. Return type is OWNED — the local String escapes by value."
+  - "The body is `let mut out = String::from(label); out.push_str(\": 0\"); out`."
+  - |-
+    fn make_counter_value(label: &str) -> String {
+        let mut out = String::from(label);
+        out.push_str(": 0");
+        out
+    }
+
+    fn main() {
+        println!("{}", make_counter_value("count"));
+    }
+runtime: server
+notes: |
+  Reinforces "build inside, return owned." The `let mut`
+  intermediate is required because `push_str` mutates;
+  returning `out` (no semicolon) transfers ownership.

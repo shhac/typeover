@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: fill-word
+order: 5
+prompt: |
+  Fill the OWNED return type so the new uppercase string can
+  escape the function.
+generator:
+  kind: template
+  vars:
+    ret: ["String"]
+  ts: |-
+    function shout(s: string): string { return s.toUpperCase(); }
+  canonical: |-
+    fn shout(s: &str) -> ${ret} {
+        s.to_uppercase()
+    }
+blanks: [ret]
+hints:
+  - "The function builds NEW data inside — the caller must take ownership. The owned counterpart of `&str` is what you want."
+  - "Capital S, six letters."
+  - "`String`"
+runtime: none
+notes: |
+  Smallest fill — pins the owned-return reflex from slots 02 and
+  03. Returns `String` (owned), not `&str` (would dangle).

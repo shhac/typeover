@@ -1,0 +1,43 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: freeform
+order: 8
+prompt: |
+  Translate the TS pattern that maps over a local array with a
+  closure. In Rust, the closure borrows from the local vector;
+  `.collect()` produces a new owned `Vec<i32>` before the
+  borrow ends.
+
+  Output:
+
+      2 4 6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3];
+    const doubled = xs.map((x) => x * 2);
+    console.log(doubled[0] + " " + doubled[1] + " " + doubled[2]);
+  canonical: |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let doubled: Vec<i32> = xs.iter().map(|x| x * 2).collect();
+        println!("{} {} {}", doubled[0], doubled[1], doubled[2]);
+    }
+expectStdout: |
+  2 4 6
+hints:
+  - "Three pieces: `xs.iter()` gives a shared iterator borrowing from `xs`, `.map(|x| x * 2)` is the closure (no lifetime annotation needed — `xs` outlives the chain), and `.collect()` materialises a new owned `Vec<i32>`. The type annotation on `doubled` tells `collect` what to produce."
+  - "`let doubled: Vec<i32> = xs.iter().map(|x| x * 2).collect();`."
+  - |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let doubled: Vec<i32> = xs.iter().map(|x| x * 2).collect();
+        println!("{} {} {}", doubled[0], doubled[1], doubled[2]);
+    }
+runtime: server
+notes: |
+  Lifetime intuition without explicit annotations: the
+  closure's borrow of `xs` is ELIDED — `xs` outlives the
+  iterator chain, so no `<'a>` is needed. `.collect()`
+  produces owned data; the borrow ends with the chain.

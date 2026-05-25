@@ -1,0 +1,41 @@
+target: rust
+themeId: rust/ownership/lifetime-intuition
+type: mcq-explain
+order: 1
+prompt: |
+  The program below fails: `r` outlives `s`. Pick the fix that
+  makes `r` a valid reference at the println.
+generator:
+  kind: variant
+  variants:
+    - id: lives-long-enough
+      ts: |-
+        const s = "hi";
+        let r: string | null = null;
+        {
+          r = s;
+        }
+        console.log(r);
+        // TS has no lifetime concept; the GC keeps the string alive.
+      source: |-
+        let r;
+        {
+            let s = String::from("hi");
+            r = &s;
+        }  // <- s dropped here
+        println!("{}", r);
+      canonical: 'Move `let s = String::from("hi");` UP to the outer scope, above `let r;`. The reference can only be valid as long as the value it points to is alive.'
+      distractors:
+        - 'Leave the layout alone — under non-lexical lifetimes the borrow is automatically extended to cover the println.'
+        - 'Replace `r = &s;` with `r = &s.clone();` — cloning the borrow extends its lifetime.'
+        - 'Annotate the binding: `let r: &''static String;` — `''static` overrides the inner scope''s drop.'
+hints:
+  - "A reference is only valid while the value it points to is alive. The fix is structural: the value's scope must CONTAIN the reference's use."
+  - "Move `s`'s declaration above `let r;`, and out of the inner block."
+  - "Declare `s` in the OUTER scope."
+runtime: none
+notes: |
+  First lifetime exercise — pure intuition, no annotations.
+  Distractors target the NLL-saves-everything reflex, the
+  clone-fixes-lifetime reflex, and the `'static`-as-magic
+  reflex.
