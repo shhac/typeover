@@ -32,7 +32,7 @@ export const themeSchema = z.object({
 const exerciseFields = {
   target: targetSchema,
   themeId: z.string(),
-  type: z.enum(["mcq", "fill-word", "fill-line", "freeform"]),
+  type: z.enum(["mcq", "mcq-explain", "fill-word", "fill-line", "freeform"]),
   order: z.number().int().positive(),
   prompt: z.string(),
   generator: GeneratorSchema,
@@ -198,9 +198,12 @@ function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
 
 /** MCQ exercises must have distractors in the generator — without
  *  them the option list collapses to one entry and the exercise
- *  renders as a single-option "quiz". */
+ *  renders as a single-option "quiz". Applies to both `mcq`
+ *  (code-translation answers) and `mcq-explain` (prose
+ *  explanation answers) — both flavours share the same shuffled-
+ *  options shape. */
 function validateMcqDistractors(ex: Exercise, ctx: Ctx): void {
-  if (ex.type !== "mcq") return;
+  if (ex.type !== "mcq" && ex.type !== "mcq-explain") return;
   if (ex.generator.kind === "template") {
     if (!ex.generator.distractors || ex.generator.distractors.length === 0) {
       ctx.addIssue({
@@ -338,10 +341,42 @@ function validateSubmissionShapeScope(ex: Exercise, ctx: Ctx): void {
   });
 }
 
+/** `mcq-explain` differs from `mcq` in what the options ARE:
+ *  prose explanations of behaviour rather than code translations.
+ *  The generator MAY author a `source:` field — the target-
+ *  language code the prompt asks ABOUT. When present, the shell
+ *  renders it as a second tab next to the TS reference; when
+ *  absent (purely conceptual prose-MCQs), the shell falls back to
+ *  TS-only. No structural check needed beyond the MCQ distractor
+ *  shape already enforced by `validateMcqDistractors`. */
+
+/** `source` is currently scoped to mcq-explain only. If another
+ *  exercise type ever genuinely wants to author target-language
+ *  source separately from the canonical, widen this check. Until
+ *  then, rejecting the field on other types catches authoring
+ *  mistakes early. */
+function validateSourceScope(ex: Exercise, ctx: Ctx): void {
+  if (ex.type === "mcq-explain") return;
+  const has =
+    ex.generator.kind === "template"
+      ? ex.generator.source !== undefined
+      : ex.generator.kind === "variant"
+        ? ex.generator.variants.some((v) => v.source !== undefined)
+        : false;
+  if (has) {
+    ctx.addIssue({
+      code: "custom",
+      message: `generator \`source:\` is only valid for mcq-explain exercises; got type "${ex.type}".`,
+      path: ["generator", "source"],
+    });
+  }
+}
+
 export const exerciseSchema = z.object(exerciseFields).superRefine((ex, ctx) => {
   validateFillBlanks(ex, ctx);
   validateFillLineMode(ex, ctx);
   validateMcqDistractors(ex, ctx);
+  validateSourceScope(ex, ctx);
   validateBlanksOnlyForFill(ex, ctx);
   validateRunnableExpectStdout(ex, ctx);
   validateAlternateCanonicalsScope(ex, ctx);

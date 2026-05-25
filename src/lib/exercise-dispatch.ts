@@ -25,7 +25,7 @@ import type { SubmissionShape } from "./freeform-shape";
  * the minimum surface we read so this helper is decoupled and
  * unit-testable without dragging the `astro:content` module in. */
 interface ExerciseInput {
-  type: "mcq" | "fill-word" | "fill-line" | "freeform";
+  type: "mcq" | "mcq-explain" | "fill-word" | "fill-line" | "freeform";
   target: "go" | "zig" | "rust";
   runtime: "yaegi" | "zig" | "server" | "none";
   expectStdout?: string;
@@ -41,6 +41,9 @@ type FillLineRuntime = "yaegi" | "zig" | "rust";
 
 interface DispatchMcq {
   kind: "mcq";
+}
+interface DispatchMcqExplain {
+  kind: "mcq-explain";
 }
 interface DispatchFillWord {
   kind: "fill-word";
@@ -72,6 +75,7 @@ interface DispatchSkip {
 
 export type ExerciseDispatch =
   | DispatchMcq
+  | DispatchMcqExplain
   | DispatchFillWord
   | DispatchFillLine
   | DispatchFreeform
@@ -120,6 +124,8 @@ export function pickExerciseDispatch(ex: ExerciseInput): ExerciseDispatch {
   switch (ex.type) {
     case "mcq":
       return { kind: "mcq" };
+    case "mcq-explain":
+      return { kind: "mcq-explain" };
     case "fill-word":
       return { kind: "fill-word", blanks: ex.blanks ?? [] };
     case "fill-line": {

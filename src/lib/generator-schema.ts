@@ -74,6 +74,15 @@ export const TemplateSpec = z
     ts: z.string(),
     /** Idiomatic Go answer template, with the same placeholders. */
     canonical: z.string(),
+    /** Optional target-language source the prompt asks ABOUT.
+     *  Used by `mcq-explain` exercises whose `canonical` /
+     *  `distractors` are PROSE explanations of behaviour — the
+     *  source itself lives here so the shell can render it as a
+     *  toggle tab next to the TS reference. The language is
+     *  inferred from the exercise's `target:` field (go/zig/rust),
+     *  so this field is language-neutral and the pattern works
+     *  for any target. Ignored by all other exercise types. */
+    source: z.string().optional(),
     /**
      * Distractor entries. Bare strings for MCQ option text and v0
      * fill-line bank. The structured `{match, explain}` form
@@ -110,6 +119,7 @@ export const TemplateSpec = z
     };
     checkRefs(spec.ts, ["ts"]);
     checkRefs(spec.canonical, ["canonical"]);
+    if (spec.source !== undefined) checkRefs(spec.source, ["source"]);
     (spec.distractors ?? []).forEach((d, i) =>
       /* For structured `{match, explain}` entries, the `match`
        * field is the templated text (it's the substituted-against-
@@ -127,6 +137,9 @@ export const VariantSpec = z
         id: z.string(),
         ts: z.string(),
         canonical: z.string(),
+        /** Optional target-language source for mcq-explain
+         *  variants — see the comment on TemplateSpec.source. */
+        source: z.string().optional(),
         distractors: z.array(DistractorEntrySpec).optional(),
       }),
     ),

@@ -14,6 +14,7 @@ export type ExerciseType = Exercise["data"]["type"];
  */
 export const EXERCISE_TYPE_LABELS: Record<ExerciseType, string> = {
   mcq: "pick one",
+  "mcq-explain": "pick one",
   "fill-word": "fill blanks",
   "fill-line": "type one line",
   freeform: "write a program",

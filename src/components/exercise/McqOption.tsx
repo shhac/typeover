@@ -1,6 +1,7 @@
 import { cn } from "../ds/_internal";
 import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
 import { isCodeMirrorTestEnv } from "~/lib/codemirror-test-env";
+import { formatInline } from "~/lib/format-inline";
 
 /**
  * The four possible visual states for an MCQ option. Resolved purely
@@ -60,6 +61,12 @@ interface McqOptionProps {
   revealed: boolean;
   isCorrect: boolean;
   onSelect: () => void;
+  /** Render mode. `"code"` (default) renders the option as a read-
+   *  only CodeMirror surface for Go/Rust/etc. option text. `"prose"`
+   *  renders the option as plain prose with inline backtick spans
+   *  highlighted — for `mcq-explain`, where the answers are
+   *  explanations of behaviour, not language translations. */
+  kind?: "code" | "prose";
 }
 
 export function McqOption(props: McqOptionProps) {
@@ -88,15 +95,24 @@ export function McqOption(props: McqOptionProps) {
         class="mt-1.5 accent-accent-primary"
         aria-describedby={`opt-${props.groupName}-${props.index}-text`}
       />
-      {/* Option body. In production, render as a read-only
-       *  CodeMirror so Go option text gets palette-themed syntax
-       *  highlighting (consistent with the Freeform editor and the
-       *  fill-line scaffold). In tests, fall back to a plain pre/
-       *  code so getByText() still resolves the option string in
-       *  one node. The CodeMirrorEditor itself handles the
-       *  test-env detection; the wrapper just chooses the right
-       *  shell. */}
-      {isCodeMirrorTestEnv() ? (
+      {/* Option body. Three branches:
+       *  - `kind="prose"` (mcq-explain) renders the option as plain
+       *    prose so explanations don't get wrapped in a monospace
+       *    code surface. Inline `backticks` are still highlighted
+       *    via formatInline so referenced identifiers read as code.
+       *  - test env renders as <pre><code> so getByText() resolves
+       *    the option string in one node.
+       *  - production (default) renders a read-only CodeMirror so
+       *    Go/Rust option text gets palette-themed syntax
+       *    highlighting (consistent with the Freeform editor and
+       *    the fill-line scaffold). */}
+      {props.kind === "prose" ? (
+        <div
+          id={`opt-${props.groupName}-${props.index}-text`}
+          class="flex-1 min-w-0 text-sm text-fg-primary leading-relaxed [&>code]:font-mono [&>code]:text-fg-primary [&>code]:bg-bg-inset [&>code]:rounded-sm [&>code]:px-1"
+          innerHTML={formatInline(props.text)}
+        />
+      ) : isCodeMirrorTestEnv() ? (
         <pre
           id={`opt-${props.groupName}-${props.index}-text`}
           class="font-mono text-sm text-fg-primary whitespace-pre-wrap leading-relaxed"

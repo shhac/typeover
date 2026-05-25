@@ -248,6 +248,7 @@ describe("EXERCISE_TYPE_LABELS", () => {
       "fill-word",
       "freeform",
       "mcq",
+      "mcq-explain",
     ]);
   });
 });

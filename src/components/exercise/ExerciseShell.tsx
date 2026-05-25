@@ -1,4 +1,4 @@
-import { createEffect, Match, Show, Switch, type JSX } from "solid-js";
+import { createEffect, createSignal, Match, Show, Switch, type JSX } from "solid-js";
 import { Button, ButtonLink } from "../ds/Button";
 import { Feedback } from "../ds/Feedback";
 import { HintButton } from "../ds/HintButton";
@@ -7,14 +7,111 @@ import { RevealButton } from "../ds/RevealButton";
 import { Stack } from "../ds/Stack";
 import { Text } from "../ds/Text";
 import { CodeMirrorEditor } from "../ds/CodeMirrorEditor";
+import { LANG_DISPLAY } from "~/lib/lang";
 import { recordHintUsed } from "~/lib/progress";
 import { formatInline } from "~/lib/format-inline";
 import type { ExercisePhaseHandle } from "~/lib/exercise-phase";
+import { cn } from "../ds/_internal";
 
 /* Right-phase nav anchors use <ButtonLink> from the DS. Earlier
  * versions hand-rolled the primary-anchor class string here;
  * ButtonLink consolidates the spec into one place
  * (design-docs/17 F-1). */
+
+/** Source pane on the exercise workbench. TS-only by default; when
+ *  `source` + `sourceLang` are supplied, renders a tab strip so the
+ *  learner can flip between the TS reference and the target-language
+ *  source the question asks ABOUT (used by `mcq-explain`). */
+function SourcePane(props: {
+  ts: string;
+  source: string | undefined;
+  sourceLang: "go" | "zig" | "rust" | undefined;
+}) {
+  /* Inline view-state — the parent shell doesn't need to know which
+   *  tab is active, and the tab switch shouldn't trigger any
+   *  exercise lifecycle effects. */
+  const [active, setActive] = createSignal<"ts" | "target">("ts");
+  const hasToggle = () => props.source !== undefined && props.sourceLang !== undefined;
+  const targetLabel = () => (props.sourceLang ? LANG_DISPLAY[props.sourceLang] : "");
+
+  return (
+    <Show
+      when={hasToggle()}
+      fallback={
+        <Stack gap="sm">
+          <InstructionLine class="mb-0">TypeScript reference</InstructionLine>
+          {/* Read-only CodeMirror so syntax tokens match the live
+           * editor below (palette-themed via design-docs/16 F-19
+           * follow-up). Renders as a static <pre> inside vitest
+           * per the editor's test-env fallback. */}
+          <CodeMirrorEditor
+            value={props.ts}
+            readOnly
+            language="ts"
+            ariaLabel="TypeScript reference snippet"
+          />
+        </Stack>
+      }
+    >
+      <Stack gap="sm">
+        <div
+          class="flex flex-row gap-1 -mb-px"
+          role="tablist"
+          aria-label="Source language"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={active() === "ts" ? "true" : "false"}
+            class={tabButtonClass(active() === "ts")}
+            onClick={() => setActive("ts")}
+          >
+            TypeScript
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={active() === "target" ? "true" : "false"}
+            class={tabButtonClass(active() === "target")}
+            onClick={() => setActive("target")}
+          >
+            {targetLabel()}
+          </button>
+        </div>
+        <Show
+          when={active() === "ts"}
+          fallback={
+            <CodeMirrorEditor
+              value={props.source!}
+              readOnly
+              language={props.sourceLang!}
+              ariaLabel={`${targetLabel()} reference snippet`}
+            />
+          }
+        >
+          <CodeMirrorEditor
+            value={props.ts}
+            readOnly
+            language="ts"
+            ariaLabel="TypeScript reference snippet"
+          />
+        </Show>
+      </Stack>
+    </Show>
+  );
+}
+
+/** Tab-strip button styling. Mirrors `interactiveTabClass` in
+ *  CodeBlock so the exercise pane reads as the same visual idiom
+ *  as the homepage's translation-drill tabs. */
+function tabButtonClass(selected: boolean): string {
+  return cn(
+    "inline-flex items-center gap-2 max-w-full px-3 py-1.5 border rounded-t-sm font-sans text-sm transition-colors focus-ring",
+    selected
+      ? "bg-bg-inset border-border-default border-b-bg-inset text-fg-primary"
+      : "bg-bg-panel border-transparent text-fg-muted hover:bg-bg-elevated hover:text-fg-secondary",
+  );
+}
 
 interface ExerciseShellProps {
   /** For progress recording from the Hint button. */
@@ -23,6 +120,15 @@ interface ExerciseShellProps {
   prompt: string;
   /** TS snippet shown above the answer region. */
   ts: string;
+  /** Optional target-language source the exercise asks ABOUT. When
+   *  set, the source pane renders TWO tabs ("TypeScript" + the
+   *  target language) instead of TS-only. Used by mcq-explain
+   *  whose answers are prose explanations of this source. The
+   *  language is inferred from the `sourceLang` prop. */
+  source?: string;
+  /** Language label + syntax highlight for the `source` pane.
+   *  Required when `source` is set; ignored otherwise. */
+  sourceLang?: "go" | "zig" | "rust";
   /** Canonical Go answer. Surfaced by the on-demand RevealButton. */
   canonical: string;
   /** Three-layer hint stack. */
@@ -130,19 +236,16 @@ export function ExerciseShell(props: ExerciseShellProps) {
 
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] border-b border-border-default">
         <section class="p-4 sm:p-6 lg:border-r lg:border-border-default bg-bg-panel">
-          {/* TS-source pane: read-only CodeMirror so syntax tokens
-           * match the live editor below (palette-themed via
-           * design-docs/16 F-19 follow-up). Renders as a static
-           * <pre> inside vitest per the editor's test-env fallback. */}
-          <Stack gap="sm">
-            <InstructionLine class="mb-0">TypeScript reference</InstructionLine>
-            <CodeMirrorEditor
-              value={props.ts}
-              readOnly
-              language="ts"
-              ariaLabel="TypeScript reference snippet"
-            />
-          </Stack>
+          {/* Source pane. Default: TS-only (single read-only
+           *  CodeMirror). When `source` + `sourceLang` are supplied
+           *  (mcq-explain), render a tab strip so the learner can
+           *  toggle between TS and the target-language source the
+           *  question asks ABOUT. */}
+          <SourcePane
+            ts={props.ts}
+            source={props.source}
+            sourceLang={props.sourceLang}
+          />
         </section>
 
         <section class="p-4 sm:p-6 bg-bg-base/30">

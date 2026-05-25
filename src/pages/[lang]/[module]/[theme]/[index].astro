@@ -9,6 +9,7 @@ import {
 } from "~/components/ds";
 import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
 import { Mcq } from "~/components/exercise/Mcq";
+import { McqExplain } from "~/components/exercise/McqExplain";
 import { FillBlankWord } from "~/components/exercise/FillBlankWord";
 import { FillBlankLineInput } from "~/components/exercise/FillBlankLineInput";
 import { Freeform } from "~/components/exercise/Freeform";
@@ -139,6 +140,19 @@ const dispatch = pickExerciseDispatch(ex);
             prompt={ex.prompt}
             generator={ex.generator}
             hints={ex.hints}
+            successNote={ex.successNote}
+            nextExerciseHref={nextExerciseHref}
+            themeHref={parentThemeHref}
+          />
+        )}
+        {dispatch.kind === "mcq-explain" && (
+          <McqExplain
+            client:visible
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            hints={ex.hints}
+            sourceLang={ex.target}
             successNote={ex.successNote}
             nextExerciseHref={nextExerciseHref}
             themeHref={parentThemeHref}

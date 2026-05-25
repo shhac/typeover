@@ -42,6 +42,12 @@ export type ExerciseInstance = {
   ts: string;
   /** The idiomatic Go answer. */
   canonical: string;
+  /** Optional target-language source the exercise asks ABOUT. Set
+   *  only for generators that authored a `source:` field (mcq-
+   *  explain exercises). Template generators substitute the same
+   *  way as `ts`/`canonical`. The language is whatever the
+   *  exercise's `target:` field declared (go/zig/rust). */
+  source?: string;
   /** For MCQs: the shuffled option list. `correctIndex` is the index
    *  of the canonical in this list. */
   options?: string[];
@@ -180,6 +186,7 @@ function generateTemplate(
   const values = resolveTemplateValues(spec, rng);
   const ts = substitute(spec.ts, values);
   const canonical = substitute(spec.canonical, values);
+  const source = spec.source !== undefined ? substitute(spec.source, values) : undefined;
 
   const blankSegments =
     opts.blanks && opts.blanks.length > 0
@@ -202,6 +209,7 @@ function generateTemplate(
     ts,
     canonical,
     values,
+    ...(source !== undefined ? { source } : {}),
     ...(blankSegments ? { blankSegments } : {}),
     ...mcq,
   };
@@ -223,12 +231,14 @@ function generateVariant(
   const rng = rngFromSeed(seed);
   const variant = pickFrom(rng, spec.variants);
 
+  const sourceFields = variant.source !== undefined ? { source: variant.source } : {};
   if (!variant.distractors || variant.distractors.length === 0) {
-    return { ts: variant.ts, canonical: variant.canonical };
+    return { ts: variant.ts, canonical: variant.canonical, ...sourceFields };
   }
   return {
     ts: variant.ts,
     canonical: variant.canonical,
+    ...sourceFields,
     ...buildShuffledOptions(rng, variant.canonical, variant.distractors.map(distractorMatchText)),
   };
 }
