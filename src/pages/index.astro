@@ -10,6 +10,7 @@ import {
 } from "~/components/ds";
 import TrackCard from "~/components/ds/TrackCard.astro";
 import { HomepageDrill } from "~/components/home/HomepageDrill";
+import { loadLangCollections } from "~/lib/curriculum-loaders";
 
 /*
  * Landing page — design-docs/15 pattern 11. The structural
@@ -26,28 +27,25 @@ import { HomepageDrill } from "~/components/home/HomepageDrill";
 /* design-docs/19 F-22 — the TrackCard dek used to say "54
  * exercises across six themes" as static prose. Author 4 new
  * exercises and the homepage silently lies until someone notices.
- * Compute both numbers from the content collection at build time. */
-const [
-  foundationsThemes,
-  foundationsExercises,
-  zigThemes,
-  zigExercises,
-  rustThemes,
-  rustExercises,
-] = await Promise.all([
+ * Compute both numbers from the content collection at build time.
+ *
+ * Zig + Rust use `loadLangCollections(lang)` so the homepage stays
+ * in lock-step with the per-track `/[lang]/*.astro` pages. The Go
+ * branch is module-scoped (foundations only — the homepage card
+ * deliberately surfaces the first-module milestone rather than the
+ * whole-track count), so it stays inline. */
+const [foundationsThemes, foundationsExercises, zig, rust] = await Promise.all([
   getCollection("themes", (t) => t.data.moduleId === "go/foundations"),
   getCollection("exercises", (ex) => ex.data.themeId.startsWith("go/foundations/")),
-  getCollection("themes", (t) => t.data.target === "zig"),
-  getCollection("exercises", (ex) => ex.data.target === "zig"),
-  getCollection("themes", (t) => t.data.target === "rust"),
-  getCollection("exercises", (ex) => ex.data.target === "rust"),
+  loadLangCollections("zig"),
+  loadLangCollections("rust"),
 ]);
 const foundationsExerciseCount = foundationsExercises.length;
 const foundationsThemeCount = foundationsThemes.length;
-const zigExerciseCount = zigExercises.length;
-const zigThemeCount = zigThemes.length;
-const rustExerciseCount = rustExercises.length;
-const rustThemeCount = rustThemes.length;
+const zigExerciseCount = zig.exercises.length;
+const zigThemeCount = zig.themes.length;
+const rustExerciseCount = rust.exercises.length;
+const rustThemeCount = rust.themes.length;
 ---
 
 <BaseLayout
