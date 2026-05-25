@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  FORBIDDEN_PATTERNS,
-  MAX_SOURCE_BYTES,
-  validateRustSource,
-} from "./validate-rust-source";
+import { FORBIDDEN_PATTERNS, MAX_SOURCE_BYTES, validateRustSource } from "./validate-rust-source";
 
 const VALID_SOURCE = `fn main() {\n    println!("hi");\n}\n`;
 
@@ -51,9 +47,16 @@ describe("validateRustSource", () => {
 
   it("accepts source exactly at the size limit", () => {
     /* Boundary check — N bytes passes, N+1 fails. */
-    expect(validateRustSource({ source: "a".repeat(MAX_SOURCE_BYTES) }).ok).toBe(
-      true,
-    );
+    expect(validateRustSource({ source: "a".repeat(MAX_SOURCE_BYTES) }).ok).toBe(true);
+  });
+
+  it("measures the size limit in bytes, not UTF-16 code units", () => {
+    const exact = "é".repeat(MAX_SOURCE_BYTES / 2);
+    const over = exact + "é";
+    expect(validateRustSource({ source: exact }).ok).toBe(true);
+    const r = validateRustSource({ source: over });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.status).toBe(413);
   });
 
   /* Each forbidden token corresponds to a recognized abuse vector.
@@ -67,21 +70,18 @@ describe("validateRustSource", () => {
     ["use std::net::TcpStream;", "std::net"],
     ["use std::os::unix::io::AsRawFd;", "std::os::"],
     ["fn main() { unsafe { let _ = 1; } }", "unsafe"],
-    ["fn main() { asm!(\"nop\"); }", "asm!"],
+    ['fn main() { asm!("nop"); }', "asm!"],
     ['let s = include_str!("path");', "include_str!"],
     ['let s = include_bytes!("path");', "include_bytes!"],
     ['include!("path");', "include!"],
     ["#![feature(let_chains)]", "#![feature("],
   ];
 
-  it.each(forbiddenCases)(
-    "rejects `%s` (covers %s) with 422",
-    (source, _label) => {
-      const r = validateRustSource({ source: VALID_SOURCE + source });
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.status).toBe(422);
-    },
-  );
+  it.each(forbiddenCases)("rejects `%s` (covers %s) with 422", (source, _label) => {
+    const r = validateRustSource({ source: VALID_SOURCE + source });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.status).toBe(422);
+  });
 
   it("matches every documented FORBIDDEN_PATTERNS entry at least once in the case table", () => {
     /* Guard against the case where someone adds a regex but forgets

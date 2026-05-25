@@ -68,7 +68,8 @@ export function validateRustSource(body: unknown): ValidateResult {
   if (source.length === 0) {
     return { ok: false, status: 400, message: "`source` is empty." };
   }
-  if (source.length > MAX_SOURCE_BYTES) {
+  const sourceBytes = new TextEncoder().encode(source).byteLength;
+  if (sourceBytes > MAX_SOURCE_BYTES) {
     return {
       ok: false,
       status: 413,
