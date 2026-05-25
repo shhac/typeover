@@ -1,5 +1,4 @@
-import type { Target } from "./content-schema";
-import { LANG_DISPLAY } from "./lang";
+import type { Target } from "~/lib/content-schema";
 import {
   getRunner,
   getRustRunner,
@@ -7,7 +6,7 @@ import {
   terminateRunner,
   terminateRustRunner,
   terminateZigRunner,
-} from "~/runtime";
+} from "./index";
 
 /** Client-side runtimes the hook actually drives. Each maps to a
  *  descriptor in `CLIENT_RUNTIME_DESCRIPTORS` below.
@@ -47,22 +46,39 @@ interface ClientRuntimeDescriptor {
  * - `get` / `terminate` are the lazy worker singletons from
  *   src/runtime/index.ts.
  */
+/* Per-runtime display labels. Duplicates the `LANG_DISPLAY` table
+ * in `~/lib/lang` by value (both are "Go" / "Zig" / "Rust" today).
+ * Inlining here keeps `runtime/` value-edge-free into `lib/`, so the
+ * subsystem cycle the seam audit flagged is broken at the bundler
+ * level. If you add a fourth language, update both tables — the
+ * `Target` type-only import below ensures the typecheck catches a
+ * missing descriptor row, but it cannot enforce label-string parity.
+ *
+ * If three places ever end up out of sync, lift LANG_DISPLAY into
+ * a shared `src/types/lang.ts` that both `lib/` and `runtime/`
+ * import from. Not justified at three entries. */
+const LABEL_BY_RUNTIME = {
+  yaegi: "Go",
+  zig: "Zig",
+  rust: "Rust",
+} as const satisfies Record<ClientRuntime, string>;
+
 export const CLIENT_RUNTIME_DESCRIPTORS: Record<ClientRuntime, ClientRuntimeDescriptor> = {
   yaegi: {
     target: "go",
-    label: LANG_DISPLAY.go,
+    label: LABEL_BY_RUNTIME.yaegi,
     get: getRunner,
     terminate: terminateRunner,
   },
   zig: {
     target: "zig",
-    label: LANG_DISPLAY.zig,
+    label: LABEL_BY_RUNTIME.zig,
     get: getZigRunner,
     terminate: terminateZigRunner,
   },
   rust: {
     target: "rust",
-    label: LANG_DISPLAY.rust,
+    label: LABEL_BY_RUNTIME.rust,
     get: getRustRunner,
     terminate: terminateRustRunner,
   },

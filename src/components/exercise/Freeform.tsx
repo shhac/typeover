@@ -30,7 +30,7 @@ interface FreeformProps {
    *  routes that don't yet have a client-side driver — the page
    *  reshapes (target=rust, runtime=server) → runtime=rust before
    *  reaching this component. The canonical union lives in
-   *  `client-runtime-descriptors.ts`; re-exporting through
+   *  `runtime/client-descriptors.ts`; re-exporting through
    *  `use-runtime-run` so we type-check in lock-step with the
    *  hook that consumes us. design-docs/32. */
   runtime: AcceptedRuntime;

@@ -29,7 +29,7 @@
 import { SandboxTransport } from "../../lib/compile-service/transports/sandbox";
 import type { CompileTransport } from "../../lib/compile-service/transports/types";
 import { validateRustSource } from "../../lib/compile-service/validate-rust-source";
-import { errorMessage } from "../../lib/error-message";
+import { errorMessage } from "../../runtime/error-message";
 
 function errorResponse(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: message }), {

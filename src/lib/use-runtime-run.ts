@@ -4,14 +4,14 @@ import {
   CLIENT_RUNTIME_DESCRIPTORS,
   type AcceptedRuntime,
   type ClientRuntime,
-} from "./client-runtime-descriptors";
-import { errorMessage } from "./error-message";
+} from "~/runtime/client-descriptors";
+import { errorMessage } from "~/runtime/error-message";
 
 export {
   runtimeToTarget,
   type AcceptedRuntime,
   type ClientRuntime,
-} from "./client-runtime-descriptors";
+} from "~/runtime/client-descriptors";
 
 /*
  * Headless lifecycle for any component that runs learner code via a

@@ -29,7 +29,7 @@ import {
   type Fd,
   type Inode,
 } from "@bjorn3/browser_wasi_shim";
-import { errorMessage } from "~/lib/error-message";
+import { errorMessage } from "./error-message";
 
 export interface WasiRunResult {
   stdout: string;

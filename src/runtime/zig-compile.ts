@@ -30,7 +30,7 @@ import {
 } from "@bjorn3/browser_wasi_shim";
 import { buildStdlibTree, decompressIfGzipped } from "./zig-assets";
 import { captureFd } from "./wasi-run";
-import { errorMessage } from "~/lib/error-message";
+import { errorMessage } from "./error-message";
 
 export interface PreparedAssets {
   /* Cached compiler module — instantiated fresh per eval (each WASI

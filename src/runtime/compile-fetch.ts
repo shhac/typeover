@@ -18,7 +18,7 @@
  * Per design-docs/32.
  */
 
-import { errorMessage } from "~/lib/error-message";
+import { errorMessage } from "./error-message";
 
 export type FetchCompiledResult =
   | { ok: true; bytes: ArrayBuffer }

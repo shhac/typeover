@@ -9,12 +9,13 @@
  * stack traces, anonymise paths) lands in one place instead of
  * drifting across files.
  *
- * Used by:
- *   - src/runtime/wasi-run.ts          (compile / trap fallthrough)
- *   - src/runtime/rust-worker.ts       (network + JSON errors)
- *   - src/runtime/zig-worker.ts        (compile + run outcomes)
- *   - src/lib/use-runtime-run.ts       (boot + run failure surface)
- *   - src/api/compile/rust.ts          (transport throws)
+ * Lives under `src/runtime/` because four of its five importers
+ * are inside this directory (wasi-run, compile-fetch, zig-compile,
+ * plus api/compile/rust which is the server side of the same
+ * pipeline). `lib/use-runtime-run.ts` reaches in for the same
+ * coercion in its catch arms. Keeping the file here avoids a
+ * `runtime → lib` import edge that would otherwise close a
+ * subsystem cycle with `lib/client-runtime-descriptors`.
  */
 export function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
