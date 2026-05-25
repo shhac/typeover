@@ -113,147 +113,159 @@ export function ExerciseShell(props: ExerciseShellProps) {
   });
 
   return (
-    <Stack gap="lg">
-      {/* Prompt stays visible while the learner works.
-       * `sticky top-0` with a backdrop-blurred surface so the
-       * prompt rides above the page as they scroll into the
-       * answer region. design-docs/16 F-21. */}
-      <div class="sticky top-0 z-10 -mx-2 px-2 py-2 bg-bg-base/85 backdrop-blur-sm border-b border-border-default/60">
+    <section
+      class="ds-panel overflow-hidden border border-border-default rounded-sm bg-bg-panel"
+      aria-label="Exercise workbench"
+    >
+      {/* Prompt stays visible while the learner works. The prompt is
+       * the work order for the bench, not a decorative page heading. */}
+      <div class="sticky top-0 z-10 px-4 sm:px-6 py-3 bg-bg-base/90 backdrop-blur-sm border-b border-border-default">
         <Text tone="secondary" size="sm" family="mono">
           <span innerHTML={formatInline(props.prompt)} />
         </Text>
       </div>
-      <Stack gap="sm">
-        {/* TS-source pane: read-only CodeMirror so syntax tokens
-         * match the live editor below (palette-themed via
-         * design-docs/16 F-19 follow-up). Renders as a static
-         * <pre> inside vitest per the editor's test-env fallback. */}
-        <InstructionLine class="mb-0">TypeScript reference</InstructionLine>
-        <CodeMirrorEditor
-          value={props.ts}
-          readOnly
-          language="ts"
-          ariaLabel="TypeScript reference snippet"
-        />
-      </Stack>
 
-      {props.children}
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] border-b border-border-default">
+        <section class="p-4 sm:p-6 lg:border-r lg:border-border-default bg-bg-panel">
+          {/* TS-source pane: read-only CodeMirror so syntax tokens
+           * match the live editor below (palette-themed via
+           * design-docs/16 F-19 follow-up). Renders as a static
+           * <pre> inside vitest per the editor's test-env fallback. */}
+          <Stack gap="sm">
+            <InstructionLine class="mb-0">TypeScript reference</InstructionLine>
+            <CodeMirrorEditor
+              value={props.ts}
+              readOnly
+              language="ts"
+              ariaLabel="TypeScript reference snippet"
+            />
+          </Stack>
+        </section>
 
-      <Show when={phase() !== "picking"}>
-        <Feedback
-          status={phase() === "right" ? "correct" : "incorrect"}
-          ref={(el) => {
-            feedbackRef = el;
-          }}
-        >
-          <Show
-            when={phase() === "right"}
-            fallback={
-              props.wrongMessage ?? (
-                <span>Not quite. Try again, reshuffle this exercise, or reveal the answer.</span>
-              )
-            }
-          >
-            {props.correctMessage ?? <span>Correct — and idiomatic.</span>}
-          </Show>
-        </Feedback>
-        <Show when={phase() === "right" && props.successNote}>
-          {(note) => (
-            <Text tone="secondary" size="sm">
-              <span innerHTML={formatInline(note())} />
-            </Text>
-          )}
-        </Show>
-      </Show>
+        <section class="p-4 sm:p-6 bg-bg-base/30">
+          <Stack gap="lg">{props.children}</Stack>
+        </section>
+      </div>
 
-      <Stack direction="row" gap="sm" wrap>
-        {/* Cross-exercise navigation (Previous + Skip-ahead) used
-         * to live here as toolbar buttons; moved to the header's
-         * ← / → arrow chrome (BaseLayout) per the 2026-05-21
-         * screenshot review — the toolbar is now reserved for the
-         * active workflow (Submit / Run / Try-again / Reveal /
-         * Next-exercise) and never holds cross-exercise nav. */}
-        <Switch>
-          <Match when={phase() === "picking"}>
-            <Button
-              variant="primary"
-              onClick={() => props.phase.submit()}
-              disabled={!props.phase.canSubmit()}
+      <div class="p-4 sm:p-6">
+        <Stack gap="lg">
+          <Show when={phase() !== "picking"}>
+            <Feedback
+              status={phase() === "right" ? "correct" : "incorrect"}
+              ref={(el) => {
+                feedbackRef = el;
+              }}
             >
-              Submit
-            </Button>
-            {props.extraPickingActions}
-          </Match>
-          <Match when={phase() === "wrong"}>
-            <Button variant="secondary" onClick={() => props.phase.tryAgain()}>
-              Try again
-            </Button>
-            {props.extraWrongActions}
-            <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
-              Reshuffle this exercise
-            </Button>
-            <Show when={!props.phase.revealed()}>
-              {/* Reveal records the exercise as failed (per the
-               * canonical pedagogy contract in design-docs/12).
-               * Earlier copy was just "Reveal correct" with no
-               * disclosure — a learner clicking it for help got
-               * silently penalised. design-docs/16 F-6. */}
-              <Button
-                variant="ghost"
-                onClick={() => props.phase.revealCorrect()}
-                title="Reveals the answer and records this exercise as failed."
+              <Show
+                when={phase() === "right"}
+                fallback={
+                  props.wrongMessage ?? (
+                    <span>Not quite. Try again, reshuffle this exercise, or reveal the answer.</span>
+                  )
+                }
               >
-                Reveal answer (counts as fail)
-              </Button>
+                {props.correctMessage ?? <span>Correct — and idiomatic.</span>}
+              </Show>
+            </Feedback>
+            <Show when={phase() === "right" && props.successNote}>
+              {(note) => (
+                <Text tone="secondary" size="sm">
+                  <span innerHTML={formatInline(note())} />
+                </Text>
+              )}
             </Show>
-          </Match>
-          <Match when={phase() === "right"}>
-            <Show
-              when={props.nextExerciseHref}
-              fallback={
-                <Show when={props.themeHref}>
+          </Show>
+
+          <Stack direction="row" gap="sm" wrap>
+            {/* Cross-exercise navigation (Previous + Skip-ahead) used
+             * to live here as toolbar buttons; moved to the header's
+             * ← / → arrow chrome (BaseLayout) per the 2026-05-21
+             * screenshot review — the toolbar is now reserved for the
+             * active workflow (Submit / Run / Try-again / Reveal /
+             * Next-exercise) and never holds cross-exercise nav. */}
+            <Switch>
+              <Match when={phase() === "picking"}>
+                <Button
+                  variant="primary"
+                  onClick={() => props.phase.submit()}
+                  disabled={!props.phase.canSubmit()}
+                >
+                  Submit
+                </Button>
+                {props.extraPickingActions}
+              </Match>
+              <Match when={phase() === "wrong"}>
+                <Button variant="secondary" onClick={() => props.phase.tryAgain()}>
+                  Try again
+                </Button>
+                {props.extraWrongActions}
+                <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
+                  Reshuffle this exercise
+                </Button>
+                <Show when={!props.phase.revealed()}>
+                  {/* Reveal records the exercise as failed (per the
+                   * canonical pedagogy contract in design-docs/12).
+                   * Earlier copy was just "Reveal correct" with no
+                   * disclosure — a learner clicking it for help got
+                   * silently penalised. design-docs/16 F-6. */}
+                  <Button
+                    variant="ghost"
+                    onClick={() => props.phase.revealCorrect()}
+                    title="Reveals the answer and records this exercise as failed."
+                  >
+                    Reveal answer (counts as fail)
+                  </Button>
+                </Show>
+              </Match>
+              <Match when={phase() === "right"}>
+                <Show
+                  when={props.nextExerciseHref}
+                  fallback={
+                    <Show when={props.themeHref}>
+                      {(href) => (
+                        <ButtonLink href={href()} variant="primary">
+                          Back to theme overview
+                        </ButtonLink>
+                      )}
+                    </Show>
+                  }
+                >
                   {(href) => (
                     <ButtonLink href={href()} variant="primary">
-                      Back to theme overview
+                      Next exercise →
                     </ButtonLink>
                   )}
                 </Show>
-              }
-            >
-              {(href) => (
-                <ButtonLink href={href()} variant="primary">
-                  Next exercise →
-                </ButtonLink>
-              )}
-            </Show>
-            <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
-              Try a fresh variant
-            </Button>
-          </Match>
-        </Switch>
-      </Stack>
+                <Button variant="ghost" onClick={() => props.phase.nextInstance()}>
+                  Try a fresh variant
+                </Button>
+              </Match>
+            </Switch>
+          </Stack>
 
-      <Stack direction="row" gap="lg" wrap>
-        <HintButton
-          hints={props.hints}
-          values={props.hintValues}
-          onReveal={() => recordHintUsed(props.exerciseId)}
-        />
-        <Show when={!props.ownsReveal}>
-          {/* Footer reveal records the same way Hint does — a peek
-           * at the canonical pre-submit is a hint-equivalent.
-           * Without this, a learner who clicked "Show answer"
-           * before picking an MCQ got no progress signal, while a
-           * learner who tried and failed and THEN revealed paid a
-           * full failure — same surface, different cost. design-
-           * docs/19 F-15. */}
-          <RevealButton
-            canonical={props.canonical}
-            lang="go"
-            onReveal={() => recordHintUsed(props.exerciseId)}
-          />
-        </Show>
-      </Stack>
-    </Stack>
+          <Stack direction="row" gap="lg" wrap>
+            <HintButton
+              hints={props.hints}
+              values={props.hintValues}
+              onReveal={() => recordHintUsed(props.exerciseId)}
+            />
+            <Show when={!props.ownsReveal}>
+              {/* Footer reveal records the same way Hint does — a peek
+               * at the canonical pre-submit is a hint-equivalent.
+               * Without this, a learner who clicked "Show answer"
+               * before picking an MCQ got no progress signal, while a
+               * learner who tried and failed and THEN revealed paid a
+               * full failure — same surface, different cost. design-
+               * docs/19 F-15. */}
+              <RevealButton
+                canonical={props.canonical}
+                lang="go"
+                onReveal={() => recordHintUsed(props.exerciseId)}
+              />
+            </Show>
+          </Stack>
+        </Stack>
+      </div>
+    </section>
   );
 }

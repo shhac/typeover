@@ -1,5 +1,5 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Container,
@@ -33,8 +33,6 @@ import { formatBlock } from "~/lib/format-block";
  * accordion-expanded body so the visual rhythm matches when a
  * learner arrives from there.
  */
-
-type Module = CollectionEntry<"modules">;
 
 export async function getStaticPaths() {
   const modules = await getCollection("modules");

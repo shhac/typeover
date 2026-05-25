@@ -4,7 +4,6 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Container,
   Heading,
-  Panel,
   Stack,
   Text,
 } from "~/components/ds";
@@ -133,67 +132,65 @@ const dispatch = pickExerciseDispatch(ex);
           <Heading level={1}>{themeEntry.data.title}</Heading>
         </Stack>
 
-        <Panel padding="airy" tone="default">
-          {dispatch.kind === "mcq" && (
-            <Mcq
-              client:visible
-              exerciseId={entry.id}
-              prompt={ex.prompt}
-              generator={ex.generator}
-              hints={ex.hints}
-              successNote={ex.successNote}
-              nextExerciseHref={nextExerciseHref}
-              themeHref={parentThemeHref}
-            />
-          )}
-          {dispatch.kind === "fill-word" && (
-            <FillBlankWord
-              client:visible
-              exerciseId={entry.id}
-              prompt={ex.prompt}
-              generator={ex.generator}
-              blanks={dispatch.blanks}
-              hints={ex.hints}
-              target={ex.target}
-              successNote={ex.successNote}
-              nextExerciseHref={nextExerciseHref}
-              themeHref={parentThemeHref}
-            />
-          )}
-          {dispatch.kind === "fill-line" && (
-            <FillBlankLineInput
-              client:only="solid-js"
-              exerciseId={entry.id}
-              prompt={ex.prompt}
-              generator={ex.generator}
-              blanks={dispatch.blanks}
-              hints={ex.hints}
-              expectStdout={dispatch.expectStdout}
-              runtime={dispatch.runtime}
-              alternateCanonicals={dispatch.alternateCanonicals}
-              acceptedAnswers={dispatch.acceptedAnswers}
-              knownAttempts={dispatch.knownAttempts}
-              successNote={ex.successNote}
-              nextExerciseHref={nextExerciseHref}
-              themeHref={parentThemeHref}
-            />
-          )}
-          {dispatch.kind === "freeform" && (
-            <Freeform
-              client:only="solid-js"
-              exerciseId={entry.id}
-              prompt={ex.prompt}
-              generator={ex.generator}
-              hints={ex.hints}
-              expectStdout={dispatch.expectStdout}
-              runtime={dispatch.runtime}
-              submissionShape={dispatch.submissionShape}
-              successNote={ex.successNote}
-              nextExerciseHref={nextExerciseHref}
-              themeHref={parentThemeHref}
-            />
-          )}
-        </Panel>
+        {dispatch.kind === "mcq" && (
+          <Mcq
+            client:visible
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            hints={ex.hints}
+            successNote={ex.successNote}
+            nextExerciseHref={nextExerciseHref}
+            themeHref={parentThemeHref}
+          />
+        )}
+        {dispatch.kind === "fill-word" && (
+          <FillBlankWord
+            client:visible
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            blanks={dispatch.blanks}
+            hints={ex.hints}
+            target={ex.target}
+            successNote={ex.successNote}
+            nextExerciseHref={nextExerciseHref}
+            themeHref={parentThemeHref}
+          />
+        )}
+        {dispatch.kind === "fill-line" && (
+          <FillBlankLineInput
+            client:only="solid-js"
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            blanks={dispatch.blanks}
+            hints={ex.hints}
+            expectStdout={dispatch.expectStdout}
+            runtime={dispatch.runtime}
+            alternateCanonicals={dispatch.alternateCanonicals}
+            acceptedAnswers={dispatch.acceptedAnswers}
+            knownAttempts={dispatch.knownAttempts}
+            successNote={ex.successNote}
+            nextExerciseHref={nextExerciseHref}
+            themeHref={parentThemeHref}
+          />
+        )}
+        {dispatch.kind === "freeform" && (
+          <Freeform
+            client:only="solid-js"
+            exerciseId={entry.id}
+            prompt={ex.prompt}
+            generator={ex.generator}
+            hints={ex.hints}
+            expectStdout={dispatch.expectStdout}
+            runtime={dispatch.runtime}
+            submissionShape={dispatch.submissionShape}
+            successNote={ex.successNote}
+            nextExerciseHref={nextExerciseHref}
+            themeHref={parentThemeHref}
+          />
+        )}
 
         <Stack gap="sm">
           <Heading level={4}>About this theme</Heading>
