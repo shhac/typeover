@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: freeform
+order: 7
+prompt: |
+  Write a Rust program with a helper `sum_slice` that takes a
+  shared slice of `i32`s and returns their sum. `main` declares an
+  array `[1, 2, 3, 4]` and prints the sum.
+
+  Output:
+
+      10
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function sumSlice(xs: number[]): number {
+      return xs.reduce((a, b) => a + b, 0);
+    }
+    console.log(sumSlice([1, 2, 3, 4]));
+  canonical: |-
+    fn sum_slice(xs: &[i32]) -> i32 {
+        xs.iter().sum()
+    }
+
+    fn main() {
+        let xs = [1, 2, 3, 4];
+        println!("{}", sum_slice(&xs));
+    }
+expectStdout: |
+  10
+hints:
+  - "Two pieces: signature `fn sum_slice(xs: &[i32]) -> i32 { xs.iter().sum() }`, call site `sum_slice(&xs)` with the `&` to take a slice view of the owned array. `.iter().sum()` is the idiomatic shape."
+  - "The array `[1, 2, 3, 4]` coerces to `&[i32]` when passed via `&xs`."
+  - |-
+    fn sum_slice(xs: &[i32]) -> i32 {
+        xs.iter().sum()
+    }
+
+    fn main() {
+        let xs = [1, 2, 3, 4];
+        println!("{}", sum_slice(&xs));
+    }
+runtime: server
+notes: |
+  Generalises the `&str` reflex to a non-string slice. The
+  `.iter().sum()` chain is the standard read-then-aggregate
+  shape for slices; the turbofish-free form works because the
+  return type pins it to `i32`.

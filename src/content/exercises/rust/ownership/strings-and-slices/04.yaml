@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: fill-word
+order: 4
+prompt: |
+  Fill the method that converts a `&str` literal into an owned
+  `String`. Idiomatic Rust uses the method form, not the
+  constructor form.
+generator:
+  kind: template
+  vars:
+    method: ["to_string"]
+  ts: |-
+    const greeting: string = "hi";
+  canonical: |-
+    let greeting: String = "hi".${method}();
+blanks: [method]
+hints:
+  - "The method is named after the destination type, snake_cased. Available on any type implementing `Display` (or `ToString`)."
+  - "Nine characters: lowercase, with one underscore."
+  - "`to_string`"
+runtime: none
+notes: |
+  Drills the `.to_string()` reflex for `&str` → `String`.
+  Alternatives `String::from(...)` and `"hi".into()` are also
+  idiomatic; this slot pins the method form because it reads
+  naturally at the end of a chain.

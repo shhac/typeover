@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: fill-line
+order: 6
+prompt: |
+  Write the signature for `len_of`. It takes a string slice and
+  returns its `usize` length. The caller keeps ownership of
+  whatever they passed.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn len_of(s: &str) -> usize {"
+  ts: |-
+    function lenOf(s: string): number { return s.length; }
+  canonical: |-
+    ${line}
+        s.len()
+    }
+
+    fn main() {
+        let owned = String::from("paul");
+        println!("{}", len_of(&owned));
+        println!("{}", len_of("hi"));
+    }
+  distractors:
+    - match: "fn len_of(s: &String) -> usize {"
+      explain: |-
+        That works for `&String` callers, but `len_of("hi")`
+        fails — string literals are `&str`, not `&String`. The
+        more flexible signature accepts BOTH, by taking `&str`.
+    - match: "fn len_of(s: String) -> usize {"
+      explain: |-
+        That MOVES the String into the function. For a read-only
+        helper, borrow with `&str` (or at least `&String`) so the
+        caller keeps their value.
+    - match: "fn len_of(s: &str) -> i32 {"
+      explain: |-
+        `.len()` returns `usize`, not `i32`. Match the type the
+        method actually returns rather than reaching for the
+        TypeScript `number` reflex.
+    - match: "fn len_of(s: &str) : usize {"
+      explain: |-
+        Return-type punctuation is `->`, not `:`. The `:`
+        introduces parameter types; `->` introduces the return
+        type.
+expectStdout: |
+  4
+  2
+runtime: server
+blanks: [line]
+hints:
+  - "Two halves: parameter type is `&str` (the universal read-only string), return type is `usize` (what `.len()` produces). Punctuation is `->` between parens and brace."
+  - "Shape: `fn <name>(<arg>: &str) -> usize {`."
+  - "`fn len_of(s: &str) -> usize {`"
+notes: |
+  Production drill for the read-only string-helper signature.
+  Distractors cover `&String` (less flexible), `String`
+  (moves), wrong return type, and `:` return punctuation.

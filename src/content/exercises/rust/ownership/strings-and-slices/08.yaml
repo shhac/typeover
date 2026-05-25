@@ -1,0 +1,46 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript string helper to Rust. `shout` takes a
+  string and returns a NEW owned string with the same content in
+  uppercase. `main` calls it with a string literal and prints the
+  result.
+
+  Output:
+
+      HI
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function shout(s: string): string { return s.toUpperCase(); }
+    console.log(shout("hi"));
+  canonical: |-
+    fn shout(s: &str) -> String {
+        s.to_uppercase()
+    }
+
+    fn main() {
+        println!("{}", shout("hi"));
+    }
+expectStdout: |
+  HI
+hints:
+  - "Two reflexes: parameter is `&str` (read-only, accepts literals), return is `String` (the new owned uppercase result). The conversion method is `.to_uppercase()`."
+  - "`s.to_uppercase()` returns a `String` directly — no extra `.to_string()` needed."
+  - |-
+    fn shout(s: &str) -> String {
+        s.to_uppercase()
+    }
+
+    fn main() {
+        println!("{}", shout("hi"));
+    }
+runtime: server
+notes: |
+  Drills the accept-`&str`-return-`String` reflex on a real
+  transformation. `.to_uppercase()` already produces an owned
+  `String`, so the body is one expression with no trailing
+  semicolon.

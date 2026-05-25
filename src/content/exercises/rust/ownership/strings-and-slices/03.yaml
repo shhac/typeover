@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: mcq-explain
+order: 3
+prompt: |
+  Given the source on the side, what is the type of `first` and
+  what does the slicing operation cost?
+generator:
+  kind: variant
+  variants:
+    - id: slice-expr
+      ts: |-
+        const s: string = "paul";
+        const first = s.slice(0, 2);
+        // JS .slice() copies into a new string.
+      source: |-
+        let s = String::from("paul");
+        let first = &s[0..2];
+      canonical: '`first` is `&str` — a borrowed string slice of `s` covering bytes 0..2 ("pa"). Zero allocation; `first` borrows from `s` and is invalidated if `s` goes out of scope or is mutated.'
+      distractors:
+        - '`first` is `&[u8]` — String indexing produces a byte-array slice; you''d need `std::str::from_utf8` to get a string back.'
+        - '`first` is `String` — `&s[0..2]` allocates a new owned String containing "pa"; modifying it does not affect `s`.'
+        - '`first` is `str` — slicing a String returns the unsized `str` type by value, which is why the `&` prefix is required.'
+hints:
+  - "Slicing a `String` produces a borrowed VIEW into its UTF-8 bytes. The view's type is the borrowed-string type, not the owned one. No new allocation."
+  - "Same type used for the parameter `&str` in slots 01–02."
+  - '`&str`; zero allocation — `first` borrows from `s`.'
+runtime: none
+notes: |
+  Teaches the `&str` view produced by string slicing. The third
+  distractor is technically correct that slicing returns `str`
+  by value (which is why you can't bind it without `&`), but
+  the QUESTION asks the type of `first` AFTER the `&` is
+  applied — which is `&str`. Distractor exists to surface the
+  unsized-type detail without making it the right answer.

@@ -1,0 +1,65 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: freeform
+order: 9
+prompt: |
+  This program fails to compile:
+
+      error[E0515]: cannot return reference to local variable `s`
+       --> src/main.rs:3:5
+        |
+      3 |     &s
+        |     ^^ returns a reference to data owned by the current function
+
+  Broken source:
+
+      fn greeting(name: &str) -> &str {
+          let s = String::from("hi, ") + name;
+          &s
+      }
+
+      fn main() {
+          println!("{}", greeting("paul"));
+      }
+
+  Fix it by returning an OWNED `String` instead of a borrow of a
+  local. Output:
+
+      hi, paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function greeting(name: string): string {
+      const s = "hi, " + name;
+      return s;
+    }
+    console.log(greeting("paul"));
+  canonical: |-
+    fn greeting(name: &str) -> String {
+        String::from("hi, ") + name
+    }
+
+    fn main() {
+        println!("{}", greeting("paul"));
+    }
+expectStdout: |
+  hi, paul
+hints:
+  - "Two coordinated edits: return type goes from `&str` to `String`, and the body returns the owned String DIRECTLY — no leading `&`, no intermediate `let`. `String + &str` produces `String`."
+  - "Body is one expression: `String::from(\"hi, \") + name`."
+  - |-
+    fn greeting(name: &str) -> String {
+        String::from("hi, ") + name
+    }
+
+    fn main() {
+        println!("{}", greeting("paul"));
+    }
+runtime: server
+notes: |
+  Closes the theme by surfacing the E0515 trap — returning a
+  reference to a local. The fix flips the return type to the
+  owned shape and lets the String escape the function. The
+  shape `String + &str → String` is the canonical concat
+  reflex.

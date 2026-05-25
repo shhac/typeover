@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: mcq
+order: 1
+prompt: |
+  A function only READS a string — measures, prints, returns a new
+  string from it. It should accept BOTH `&String` arguments AND
+  string-literal arguments. Pick the idiomatic parameter type.
+generator:
+  kind: variant
+  variants:
+    - id: read-helper
+      ts: 'function shout(s: string): string { return s.toUpperCase(); }'
+      canonical: 'fn shout(s: &str) -> String — `&str` is the universal read-only string borrow; both `&String` and `"literal"` coerce to it.'
+      distractors:
+        - 'fn shout(s: &String) -> String — works for `&String` callers, but `"literal"` does not auto-coerce.'
+        - 'fn shout(s: String) -> String — takes ownership; the caller can''t use their String afterward.'
+        - 'fn shout(s: str) -> String — `str` is unsized (length not known at compile time); cannot be passed by value.'
+hints:
+  - "The borrowed string type that works for BOTH owned String and string literals is the one without the leading capital letter."
+  - "Three letters preceded by `&`."
+  - '`fn shout(s: &str) -> String`'
+runtime: none
+notes: |
+  Establishes `&str` as the default for read-only string
+  parameters. The "works for both" framing is what makes `&str`
+  superior to `&String` — covered by Deref coercion.

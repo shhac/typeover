@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: fill-word
+order: 5
+prompt: |
+  Fill the parameter type: a SHARED VIEW into a sequence of `i32`s.
+  The function only reads — no ownership transfer, no mutation.
+generator:
+  kind: template
+  vars:
+    param: ["&[i32]"]
+  ts: |-
+    function sum(xs: number[]): number {
+      return xs.reduce((a, b) => a + b, 0);
+    }
+  canonical: |-
+    fn sum(xs: ${param}) -> i32 {
+        xs.iter().sum()
+    }
+blanks: [param]
+hints:
+  - "Slice syntax is `&[T]` — `&` for the shared borrow, `[T]` for the unsized slice type. Mirrors the `&str` (string slice) shape from slots 01–03, but for arbitrary element types."
+  - "Six characters: `&` + `[` + `i32` + `]`."
+  - "`&[i32]`"
+runtime: none
+notes: |
+  Generalises the `&str` reflex to arbitrary element types.
+  `&[T]` is the borrowed-view counterpart of the owned `Vec<T>`,
+  just as `&str` is to `String`.

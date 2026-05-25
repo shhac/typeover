@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/strings-and-slices
+type: mcq
+order: 2
+prompt: |
+  A function builds and returns a brand-new string (e.g. "@" + name).
+  The result must outlive the function. Pick the idiomatic return
+  type.
+generator:
+  kind: variant
+  variants:
+    - id: owned-return
+      ts: 'function tag(name: string): string { return "@" + name; }'
+      canonical: 'fn tag(name: &str) -> String — returns the owned String; the function allocates, the caller takes ownership.'
+      distractors:
+        - 'fn tag(name: &str) -> &str — the new string lives only inside the function; returning a reference to it produces a dangling borrow.'
+        - 'fn tag(name: &str) -> str — `str` is unsized; functions cannot return it by value.'
+        - 'fn tag(name: &str) -> &String — same dangling-reference problem as `&str`, plus `&String` is rarely the right type.'
+hints:
+  - "The parameter is the borrowed type (`&str`); the RETURN must be the OWNED type because the function creates new heap-allocated data the caller takes ownership of."
+  - "Capital-S, six letters."
+  - '`fn tag(name: &str) -> String`'
+runtime: none
+notes: |
+  Establishes `String` as the owned return type. The mental
+  model: accept `&str` (broad), return `String` (owned).
+  Mirrors the C++ `std::string_view` / `std::string` split.
