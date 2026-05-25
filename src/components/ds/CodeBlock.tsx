@@ -7,10 +7,8 @@ import {
   IconFileTs,
   IconFileZig,
 } from "~/components/icons/file-icons";
-import { CodeHighlight } from "./CodeHighlight";
+import { CodeHighlight, type Lang } from "./CodeHighlight";
 import { cn } from "./_internal";
-
-type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
 
 interface CodeBlockTab {
   id: string;

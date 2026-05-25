@@ -5,8 +5,9 @@ import { typescriptLanguage } from "@codemirror/lang-javascript";
 import { rustLanguage } from "@codemirror/lang-rust";
 import { highlightTree, tagHighlighter, tags } from "@lezer/highlight";
 import { zigLanguage } from "@ndim/codemirror-lang-zig";
+import { assertUnreachable } from "~/lib/assert-unreachable";
 
-type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
+export type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
 
 interface Token {
   text: string;
@@ -32,15 +33,31 @@ const highlighter = tagHighlighter([
   { tag: tags.meta, class: "text-fg-muted" },
 ]);
 
-function parserFor(lang: Lang) {
-  if (lang === "go") return goLanguage.parser;
-  if (lang === "ts") return typescriptLanguage.parser;
-  if (lang === "zig") return zigLanguage.parser;
-  if (lang === "rust") return rustLanguage.parser;
-  return null;
+/* Switch + `assertUnreachable` on the `default` so adding a new
+ * Lang member to the union without a matching branch here fails
+ * typecheck — the if-chain that used to live here silently
+ * returned `null` for any unmatched lang, which is exactly how
+ * the missing Rust branch (commit 94f56b5) shipped to production
+ * undetected. */
+export function parserFor(lang: Lang) {
+  switch (lang) {
+    case "go":
+      return goLanguage.parser;
+    case "ts":
+      return typescriptLanguage.parser;
+    case "zig":
+      return zigLanguage.parser;
+    case "rust":
+      return rustLanguage.parser;
+    case "shell":
+    case "plain":
+      return null;
+    default:
+      return assertUnreachable(lang);
+  }
 }
 
-function highlightedTokens(code: string, lang: Lang): Token[] {
+export function highlightedTokens(code: string, lang: Lang): Token[] {
   const parser = parserFor(lang);
   if (!parser || code === "") return [{ text: code }];
 
