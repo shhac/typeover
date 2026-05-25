@@ -1,6 +1,6 @@
 target: rust
 themeId: rust/ownership/borrowing
-type: mcq
+type: mcq-explain
 order: 1
 prompt: |
   A function only needs to READ a String — log it, measure it,
@@ -10,7 +10,10 @@ generator:
   kind: variant
   variants:
     - id: log-helper
-      ts: "function log(s: string): void { console.log(s); }"
+      ts: |-
+        function log(s: string): void {
+          console.log(s);
+        }
       canonical: '`fn log(s: &String)` — takes a shared reference; the caller keeps ownership.'
       distractors:
         - '`fn log(s: String)` — takes ownership; the caller can''t use `s` afterward.'

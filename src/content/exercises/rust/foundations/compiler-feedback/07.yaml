@@ -1,16 +1,24 @@
 target: rust
 themeId: rust/foundations/compiler-feedback
-type: mcq
+type: mcq-explain
 order: 7
 prompt: |
-  rustc emits `warning: unused variable `extra`` but the program
+  rustc emits `warning: unused variable: `extra`` but the program
   STILL compiles and runs. Pick the statement that correctly
   describes the warning-vs-error distinction.
 generator:
   kind: variant
   variants:
     - id: warn-vs-err
-      ts: "TS surfaces unused-variable lints; whether they BLOCK build depends on tsconfig — Rust's default is the same."
+      ts: |-
+        // TS surfaces unused-variable lints — whether they
+        // BLOCK the build depends on tsconfig (noUnusedLocals).
+        // Rust's default behaviour is similar.
+      source: |-
+        fn main() {
+            let extra = 42;
+            println!("done");
+        }
       canonical: "Warnings produce output but don't stop compilation; the binary still builds and runs."
       distractors:
         - "Warnings stop the build until the underlying issue is fixed."

@@ -1,9 +1,9 @@
 target: rust
 themeId: rust/ownership/moves-and-copy
-type: mcq
+type: mcq-explain
 order: 2
 prompt: |
-  rustc emits this diagnostic on a 4-line program. Pick the line
+  rustc emits this diagnostic on the program below. Pick the line
   that's a MOVE (not a copy, borrow, or unrelated assignment).
 
       error[E0382]: borrow of moved value: `name`
@@ -17,7 +17,15 @@ generator:
   kind: variant
   variants:
     - id: which-line
-      ts: "TS doesn't have a move concept — the question's pinning the Rust-specific event."
+      ts: |-
+        const name: string = "paul";
+        const owner: string = name;
+        console.log(name);
+        // TS doesn't have a move concept — both bindings stay usable.
+      source: |-
+        let name = String::from("paul");
+        let owner = name;
+        println!("{}", name);
       canonical: '`let owner = name;` — assignment moves the String out of `name` into `owner`.'
       distractors:
         - '`let name = String::from("paul");` — that''s the original construction, not a move.'

@@ -1,6 +1,6 @@
 target: rust
 themeId: rust/ownership/borrowing
-type: mcq
+type: mcq-explain
 order: 2
 prompt: |
   Given `fn log(s: &String)` and `let name = String::from("paul");`,
@@ -10,7 +10,22 @@ generator:
   kind: variant
   variants:
     - id: borrow-call
-      ts: "TS passes by reference for objects implicitly; in Rust the call site spells the borrow with `&`."
+      ts: |-
+        function log(s: string): void {
+          console.log(s);
+        }
+        const name: string = "paul";
+        log(name);
+        // TS passes the reference implicitly; `name` stays usable either way.
+      source: |-
+        fn log(s: &String) {
+            println!("{}", s);
+        }
+
+        fn main() {
+            let name = String::from("paul");
+            // pick the call form that borrows `name`
+        }
       canonical: '`log(&name);` — takes a shared reference; `name` stays usable.'
       distractors:
         - '`log(name);` — moves the String into `log`; `name` is no longer usable.'

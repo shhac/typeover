@@ -1,6 +1,6 @@
 target: rust
 themeId: rust/ownership/borrowing
-type: mcq
+type: mcq-explain
 order: 3
 prompt: |
   Inside `fn count(s: &String) -> usize`, you want to return the
@@ -10,7 +10,14 @@ generator:
   kind: variant
   variants:
     - id: len-body
-      ts: "TS dot-access works on references and values transparently — same in Rust for method calls."
+      ts: |-
+        function count(s: string): number {
+          return s.length;
+        }
+      source: |-
+        fn count(s: &String) -> usize {
+            // pick the body that returns the String's length
+        }
       canonical: '`s.len()` — auto-deref calls `String::len(&self)` on the underlying String.'
       distractors:
         - '`(*s).len()` — explicit deref; compiles but is unidiomatic.'

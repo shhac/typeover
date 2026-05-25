@@ -1,6 +1,6 @@
 target: rust
 themeId: rust/ownership/moves-and-copy
-type: mcq
+type: mcq-explain
 order: 1
 prompt: |
   In Rust, each value has exactly ONE owning binding at a time.
@@ -9,8 +9,14 @@ generator:
   kind: variant
   variants:
     - id: string-move
-      ts: 'const a: string = "hi"; const b: string = a; // both still usable'
-      canonical: 'After `let a = String::from("hi"); let b = a;` — `b` owns the String; `a` is no longer usable.'
+      ts: |-
+        const a: string = "hi";
+        const b: string = a;
+        // both `a` and `b` are still usable in TS
+      source: |-
+        let a = String::from("hi");
+        let b = a;
+      canonical: '`b` owns the String; `a` is no longer usable.'
       distractors:
         - '`a` still owns it; `b` is just a reference.'
         - 'Both `a` and `b` own it independently (cloned automatically).'
