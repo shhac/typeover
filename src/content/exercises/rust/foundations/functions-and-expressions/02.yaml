@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: mcq
+order: 2
+prompt: |
+  Pick the function that returns `()` — the unit type. A function
+  with no return arrow returns unit; the explicit form spells it
+  out.
+generator:
+  kind: variant
+  variants:
+    - id: log-thing
+      ts: "function logThing(s: string): void { console.log(s); }"
+      canonical: 'fn log_thing(s: &str) { println!("{}", s); }'
+      distractors:
+        - 'fn log_thing(s: &str) -> void { println!("{}", s); }'
+        - 'fn log_thing(s: &str): void { println!("{}", s); }'
+        - 'fn log_thing(s: &str) -> () { println!("{}", s) }'
+hints:
+  - "TS's `void` doesn't exist in Rust. The 'returns nothing' shape is: omit the `->` clause entirely. Rust implicitly treats that as `-> ()` (unit type)."
+  - "Shape: `fn <name>(<args>) { <body> }`. No `->`."
+  - 'For log-thing: `fn log_thing(s: &str) { println!("{}", s); }`.'
+runtime: none
+notes: |
+  Distractors:
+   - `-> void` — TS leakage; `void` isn't a Rust type.
+   - `: void` — wrong return-type punctuation AND wrong type name.
+   - `-> ()` — TECHNICALLY valid Rust (explicit unit), but the
+     idiomatic form is to omit the arrow entirely. The variant
+     also drops the trailing `;` so the body doesn't compile —
+     subtle real-Rust gotcha.

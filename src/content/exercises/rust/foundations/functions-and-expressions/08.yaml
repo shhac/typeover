@@ -1,0 +1,42 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript helper into a complete Rust program.
+  `square` takes an `i32` and returns its square. `main` prints
+  `square(6)`. Output should be exactly:
+
+      36
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function square(n: number): number { return n * n; }
+    console.log(square(6));
+  canonical: |-
+    fn square(n: i32) -> i32 {
+        n * n
+    }
+
+    fn main() {
+        println!("{}", square(6));
+    }
+expectStdout: |
+  36
+runtime: server
+hints:
+  - "Define `square` as `fn square(n: i32) -> i32 { n * n }`. No `return`, no trailing `;` on the body expression. Then in `main`, `println!(\"{}\", square(6));`."
+  - "Two top-level items: the `square` function and `fn main()`. Each is a separate block."
+  - |-
+    fn square(n: i32) -> i32 {
+        n * n
+    }
+
+    fn main() {
+        println!("{}", square(6));
+    }
+notes: |
+  First freeform with a separate helper function. Forces
+  expression-tail, explicit types at the boundary, and the
+  call-from-main shape. Canonical small for prebake.

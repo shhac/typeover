@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: fill-word
+order: 4
+prompt: |
+  Fill the parameter type. The function adds one to a 32-bit
+  signed integer.
+generator:
+  kind: template
+  vars:
+    type: ["i32"]
+    name: [n, x, count]
+  ts: |-
+    function inc(${name}: number): number { return ${name} + 1; }
+  canonical: |-
+    fn inc(${name}: ${type}) -> i32 {
+        ${name} + 1
+    }
+blanks: [type]
+hints:
+  - "Same type used everywhere in the foundations theme for plain integers — three characters."
+  - "Family letter `i` + bit width `32`."
+  - "`i32`"
+runtime: none
+notes: |
+  Production drill for parameter type annotation. Reinforces the
+  i32 default from scalar-types in a function-boundary context.

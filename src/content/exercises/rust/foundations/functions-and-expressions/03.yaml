@@ -1,0 +1,38 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: mcq
+order: 3
+prompt: |
+  Pick the idiomatic Rust function body. The last expression
+  (with NO semicolon) is the function's return value — no `return`
+  keyword needed.
+generator:
+  kind: variant
+  variants:
+    - id: add
+      ts: "function add(a: number, b: number): number { return a + b; }"
+      canonical: "fn add(a: i32, b: i32) -> i32 { a + b }"
+      distractors:
+        - "fn add(a: i32, b: i32) -> i32 { a + b; }"
+        - "fn add(a: i32, b: i32) -> i32 { return a + b }"
+        - "fn add(a: i32, b: i32) -> i32 { let sum = a + b; }"
+    - id: square
+      ts: "function square(n: number): number { return n * n; }"
+      canonical: "fn square(n: i32) -> i32 { n * n }"
+      distractors:
+        - "fn square(n: i32) -> i32 { n * n; }"
+        - "fn square(n: i32) -> i32 { return n * n }"
+        - "fn square(n: i32) -> i32 { let result: i32 = n * n; }"
+hints:
+  - "The final EXPRESSION (not statement) in a Rust block is its value. Adding `;` turns the expression into a statement, which produces `()` instead — and a function declared `-> i32` returning `()` fails to compile."
+  - "Two shifts from TS: no `return` keyword needed at the tail; no trailing `;` on the value-producing line."
+  - "For add: `fn add(a: i32, b: i32) -> i32 { a + b }`."
+runtime: none
+notes: |
+  Pins the expression-vs-statement distinction. Distractors:
+   - `a + b;` — semicolon converts to statement; returns `()`,
+     compile error.
+   - `return a + b` (no `;`) — works but is unidiomatic for the
+     tail position; reserve `return` for early-exit only.
+   - `let sum = a + b;` — declares but doesn't produce; function
+     body's final value is `()` from the `let` statement.

@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: freeform
+order: 9
+prompt: |
+  The TS reference computes a discount. Translate it into Rust.
+  Watch the trailing semicolon — if you accidentally add one
+  after the tail expression, the function returns `()` and the
+  program won't compile. Output:
+
+      45
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function discounted(price: number, off: number): number {
+        return price - off;
+    }
+    console.log(discounted(50, 5));
+  canonical: |-
+    fn discounted(price: i32, off: i32) -> i32 {
+        price - off
+    }
+
+    fn main() {
+        println!("{}", discounted(50, 5));
+    }
+expectStdout: |
+  45
+runtime: server
+hints:
+  - "`fn discounted(price: i32, off: i32) -> i32 { price - off }` — the body is one expression, NO trailing `;`. If you write `price - off;` the function returns `()` and Rust rejects it because the declared return type is `i32`."
+  - "Two items: the function, then `fn main()` calling it with `println!`."
+  - |-
+    fn discounted(price: i32, off: i32) -> i32 {
+        price - off
+    }
+
+    fn main() {
+        println!("{}", discounted(50, 5));
+    }
+notes: |
+  Closes the theme by pinning the semicolon-as-statement-converter
+  rule under runtime grading. The slip the prompt warns about IS
+  the common mistake — writing `price - off;` looks fine to a TS
+  dev but fails compile because the resulting body expression is
+  `()`, not `i32`.

@@ -1,0 +1,36 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: mcq
+order: 1
+prompt: |
+  Pick the idiomatic Rust function declaration. Rust uses `fn`,
+  puts the return type after `->`, and requires explicit types
+  on every parameter.
+generator:
+  kind: variant
+  variants:
+    - id: double
+      ts: "function double(n: number): number { return n * 2; }"
+      canonical: "fn double(n: i32) -> i32 { n * 2 }"
+      distractors:
+        - "function double(n: i32) -> i32 { n * 2 }"
+        - "fn double(n: i32): i32 { return n * 2; }"
+        - "fn double(n) -> i32 { n * 2 }"
+    - id: greet
+      ts: "function greet(name: string): string { return `hi ${name}`; }"
+      canonical: 'fn greet(name: &str) -> String { format!("hi {}", name) }'
+      distractors:
+        - 'fn greet(name: &str): String { format!("hi {}", name) }'
+        - 'fn greet(name) -> String { format!("hi {}", name) }'
+        - 'function greet(name: &str) -> String { format!("hi {}", name) }'
+hints:
+  - "Three shifts from TS: keyword is `fn` not `function`; the return type uses `-> T` not `: T`; parameter types are mandatory (no inference at the boundary)."
+  - "Shape: `fn <name>(<arg>: <type>) -> <ret> { <body> }`. Final expression in the body has no semicolon — that's the implicit return."
+  - "For double: `fn double(n: i32) -> i32 { n * 2 }`."
+runtime: none
+notes: |
+  Sets the `fn` / `->` / mandatory-param-types reflex. Distractors:
+   - `function` keyword — JS/TS leakage.
+   - `: T` for return type — JS/TS shape.
+   - Missing parameter type — TS allows inference; Rust never
+     does at function boundaries.

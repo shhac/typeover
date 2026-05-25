@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: fill-word
+order: 5
+prompt: |
+  Fill the punctuation that introduces a function's return type.
+  Two characters.
+generator:
+  kind: template
+  vars:
+    arrow: ["->"]
+  ts: |-
+    function half(n: number): number { return n / 2; }
+  canonical: |-
+    fn half(n: i32) ${arrow} i32 {
+        n / 2
+    }
+blanks: [arrow]
+hints:
+  - "Two characters: a dash and a greater-than. The shape resembles a small arrow pointing from the parameter list to the return type."
+  - "Same shape as the type annotation in a Go function or a TS type predicate, but spelled differently."
+  - "`->`"
+runtime: none
+notes: |
+  Drills `->` return-type punctuation specifically — separates it
+  from the broader `fn` shape pinned in MCQs 01/03.

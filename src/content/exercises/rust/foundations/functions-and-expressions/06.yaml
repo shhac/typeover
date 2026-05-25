@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: fill-line
+order: 6
+prompt: |
+  Write the Rust function signature line. `triple` takes an
+  `i32` and returns an `i32` — three times the input.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn triple(n: i32) -> i32 {"
+  ts: |-
+    function triple(n: number): number { return n * 3; }
+    console.log(triple(4));
+  canonical: |-
+    ${line}
+        n * 3
+    }
+
+    fn main() {
+        println!("{}", triple(4));
+    }
+  distractors:
+    - match: "function triple(n: i32) -> i32 {"
+      explain: |-
+        `function` is TypeScript. Rust uses `fn`.
+    - match: "fn triple(n: i32): i32 {"
+      explain: |-
+        Return-type punctuation is `->`, not `:`. The `:` after
+        a parameter name is the parameter type; `->` between
+        parens and brace introduces the return type.
+    - match: "fn triple(n) -> i32 {"
+      explain: |-
+        Rust requires explicit parameter types at function
+        boundaries — there's no inference here like TS allows.
+        Add `: i32` after `n`.
+    - match: "fn triple(n: i32) {"
+      explain: |-
+        That declares a function returning `()` (unit). The next
+        line `n * 3` would then fail to compile because the
+        block expects to produce `()` but the expression
+        produces `i32`.
+expectStdout: |
+  12
+runtime: server
+blanks: [line]
+hints:
+  - "Three things: `fn` (not `function`), parameter type explicit (`: i32`), and return type after `->` (not `:`). The opening brace closes the signature line."
+  - "Shape: `fn <name>(<arg>: <type>) -> <ret> {`."
+  - "`fn triple(n: i32) -> i32 {`"
+notes: |
+  Production drill for the function signature. Four distractors
+  cover JS `function` keyword, `:` return-type punctuation,
+  missing parameter type, and missing return type — the four
+  near-misses a TS dev will reach for in this order.

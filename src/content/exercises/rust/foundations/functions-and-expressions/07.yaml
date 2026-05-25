@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/foundations/functions-and-expressions
+type: fill-line
+order: 7
+prompt: |
+  Write the tail expression of `abs_diff` — the function's return
+  value. Use an `if/else` expression (no `return` keyword, no
+  trailing `;`).
+generator:
+  kind: template
+  vars:
+    line:
+      - "if a > b { a - b } else { b - a }"
+  ts: |-
+    function absDiff(a: number, b: number): number {
+        return a > b ? a - b : b - a;
+    }
+    console.log(absDiff(3, 7));
+  canonical: |-
+    fn abs_diff(a: i32, b: i32) -> i32 {
+        ${line}
+    }
+
+    fn main() {
+        println!("{}", abs_diff(3, 7));
+    }
+  distractors:
+    - match: "return if a > b { a - b } else { b - a };"
+      explain: |-
+        Works, but `return` is reserved for early-exit. The
+        idiomatic tail is just the expression — no `return`,
+        no trailing `;`. The compiler treats the final block
+        expression as the function's value.
+    - match: "if a > b { a - b } else { b - a };"
+      explain: |-
+        The trailing semicolon converts the expression to a
+        statement, which produces `()`. The function declared
+        `-> i32` won't compile. Drop the `;`.
+    - match: "a > b ? a - b : b - a"
+      explain: |-
+        Rust has no ternary `?:`. The branching expression is
+        `if cond { a } else { b }` — same shape, different
+        syntax.
+    - match: "if (a > b) { a - b } else { b - a }"
+      explain: |-
+        Drop the parens around the condition — Rust doesn't
+        wrap them. Other than that the shape is exactly right.
+expectStdout: |
+  4
+runtime: server
+blanks: [line]
+hints:
+  - "Two things: `if` IS the expression in Rust (no ternary), and the tail position has no `return` and no `;`. The branches are blocks; each block's final expression is the produced value."
+  - "Shape: `if <cond> { <val> } else { <other> }`."
+  - "`if a > b { a - b } else { b - a }`"
+notes: |
+  Combines the expression-form `if` (control-flow theme) with
+  the no-return-keyword tail (slot 03). Four distractors cover
+  the common Rust-newbie reflexes.
