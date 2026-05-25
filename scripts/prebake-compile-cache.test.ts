@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { extractCanonicals, type ExerciseYaml } from "./prebake-compile-cache.ts";
+import {
+  extractCanonicals,
+  substituteCanonicalVars,
+  type ExerciseYaml,
+} from "./prebake-compile-cache.ts";
 
 /* Pin the "all variants get baked, not just variants[0]" contract.
  * The Rust track today has one freeform exercise with a single
@@ -59,8 +63,87 @@ describe("extractCanonicals", () => {
     ).toEqual([]);
   });
 
-  it("skips non-freeform exercises", () => {
+  it("skips mcq and fill-word exercises", () => {
     expect(extractCanonicals({ ...TEMPLATE_FREEFORM, type: "mcq" })).toEqual([]);
+    expect(extractCanonicals({ ...TEMPLATE_FREEFORM, type: "fill-word" })).toEqual([]);
+  });
+
+  /* fill-line is graded by running the substituted canonical
+   * against expectStdout. The compilable program is the canonical
+   * scaffold with `${var}` replaced by the var's first option —
+   * exactly what the runtime POSTs when the learner types the
+   * canonical answer, so the SHA-256 lines up with the cache. */
+  it("substitutes ${var} placeholders for fill-line exercises", () => {
+    const fillLine: ExerciseYaml = {
+      target: "rust",
+      themeId: "rust/foundations/variables",
+      type: "fill-line",
+      order: 5,
+      runtime: "server",
+      generator: {
+        kind: "template",
+        canonical: "fn main() {\n    ${line}\n    println!(\"{}\", x);\n}",
+        vars: { line: ["let mut x: i32 = 0;"] },
+      },
+    };
+    expect(extractCanonicals(fillLine)).toEqual([
+      'fn main() {\n    let mut x: i32 = 0;\n    println!("{}", x);\n}',
+    ]);
+  });
+
+  it("includes alternateCanonicals for fill-line", () => {
+    const fillLine: ExerciseYaml = {
+      target: "rust",
+      themeId: "rust/foundations/variables",
+      type: "fill-line",
+      order: 5,
+      runtime: "server",
+      alternateCanonicals: [
+        'fn main() { let x = 1; println!("{x}"); }',
+      ],
+      generator: {
+        kind: "template",
+        canonical: "fn main() {\n    ${line}\n    println!(\"{}\", x);\n}",
+        vars: { line: ["let x: i32 = 1;"] },
+      },
+    };
+    const out = extractCanonicals(fillLine);
+    expect(out).toHaveLength(2);
+    expect(out[0]).toContain("let x: i32 = 1;");
+    expect(out[1]).toBe('fn main() { let x = 1; println!("{x}"); }');
+  });
+});
+
+describe("substituteCanonicalVars", () => {
+  it("returns the input unchanged when vars is undefined", () => {
+    expect(substituteCanonicalVars("fn main() { ${x} }", undefined)).toBe(
+      "fn main() { ${x} }",
+    );
+  });
+
+  it("replaces every occurrence of a single var", () => {
+    /* The template can reference the same var multiple times
+     * (e.g. `${name} == ${name}`); replaceAll handles that. */
+    expect(
+      substituteCanonicalVars("let ${k} = 1; print(${k});", { k: ["foo"] }),
+    ).toBe("let foo = 1; print(foo);");
+  });
+
+  it("replaces multiple distinct vars", () => {
+    expect(
+      substituteCanonicalVars("${a} + ${b}", { a: ["1"], b: ["2"] }),
+    ).toBe("1 + 2");
+  });
+
+  it("uses options[0] only — additional options are ignored", () => {
+    /* The canonical is `options[0]` by convention; other options
+     * are kept for runtime variation but the prebake hashes the
+     * canonical, not the alternates. */
+    expect(substituteCanonicalVars("${k}", { k: ["first", "second"] })).toBe("first");
+  });
+
+  it("skips vars with no options or non-string first option", () => {
+    expect(substituteCanonicalVars("${k} stays", { k: [] })).toBe("${k} stays");
   });
 
   it("returns an empty array when there's no canonical and no variants", () => {

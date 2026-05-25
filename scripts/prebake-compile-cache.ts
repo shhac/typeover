@@ -40,12 +40,34 @@ export type ExerciseYaml = {
   order: number;
   runtime?: string;
   expectStdout?: string;
+  alternateCanonicals?: string[];
   generator?: {
     kind?: string;
     canonical?: string;
     variants?: Array<{ canonical?: string }>;
+    vars?: Record<string, string[]>;
   };
 };
+
+/** Substitute `${name}` template variables in `canonical` with the
+ *  first option from each var's options list. Matches what
+ *  generator-runtime does at exercise-instance time when the user's
+ *  input equals `vars[name][0]` (the canonical answer). Used for
+ *  fill-line prebake so the cache key matches what the runtime
+ *  actually POSTs when a learner types the canonical line. */
+export function substituteCanonicalVars(
+  canonical: string,
+  vars: Record<string, string[]> | undefined,
+): string {
+  if (!vars) return canonical;
+  let out = canonical;
+  for (const [name, options] of Object.entries(vars)) {
+    if (Array.isArray(options) && typeof options[0] === "string") {
+      out = out.replaceAll(`\${${name}}`, options[0]);
+    }
+  }
+  return out;
+}
 
 interface CanonicalEntry {
   exerciseId: string;
@@ -65,15 +87,39 @@ interface CanonicalEntry {
  *  first hit), and (b) keeps the directory walker pure I/O. */
 export function extractCanonicals(data: ExerciseYaml): string[] {
   if (data.runtime !== "server") return [];
-  if (data.type !== "freeform") return [];
-  const out: string[] = [];
-  if (typeof data.generator?.canonical === "string") {
-    out.push(data.generator.canonical);
+
+  /* freeform: the generator's canonical IS the compilable program;
+   * variants ship their own canonical each. */
+  if (data.type === "freeform") {
+    const out: string[] = [];
+    if (typeof data.generator?.canonical === "string") {
+      out.push(data.generator.canonical);
+    }
+    for (const v of data.generator?.variants ?? []) {
+      if (typeof v.canonical === "string") out.push(v.canonical);
+    }
+    return out;
   }
-  for (const v of data.generator?.variants ?? []) {
-    if (typeof v.canonical === "string") out.push(v.canonical);
+
+  /* fill-line: the generator's canonical is a template with
+   * `${var}` placeholders; the compilable program is what you get
+   * when you fill each blank with the var's canonical first option.
+   * That's also the exact bytes the runtime POSTs when the learner
+   * types the canonical answer, so the SHA-256 lines up with the
+   * cache lookup the SW does. Alternate canonicals are pre-baked
+   * too so success notes pass without a Sandbox round-trip. */
+  if (data.type === "fill-line") {
+    const out: string[] = [];
+    if (typeof data.generator?.canonical === "string") {
+      out.push(substituteCanonicalVars(data.generator.canonical, data.generator.vars));
+    }
+    for (const alt of data.alternateCanonicals ?? []) {
+      if (typeof alt === "string") out.push(alt);
+    }
+    return out;
   }
-  return out;
+
+  return [];
 }
 
 async function collectCanonicals(): Promise<CanonicalEntry[]> {
@@ -115,7 +161,7 @@ function pickTransport(): CompileTransport {
 async function main(): Promise<void> {
   const canonicals = await collectCanonicals();
   if (canonicals.length === 0) {
-    console.log("[prebake] no freeform rust exercises with runtime=server — nothing to do");
+    console.log("[prebake] no server-runtime rust exercises — nothing to do");
     return;
   }
 
