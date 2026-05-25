@@ -1,0 +1,34 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: mcq
+order: 1
+prompt: |
+  Pick the idiomatic Rust binding for a small whole number. Rust
+  has no generic `number` — every integer carries an explicit width.
+generator:
+  kind: variant
+  variants:
+    - id: count
+      ts: "let count: number = 7;"
+      canonical: "let count: i32 = 7;"
+      distractors:
+        - "let count: int = 7;"
+        - "let count: i = 7;"
+        - "let count: number = 7;"
+    - id: page
+      ts: "let page: number = 1;"
+      canonical: "let page: i32 = 1;"
+      distractors:
+        - "let page: integer = 1;"
+        - "let page: i32 = 1.0;"
+        - "let page: i32 = '1';"
+hints:
+  - "Rust's default integer is `i32` — 32-bit signed. The annotation goes after `:` between name and `=`."
+  - "Three characters: family letter + bit width."
+  - "For count: `let count: i32 = 7;`."
+runtime: none
+notes: |
+  Sets the i32-as-default reflex. Distractors:
+   - `int` / `integer` / `i` — close-but-wrong names; Rust uses `i32`.
+   - `number` — TS leakage.
+   - `1.0` / `'1'` — float / string literal in an i32 slot.

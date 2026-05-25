@@ -1,0 +1,44 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: freeform
+order: 9
+prompt: |
+  The TS reference adds an `i32` to an `i64`. Rust rejects that
+  without an explicit cast. Write a complete Rust program that
+  computes the sum and prints it. Output should be exactly:
+
+      sum: 2000000000005
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const small: number = 5;
+    const big: bigint = 2_000_000_000_000n;
+    const sum: bigint = BigInt(small) + big;
+    console.log("sum: " + sum);
+  canonical: |-
+    fn main() {
+        let small: i32 = 5;
+        let big: i64 = 2_000_000_000_000;
+        let sum: i64 = small as i64 + big;
+        println!("sum: {}", sum);
+    }
+expectStdout: |
+  sum: 2000000000005
+runtime: server
+hints:
+  - "Cast the narrower type up: `small as i64`. Rust requires the cast even though `i32 → i64` is loss-free. The `2_000_000_000_000` literal underscores are visual separators only."
+  - "Shape: `fn main() { let small: i32 = 5; let big: i64 = 2_000_000_000_000; let sum: i64 = small as i64 + big; println!(\"sum: {}\", sum); }`."
+  - |-
+    fn main() {
+        let small: i32 = 5;
+        let big: i64 = 2_000_000_000_000;
+        let sum: i64 = small as i64 + big;
+        println!("sum: {}", sum);
+    }
+notes: |
+  Closes the theme by combining the i32/i64 distinction (slot 03's
+  width awareness) with the explicit `as` cast (slots 05 + 08).
+  TS reference uses `BigInt()` to make the cast parallel feel
+  natural — both languages require explicit conversion across
+  the int/bigint boundary.

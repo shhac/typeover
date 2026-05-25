@@ -1,0 +1,53 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: fill-line
+order: 7
+prompt: |
+  Write the boolean line — the answer should be `true` when the
+  vector has more than two items.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let big: bool = items.len() > 2;"
+  ts: |-
+    const items: string[] = ["a", "b", "c"];
+    const big: boolean = items.length > 2;
+    console.log(big);
+  canonical: |-
+    fn main() {
+        let items: Vec<&str> = vec!["a", "b", "c"];
+        ${line}
+        println!("{}", big);
+    }
+  distractors:
+    - match: "let big: boolean = items.len() > 2;"
+      explain: |-
+        Rust's boolean type is `bool`, not `boolean`. Other than
+        the type name, the comparison itself is exactly right.
+    - match: "let big = items.len() > 2;"
+      explain: |-
+        Compiles (Rust infers `bool`), but this exercise asks
+        for the explicit `: bool` annotation.
+    - match: "let big: bool = items.len() > 2usize;"
+      explain: |-
+        The `2usize` suffix isn't needed — Rust infers the
+        literal `2` as `usize` from the comparison's left side.
+        Use the plain `2`.
+    - match: "let big: bool = items.length > 2;"
+      explain: |-
+        `.length` is TypeScript / JavaScript. Rust's
+        equivalent on a Vec is the method `.len()`.
+expectStdout: |
+  true
+runtime: server
+blanks: [line]
+hints:
+  - "Three things to get right: the type is `bool` (not `boolean`), the property is `.len()` (not `.length`), and the literal `2` doesn't need a suffix — Rust infers `usize` from the comparison."
+  - "Shape: `let <name>: bool = <comparison>;`."
+  - "`let big: bool = items.len() > 2;`"
+notes: |
+  Combines `bool` annotation + `.len()`/`usize` recognition + the
+  comparison-literal inference rule in one production line.
+  Distractors catch the three most common slips (TS type name,
+  no annotation, unnecessary suffix) plus a `.length` reflex.

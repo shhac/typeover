@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: fill-word
+order: 5
+prompt: |
+  Rust requires an explicit keyword to convert between numeric types
+  — no implicit coercion. Fill the keyword.
+generator:
+  kind: template
+  vars:
+    keyword: ["as"]
+  ts: |-
+    let small: number = 5;
+    let big: bigint = BigInt(small);
+  canonical: |-
+    let small: i32 = 5;
+    let big: i64 = small ${keyword} i64;
+blanks: [keyword]
+hints:
+  - "Two letters. Same word TypeScript uses for its own type assertions, but in Rust this is a real runtime conversion, not a typecheck-only assertion."
+  - "Shape: `<expr> <keyword> <type>`. Slots between `small` and `i64`."
+  - "`as`"
+runtime: none
+notes: |
+  Production drill for the `as` cast keyword. The TS reference
+  uses `BigInt()` deliberately — TS has no implicit number→bigint
+  coercion either, so the parallel reads cleanly.

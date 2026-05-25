@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: mcq
+order: 3
+prompt: |
+  `.len()` and array indexing both work with `usize`. Pick the right
+  type for a variable holding a count of items.
+generator:
+  kind: variant
+  variants:
+    - id: items
+      ts: "const items: string[] = []; const total: number = items.length;"
+      canonical: "let items: Vec<&str> = vec![]; let total: usize = items.len();"
+      distractors:
+        - "let items: Vec<&str> = vec![]; let total: i32 = items.len();"
+        - "let items: Vec<&str> = vec![]; let total: u32 = items.len();"
+        - "let items: Vec<&str> = vec![]; let total: int = items.len();"
+hints:
+  - "`.len()` returns a pointer-width unsigned integer — sized to hold any in-memory index on the host. Rust spells that `usize`."
+  - "Five characters: `u` (unsigned) + a word."
+  - "For items: `let total: usize = items.len();`."
+runtime: none
+notes: |
+  Introduces `usize` — the pointer-width unsigned integer used for
+  lengths and indices. Distractors:
+   - `i32` — wrong family (signed) and may not fit on 64-bit hosts.
+   - `u32` — same family but fixed width; doesn't match the
+     platform-pointer contract `.len()` advertises.
+   - `int` — JS/C name; not a Rust type.

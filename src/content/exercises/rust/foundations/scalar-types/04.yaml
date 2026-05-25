@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: fill-word
+order: 4
+prompt: |
+  Fill the Rust boolean type. Four letters.
+generator:
+  kind: template
+  vars:
+    type: ["bool"]
+    name: [ready, done, ok]
+  ts: |-
+    let ${name}: boolean = false;
+  canonical: |-
+    let ${name}: ${type} = false;
+blanks: [type]
+hints:
+  - "Rust's boolean type is shorter than TS's `boolean` — drop the trailing -ean."
+  - "Four letters: same as the C99 type."
+  - "`bool`"
+runtime: none
+notes: |
+  Drill for the `bool` annotation. The wider lesson — that Rust's
+  bool isn't implicit-coerced from integers — lives in slot 09's
+  freeform.

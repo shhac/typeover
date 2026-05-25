@@ -1,0 +1,42 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript into a complete Rust program with explicit
+  numeric types. Output should be exactly:
+
+      total: 7.5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const count: number = 3;
+    const price: number = 2.5;
+    const total: number = count * price;
+    console.log("total: " + total);
+  canonical: |-
+    fn main() {
+        let count: i32 = 3;
+        let price: f64 = 2.5;
+        let total: f64 = count as f64 * price;
+        println!("total: {}", total);
+    }
+expectStdout: |
+  total: 7.5
+runtime: server
+hints:
+  - "`count` is `i32` and `price` is `f64`. Rust won't mix them implicitly — convert the `i32` with `as f64` before multiplying."
+  - "Shape: `fn main() { let count: i32 = 3; let price: f64 = 2.5; let total: f64 = count as f64 * price; println!(\"total: {}\", total); }`."
+  - |-
+    fn main() {
+        let count: i32 = 3;
+        let price: f64 = 2.5;
+        let total: f64 = count as f64 * price;
+        println!("total: {}", total);
+    }
+notes: |
+  Forces the explicit `as f64` cast — the TS `number * number`
+  shape doesn't transfer. Canonical small enough for prebake.
+  Operator precedence: `as` binds tighter than `*`, so
+  `count as f64 * price` reads `(count as f64) * price`.

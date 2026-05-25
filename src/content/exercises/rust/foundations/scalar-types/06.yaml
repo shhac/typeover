@@ -1,0 +1,51 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: fill-line
+order: 6
+prompt: |
+  Write the Rust line that declares `temp` as a 64-bit float
+  initialised to `36.6`. Output should print `36.6`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let temp: f64 = 36.6;"
+  ts: |-
+    const temp: number = 36.6;
+    console.log(temp);
+  canonical: |-
+    fn main() {
+        ${line}
+        println!("{}", temp);
+    }
+  distractors:
+    - match: "let temp = 36.6;"
+      explain: |-
+        Rust would infer `f64` here, but this exercise asks for
+        the explicit annotation so you see the type name.
+    - match: "let temp: f32 = 36.6;"
+      explain: |-
+        `f32` is valid Rust, but the DEFAULT float type is `f64` —
+        same precision as TS's `number`. Reach for `f32` only
+        when memory or interop forces 32-bit.
+    - match: "let temp: float = 36.6;"
+      explain: |-
+        `float` isn't a Rust type. The 64-bit floating point type
+        is `f64`.
+    - match: "let temp: number = 36.6;"
+      explain: |-
+        `number` is TypeScript. Rust uses width-specific types —
+        for this value, `f64`.
+expectStdout: |
+  36.6
+runtime: server
+blanks: [line]
+hints:
+  - "Same shape as the variables theme but with the float family. The default float is `f64`."
+  - "Shape: `let <name>: <type> = <value>;`."
+  - "`let temp: f64 = 36.6;`"
+notes: |
+  Production drill for the f64 annotation under runtime grading.
+  Distractor explains cover the three predictable wrong shapes:
+  unannotated (compiles, wrong intent), f32 (works, off-default),
+  and TS leakage.

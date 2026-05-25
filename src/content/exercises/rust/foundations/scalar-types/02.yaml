@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/foundations/scalar-types
+type: mcq
+order: 2
+prompt: |
+  Pick the idiomatic Rust binding for a fractional number. Rust's
+  default float is the 64-bit form, not the 32-bit one.
+generator:
+  kind: variant
+  variants:
+    - id: pi
+      ts: "let pi: number = 3.14;"
+      canonical: "let pi: f64 = 3.14;"
+      distractors:
+        - "let pi: f32 = 3.14;"
+        - "let pi: float = 3.14;"
+        - "let pi: double = 3.14;"
+    - id: rate
+      ts: "let rate: number = 0.075;"
+      canonical: "let rate: f64 = 0.075;"
+      distractors:
+        - "let rate: number = 0.075;"
+        - "let rate: f = 0.075;"
+        - "let rate: f64 = 0.075f;"
+hints:
+  - "Rust's float family is `f32` / `f64`. The DEFAULT is the wider one — same as TS's `number` precision."
+  - "Three characters: family letter + bit width."
+  - "For pi: `let pi: f64 = 3.14;`."
+runtime: none
+notes: |
+  Reinforces "default float is f64" against the C/Go reflex of
+  reaching for f32. Distractors:
+   - `f32` — works but isn't the default; teaching slot pins f64.
+   - `float` / `double` — JS / C++ names.
+   - `0.075f` — C-style literal suffix; Rust uses `0.075f64`.
