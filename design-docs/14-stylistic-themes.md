@@ -218,10 +218,9 @@ panels via `@supports` guard.
 
 #### `islands`
 
-Distinct floating cards with stronger drop shadows
-(`--shadow-island: 0 8px 24px -8px var(--color-shadow-key)`).
-Panels physically separate from the page background, breathing
-on all sides. Reads modern-app rather than terminal.
+Distinct floating cards with stronger panel shadows. Panels
+physically separate from the page background, breathing on all
+sides. Reads modern-app rather than terminal.
 
 ### Style contract
 
@@ -241,11 +240,11 @@ The component layer still doesn't branch on style. No JS, no
 component-level conditionals. Every override flows through CSS
 variables.
 
-The component layer reads `--shadow-panel`, `--shadow-island`,
-`--surface-pattern`, `--border-style` etc. as it already reads
-`--color-bg-panel`. New tokens introduced by the style axis go
-in `@theme` first with the `terminal` default values; each
-`:root[data-style="…"]` block re-binds them.
+The component layer reads `--shadow-panel`, `--surface-pattern`,
+`--border-style` etc. as it already reads `--color-bg-panel`.
+New tokens introduced by the style axis go in `@theme` first with
+the `terminal` default values; each `:root[data-style="…"]` block
+re-binds them.
 
 ### What Style does *not* do
 

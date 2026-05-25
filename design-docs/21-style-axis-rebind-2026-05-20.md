@@ -140,9 +140,9 @@ Push past "drop shadow on a card" into objects-on-a-desk.
   stays near-white. Optional subtle felt-noise body pattern.
 - **Token overrides**: `--color-bg-base` (deepen),
   `--color-bg-panel` (contrast brighten), `--color-border-default:
-   transparent`, `--shadow-panel` (existing layered drop +
-  inner-top highlight, keep), `--shadow-island`, `--radius-*`
-  (amplified), `--font-heading`, `--heading-weight: 700`.
+  transparent`, `--shadow-panel` (existing layered drop +
+  inner-top highlight, keep), `--radius-*` (amplified),
+  `--font-heading`, `--heading-weight: 700`.
 
 ## New @theme tokens this needs
 

@@ -254,9 +254,6 @@ body {
     inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 8%, transparent),
     0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
     0 2px 4px -1px color-mix(in oklab, #000 30%, transparent);
-  --shadow-island:
-    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 10%, transparent),
-    0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
 }
 
 /* Islands radius progression: amplified modestly `3 / 6 / 12 / 20`. */
