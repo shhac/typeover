@@ -1,7 +1,15 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createSignal, lazy, Show, Suspense } from "solid-js";
 import { Button } from "../ds/Button";
 import { CodeBlock } from "../ds/CodeBlock";
-import { DiffView } from "./DiffView";
+
+/* DiffView statically pulls in the `diff` package (~40 KB minified)
+ * just to render the word/line-level diff against the canonical
+ * answer. The diff only appears inside the <Show when={shown()}>
+ * branch below — i.e. after the learner clicks "Show answer" with
+ * a non-empty submission. First paint and the entire happy-path
+ * "submit-correct" flow never need it. Lazy-loading defers the
+ * download until the reveal click. */
+const DiffView = lazy(() => import("./DiffView").then((m) => ({ default: m.DiffView })));
 
 interface InlineCanonicalRevealProps {
   /** What the learner typed. Accessor so a reveal-after-edit
@@ -75,7 +83,9 @@ export function InlineCanonicalReveal(props: InlineCanonicalRevealProps) {
             </CodeBlock>
           }
         >
-          <DiffView submission={props.submission()} canonical={props.canonical} mode={props.mode} />
+          <Suspense fallback={null}>
+            <DiffView submission={props.submission()} canonical={props.canonical} mode={props.mode} />
+          </Suspense>
         </Show>
       </Show>
     </div>
