@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: fill-line
+order: 4
+prompt: |
+  The program below moves `name` into `owner`, then tries to
+  print `name` — use-after-move. Fix the print line to reference
+  the NEW owner instead (the simplest fix without cloning or
+  borrowing). The program should print `paul`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'println!("{}", owner);'
+  ts: |-
+    const name: string = "paul";
+    const owner: string = name;
+    console.log(owner);
+  canonical: |-
+    fn main() {
+        let name = String::from("paul");
+        let owner = name;
+        ${line}
+    }
+  distractors:
+    - match: 'println!("{}", name);'
+      explain: |-
+        That's the line that failed to compile — `name` was moved
+        into `owner` on the previous line, so it's no longer
+        usable. The simplest fix is to print the new owner.
+    - match: 'println!("{}", name.clone());'
+      explain: |-
+        `.clone()` here is too late — `name` was already moved
+        BEFORE this line ran. The borrow-of-moved-value error
+        fires regardless. (If you wanted to keep both bindings,
+        the clone would have to go on `let owner = name.clone();`
+        instead.)
+    - match: 'println!("{}", &name);'
+      explain: |-
+        Borrowing a moved value fails the same way. Once `name`
+        is moved, all access to it — read, borrow, clone — is
+        rejected.
+    - match: 'println!("{}", owner.clone());'
+      explain: |-
+        Compiles, but `.clone()` is unnecessary — println! takes
+        the value by reference internally, so a plain `owner`
+        works without the heap copy.
+expectStdout: |
+  paul
+runtime: server
+blanks: [line]
+hints:
+  - "Print the binding that NOW owns the String — the one on the left side of the `let owner = name;` assignment."
+  - "Shape: `println!(\"{}\", <name>);`."
+  - "`println!(\"{}\", owner);`"
+notes: |
+  Production drill for the simplest use-after-move fix: print
+  the new owner. Distractors cover .clone()-too-late, borrow-
+  too-late, and unnecessary-.clone() — three real near-misses.

@@ -1,0 +1,46 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: freeform
+order: 7
+prompt: |
+  Write a Rust program with a helper `build_name() -> String`
+  that constructs and RETURNS a `String`. In `main`, call it,
+  bind the returned ownership, and print it. Output:
+
+      paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function buildName(): string { return "paul"; }
+    const name: string = buildName();
+    console.log(name);
+  canonical: |-
+    fn build_name() -> String {
+        String::from("paul")
+    }
+
+    fn main() {
+        let name = build_name();
+        println!("{}", name);
+    }
+expectStdout: |
+  paul
+runtime: server
+hints:
+  - "Return type is `-> String` — the function MOVES its constructed value out to the caller. Body is one expression with no trailing `;`."
+  - "Caller binds with `let name = build_name();`. From that point `name` is the owner; the function no longer holds it."
+  - |-
+    fn build_name() -> String {
+        String::from("paul")
+    }
+
+    fn main() {
+        let name = build_name();
+        println!("{}", name);
+    }
+notes: |
+  Pinning the "return-as-move-out" reflex. Pairs with slot 06 —
+  the call passes ownership IN, the return passes ownership OUT.
+  Together they sketch the two directions ownership flows
+  through a function boundary.

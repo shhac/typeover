@@ -1,0 +1,57 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: freeform
+order: 9
+prompt: |
+  The following Rust program fails to compile:
+
+      error[E0382]: borrow of moved value: `name`
+       --> src/main.rs:4:20
+        |
+      2 |     let name = String::from("paul");
+      3 |     let owner = name;
+      4 |     println!("{}", name);
+        |                    ^^^^ value borrowed here after move
+
+  Broken source:
+
+      fn main() {
+          let name = String::from("paul");
+          let owner = name;
+          println!("{}", name);
+      }
+
+  Fix it by cloning so both bindings own a String. The program
+  should print exactly:
+
+      paul, paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const name: string = "paul";
+    const owner: string = name;
+    console.log(name + ", " + owner);
+  canonical: |-
+    fn main() {
+        let name = String::from("paul");
+        let owner = name.clone();
+        println!("{}, {}", name, owner);
+    }
+expectStdout: |
+  paul, paul
+runtime: server
+hints:
+  - "Change the offending line `let owner = name;` to `let owner = name.clone();`. After cloning, both bindings own independent Strings — the println! at the end can read both."
+  - "Update the println! too: `println!(\"{}, {}\", name, owner);` so the output matches `paul, paul`."
+  - |-
+    fn main() {
+        let name = String::from("paul");
+        let owner = name.clone();
+        println!("{}, {}", name, owner);
+    }
+notes: |
+  Closes the theme by repairing the exact use-after-move bug
+  from slot 02's diagnostic. The fix (`.clone()`) is the
+  beginner's escape hatch; borrowing (next theme) is the
+  idiomatic answer for most real cases.

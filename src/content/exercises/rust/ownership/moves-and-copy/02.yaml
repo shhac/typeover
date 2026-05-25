@@ -1,0 +1,34 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: mcq
+order: 2
+prompt: |
+  rustc emits this diagnostic on a 4-line program. Pick the line
+  that's a MOVE (not a copy, borrow, or unrelated assignment).
+
+      error[E0382]: borrow of moved value: `name`
+       --> src/main.rs:3:20
+        |
+      1 |     let name = String::from("paul");
+      2 |     let owner = name;
+      3 |     println!("{}", name);
+        |                    ^^^^ value borrowed here after move
+generator:
+  kind: variant
+  variants:
+    - id: which-line
+      ts: "TS doesn't have a move concept — the question's pinning the Rust-specific event."
+      canonical: '`let owner = name;` — assignment moves the String out of `name` into `owner`.'
+      distractors:
+        - '`let name = String::from("paul");` — that''s the original construction, not a move.'
+        - '`println!("{}", name);` — that''s where the error surfaces, but the MOVE happened on the previous line.'
+        - '`String::from("paul")` — that allocates but doesn''t move anything yet.'
+hints:
+  - "rustc's error message and span point at line 3 (the println!) — but that's where the move is DETECTED, not where it HAPPENED. Look one line up."
+  - "The move event is the assignment that transferred ownership."
+  - "`let owner = name;`"
+runtime: none
+notes: |
+  Teaches the move/use-after-move distinction. The "value
+  borrowed here after move" span fingers the USE; the move
+  itself is the line above. Beginners conflate the two.

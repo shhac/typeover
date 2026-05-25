@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: mcq
+order: 3
+prompt: |
+  Some types implement `Copy`. For those, assignment COPIES the
+  value bit-for-bit instead of moving — the original binding stays
+  usable. Pick the type that's `Copy` by default.
+generator:
+  kind: variant
+  variants:
+    - id: which-is-copy
+      ts: "TS primitives (number, boolean) are always copied; objects/strings are referenced. Rust's Copy is a stricter, opt-in version of that idea."
+      canonical: "i32 — small fixed-size scalars are Copy by default."
+      distractors:
+        - "String — owns a heap allocation; moves, never copies implicitly."
+        - "Vec<i32> — owns its buffer; moves."
+        - "Box<i32> — single heap pointer with ownership; moves."
+hints:
+  - "Rule of thumb: if a type owns a heap allocation, it's NOT Copy (moving is cheap, copying would be hidden expense). Stack-only scalars are Copy."
+  - "Three letters. The default integer type."
+  - "`i32`"
+runtime: none
+notes: |
+  Distinguishes Copy from move. Distractors are the obvious
+  non-Copy types: String, Vec, Box — each owns heap memory.
+  i32 is the canonical Copy example for foundations-level Rust.

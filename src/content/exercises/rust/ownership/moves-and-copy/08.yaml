@@ -1,0 +1,46 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript pattern: a function consumes a value,
+  prints it, and the original binding is no longer used. In Rust
+  this is a move. The program should print:
+
+      received: paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function receive(s: string): void { console.log("received: " + s); }
+    const name: string = "paul";
+    receive(name);
+  canonical: |-
+    fn receive(s: String) {
+        println!("received: {}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        receive(name);
+    }
+expectStdout: |
+  received: paul
+runtime: server
+hints:
+  - "Two shifts from the TS reference: `String` for an owned string (not `string`/`&str`), and `String::from(\"paul\")` to construct one from a literal. The function signature `fn receive(s: String)` takes ownership."
+  - "Don't reach for `&str` or `&String` here — the prompt wants the move."
+  - |-
+    fn receive(s: String) {
+        println!("received: {}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        receive(name);
+    }
+notes: |
+  Translation drill — TS object-passing semantics LOOK identical
+  but Rust moves; the freeform forces the learner to type
+  `String::from(...)` and `s: String` rather than reach for
+  `&str`.

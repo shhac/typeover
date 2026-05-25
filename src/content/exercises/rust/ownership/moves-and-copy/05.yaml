@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: fill-line
+order: 5
+prompt: |
+  The program needs to keep using `name` AFTER passing a copy
+  along to `owner`. `clone()` creates an independent owned
+  duplicate. Fix the assignment line so both `name` and `owner`
+  remain usable. The program should print `paul, paul`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let owner = name.clone();"
+  ts: |-
+    const name: string = "paul";
+    const owner: string = name;
+    console.log(name + ", " + owner);
+  canonical: |-
+    fn main() {
+        let name = String::from("paul");
+        ${line}
+        println!("{}, {}", name, owner);
+    }
+  distractors:
+    - match: "let owner = name;"
+      explain: |-
+        Plain assignment MOVES the String. After this line `name`
+        is gone and the println! below fails. Use `.clone()` to
+        get an independent duplicate.
+    - match: "let owner = &name;"
+      explain: |-
+        That's a BORROW (reference), not an owned duplicate.
+        Borrows are covered in the next theme; for now, `.clone()`
+        is the answer when you need a second OWNER.
+    - match: "let owner = name.copy();"
+      explain: |-
+        `.copy()` isn't the method name — Rust's String doesn't
+        have one. The trait `Copy` is implicit; explicit
+        duplication is `.clone()`.
+    - match: "let mut owner = name.clone();"
+      explain: |-
+        `mut` is unnecessary — `owner` is never reassigned. The
+        `.clone()` alone is the fix.
+expectStdout: |
+  paul, paul
+runtime: server
+blanks: [line]
+hints:
+  - "`.clone()` allocates a new heap copy with the same contents. After it, both bindings own independent Strings."
+  - "Shape: `let owner = name.clone();`."
+  - "`let owner = name.clone();`"
+notes: |
+  Production drill for `.clone()` as the "keep both alive" tool.
+  Distractors map to four common slips: forget the clone,
+  borrow instead, wrong method name, unnecessary `mut`.

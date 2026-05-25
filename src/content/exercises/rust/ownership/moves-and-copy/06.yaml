@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/ownership/moves-and-copy
+type: freeform
+order: 6
+prompt: |
+  Write a Rust program with a helper `consume(s: String)` that
+  takes ownership of a `String` and prints it. In `main`,
+  construct a String and pass it to `consume`. Output should be
+  exactly:
+
+      paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function consume(s: string): void { console.log(s); }
+    const name: string = "paul";
+    consume(name);
+  canonical: |-
+    fn consume(s: String) {
+        println!("{}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        consume(name);
+    }
+expectStdout: |
+  paul
+runtime: server
+hints:
+  - "Function signature `fn consume(s: String)` — passing a `String` (not `&String`) takes ownership. The caller's binding is moved INTO the function; after the call the caller can't use it anymore."
+  - "No `return` — the function returns `()` implicitly."
+  - |-
+    fn consume(s: String) {
+        println!("{}", s);
+    }
+
+    fn main() {
+        let name = String::from("paul");
+        consume(name);
+    }
+notes: |
+  First freeform with an ownership-taking function signature.
+  Pinning `s: String` (not `&String`) means the call site's
+  binding moves — preview of design-docs/10c's pedagogy on
+  "functions take ownership unless you borrow."
