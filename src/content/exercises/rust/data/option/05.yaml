@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/data/option
+type: fill-word
+order: 5
+prompt: |
+  Fill the method that extracts the inner value or substitutes a
+  default if the Option is `None`. The default is `0` here.
+generator:
+  kind: template
+  vars:
+    method: ["unwrap_or"]
+  ts: |-
+    function show(maybe: number | null): number {
+      return maybe ?? 0;
+    }
+  canonical: |-
+    let maybe_n: Option<i32> = None;
+    let n: i32 = maybe_n.${method}(0);
+blanks: [method]
+hints:
+  - "Nine characters, lowercase, one underscore. Same first half as `.unwrap()` — the part that means 'extract the value' — plus the suffix that means 'else fall back'."
+  - "Method name spells the operation: `unwrap` + connector + a 2-letter conjunction."
+  - "`unwrap_or`"
+runtime: none
+notes: |
+  Pins the safe-extract idiom. `.unwrap_or(default)` is the
+  panic-free counterpart of `.unwrap()` — TS-flavoured
+  equivalent of the `??` nullish-coalescing operator.

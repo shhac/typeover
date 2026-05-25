@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/data/option
+type: freeform
+order: 7
+prompt: |
+  Write `show(n: Option<i32>)` that prints `v=<value>` when the
+  Option is `Some`, doing nothing for `None`. Use `if let
+  Some(v) = n` — not `match`. `main` calls `show(Some(7))` and
+  `show(None)`.
+
+  Output:
+
+      v=7
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function show(n: number | null): void {
+      if (n !== null) console.log("v=" + n);
+    }
+    show(7);
+    show(null);
+  canonical: |-
+    fn show(n: Option<i32>) {
+        if let Some(v) = n {
+            println!("v={}", v);
+        }
+    }
+
+    fn main() {
+        show(Some(7));
+        show(None);
+    }
+hints:
+  - "Shape: `if let Some(<binding>) = <value> { <body> }`. Destructures `Some` and binds the payload to `v` in one line; the `None` case falls through without an `else`."
+  - "Body is one `println!` using the bound `v`."
+  - |-
+    fn show(n: Option<i32>) {
+        if let Some(v) = n {
+            println!("v={}", v);
+        }
+    }
+
+    fn main() {
+        show(Some(7));
+        show(None);
+    }
+expectStdout: |
+  v=7
+runtime: server
+notes: |
+  Drills `if let Some` as the lightweight alternative to a
+  two-arm `match` when only one variant carries action.
+  The `None` call produces no output.

@@ -1,0 +1,67 @@
+target: rust
+themeId: rust/data/option
+type: freeform
+order: 9
+prompt: |
+  This program reaches for `.unwrap()` and panics on the `None`
+  branch:
+
+      thread 'main' panicked at 'called `Option::unwrap()` on a
+      `None` value'
+
+  Broken source:
+
+      fn parse_age(s: &str) -> Option<i32> {
+          s.parse().ok()
+      }
+
+      fn main() {
+          let n = parse_age("hello").unwrap();
+          println!("{}", n);
+      }
+
+  Fix `main` by handling the `None` case explicitly with
+  `unwrap_or(0)` — so a parse failure prints `0` instead of
+  panicking.
+
+  Output:
+
+      0
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number | null {
+      const n = Number(s);
+      return Number.isNaN(n) ? null : n;
+    }
+    const n = parseAge("hello") ?? 0;
+    console.log(n);
+  canonical: |-
+    fn parse_age(s: &str) -> Option<i32> {
+        s.parse().ok()
+    }
+
+    fn main() {
+        let n = parse_age("hello").unwrap_or(0);
+        println!("{}", n);
+    }
+expectStdout: |
+  0
+hints:
+  - "Change `.unwrap()` to `.unwrap_or(0)`. That replaces the panic with a default value — the `None` case quietly contributes `0`."
+  - "One method substitution: `.unwrap()` → `.unwrap_or(0)`."
+  - |-
+    fn parse_age(s: &str) -> Option<i32> {
+        s.parse().ok()
+    }
+
+    fn main() {
+        let n = parse_age("hello").unwrap_or(0);
+        println!("{}", n);
+    }
+runtime: server
+notes: |
+  Closes the theme by surfacing the canonical "don't
+  unwrap" fix. The `.unwrap_or(default)` shape is the
+  panic-free alternative — TS's `??` in idiomatic Rust.

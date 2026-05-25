@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/data/option
+type: freeform
+order: 8
+prompt: |
+  Translate the TS nullable-returning function. `find_user(id)`
+  returns `Some(String::from("alice"))` for `id == 1` and `None`
+  otherwise. `main` calls it with `1`, uses `if let Some(name) =
+  ...` to print on the present branch.
+
+  Output:
+
+      alice
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function findUser(id: number): string | null {
+      if (id === 1) return "alice";
+      return null;
+    }
+    const name = findUser(1);
+    if (name !== null) console.log(name);
+  canonical: |-
+    fn find_user(id: i32) -> Option<String> {
+        if id == 1 {
+            Some(String::from("alice"))
+        } else {
+            None
+        }
+    }
+
+    fn main() {
+        if let Some(name) = find_user(1) {
+            println!("{}", name);
+        }
+    }
+expectStdout: |
+  alice
+hints:
+  - "Two pieces: function returns `Option<String>` (the owned-string nullable), and `main` consumes it with `if let Some(name) = find_user(1)`. Owned String inside Some — `String::from(\"alice\")`, not just `\"alice\"`."
+  - "`Some(String::from(\"alice\"))` for the present branch, `None` for the absent branch."
+  - |-
+    fn find_user(id: i32) -> Option<String> {
+        if id == 1 {
+            Some(String::from("alice"))
+        } else {
+            None
+        }
+    }
+
+    fn main() {
+        if let Some(name) = find_user(1) {
+            println!("{}", name);
+        }
+    }
+runtime: server
+notes: |
+  Drills the full T-or-null → Option<T> translation. The
+  owned-String payload pins the lesson that `Some(...)`
+  carries owned data (an `&str` literal would compile but
+  produce `Option<&str>`).

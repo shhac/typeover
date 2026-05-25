@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/data/option
+type: mcq-explain
+order: 3
+prompt: |
+  Pick the strongest reason to handle `Option<T>` with `match`
+  (or `if let`) rather than `.unwrap()`.
+generator:
+  kind: variant
+  variants:
+    - id: match-over-unwrap
+      ts: |-
+        // TS: nullish access throws TypeError at runtime
+        //   const n: number | null = null;
+        //   n.toString(); // crash
+      canonical: '`.unwrap()` PANICS at runtime if the value is `None`. `match` (and `if let`) force the caller to handle BOTH variants at compile time — the absence case can never go unhandled silently.'
+      distractors:
+        - '`.unwrap()` is slower because it allocates a fallback value before returning.'
+        - '`match` works on more types than `.unwrap()` does; `.unwrap()` is restricted to numeric Options.'
+        - '`match` is required by the borrow checker; `.unwrap()` causes E0382 (move out of borrow) errors.'
+hints:
+  - "The pedagogical point of `Option<T>` is that ABSENCE must be HANDLED. `.unwrap()` skips the check by panicking; `match` makes the check structural — the compiler refuses to compile a `match` that doesn't cover both variants."
+  - "Three letters: p-a-n-i-c."
+  - 'Panic at runtime vs compile-time exhaustiveness.'
+runtime: none
+notes: |
+  Names the real cost of `.unwrap()`: runtime panic. The
+  other distractors target plausible-but-wrong reasons
+  (alloc, type-system gating, borrow-check) — all false.

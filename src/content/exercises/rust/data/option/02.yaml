@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/option
+type: mcq
+order: 2
+prompt: |
+  Given `let n: Option<i32> = Some(7);`, what value (of the same
+  type) represents ABSENCE?
+generator:
+  kind: variant
+  variants:
+    - id: none-variant
+      ts: 'let n: number | null = 7; const absent: number | null = null;'
+      canonical: 'None — the unit variant of `Option<T>` that carries no payload.'
+      distractors:
+        - 'null — Rust has no `null` value; the type doesn''t exist.'
+        - 'undefined — JS-only; Rust has no `undefined`.'
+        - 'Option::Nothing — the variant is named `None`, not `Nothing`. `Nothing` is the Haskell name.'
+hints:
+  - "Capitalised, four letters. The variant prelude-imported alongside `Some`, so it's referenced bare (no `Option::` qualifier needed)."
+  - "Same word as the English determiner meaning 'not any'."
+  - '`None`'
+runtime: none
+notes: |
+  Pins `None` as the absence value. The variant is in the
+  prelude (auto-imported into every module), so it's
+  referenced bare instead of as `Option::None`.

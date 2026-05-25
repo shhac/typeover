@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/data/option
+type: mcq
+order: 1
+prompt: |
+  TypeScript spells "a string that might be absent" as `string | null`.
+  Pick the Rust equivalent.
+generator:
+  kind: variant
+  variants:
+    - id: optional-string
+      ts: 'function findName(id: number): string | null { ... }'
+      canonical: 'Option<String> — a generic enum with two variants, `Some(String)` and `None`.'
+      distractors:
+        - 'String | null — `|` is TS-union syntax; Rust has no `null` type.'
+        - 'String? — `?` is the early-return operator in Rust, not a type-level "nullable" modifier (used in some other languages).'
+        - 'Maybe<String> — that''s Haskell''s name for the same idea; Rust calls it `Option`.'
+hints:
+  - "Rust models absence as a real value in the type system. Generic enum, two variants — one with payload, one without. Spelled with capital O and pointy brackets around the inner type."
+  - "Six letters; same word a user might say when offered a choice."
+  - '`Option<String>`'
+runtime: none
+notes: |
+  Pins `Option<T>` as the nullable replacement. Distractors
+  cover TS-union, `?` modifier (Swift/Kotlin), and the
+  Haskell name.

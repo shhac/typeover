@@ -1,0 +1,24 @@
+target: rust
+themeId: rust/data/option
+type: fill-word
+order: 4
+prompt: |
+  Fill the variant name that constructs an `Option<i32>` carrying
+  the value 7.
+generator:
+  kind: template
+  vars:
+    variant: ["Some"]
+  ts: |-
+    const n: number | null = 7;
+  canonical: |-
+    let n: Option<i32> = ${variant}(7);
+blanks: [variant]
+hints:
+  - "PascalCase. Four letters. The companion to `None` — the other variant of `Option<T>`, the one that carries the value."
+  - "Same English word as the determiner meaning 'at least one'."
+  - "`Some`"
+runtime: none
+notes: |
+  Drills `Some(value)` construction. The variant is in the
+  prelude, so no `Option::` qualifier is needed.

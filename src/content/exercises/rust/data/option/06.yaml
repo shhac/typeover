@@ -1,0 +1,52 @@
+target: rust
+themeId: rust/data/option
+type: freeform
+order: 6
+prompt: |
+  Write `divide(a: i32, b: i32) -> Option<i32>` that returns
+  `Some(a / b)` when `b != 0` and `None` otherwise. `main` calls
+  the function twice (with `b=2` and `b=0`) and prints each
+  result with debug formatting (`{:?}`).
+
+  Output:
+
+      Some(5)
+      None
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function divide(a: number, b: number): number | null {
+      return b === 0 ? null : Math.trunc(a / b);
+    }
+    console.log(divide(10, 2));
+    console.log(divide(10, 0));
+  canonical: |-
+    fn divide(a: i32, b: i32) -> Option<i32> {
+        if b == 0 { None } else { Some(a / b) }
+    }
+
+    fn main() {
+        println!("{:?}", divide(10, 2));
+        println!("{:?}", divide(10, 0));
+    }
+expectStdout: |
+  Some(5)
+  None
+hints:
+  - "Two pieces: signature `fn divide(a: i32, b: i32) -> Option<i32>`, body is an `if`-expression returning `None` or `Some(a / b)`. The print uses `{:?}` (debug) so the variant name shows in the output."
+  - "Body: `if b == 0 { None } else { Some(a / b) }`."
+  - |-
+    fn divide(a: i32, b: i32) -> Option<i32> {
+        if b == 0 { None } else { Some(a / b) }
+    }
+
+    fn main() {
+        println!("{:?}", divide(10, 2));
+        println!("{:?}", divide(10, 0));
+    }
+runtime: server
+notes: |
+  First Option-returning function. The `if`-expression body
+  returns one of the two variants directly — no separate
+  `return` keyword, since `if` is an expression.
