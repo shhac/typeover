@@ -48,12 +48,6 @@ export interface ValidateError {
 
 export type ValidateResult = ValidateOk | ValidateError;
 
-/** Shape of the JSON body the Function accepts. `source` is the
- *  only field; everything else is ignored. */
-interface RawBody {
-  source?: unknown;
-}
-
 /** Validate a parsed JSON body. Returns either a typed `source`
  *  string ready to hand to the transport, or a `{ status, message }`
  *  the caller turns into an error response. */
@@ -61,7 +55,10 @@ export function validateRustSource(body: unknown): ValidateResult {
   if (typeof body !== "object" || body === null) {
     return { ok: false, status: 400, message: "Body must be a JSON object." };
   }
-  const { source } = body as RawBody;
+  /* Read `source` off the body without an `as` cast on user input —
+   * the `typeof` check on the next line narrows from `unknown` to
+   * `string` for the rest of the function. */
+  const source: unknown = (body as Record<string, unknown>).source;
   if (typeof source !== "string") {
     return { ok: false, status: 400, message: "`source` must be a string." };
   }

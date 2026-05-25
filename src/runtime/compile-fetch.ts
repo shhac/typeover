@@ -58,15 +58,25 @@ export async function fetchCompiledWasm(
      * 422 with `{ error: <rustc stderr> }`; transport-level 5xx
      * just has a status code. Try JSON first, fall back on parse
      * failure. */
-    let message = `compile request failed (${res.status})`;
-    try {
-      const body = (await res.json()) as { error?: unknown };
-      if (typeof body.error === "string") message = body.error;
-    } catch {
-      /* non-JSON body — fall back to the status-derived message. */
-    }
-    return { ok: false, error: message };
+    return { ok: false, error: await readErrorMessage(res) };
   }
 
   return { ok: true, bytes: await res.arrayBuffer() };
+}
+
+/** Decode the error message off a non-OK compile response. Tries
+ *  JSON `{ error: string }` first (the Function's canonical shape);
+ *  falls back to a status-derived message when the body isn't
+ *  JSON, the JSON lacks an `error` field, or the field isn't a
+ *  string. No `as` cast on user-input bytes — narrow via typeof. */
+async function readErrorMessage(res: Response): Promise<string> {
+  const fallback = `compile request failed (${res.status})`;
+  try {
+    const body: unknown = await res.json();
+    if (typeof body !== "object" || body === null) return fallback;
+    const error = (body as Record<string, unknown>).error;
+    return typeof error === "string" ? error : fallback;
+  } catch {
+    return fallback;
+  }
 }

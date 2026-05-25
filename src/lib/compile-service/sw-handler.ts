@@ -25,9 +25,11 @@ export const CACHE_PREFIX = "/compile-cache/";
 export function extractSource(bodyText: string): string | undefined {
   if (!bodyText.startsWith("{")) return bodyText;
   try {
-    const parsed = JSON.parse(bodyText) as { source?: unknown; edit?: unknown };
-    if (typeof parsed.source === "string") return parsed.source;
-    if (typeof parsed.edit === "string") return parsed.edit;
+    const parsed: unknown = JSON.parse(bodyText);
+    if (typeof parsed !== "object" || parsed === null) return undefined;
+    const bag = parsed as Record<string, unknown>;
+    if (typeof bag.source === "string") return bag.source;
+    if (typeof bag.edit === "string") return bag.edit;
     return undefined;
   } catch {
     return bodyText;
