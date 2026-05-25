@@ -1,5 +1,5 @@
 import { onMount } from "solid-js";
-import { EditorState, type Extension } from "@codemirror/state";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import { bracketMatching, indentOnInput, indentUnit } from "@codemirror/language";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -124,21 +124,7 @@ function TestareaFallback(props: CodeMirrorEditorProps) {
     if (props.ref && el) {
       const handle: CodeMirrorEditorHandle = {
         focus: () => el!.focus(),
-        insertAtCursor: (text: string) => {
-          const ta = el!;
-          const start = ta.selectionStart;
-          const end = ta.selectionEnd;
-          const before = ta.value.slice(0, start);
-          const after = ta.value.slice(end);
-          const next = before + text + after;
-          props.onValueChange?.(next);
-          /* Keep the caret after the inserted text on the next
-           * tick — Solid hasn't yet propagated `value`. */
-          queueMicrotask(() => {
-            ta.selectionStart = start + text.length;
-            ta.selectionEnd = start + text.length;
-          });
-        },
+        insertAtCursor: (text: string) => insertIntoTextarea(el!, text, props.onValueChange),
       };
       props.ref(handle);
     }
@@ -194,6 +180,97 @@ function toCompletionLanguage(lang: CmLanguage): CompletionLanguage | null {
   }
 }
 
+function insertIntoTextarea(
+  el: HTMLTextAreaElement,
+  text: string,
+  onValueChange?: (value: string) => void,
+): void {
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
+  const before = el.value.slice(0, start);
+  const after = el.value.slice(end);
+  const next = before + text + after;
+  onValueChange?.(next);
+  queueMicrotask(() => {
+    el.selectionStart = start + text.length;
+    el.selectionEnd = start + text.length;
+  });
+}
+
+function createEditorHandle(view: EditorView): CodeMirrorEditorHandle {
+  return {
+    focus: () => view.focus(),
+    insertAtCursor: (text: string) => {
+      const { from, to } = view.state.selection.main;
+      view.dispatch({
+        changes: { from, to, insert: text },
+        selection: { anchor: from + text.length },
+      });
+    },
+  };
+}
+
+function buildCodeMirrorExtensions(
+  props: CodeMirrorEditorProps,
+  lang: CmLanguage,
+  readOnly: boolean,
+  editableCompartment: Compartment,
+): Extension[] {
+  const completionLang = toCompletionLanguage(lang);
+  const completion: Extension[] =
+    completionLang && !readOnly
+      ? [completionExtension({ language: completionLang, canonical: props.canonical })]
+      : [];
+
+  const baseExtensions: Extension[] = [
+    cmLanguageExtension(lang),
+    EditorView.contentAttributes.of({
+      "aria-label": props.ariaLabel ?? ARIA_LABEL_BY_LANG[lang],
+      spellcheck: "false",
+    }),
+    ...codemirrorThemeExtensions({
+      minHeight: readOnly ? "auto" : "16rem",
+      contentPadding: "0.75rem 0",
+      surfaceFocusOutline: !readOnly,
+      caret: !readOnly,
+    }),
+  ];
+
+  const editorOnly: Extension[] = readOnly
+    ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
+    : [
+        lineNumbers(),
+        history(),
+        bracketMatching(),
+        closeBrackets(),
+        indentOnInput(),
+        indentUnit.of("\t"),
+        highlightActiveLine(),
+        editableCompartment.of(EditorView.editable.of(!props.disabled)),
+        ...completion,
+        keymap.of([
+          {
+            key: "Mod-Enter",
+            run: () => {
+              props.onCmdEnter?.();
+              return true;
+            },
+          },
+          ...closeBracketsKeymap,
+          ...defaultKeymap,
+          ...historyKeymap,
+          indentWithTab,
+        ]),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            props.onValueChange?.(update.state.doc.toString());
+          }
+        }),
+      ];
+
+  return [...baseExtensions, ...editorOnly];
+}
+
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   if (isCodeMirrorTestEnv()) return TestareaFallback(props);
 
@@ -212,79 +289,11 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
     /* Toggle editability when `disabled` flips. Only relevant in
      * editor mode (readOnly mode never adds the compartment). */
     editable: readOnly ? undefined : () => !props.disabled,
-    buildExtensions: (editableCompartment) => {
-      const completionLang = toCompletionLanguage(lang);
-      const completion: Extension[] =
-        completionLang && !readOnly
-          ? [completionExtension({ language: completionLang, canonical: props.canonical })]
-          : [];
-
-      const baseExtensions: Extension[] = [
-        cmLanguageExtension(lang),
-        EditorView.contentAttributes.of({
-          "aria-label": props.ariaLabel ?? ARIA_LABEL_BY_LANG[lang],
-          spellcheck: "false",
-        }),
-        ...codemirrorThemeExtensions({
-          minHeight: readOnly ? "auto" : "16rem",
-          contentPadding: "0.75rem 0",
-          surfaceFocusOutline: !readOnly,
-          caret: !readOnly,
-        }),
-      ];
-
-      /* Editor-only extensions (history, closeBrackets, indent-on-
-       * input, line numbers, active-line highlight, keymap) drop
-       * out under readOnly so the pane reads as static syntax-
-       * highlighted code rather than an editable editor with
-       * disabled affordances. */
-      const editorOnly: Extension[] = readOnly
-        ? [EditorState.readOnly.of(true), EditorView.editable.of(false)]
-        : [
-            lineNumbers(),
-            history(),
-            bracketMatching(),
-            closeBrackets(),
-            indentOnInput(),
-            indentUnit.of("\t"),
-            highlightActiveLine(),
-            editableCompartment.of(EditorView.editable.of(!props.disabled)),
-            ...completion,
-            keymap.of([
-              {
-                key: "Mod-Enter",
-                run: () => {
-                  props.onCmdEnter?.();
-                  return true;
-                },
-              },
-              ...closeBracketsKeymap,
-              ...defaultKeymap,
-              ...historyKeymap,
-              indentWithTab,
-            ]),
-            EditorView.updateListener.of((update) => {
-              if (update.docChanged) {
-                props.onValueChange?.(update.state.doc.toString());
-              }
-            }),
-          ];
-
-      return [...baseExtensions, ...editorOnly];
-    },
+    buildExtensions: (editableCompartment) =>
+      buildCodeMirrorExtensions(props, lang, readOnly, editableCompartment),
     onView: (view) => {
       if (readOnly || !props.ref) return;
-      const handle: CodeMirrorEditorHandle = {
-        focus: () => view.focus(),
-        insertAtCursor: (text: string) => {
-          const { from, to } = view.state.selection.main;
-          view.dispatch({
-            changes: { from, to, insert: text },
-            selection: { anchor: from + text.length },
-          });
-        },
-      };
-      props.ref(handle);
+      props.ref(createEditorHandle(view));
     },
   });
 
