@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/concurrency
+type: mcq
+order: 2
+prompt: |
+  After `let handle = thread::spawn(...)`, how do you BLOCK
+  until the spawned thread finishes and get its return value?
+generator:
+  kind: variant
+  variants:
+    - id: join-handle
+      ts: 'const result = await promise; // TS uses await for async results.'
+      canonical: 'handle.join().unwrap() — `.join()` blocks the current thread until the spawned one completes, returning the inner value wrapped in `Result`.'
+      distractors:
+        - 'handle.wait() — no such method on `JoinHandle`.'
+        - 'handle.await — `.await` is for futures, not thread handles.'
+        - 'thread::wait(handle) — no such function in `std::thread`.'
+hints:
+  - "Four letters. Same word as thread-joining in POSIX / Java / C++."
+  - "`.join()`."
+  - '`handle.join().unwrap()`'
+runtime: none
+notes: |
+  Pins `.join()` as the blocking-wait method. The `.await`
+  distractor surfaces the async/thread confusion — common
+  for TS-native devs who conflate the two concurrency
+  models.

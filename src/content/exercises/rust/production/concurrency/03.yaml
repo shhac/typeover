@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/concurrency
+type: mcq
+order: 3
+prompt: |
+  Pick the standard library module that provides channels for
+  inter-thread message passing.
+generator:
+  kind: variant
+  variants:
+    - id: mpsc-channel
+      ts: '// TS has no built-in channel; closest is postMessage for workers.'
+      canonical: 'std::sync::mpsc — multi-producer, single-consumer channel. `mpsc::channel()` returns a `(Sender, Receiver)` pair.'
+      distractors:
+        - 'std::thread::channel — no such module; channels live in `std::sync`.'
+        - 'std::io::channel — `std::io` is for file/stream I/O, not inter-thread messaging.'
+        - 'std::channel — no top-level `channel` module; it''s under `sync::mpsc`.'
+hints:
+  - "Four letters: multi-producer, single-consumer. The module lives under `std::sync`."
+  - "`mpsc`."
+  - '`std::sync::mpsc`'
+runtime: none
+notes: |
+  Pins `std::sync::mpsc` as the channel module. The
+  module path matters because beginners often guess
+  `std::thread::channel` by analogy with Go's builtin.

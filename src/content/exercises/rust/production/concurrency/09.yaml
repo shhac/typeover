@@ -1,0 +1,74 @@
+target: rust
+themeId: rust/production/concurrency
+type: freeform
+order: 9
+prompt: |
+  Three threads each increment a shared counter. Without
+  synchronisation the counter stays at 0 (each `move` closure
+  copies its own `i32`). Fix it with `Arc<Mutex<i32>>` so all
+  threads mutate the SAME value.
+
+  Output:
+
+      3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let counter = 0;
+    await Promise.all([1, 2, 3].map(() =>
+      new Promise<void>((r) => { counter += 1; r(); })
+    ));
+    console.log(counter);
+  canonical: |-
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
+    fn main() {
+        let counter = Arc::new(Mutex::new(0));
+        let handles: Vec<_> = (0..3)
+            .map(|_| {
+                let counter = Arc::clone(&counter);
+                thread::spawn(move || {
+                    let mut num = counter.lock().unwrap();
+                    *num += 1;
+                })
+            })
+            .collect();
+        for h in handles {
+            h.join().unwrap();
+        }
+        println!("{}", counter.lock().unwrap());
+    }
+expectStdout: |
+  3
+hints:
+  - "Three layers: `Arc` shares ownership across threads, `Mutex` synchronises mutable access, the inner `i32` is the counter. Each thread does `let counter = Arc::clone(&counter);` before `thread::spawn(move || { ... })` so the closure captures the new Arc, not the original."
+  - "Inside each thread: `let mut num = counter.lock().unwrap(); *num += 1;`. The lock guard (`num`) drops at end of scope, releasing the mutex."
+  - |-
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
+    fn main() {
+        let counter = Arc::new(Mutex::new(0));
+        let handles: Vec<_> = (0..3)
+            .map(|_| {
+                let counter = Arc::clone(&counter);
+                thread::spawn(move || {
+                    let mut num = counter.lock().unwrap();
+                    *num += 1;
+                })
+            })
+            .collect();
+        for h in handles {
+            h.join().unwrap();
+        }
+        println!("{}", counter.lock().unwrap());
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical `Arc<Mutex<T>>` pattern.
+  Three layers (Arc + Mutex + T) is the standard shared-
+  mutable-state shape for multithreaded Rust — the same
+  shape the smart-pointers theme's `Rc<RefCell<T>>`
+  provided for single-threaded code.

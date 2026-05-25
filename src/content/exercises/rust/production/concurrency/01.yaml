@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/concurrency
+type: mcq
+order: 1
+prompt: |
+  A spawned thread needs to OWN its captured data — the parent
+  scope may end before the thread finishes. Pick the closure
+  modifier.
+generator:
+  kind: variant
+  variants:
+    - id: move-closure
+      ts: '// TS closures capture by reference; no move concept.'
+      canonical: 'move || { ... } — forces capture by VALUE so the spawned thread owns the data and can run independently of the parent scope.'
+      distractors:
+        - '|| { ... } — default closure BORROWS from the parent; if the parent scope ends first, the borrow is dangling.'
+        - '&move || { ... } — not valid Rust syntax.'
+        - 'async move || { ... } — `async` is for futures, not OS threads; `thread::spawn` takes a plain closure.'
+hints:
+  - "Same `move` keyword used in the closures theme (slot 03). Here the motivation is concrete: the thread may outlive the parent's stack frame."
+  - "Four letters."
+  - '`move || { ... }`'
+runtime: none
+notes: |
+  Pins `move` for thread closures. The default-borrow
+  distractor surfaces the real E0373 ("closure may outlive
+  the current function") that fires without `move`.

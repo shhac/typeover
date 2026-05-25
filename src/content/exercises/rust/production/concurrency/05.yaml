@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/production/concurrency
+type: fill-word
+order: 5
+prompt: |
+  Fill the call that increments the reference count on an `Arc`
+  and produces another pointer to the same shared data — the
+  idiomatic associated-function form.
+generator:
+  kind: template
+  vars:
+    call: ["Arc::clone"]
+  ts: |-
+    const ref2 = data; // TS shares objects by reference implicitly.
+  canonical: |-
+    use std::sync::Arc;
+
+    let shared = Arc::new(42);
+    let shared2 = ${call}(&shared);
+blanks: [call]
+hints:
+  - "Same pattern as `Rc::clone` from the smart-pointers theme — but the atomic flavour for thread-safety."
+  - "`Arc::clone`."
+  - "`Arc::clone`"
+runtime: none
+notes: |
+  Drills `Arc::clone(&x)` as the explicit-shared-ownership
+  call. Same idiom as `Rc::clone` — the associated-function
+  form communicates the cheap-clone semantics.

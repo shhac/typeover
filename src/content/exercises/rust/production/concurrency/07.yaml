@@ -1,0 +1,55 @@
+target: rust
+themeId: rust/production/concurrency
+type: freeform
+order: 7
+prompt: |
+  Create a channel. Spawn a thread that sends `"hello"` through
+  the sender. `main` receives the message and prints it.
+
+  Output:
+
+      hello
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    // TS: no built-in channels; closest is postMessage for workers.
+    // const { port1, port2 } = new MessageChannel();
+    // port2.onmessage = (e) => console.log(e.data);
+    // port1.postMessage("hello");
+    console.log("hello");
+  canonical: |-
+    use std::sync::mpsc;
+    use std::thread;
+
+    fn main() {
+        let (tx, rx) = mpsc::channel();
+        thread::spawn(move || {
+            tx.send(String::from("hello")).unwrap();
+        });
+        let msg = rx.recv().unwrap();
+        println!("{}", msg);
+    }
+expectStdout: |
+  hello
+hints:
+  - "Three pieces: `mpsc::channel()` creates the `(Sender, Receiver)` pair, the spawned thread `move`-captures `tx` and calls `tx.send(...)`, `main` calls `rx.recv().unwrap()` to block until a message arrives."
+  - "Channel: `let (tx, rx) = mpsc::channel();`. Send: `tx.send(String::from(\"hello\")).unwrap();`. Receive: `rx.recv().unwrap()`."
+  - |-
+    use std::sync::mpsc;
+    use std::thread;
+
+    fn main() {
+        let (tx, rx) = mpsc::channel();
+        thread::spawn(move || {
+            tx.send(String::from("hello")).unwrap();
+        });
+        let msg = rx.recv().unwrap();
+        println!("{}", msg);
+    }
+runtime: server
+notes: |
+  Drills the canonical channel pattern. The `move` on the
+  closure transfers `tx` ownership to the thread; `rx`
+  stays in main. `recv()` blocks until the message
+  arrives.

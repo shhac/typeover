@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/production/concurrency
+type: freeform
+order: 6
+prompt: |
+  Spawn a thread that computes `21 * 2` and returns the result.
+  `main` joins the handle, unwraps, and prints.
+
+  Output:
+
+      42
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    async function compute(): Promise<number> { return 21 * 2; }
+    console.log(await compute());
+  canonical: |-
+    use std::thread;
+
+    fn main() {
+        let handle = thread::spawn(|| -> i32 {
+            21 * 2
+        });
+        let result = handle.join().unwrap();
+        println!("{}", result);
+    }
+expectStdout: |
+  42
+hints:
+  - "Three pieces: `thread::spawn` with a closure that returns `i32` (annotated with `|| -> i32 { ... }`), `.join()` on the returned handle to block until done, `.unwrap()` to extract the value from the `Result<T, Box<dyn Any>>`."
+  - "Closure: `|| -> i32 { 21 * 2 }`."
+  - |-
+    use std::thread;
+
+    fn main() {
+        let handle = thread::spawn(|| -> i32 {
+            21 * 2
+        });
+        let result = handle.join().unwrap();
+        println!("{}", result);
+    }
+runtime: server
+notes: |
+  Simplest thread-with-return pattern. The closure's return
+  type annotation `|| -> i32` is optional here (inferred)
+  but idiomatic for teaching.

@@ -1,0 +1,32 @@
+target: rust
+themeId: rust/production/concurrency
+type: fill-word
+order: 4
+prompt: |
+  Fill the function that spawns a new OS thread running a
+  closure.
+generator:
+  kind: template
+  vars:
+    call: ["thread::spawn"]
+  ts: |-
+    // TS: const worker = new Worker("file.js");
+  canonical: |-
+    use std::thread;
+
+    fn main() {
+        let handle = ${call}(|| {
+            println!("hi from thread");
+        });
+        handle.join().unwrap();
+    }
+blanks: [call]
+hints:
+  - "Module name + `::` + function name. The module is `thread`; the function is the English word for creating a new entity."
+  - "Shape: `<module>::<function>`."
+  - "`thread::spawn`"
+runtime: none
+notes: |
+  Drills `thread::spawn(closure)`. The associated function
+  pattern mirrors `Box::new`, `Rc::clone`, etc. — the
+  module name is the namespace, the function is the action.

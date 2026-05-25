@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/production/concurrency
+type: freeform
+order: 8
+prompt: |
+  Translate `Promise.all([double(1), double(2), double(3)])` to
+  Rust threads. Spawn 3 threads that each double their input,
+  join all handles, collect results, print space-separated.
+
+  Output:
+
+      2 4 6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    async function double(x: number): Promise<number> { return x * 2; }
+    const results = await Promise.all([double(1), double(2), double(3)]);
+    console.log(results.join(" "));
+  canonical: |-
+    use std::thread;
+
+    fn main() {
+        let handles: Vec<_> = vec![1, 2, 3]
+            .into_iter()
+            .map(|x| thread::spawn(move || -> i32 { x * 2 }))
+            .collect();
+        let results: Vec<i32> = handles
+            .into_iter()
+            .map(|h| h.join().unwrap())
+            .collect();
+        println!("{} {} {}", results[0], results[1], results[2]);
+    }
+expectStdout: |
+  2 4 6
+hints:
+  - "Spawn phase: `vec![1, 2, 3].into_iter().map(|x| thread::spawn(move || x * 2)).collect()`. Join phase: `.into_iter().map(|h| h.join().unwrap()).collect()`. Two iterator chains — spawn all, then join all (like `Promise.all` but explicit)."
+  - "Key: `move ||` captures `x` by value so each thread owns its own copy."
+  - |-
+    use std::thread;
+
+    fn main() {
+        let handles: Vec<_> = vec![1, 2, 3]
+            .into_iter()
+            .map(|x| thread::spawn(move || -> i32 { x * 2 }))
+            .collect();
+        let results: Vec<i32> = handles
+            .into_iter()
+            .map(|h| h.join().unwrap())
+            .collect();
+        println!("{} {} {}", results[0], results[1], results[2]);
+    }
+runtime: server
+notes: |
+  Translates `Promise.all` into the spawn-all-then-join-all
+  pattern. Each thread is independent; joining in order
+  makes the output deterministic (like `Promise.all`'s
+  ordered results).
