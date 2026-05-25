@@ -40,6 +40,7 @@ import {
 } from "@bjorn3/browser_wasi_shim";
 import { buildStdlibTree, decompressIfGzipped } from "./zig-assets";
 import { captureFd, runWasiBinary } from "./wasi-run";
+import { errorMessage } from "~/lib/error-message";
 
 interface ZigResult {
   stdout: string;
@@ -140,7 +141,7 @@ async function runWasi(
     /* Zig traps and the shim's `wasi.start` exit-throw both land
      * here. Surface stderr alongside the raw error so the learner
      * sees the diagnostic. */
-    const errStr = err instanceof Error ? err.message : String(err);
+    const errStr = errorMessage(err);
     return {
       ok: false,
       reason: stderrBuf.text ? `${stderrBuf.text}\n${errStr}` : errStr,
@@ -256,7 +257,7 @@ async function tryCompile(
   try {
     return { ok: true, bytes: await compile(code, assets) };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 

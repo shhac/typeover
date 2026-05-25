@@ -29,6 +29,7 @@ import {
   type Fd,
   type Inode,
 } from "@bjorn3/browser_wasi_shim";
+import { errorMessage } from "~/lib/error-message";
 
 export interface WasiRunResult {
   stdout: string;
@@ -99,8 +100,7 @@ export async function runWasiBinary(
     }
   } catch (err) {
     /* Compile failure or wasm trap — surface the message. */
-    const e = err as { message?: string };
-    error = e.message || String(err);
+    error = errorMessage(err);
   }
 
   return { stdout: stdoutBuf.text, stderr: stderrBuf.text, error };

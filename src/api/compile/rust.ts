@@ -29,6 +29,7 @@
 import { SandboxTransport } from "../../lib/compile-service/transports/sandbox";
 import type { CompileTransport } from "../../lib/compile-service/transports/types";
 import { validateRustSource } from "../../lib/compile-service/validate-rust-source";
+import { errorMessage } from "../../lib/error-message";
 
 function errorResponse(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: message }), {
@@ -37,37 +38,59 @@ function errorResponse(status: number, message: string): Response {
   });
 }
 
-export function createRustCompilePostHandler(transport: CompileTransport) {
-  return async function POST(request: Request): Promise<Response> {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return errorResponse(400, "Body must be JSON.");
-    }
+/* Each helper returns an `ok`-tagged envelope so the handler is a
+ * flat chain of early-returns rather than a stack of `let x; try { x
+ * = ... } catch { ... }` blocks. The catch arm of `try/await` only
+ * needs to construct the Response once, and the success arm can
+ * narrow cleanly through the discriminator. */
 
-    const validation = validateRustSource(body);
-    if (!validation.ok) {
-      return errorResponse(validation.status, validation.message);
-    }
+type ParseResult =
+  | { ok: true; body: unknown }
+  | { ok: false; response: Response };
 
-    let result;
-    try {
-      result = await transport.compile({
-        language: "rust",
-        source: validation.source,
-      });
-    } catch (e) {
-      return errorResponse(422, e instanceof Error ? e.message : String(e));
-    }
+async function parseJsonBody(request: Request): Promise<ParseResult> {
+  try {
+    return { ok: true, body: await request.json() };
+  } catch {
+    return { ok: false, response: errorResponse(400, "Body must be JSON.") };
+  }
+}
 
+type CompileResult =
+  | { ok: true; wasm: Uint8Array; elapsedSeconds: number }
+  | { ok: false; response: Response };
+
+async function runCompile(
+  transport: CompileTransport,
+  source: string,
+): Promise<CompileResult> {
+  try {
+    const result = await transport.compile({ language: "rust", source });
     if (!result.ok) {
       /* 422 covers both rustc compile failures and transport errors —
        * the worker surfaces the message verbatim into the freeform
        * run-result panel, so the learner sees the actual rustc
        * diagnostic. */
-      return errorResponse(422, result.message);
+      return { ok: false, response: errorResponse(422, result.message) };
     }
+    return { ok: true, wasm: result.wasm, elapsedSeconds: result.elapsedSeconds };
+  } catch (e) {
+    return { ok: false, response: errorResponse(422, errorMessage(e)) };
+  }
+}
+
+export function createRustCompilePostHandler(transport: CompileTransport) {
+  return async function POST(request: Request): Promise<Response> {
+    const parsed = await parseJsonBody(request);
+    if (!parsed.ok) return parsed.response;
+
+    const validation = validateRustSource(parsed.body);
+    if (!validation.ok) {
+      return errorResponse(validation.status, validation.message);
+    }
+
+    const result = await runCompile(transport, validation.source);
+    if (!result.ok) return result.response;
 
     /* Slice into a fresh ArrayBuffer so the Response body is exactly
      * the wasm bytes — the upstream Uint8Array may be a view into a

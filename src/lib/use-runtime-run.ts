@@ -5,6 +5,7 @@ import {
   type AcceptedRuntime,
   type ClientRuntime,
 } from "./client-runtime-descriptors";
+import { errorMessage } from "./error-message";
 
 export {
   runtimeToTarget,
@@ -203,7 +204,7 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
       (e: unknown) => {
         if (bootGen !== currentGen()) return;
         setStatus("error");
-        setBootError(e instanceof Error ? e.message : String(e));
+        setBootError(errorMessage(e));
       },
     );
   }
@@ -267,7 +268,7 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
       setRunResult({
         stdout: "",
         stderr: "",
-        error: e instanceof Error ? e.message : String(e),
+        error: errorMessage(e),
         durationMs: performance.now() - t0,
       });
     } finally {
