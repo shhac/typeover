@@ -1,5 +1,13 @@
 # 09 — Authoring
 
+**Status as of 2026-05-25.** The "lang-prefixed content tree" the
+content-tree section below describes is current — every path lives
+under `src/content/<kind>/<lang>/...`. Authoring tooling now covers
+Go + Zig + Rust uniformly. The Rust track adds an autonomous build
+loop on top of the manual authoring pipeline; see
+[10c-curriculum-rust.md](10c-curriculum-rust.md) for the loop
+contract.
+
 ## Posture
 
 typeover is **community-friendly from day one**. The author of most
@@ -19,14 +27,17 @@ This serves three goals:
 
 ```
 src/content/
-├── modules/<module-id>.yaml             # module metadata + summary
-├── themes/<module-id>/<theme-id>.yaml   # theme metadata + intro prose
-└── exercises/<module-id>/<theme-id>/
+├── modules/<lang>/<module-id>.yaml             # module metadata + summary
+├── themes/<lang>/<module-id>/<theme-id>.yaml   # theme metadata + intro prose
+└── exercises/<lang>/<module-id>/<theme-id>/
     ├── 01.yaml
     ├── 02.yaml
     ├── …
     └── 09.yaml
 ```
+
+Lang segment is `go` / `zig` / `rust`. See design-docs/31 for the
+multi-language reshape that introduced this layout.
 
 Themes are flat YAML files (intro prose lives inside as the `intro`
 string, not in a separate `.md` file). Exercises are named by their

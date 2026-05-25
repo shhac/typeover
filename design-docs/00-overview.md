@@ -1,5 +1,11 @@
 # typeover — design docs
 
+**Status as of 2026-05-25.** The site teaches **three** languages —
+Go, Zig, and Rust — from TypeScript. Go and Zig run entirely in the
+browser; Rust uses the server-compile, client-execute pipeline
+described in design-docs/32. Deploys to both `typeover.dev` and
+`typeover.paulie.app`.
+
 This directory captures *why* typeover is built the way it is. Each document
 is short and answers one question; the goal is that someone landing on the
 repo six months from now (including future-us) can rebuild the mental model
@@ -27,8 +33,9 @@ from these files alone.
 |---|---|---|
 | 10 | [curriculum-go.md](10-curriculum-go.md) | Full Go curriculum, top-down outline with iterative validation. |
 | 10b | [curriculum-zig.md](10b-curriculum-zig.md) | Zig curriculum spine, first slice, and the slot queue for next sessions. |
+| 10c | [curriculum-rust.md](10c-curriculum-rust.md) | Rust curriculum spine: 7 modules × 32 themes; first slice + autonomous build loop. |
 | 11 | [progress-tracking.md](11-progress-tracking.md) | What state we keep about each learner; gamification-ready schema. |
-| 12 | [test-plan.md](12-test-plan.md) | Critical-path test checklist for when Vitest lands. |
+| 12 | [test-plan.md](12-test-plan.md) | Critical-path test checklist; what each test pins. |
 | 13 | [themes.md](13-themes.md) | Theme catalogue + the data-theme swap mechanism. |
 
 ## Architecture follow-ups

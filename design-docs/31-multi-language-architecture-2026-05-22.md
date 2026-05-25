@@ -1,5 +1,47 @@
 # 31 — Multi-language track architecture (2026-05-22)
 
+**Status update 2026-05-25.** The "future contributor adding a
+third language" hypothetical materialised three days after this doc
+landed — **Rust** joined the schema, route tree, runtime hook, and
+DS-token catalogue with no architectural rewrite. The reshape paid
+off exactly as designed. The Rust-specific runtime is in
+[32](32-compile-service-architecture-2026-05-24.md) and the
+curriculum spine is in [10c](10c-curriculum-rust.md).
+
+Per-decision Rust deltas (read inline alongside D1-D6 below):
+
+- **D1 (content layout):** Rust content lives at
+  `src/content/{modules,themes,exercises}/rust/...` exactly as Zig
+  does. No surprises.
+- **D2 (route tree):** Rust pages render through the same
+  `src/pages/[lang]/...` tree. The `lang` enum widened.
+- **D3 (schema):** `targetSchema` widened to
+  `z.enum(["go", "zig", "rust"])`. The `runtime` enum stayed at
+  `"yaegi" | "zig" | "server" | "none"` — Rust uses `"server"`, the
+  language-agnostic tier defined in [32](32-compile-service-architecture-2026-05-24.md).
+- **D4 (runtime hook):** `useRuntimeRun` already dispatched via
+  `RUNTIME_ACCESSORS`; the `"server"` branch grew the Rust client
+  (browser_wasi_shim instantiating wasm fetched from the compile
+  service). The hook stayed runtime-agnostic.
+- **D5 (progress migration):** no further migration was needed —
+  Rust IDs are already lang-prefixed; only the original Go-only
+  legacy fixup is in play.
+- **D6 (DS tokens):** `Badge` / `LangCrumbs` / `CodeBlock` /
+  `Heading` / `Eyebrow` variant unions all widened to include
+  `"rust"` with a matching `--color-accent-rust` token (Rust's
+  brand `#dea584` warm tan). `LANG_ACCENT_CLASS` was extracted as
+  a shared lookup table during this work — a previous sweep
+  discovered `Heading` + `Eyebrow` were missing their `zig` and
+  `rust` rows entirely; the shared table prevents that drift.
+
+The "what still has Go-only assumptions" list below was largely
+cleared during the Rust integration — `Freeform` learned per-language
+scaffolds (via `freeform-shape.ts`), `MobileKeyBar` learned
+language-aware key presets, the dispatcher tests grew Zig and Rust
+cases, the `content:new theme` script became language-aware.
+
+---
+
 The one-time architectural reshape we made when adding the Zig
 track alongside Go. Captures **why the multi-language shape looks
 the way it does** so a future contributor adding a third language

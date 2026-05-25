@@ -1,5 +1,15 @@
 # 07 — Release
 
+**Status as of 2026-05-25.** The "Module 1 of Go" launch gate from
+the original posture has been surpassed materially. The site has
+three tracks live, with all 7 Go modules authored (~288 exercises),
+4 Zig modules (~180), and the Rust foundations module shipping (~45
+and growing). Deploys to `typeover.dev` (primary) and
+`typeover.paulie.app` (alias). The original launch-gate checklist
+below is preserved for posterity — the boxes are checked or moot.
+Pre-public-launch work now is polish + a few open checklist items
+(real-device mobile pass, Lighthouse ≥ 95) rather than content.
+
 ## Posture
 
 typeover is a **portfolio / learning project** built to a real production

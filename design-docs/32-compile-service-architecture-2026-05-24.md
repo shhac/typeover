@@ -1,5 +1,14 @@
 # 32 — Compile-service architecture (2026-05-24)
 
+**Status update 2026-05-25.** The pipeline is live; Rust exercises
+ship through it today. ~45 Rust exercises authored across the
+foundations module and growing under an autonomous build loop. The
+`/api/compile/rust.ts` handler, `bootstrap-rust-sandbox.ts`
+pre-warmer, `prebake-compile-cache.ts` L1 baker, and SW + Function
+cascade are all in place and tested. The "What this doc does NOT
+cover — defer to a future 10c-curriculum-rust.md" promise has been
+met by [10c-curriculum-rust.md](10c-curriculum-rust.md).
+
 ## Why this exists
 
 The Yaegi (Go) and zig.wasm (Zig) tracks both run *in the learner's

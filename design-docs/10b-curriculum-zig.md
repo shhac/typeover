@@ -1,8 +1,16 @@
 # 10b — Curriculum (Zig target)
 
+**Status as of 2026-05-25.** Modules 1-4 (basics, types, memory,
+errors) are **shipped** — 20 themes × 9 slots ≈ 180 exercises live
+against the real Zig compiler. Modules 5-7 (comptime, stdlib,
+idioms) are still scaffolded. The first-slice section below is
+preserved as the historical "what shipped first" record; the
+slot-queue below it is materially out of date but kept as
+authoring-archive.
+
 Parallel to [10-curriculum-go.md](10-curriculum-go.md). The Zig
-track's module/theme spine, the first-slice content that shipped,
-and the queue of remaining themes for future authoring sessions.
+track's module/theme spine, what shipped, and the queue of
+remaining themes for future authoring sessions.
 
 The pedagogy + ordering principles from 10 (start where TS mental
 models transfer; one friction point per module; defer the natively
@@ -172,3 +180,22 @@ exercises — and is end-to-end exerciseable. Then Module 2
 (types), and so on. The Go track took many sessions to build up
 from 1 module to 7 with 288 exercises; expect the same arc for
 Zig.
+
+## Status update (2026-05-25)
+
+Modules 1-4 are complete: ~180 exercises shipped against the real
+Zig compiler. Specifically:
+
+- **Module 1 (Basics)** — all 8 themes × ~9 slots authored:
+  hello-and-output, variables, conditionals, while-and-for,
+  functions, numeric-primitives, strings-as-slices, optionals.
+- **Module 2 (Types)** — structs, enums-and-tagged-unions,
+  pointers, arrays-vs-slices.
+- **Module 3 (Memory)** — allocators-intro, defer-and-errdefer,
+  arraylist, ownership-conventions.
+- **Module 4 (Errors)** — error-sets, try-and-catch,
+  error-union-returns, panics-vs-errors.
+
+Modules 5-7 (comptime, stdlib, idioms) remain on the slot queue.
+Every shipped canonical was smoke-tested against
+`runtime/zig-wasm/smoke.mjs` before commit.

@@ -114,11 +114,16 @@ The `runtime` field on `exerciseSchema` is already in place
 
 ## What's deferred to a future POC
 
-- **`sync`, `time`, `context`** — not in the vendored subset. Module
-  6 (Concurrency) and Module 7 (Idioms) will need these. Adding each
-  is one `cp` from the upstream yaegi stdlib into
-  `runtime/yaegi-wasm/symbols/` plus a rebuild. Expect each to add
-  ~50-500 KB to the raw WASM.
+- **`sync`, `time`, `context`** — *landed 2026-05-21.* All three
+  vendored from `yaegi v0.16.1/stdlib/go1_22_*.go` into
+  `runtime/yaegi-wasm/symbols/`, package clause rewritten
+  `stdlib` → `symbols`. WASM raw size held at 10 MB. Verified
+  via probe matrix: `sync.{WaitGroup,Mutex,Once,RWMutex,Map}`,
+  `time.{After,Now,Millisecond,Second,Duration}`,
+  `context.{Background,WithCancel,WithTimeout,Done,Err}` all
+  import + use cleanly. Unlocks every Module 6 concurrency theme
+  and Theme 7.3 (`idioms/context`) — those modules now ship.
+  See design-docs/30 for the full upstream-tracker record.
 - **Server fallback hosting** — Vercel Function vs Cloudflare Worker
   vs a small VPS, sandboxing strategy (firejail / nsjail), timeouts.
   Open in 99-open-questions.md.

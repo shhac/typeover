@@ -1,16 +1,24 @@
 # 01 — Vision
 
+**Status as of 2026-05-25.** The original "Go-only v0" framing has
+been superseded by reality. typeover now ships **three** first-class
+language tracks: Go, Zig, and Rust. The "future targets" hedge below
+is retained as the historical why-we-built-it-this-way — the schema
+flex it bought us is what made adding Zig (design-docs/31) and Rust
+(design-docs/32 + 10c) cheap.
+
 ## What
 
 **typeover** teaches a *target language* to developers who already know
-TypeScript. The first (and currently only) target is **Go**.
+TypeScript. The first target was Go; Zig and Rust have since landed
+on the same footing. The architectural shape stays target-agnostic —
+URL structure (`/[lang]/...`), exercise schemas (`target` field),
+runtime hook (`useRuntimeRun`), and DS tokens (`accent-go`,
+`accent-zig`, `accent-rust`) all generalise per design-docs/31.
 
 The name and the platform are deliberately language-agnostic. Future
-targets are possible — Rust, Zig, Python, Elixir — once the Go pipeline
-is mature and the model is proven. For v0, "typeover" means "TS to Go"
-and nothing more, but exercise schemas, URL structure, and any
-per-target chrome are named so a second target slots in without a
-rewrite.
+targets beyond the current three — Python, Elixir, etc. — are
+possible without a rewrite; the multi-language plumbing is in place.
 
 Most Go-learning resources assume zero prior programming knowledge or assume a
 C/Java background. There's a large and growing audience that comes from the
@@ -51,19 +59,20 @@ The target learner:
 - Progress tracked locally first; cloud accounts only if there's demand.
 - Open-source content, so the community can extend it.
 
-## Scope (Go target)
+## Scope (per target)
 
-For the Go target, typeover aims to be a **full Go intro**, with
+For each target, typeover aims to be a **full intro**, with
 TS-translation as the pedagogical wedge — not just a phrasebook. The
-bilingual core gets you through everything that has a TS analogue
-(types, structs, generics, interfaces, error returns). Once that
-scaffold is paying off, the course continues into the parts of Go that
-*don't* translate from TS (goroutines, channels, defer, embedding,
-project layout, stdlib idioms) as straight Go content, no longer leaning
-on the translation crutch.
+bilingual core covers everything that has a TS analogue (types,
+generics, control flow, errors-as-values). Once that scaffold is
+paying off, the course continues into the parts of the target that
+*don't* translate from TS (goroutines/channels for Go; allocators +
+comptime for Zig; ownership + lifetimes for Rust) as straight target
+content, no longer leaning on the translation crutch.
 
-This same shape — "bilingual core, then native-only content" — is the
-intended template for any future target.
+The "bilingual core, then native-only content" template is shared
+across all three current tracks and is the intended template for any
+future target.
 
 The audience deliberately isn't split into "backend devs" vs "frontend
 devs picking up Go for tooling." The bilingual core serves both; if

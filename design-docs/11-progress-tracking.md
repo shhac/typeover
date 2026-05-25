@@ -1,5 +1,13 @@
 # 11 — Progress tracking
 
+**Status as of 2026-05-25.** Progress IDs are lang-prefixed
+(`go/foundations/variables/01`, `zig/basics/hello-and-output/03`,
+`rust/foundations/variables/05`). The legacy un-prefixed IDs from
+the Go-only era are migrated on first read per design-docs/31 D5
+(rewriter in `progress.ts`). Zod-validated blob + corrupt-blob
+backup are shipped (task #37). Same-tab progress events fire to
+keep the chip islands in sync (design-docs/19 F-20).
+
 ## Posture
 
 typeover tracks learner progress **locally** (no accounts in v0), at a

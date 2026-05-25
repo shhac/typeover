@@ -1,5 +1,30 @@
 # 12 — Test plan
 
+**Status as of 2026-05-25.** Vitest is wired and the test base has
+grown to **1013 tests across 74 files**, well past the original
+launch-gate target. New coverage since the 345-test snapshot below:
+zig-compile, zig-assets, fetch-asset, compile-fetch, wasi-run,
+client-descriptors, the SmokeProbe path (renamed from YaegiSmoke),
+the full exercise-dispatch skip matrix, the content-schema
+refinement matrix (every cross-field guard), progress-migrations
+(legacy-ID rewriter rejection cases), fill-line-attempts
+empty-target guard, CodeHighlight grammar dispatch + 16-case
+regression suite, code-completions, codemirror-{lang,theme}, the
+Rust compile-service stack (`hash`, `normalize/{index,rust}`,
+`sw-handler`, `validate-rust-source`, `transports/sandbox`,
+`/api/compile/rust`), service-worker registration + should-handle
+predicates, grading-invariants, `freeform-shape`, `try-share`,
+`use-auto-submit-on-correct`, `use-run-result-focus`, BaseLayout
+bootstrap, prebake-compile-cache, content-report, sitemap-shape.
+
+The original target checklist below is preserved as the
+"what contract does each test pin" reference — every item below
+is shipped. The list is no longer exhaustive of the suite — items
+landed after the original spec aren't enumerated here, only in the
+status update above.
+
+---
+
 This is the **target test checklist** for when the Vitest setup task (#36)
 lands. It's organised by critical path so each test has a clear "what
 contract am I pinning?" framing. Not all of it has to land at once —
@@ -9,7 +34,7 @@ Compiled from the iteration-2 code-structure review's test-coverage lens
 findings (2026-05-17). Each item is paired with a one-line "what breaks
 if this regresses" so future-us remembers why the test exists.
 
-**Status (2026-05-19):** Vitest is wired (`pnpm test`). **345 tests
+**Earlier status (2026-05-19):** Vitest is wired (`pnpm test`). **345 tests
 live across 29 files** covering: P0 seed determinism, P0 generator
 parsing + `generate()` golden cases, all three cellState truth
 tables, P1 progress-storage invariants (SSR / malformed /

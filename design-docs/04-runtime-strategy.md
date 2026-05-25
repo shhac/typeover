@@ -1,12 +1,20 @@
 # 04 — Runtime strategy
 
-**Status:** shipped. The Yaegi-WASM-in-Worker primary path is live —
-vendored stdlib subset, ~11 MB raw / 1.9 MB brotli, drives every
-freeform + fill-line exercise in Module 1. The POC matrix outcome
-lives in [04a-runtime-matrix.md](04a-runtime-matrix.md). The
-server-compile fallback is still parked (Modules 6-7 only); see
-[99-open-questions.md](99-open-questions.md) for the proposed
-deployable shape.
+**Status as of 2026-05-25.** The Yaegi-WASM-in-Worker primary path
+drives every Go freeform + fill-line exercise across all 7 modules.
+The vendored stdlib has grown beyond the launch subset — `sync`,
+`time`, and `context` were added 2026-05-21, unlocking Module 6
+(Concurrency) and Module 7.3 (idioms/context). The matrix outcome
+lives in [04a-runtime-matrix.md](04a-runtime-matrix.md); the
+ongoing gap tracker lives in [30](30-yaegi-upstream-tracker-2026-05-21.md).
+The server-compile pipeline is no longer parked — it shipped 2026-05-24
+for the Rust track and is the only path that uses `runtime: "server"`
+today; see [32](32-compile-service-architecture-2026-05-24.md) for the
+language-agnostic shape and Rust-specific implementation. Go's hard-edge
+exercises (`defer` arg-capture semantics, generic-stdlib funcs) still
+use Yaegi-friendly workarounds (`alternateCanonicals`, MCQ-instead-of-fill-line
+for unfixable cases) rather than routing to the server — see
+design-docs/30 for the per-gap workarounds in shipped content.
 
 ## The question
 
@@ -73,20 +81,27 @@ picks the right runtime.
 
 ## Fallback: server compile
 
-When an exercise's `runtime` is `"server"`, the worker is bypassed and the
-code is `POST`ed to a serverless endpoint (Vercel function) that:
+**Shipped 2026-05-24 — for Rust, not Go.** When an exercise's
+`runtime` is `"server"`, the worker is bypassed and the code routes
+through the language-agnostic compile-service pipeline documented in
+[32](32-compile-service-architecture-2026-05-24.md). The pipeline:
 
-1. Writes the code to a tempdir.
-2. Compiles + runs it with `go run`, with timeout and resource limits.
-3. Captures stdout/stderr/exit code, returns them.
+1. Service-worker intercept hashes a normalized source.
+2. L1 (static CDN) → L2 (Vercel Blob, deferred today) → L3 (Vercel
+   Sandbox, Firecracker microVM).
+3. Function returns wasm bytes; browser instantiates via
+   `bjorn3/browser_wasi_shim` and captures stdout/stderr.
 
-This is slow (~500ms) compared to Yaegi (~10ms), but it's only for the
-~10% of exercises that need it, and it covers 100% of valid Go.
-
-**Sandboxing the server path:** `firejail` or a small Docker container with
-no network, read-only FS except `/tmp`, ulimit on CPU and memory. The
-official Go Playground's sandbox is over-engineered for our needs; a
-minimal `nsjail` config is enough.
+For Go specifically, the server fallback is **available but unused
+in shipped content** — every Go exercise we ship today runs cleanly
+on Yaegi (with `alternateCanonicals` covering the
+`slices.Sort` / range-over-int / loop-var-1.22 gaps from
+design-docs/30). If a future Go exercise genuinely cannot avoid a
+Yaegi gap, the path to wire it through the same compile-service is
+one `LANGUAGE_REGISTRY` entry + `/api/compile/go.ts` route + a Docker
+or Sandbox transport that runs `go build -target wasm32-wasip1`. The
+heavy lifting (SW cache, L1/L2/L3 cascade, source normaliser, hash
+function, registration) is already in place.
 
 ## Not chosen: full gc in WASM
 

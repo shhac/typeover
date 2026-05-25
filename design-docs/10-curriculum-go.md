@@ -1,8 +1,17 @@
 # 10 — Curriculum (Go target)
 
+**Status as of 2026-05-25.** Pass 3 (per-theme exercise authoring)
+is **complete**. All 7 modules × ~31 themes are shipped at ~288
+exercises total — the launch-gate "Module 1 only" framing has been
+superseded by far. The original Pass-1 / Pass-2 record below stays
+because the *ordering rationale* is still load-bearing for anyone
+adding a future theme. Module-1 launch-gate framing remains the
+yardstick for what "polished" means; every later module was held to
+the same bar.
+
 This is the curriculum tree. Pass 1 established modules, Pass 2 drills
-each module into themes with prerequisite chains, Pass 3+ will break
-themes into exercise-level content (9 slots per theme by default).
+each module into themes with prerequisite chains, Pass 3 broke themes
+into 9-10 exercise slots each.
 
 ## Ordering principle
 
@@ -141,11 +150,12 @@ this clicks, everything from Module 4 onward falls into place.
 
 Total: **7 modules, 31 themes**. At 9 exercises per theme (default
 slot allocation), that's ~280 exercises end-to-end — a theme may
-ship 10 when a slot is genuinely warranted (Foundations shipped
-that way for 4 of 6 themes). Launch gate is Module 1 only: 6 themes,
-58 exercises shipped.
+ship 10 when a slot is genuinely warranted. **Shipped 2026-05-25:
+all 7 modules, ~288 exercises end-to-end.** Module 1 (Foundations)
+opened the gate; Modules 2-7 followed and were held to the same
+quality bar.
 
-## What Pass 3 looks like (still pending)
+## What Pass 3 looks like (shipped)
 
 For each theme, break into the 9-slot exercise progression with
 concrete TS↔Go content per slot, hints, and notes. Example for
@@ -183,6 +193,9 @@ guess." A full per-theme audit for "new shape introduced inside
 fill-line/freeform without prior MCQ" remains part of Module 1's
 pre-launch QA and is applied to every Module 2+ theme as it lands.
 
-Pass 3 is per-theme work; doesn't have to land all at once. Each theme's
-Pass 3 lives in `design-docs/lessons/<module>/<theme>.md` (planned —
-not yet a directory).
+Pass 3 was per-theme work; landed across many authoring sessions
+over April-May 2026. Per-theme rationale and Yaegi workarounds are
+tracked in design-docs/23-29 (proposer-cycle docs covering the
+Module-2+ pushes) and design-docs/30 (the Yaegi upstream tracker
+documenting which exercises ship `alternateCanonicals` because of
+a Yaegi gap).

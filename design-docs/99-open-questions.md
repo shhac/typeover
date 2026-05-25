@@ -1,5 +1,13 @@
 # 99 — Open questions
 
+**Status as of 2026-05-25.** Many of the "future-proofing for
+multi-target" notes and the runtime open questions are now closed —
+typeover ships three tracks (Go, Zig, Rust), the server-fallback
+runtime exists (as the Rust compile-service per design-docs/32),
+sync/time/context are vendored into Yaegi, and the Go curriculum is
+content-complete. Captured items below stay as the historical
+record; the ones marked still-relevant carry forward.
+
 Captured here so they don't sit only in conversation history.
 
 ## Resolved
@@ -58,19 +66,28 @@ Captured here so they don't sit only in conversation history.
 
 ## Still open
 
-- **Stdlib coverage.** Which stdlib packages do we drill on (`net/http`,
-  `encoding/json`, `context`)? Which do we skip (`cgo`, `reflect`)?
-- **Pass 2 curriculum.** Themes per module + prerequisite chain.
-- **Pass 3+ curriculum.** Exercise-level breakdowns.
-- **Server-fallback runtime hosting** for hard exercises that Yaegi
-  can't handle (Vercel function vs always-on container).
-- **Module 3 weighting.** Currently bundles 6 themes — may split into
-  "Types & methods" + "Interfaces & generics."
-- **Generics positioning.** Should they jump earlier given TS-dev
-  familiarity?
+- **Stdlib coverage edges.** `context` is vendored (2026-05-21);
+  `net/http` and `encoding/json` remain out of scope per design-docs/10's
+  "explicitly not in v0" list. Revisit if a theme genuinely needs them.
 - **Logo / wordmark** — currently just the wordmark in mono.
-- **Domain claim timing** — `typeover.dev / .io / .app / .co` all free;
-  grab before public launch.
+- **Domain claim status** — `typeover.dev` is claimed (primary deploy).
+  `typeover.paulie.app` is the alias. `.io / .app / .co` remain
+  unclaimed; pickup if/when public marketing begins.
+
+## Closed since last edit
+
+- ~~**Pass 2 curriculum**~~ — landed; design-docs/10 captures it.
+- ~~**Pass 3+ curriculum**~~ — all 7 Go modules authored; Zig
+  Modules 1-4 authored; Rust Module 1 partially authored under an
+  autonomous loop. See 10 / 10b / 10c.
+- ~~**Server-fallback runtime hosting**~~ — shipped as the Rust
+  compile-service in design-docs/32 (Vercel Sandbox + L1 CDN + SW
+  cache). The Go-specific fallback was never needed; design-docs/30
+  covers the Yaegi workarounds in shipped content.
+- ~~**Module 3 weighting**~~ — split into Types & methods (3.x) +
+  Interfaces & generics (4.x) per design-docs/10.
+- ~~**Generics positioning**~~ — kept after interfaces (4.2 after
+  4.1), per design-docs/10.
 
 ## Engineering follow-ups (preventive)
 
@@ -406,8 +423,9 @@ a should-definitely-do that was parked because the immediate iteration
 was already big enough.
 
 - **Add Vitest + critical-path unit tests.** *(Landed.)* Vitest +
-  `@solidjs/testing-library` + jsdom wired (`pnpm test`). 463 tests
-  across 36 files cover the listed surfaces and more: seed PRNG,
+  `@solidjs/testing-library` + jsdom wired (`pnpm test`).
+  **1013 tests across 74 files** as of 2026-05-25, covering the
+  listed surfaces and far more: seed PRNG,
   `generate()` + dedup + `substitute`, `bumpExercise` lifecycle +
   corrupt-blob recovery, `optionCellState` truth table, Mcq /
   FillBlankWord / FillBlankLineInput / Freeform happy + wrong +
@@ -453,44 +471,56 @@ was already big enough.
 ## Unvalidated assumptions
 
 - CodeMirror 6 on mobile touch keyboards works well enough for freeform
-  code editing.
-- Yaegi handles 80%+ of intended Module 1–4 exercises.
+  code editing. *(Shipped 2026; real-device QA pass still pending the
+  launch checklist.)*
+- Yaegi handles 80%+ of intended Go exercises. *(Validated end-to-end:
+  every Go canonical runs through `pnpm runtime:verify`; the gaps from
+  design-docs/30 ship `alternateCanonicals` rather than route to the
+  server.)*
 - TS blue and Go cyan have enough contrast against `bg-base` for WCAG
-  AA at ≥14px.
+  AA at ≥14px. *(Validated; Rust tan + Zig orange added with same
+  contrast check.)*
 - 9-exercise theme template is right for most themes; outliers can
-  deviate.
+  deviate. *(Validated — themes range 9-11 slots in practice.)*
 - Burst-mode maintenance with constant quality bar is sustainable.
+  *(Validated through the full Go curriculum + 4 Zig modules.)*
 - Current design system can be retuned toward airy without rewriting.
+  *(Validated.)*
 
-## Architecture (future-proofing for multi-target)
+## Architecture (multi-target)
 
-typeover is positioned as a TS→X bridge where X starts as Go but may
-later include Rust, Zig, Python, etc. (Decided 2026-05-18.) Implications
-for v0 that we should bake in cheaply:
+**Shipped 2026-05-22 onwards.** Originally a future-proofing list,
+all four points landed:
 
-- **Exercise schema:** `target: "go"` field on every exercise, not
-  implicit. URL structure `/<target>/<module>/<lesson>` (initially just
-  `/go/...`).
-- **Design tokens:** the `accent-go` colour is fine to stay hardcoded
-  while Go is the only target. When a second target arrives we
-  generalise to `accent-target` with per-target overrides.
-- **Runtime:** Yaegi is Go-specific; that's correct. The worker
-  abstraction (`runtime/<target>/worker.ts`) is where target swap-out
-  will happen if/when a second language joins.
-- **Content collections:** `src/content/lessons/<target>/...` rather
-  than `src/content/lessons/...` flat.
+- **Exercise schema:** `target: "go" | "zig" | "rust"` on every
+  exercise. URL structure is `/[lang]/[module]/[theme]/[NN]`.
+- **Design tokens:** `--color-accent-go` / `--color-accent-zig` /
+  `--color-accent-rust` all defined. The shared `LANG_ACCENT_CLASS`
+  lookup table prevents per-primitive drift (Heading + Eyebrow were
+  missing zig/rust rows before that extraction).
+- **Runtime:** Yaegi (Go), self-hosted zig.wasm (Zig), and
+  server-compile-then-client-execute (Rust). The shared
+  `useRuntimeRun` hook dispatches via a `RUNTIME_ACCESSORS` record.
+- **Content collections:**
+  `src/content/{modules,themes,exercises}/<lang>/...`.
 
-None of this is built yet — just keeping the room for it.
+Captured for posterity in design-docs/31 (the one-time architectural
+reshape) and design-docs/32 (the language-agnostic compile service).
 
 ## Runtime
 
-- **Yaegi POC results.** Until we run the 20-snippet matrix (see
-  04-runtime-strategy.md), we don't know how often we'll fall back to the
-  server path. Decide after.
-- **Server fallback hosting.** Vercel function (cold-start cost) vs a tiny
-  always-on VPS vs Fly.io? Decision depends on traffic shape.
-- **Grading depth.** Start with gofmt-normalised string compare. When
-  does it become worth doing AST equivalence or running hidden tests?
+- ~~**Yaegi POC results.**~~ Shipped + matrix in design-docs/04a.
+  90% pass rate; Yaegi is the primary Go runtime.
+- ~~**Server fallback hosting.**~~ Shipped 2026-05-24 as the Rust
+  compile-service (Vercel Sandbox + Firecracker microVMs) per
+  design-docs/32. Go content doesn't need it today; design-docs/30
+  tracks the workarounds used instead.
+- **Grading depth.** Today we use stdout-equality grading (with
+  whitespace normalisation) for freeform + fill-line; string-match
+  for fill-word; ID-match for MCQ. AST equivalence has not been
+  needed; revisit if a theme genuinely teaches a concept where
+  multiple stdout-equivalent solutions deserve fine-grained
+  feedback.
 
 ## Design
 
@@ -513,6 +543,7 @@ None of this is built yet — just keeping the room for it.
 
 ## Brand
 
-- **Name.** typeover available (`.dev`, `.io`, `.app`, GitHub org, scoped
-  npm). `.com` taken (parked). Snapshot, don't sit on these.
-- **Logo.** None yet. Wordmark in mono should carry v0; commission later.
+- **Name.** `typeover.dev` is claimed and serves as the primary
+  deploy; `typeover.paulie.app` is the alias. `.io / .app / .co`
+  remain unclaimed; grab if/when public marketing begins.
+- **Logo.** None yet. Wordmark in mono carries v0; commission later.

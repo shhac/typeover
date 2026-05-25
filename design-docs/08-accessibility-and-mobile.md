@@ -86,11 +86,12 @@ Every component in `src/components/ds/` ships with:
 
 This is the hardest mobile UX:
 
-- **Current editor surface:** Freeform exercises ship today with a
-  plain `<textarea>` driving `useYaegiRun`. CodeMirror 6 integration
-  is task #23 — planned but not blocking launch. The mobile
-  affordances below apply to the textarea surface today and will
-  apply to CodeMirror when it lands.
+- **Current editor surface:** Freeform + fill-line exercises drive
+  CodeMirror 6 surfaces (`CodeMirrorEditor` / `CodeMirrorFillBlanks`)
+  with language grammars dynamic-imported per `target`. The original
+  textarea path is retained only as the SSR placeholder before
+  hydration. The mobile affordances below apply to the CodeMirror
+  surface.
 - **Software keyboard quirks:** iOS Safari shrinks the viewport when
   the keyboard appears. The editor must reflow correctly.
 - **Code-friendly virtual keyboard.** We don't fully solve this (no
