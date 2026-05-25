@@ -24,6 +24,7 @@ import Accordion from "~/components/ds/Accordion.astro";
 import TrackCard from "~/components/ds/TrackCard.astro";
 import Breadcrumb from "~/components/curriculum/Breadcrumb.astro";
 import ThemeCard from "~/components/curriculum/ThemeCard.astro";
+import { HomepageDrill } from "~/components/home/HomepageDrill";
 import { getCollection } from "astro:content";
 
 /* Pull one real foundations theme + its first exercise for the
@@ -71,21 +72,33 @@ const sampleExerciseIds = sampleTheme
         <Stack gap="sm">
           <Heading level={1}>Design system</Heading>
           <Text tone="secondary" size="lg">
-            Inventory of typeover's design-system primitives. Compose
-            them — every page on the site is built from this list.
+            Product recipes first, primitive inventory second. The recipes
+            define the typeover feel; the primitives keep implementation tidy.
           </Text>
         </Stack>
 
         <Divider />
 
-        {/* Example of <Compare> + filename labels — the killer
-          * move for the TS → Go translation pattern. */}
-        <Stack gap="sm">
-          <Eyebrow>compare — side by side</Eyebrow>
-          <Compare
-            caption="<Compare> renders a <figure> + <figcaption> wrapping <Adaptive>. Side-by-side at ≥1024px, stacked below. Used wherever TS↔Go translation is the point."
-          >
-            <CodeBlock lang="ts" filename="users.ts">{`type User = {
+        <Stack gap="lg">
+          <Stack gap="xs">
+            <Heading level={2} size="2xl">Product recipes</Heading>
+            <Text tone="muted" size="sm">
+              Opinionated typeover surfaces. Start here when changing the
+              feel of the site; primitives below are implementation parts.
+            </Text>
+          </Stack>
+
+          <Stack gap="sm">
+            <Heading level={3} size="xl">Homepage translation drill</Heading>
+            <HomepageDrill client:visible />
+          </Stack>
+
+          <Stack gap="sm">
+            <Heading level={3} size="xl">Translation lane</Heading>
+            <Compare
+              caption="<Compare> renders a source-to-target lane: stacked on mobile, joined by an arrow gutter on desktop. Used wherever TS-to-target translation is the point."
+            >
+              <CodeBlock lang="ts" filename="users.ts">{`type User = {
   id: string;
   name: string;
 };
@@ -93,21 +106,59 @@ const sampleExerciseIds = sampleTheme
 function greet(u: User) {
   return \`hi \${u.name}\`;
 }`}</CodeBlock>
-            <CodeBlock lang="go" filename="users.go">{`type User struct {
+              <CodeBlock lang="go" filename="users.go">{`type User struct {
     ID   string
     Name string
 }
 
 func greet(u User) string {
     return "hi " + u.Name
-}`}</CodeBlock>
-          </Compare>
+  }`}</CodeBlock>
+            </Compare>
+          </Stack>
+
+          <Stack gap="sm">
+            <Heading level={3} size="xl">Exercise workbench</Heading>
+            <section class="border border-border-default rounded-sm overflow-hidden bg-bg-panel">
+              <div class="px-4 sm:px-6 py-3 bg-bg-base/90 border-b border-border-default">
+                <Text tone="secondary" size="sm" family="mono">
+                  Inside a function, which target-language translation keeps the same intent?
+                </Text>
+              </div>
+              <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] border-b border-border-default">
+                <div class="p-4 sm:p-6 lg:border-r lg:border-border-default">
+                  <Text tone="muted" size="xs" family="mono" class="mb-3">
+                    TypeScript reference
+                  </Text>
+                  <CodeBlock lang="ts" filename="reference.ts">{`let total = items.length;
+console.log(total);`}</CodeBlock>
+                </div>
+                <div class="p-4 sm:p-6 bg-bg-base/30">
+                  <Text tone="muted" size="xs" family="mono" class="mb-3">
+                    Your move
+                  </Text>
+                  <CodeBlock lang="go" filename="answer.go">{`total := len(items)
+fmt.Println(total)`}</CodeBlock>
+                </div>
+              </div>
+              <div class="p-4 sm:p-6 flex flex-row flex-wrap gap-3">
+                <Button variant="primary">Submit</Button>
+                <Button variant="ghost">Hint</Button>
+                <Button variant="ghost">Show canonical</Button>
+              </div>
+            </section>
+          </Stack>
         </Stack>
 
         <Divider />
 
         <Stack gap="md">
-          <Eyebrow>primitives</Eyebrow>
+          <Stack gap="xs">
+            <Heading level={2} size="2xl">Primitive inventory</Heading>
+            <Text tone="muted" size="sm">
+              Raw DS parts for lower-level maintenance and visual regression checks.
+            </Text>
+          </Stack>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
             <Stack gap="xs">
               <Eyebrow tone="primary">buttons</Eyebrow>
