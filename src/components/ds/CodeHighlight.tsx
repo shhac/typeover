@@ -2,6 +2,7 @@ import type { JSX } from "solid-js";
 import { For } from "solid-js";
 import { goLanguage } from "@codemirror/lang-go";
 import { typescriptLanguage } from "@codemirror/lang-javascript";
+import { rustLanguage } from "@codemirror/lang-rust";
 import { highlightTree, tagHighlighter, tags } from "@lezer/highlight";
 import { zigLanguage } from "@ndim/codemirror-lang-zig";
 
@@ -35,6 +36,7 @@ function parserFor(lang: Lang) {
   if (lang === "go") return goLanguage.parser;
   if (lang === "ts") return typescriptLanguage.parser;
   if (lang === "zig") return zigLanguage.parser;
+  if (lang === "rust") return rustLanguage.parser;
   return null;
 }
 
