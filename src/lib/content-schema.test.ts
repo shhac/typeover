@@ -21,6 +21,7 @@ const tplGen = (
     ts: string;
     canonical: string;
     distractors: string[];
+    source: string;
   }> = {},
 ) => ({
   kind: "template" as const,
@@ -31,7 +32,7 @@ const tplGen = (
 });
 
 const variantGen = (
-  variants: Array<{ id: string; ts: string; canonical: string; distractors?: string[] }>,
+  variants: Array<{ id: string; ts: string; canonical: string; distractors?: string[]; source?: string }>,
 ) => ({
   kind: "variant" as const,
   variants,
@@ -539,5 +540,54 @@ describe("exerciseSchema — submissionShape scope", () => {
       }),
     );
     expect(r.success).toBe(true);
+  });
+});
+
+describe("validateSourceScope", () => {
+  it("accepts source on mcq-explain with a template generator", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq-explain",
+        generator: tplGen({ distractors: ["${x}+1"], source: "let x = 1;" }),
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects source on mcq with a template generator", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        generator: tplGen({ distractors: ["${x}+1"], source: "let x = 1;" }),
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("generator.source");
+  });
+
+  it("accepts source on mcq-explain with a variant generator", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq-explain",
+        generator: variantGen([
+          { id: "a", ts: "1", canonical: "1", distractors: ["2"], source: "let a = 1;" },
+        ]),
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects source on fill-word with a variant generator", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "fill-word",
+        blanks: ["x"],
+        generator: variantGen([
+          { id: "a", ts: "1", canonical: "1", source: "let a = 1;" },
+        ]),
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("generator.source");
   });
 });

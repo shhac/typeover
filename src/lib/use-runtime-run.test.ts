@@ -57,7 +57,7 @@ vi.mock("~/runtime", () => ({
   terminateRustRunner: rustTerminateMock,
 }));
 
-import { useRuntimeRun } from "./use-runtime-run";
+import { stdoutMatches, useRuntimeRun, type RunResult } from "./use-runtime-run";
 
 beforeEach(() => {
   evalMock.mockReset();
@@ -545,5 +545,69 @@ describe("useRuntimeRun — precheck hook", () => {
     await h.run();
     expect(evalMock).toHaveBeenCalledTimes(1);
     expect(h.runResult()?.stdout).toBe("ok");
+  });
+});
+
+describe("useRuntimeRun — syntheticRun", () => {
+  function setupWithSyntheticRun(
+    syntheticRun: () => RunResult | null,
+  ): ReturnType<typeof useRuntimeRun> {
+    let handle!: ReturnType<typeof useRuntimeRun>;
+    createRoot((dispose) => {
+      handle = useRuntimeRun({
+        runtime: "yaegi",
+        buildProgram: () => "package main\nfunc main(){}",
+        syntheticRun,
+      });
+      disposers.push(dispose);
+    });
+    return handle;
+  }
+
+  it("sets runResult to the synthetic value and skips eval when syntheticRun returns non-null", async () => {
+    const synthetic: RunResult = {
+      stdout: "",
+      stderr: "",
+      error: "expected error from known attempt",
+      durationMs: 0,
+    };
+    const h = setupWithSyntheticRun(() => synthetic);
+    await h.run();
+    expect(h.runResult()).toBe(synthetic);
+    expect(evalMock).not.toHaveBeenCalled();
+  });
+
+  it("proceeds to the normal eval path when syntheticRun returns null", async () => {
+    evalMock.mockResolvedValueOnce({ stdout: "real", stderr: "", error: "" });
+    const h = setupWithSyntheticRun(() => null);
+    await h.run();
+    expect(evalMock).toHaveBeenCalledTimes(1);
+    expect(h.runResult()?.stdout).toBe("real");
+  });
+});
+
+describe("stdoutMatches", () => {
+  it("returns false for a null result", () => {
+    expect(stdoutMatches(null, "hello\n")).toBe(false);
+  });
+
+  it("returns false when error is non-empty even if stdout matches", () => {
+    const result = { stdout: "hello\n", stderr: "", error: "oops", durationMs: 1 };
+    expect(stdoutMatches(result, "hello\n")).toBe(false);
+  });
+
+  it("returns false when stdout does not match", () => {
+    const result = { stdout: "wrong\n", stderr: "", error: "", durationMs: 1 };
+    expect(stdoutMatches(result, "hello\n")).toBe(false);
+  });
+
+  it("returns true when stdout matches and error is empty", () => {
+    const result = { stdout: "hello\n", stderr: "", error: "", durationMs: 1 };
+    expect(stdoutMatches(result, "hello\n")).toBe(true);
+  });
+
+  it("returns true for empty expectStdout with empty stdout and no error", () => {
+    const result = { stdout: "", stderr: "", error: "", durationMs: 0 };
+    expect(stdoutMatches(result, "")).toBe(true);
   });
 });

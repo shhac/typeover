@@ -185,6 +185,26 @@ describe("progress storage — corrupt-blob backup", () => {
     expect(main).not.toContain("not json");
     expect(JSON.parse(main!).version).toBe(1);
   });
+
+  it("writes the backup key BEFORE resetting the main key (ordering guarantee)", () => {
+    /* handleCorruptProgress must persist the backup before
+     * overwriting the main key. If the write order were reversed,
+     * a crash between the two setItem calls would lose the corrupt
+     * blob with no backup. Pin the ordering via a setItem spy. */
+    const spy = vi.spyOn(localStorage, "setItem");
+    localStorage.setItem(STORAGE_KEY, "{not json");
+    spy.mockClear();
+
+    getExerciseProgress("ex-1");
+
+    const calls = spy.mock.calls.map(([key]) => key as string);
+    const backupIdx = calls.findIndex((k) => k.startsWith("typeover:progress:corrupt-"));
+    const mainIdx = calls.findIndex((k) => k === STORAGE_KEY);
+    expect(backupIdx).toBeGreaterThanOrEqual(0);
+    expect(mainIdx).toBeGreaterThanOrEqual(0);
+    expect(backupIdx).toBeLessThan(mainIdx);
+    spy.mockRestore();
+  });
 });
 
 describe("progress storage — recorder semantics", () => {
