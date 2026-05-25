@@ -164,8 +164,10 @@ function BlankInputCodeMirror(props: BlankInputProps, state: () => InputState) {
     initialDoc: props.value,
     value: () => props.value,
     editable: () => !props.locked,
-    buildExtensions: (editableCompartment) => [
-      cmLanguageExtension(props.language ?? "go"),
+    language: { accessor: () => props.language ?? "go", loadExtension: cmLanguageExtension },
+    buildExtensions: ({ editableCompartment, languageCompartment }) => [
+      /* Grammar lands later via the `language` config above. */
+      languageCompartment.of([]),
       singleLineFilter,
       history(),
       closeBrackets(),

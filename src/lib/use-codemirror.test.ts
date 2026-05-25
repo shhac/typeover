@@ -209,7 +209,9 @@ describe("useCodeMirror editable compartment toggle (E5)", () => {
         parent: () => parent,
         initialDoc: "ab",
         editable,
-        buildExtensions: (compartment) => [compartment.of(EditorView.editable.of(editable()))],
+        buildExtensions: ({ editableCompartment }) => [
+          editableCompartment.of(EditorView.editable.of(editable())),
+        ],
       });
       return d;
     });

@@ -149,13 +149,16 @@ export function summariseCoverage(tree: readonly ModuleNode[]): CoverageSummary 
 }
 
 /* ======================= Re-exports (sibling modules) ================
- * Navigation helpers split across two files:
- *   - `./curriculum-paths` — pure URL builders + id parsers, no
- *     `CollectionEntry` dep, importable from anywhere.
- *   - `./curriculum-nav` — context loads + adjacency walks that
- *     depend on Astro's `CollectionEntry` types.
- * Both are re-exported here so existing `~/lib/curriculum` imports
- * stay stable. New code can import from the leaner module directly. */
+ * URL builders + id parsers live in `./curriculum-paths` — they have
+ * no `CollectionEntry` dep and are safe to re-export from here.
+ *
+ * Navigation helpers (context loads + adjacency walks) live in
+ * `./curriculum-nav` and are NOT re-exported through this module.
+ * Re-exporting them created a cycle (`curriculum-nav` imports
+ * `byOrder` from here, this file re-exported nav functions back) —
+ * Vite warned that the split chunks would have a circular dependency
+ * with non-deterministic execution order. Consumers import directly
+ * from `~/lib/curriculum-nav` instead. */
 export {
   exerciseHref,
   langHref,
@@ -166,20 +169,6 @@ export {
   paramsForTheme,
   themeHref,
 } from "./curriculum-paths";
-
-export {
-  findAdjacentExercises,
-  firstExerciseOfNextTheme,
-  lastExerciseInModule,
-  lastExerciseOfPreviousTheme,
-  loadExerciseContext,
-  loadThemeContext,
-} from "./curriculum-nav";
-
-/* `ExerciseContext` / `ThemeContext` types are still exported by
- * `curriculum-nav.ts` itself; the umbrella re-export is dropped
- * because no caller imports the type through this barrel today.
- * Direct consumers should import from `~/lib/curriculum-nav`. */
 
 /* loadLangCollections + LangCollections aren't re-exported here
  * because their `getCollection` runtime import from `astro:content`

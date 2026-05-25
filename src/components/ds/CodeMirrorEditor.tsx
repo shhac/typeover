@@ -215,6 +215,7 @@ function buildCodeMirrorExtensions(
   lang: CmLanguage,
   readOnly: boolean,
   editableCompartment: Compartment,
+  languageCompartment: Compartment,
 ): Extension[] {
   const completionLang = toCompletionLanguage(lang);
   const completion: Extension[] =
@@ -223,7 +224,11 @@ function buildCodeMirrorExtensions(
       : [];
 
   const baseExtensions: Extension[] = [
-    cmLanguageExtension(lang),
+    /* Language grammar lands here later — `useCodeMirror`'s
+     * `language` config dynamic-imports the per-grammar chunk and
+     * dispatches a `languageCompartment.reconfigure(...)` once it
+     * resolves. Starts empty so the editor mounts immediately. */
+    languageCompartment.of([]),
     EditorView.contentAttributes.of({
       "aria-label": props.ariaLabel ?? ARIA_LABEL_BY_LANG[lang],
       spellcheck: "false",
@@ -289,8 +294,9 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
     /* Toggle editability when `disabled` flips. Only relevant in
      * editor mode (readOnly mode never adds the compartment). */
     editable: readOnly ? undefined : () => !props.disabled,
-    buildExtensions: (editableCompartment) =>
-      buildCodeMirrorExtensions(props, lang, readOnly, editableCompartment),
+    buildExtensions: ({ editableCompartment, languageCompartment }) =>
+      buildCodeMirrorExtensions(props, lang, readOnly, editableCompartment, languageCompartment),
+    language: { accessor: () => lang, loadExtension: cmLanguageExtension },
     onView: (view) => {
       if (readOnly || !props.ref) return;
       props.ref(createEditorHandle(view));

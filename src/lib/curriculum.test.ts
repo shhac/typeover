@@ -4,9 +4,6 @@ import {
   buildCurriculumTree,
   byOrder,
   exerciseHref,
-  findAdjacentExercises,
-  loadExerciseContext,
-  loadThemeContext,
   paramsForExercise,
   paramsForModule,
   paramsForTheme,
@@ -14,6 +11,11 @@ import {
   themeHref,
   truncateIntro,
 } from "./curriculum";
+import {
+  findAdjacentExercises,
+  loadExerciseContext,
+  loadThemeContext,
+} from "./curriculum-nav";
 
 /*
  * Tests for the pure curriculum helpers that power /go and the dynamic

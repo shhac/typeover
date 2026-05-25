@@ -28,7 +28,7 @@ import { EditorView } from "@codemirror/view";
  * shape (textarea, span tree, plain input) is different.
  */
 
-export interface UseCodeMirrorOpts {
+export interface UseCodeMirrorOpts<L extends string = string> {
   /** Accessor for the parent DOM element. Solid refs populate
    *  AFTER the first render, so a function is the safe shape. */
   parent: Accessor<HTMLElement | undefined>;
@@ -36,11 +36,14 @@ export interface UseCodeMirrorOpts {
    *  changes flow through the optional `value` accessor below. */
   initialDoc: string;
   /** Build the full extension list. Called once at mount; the
-   *  `editableCompartment` is supplied so callers can include
-   *  `editableCompartment.of(EditorView.editable.of(...))` in
-   *  the list when they want the hook to toggle editability
-   *  later via the `editable` accessor. */
-  buildExtensions: (editableCompartment: Compartment) => Extension[];
+   *  `editableCompartment` and `languageCompartment` are supplied
+   *  so callers can include them in the list to let the hook
+   *  toggle editability and swap the language grammar later
+   *  without rebuilding the view. */
+  buildExtensions: (compartments: {
+    editableCompartment: Compartment;
+    languageCompartment: Compartment;
+  }) => Extension[];
   /** If provided, the hook syncs incoming `value()` into the
    *  doc whenever it changes — skipping when current === incoming
    *  to avoid cursor-jump loops with the editor's own update
@@ -51,22 +54,36 @@ export interface UseCodeMirrorOpts {
    *  `editableCompartment.of(EditorView.editable.of(initial))` in
    *  the extension list for the toggle to take effect. */
   editable?: Accessor<boolean>;
+  /** If provided, the hook async-loads the language extension via
+   *  `loadExtension(lang)` whenever the language changes and
+   *  reconfigures `languageCompartment`. Caller must include
+   *  `languageCompartment.of([])` in the extension list so the
+   *  view mounts with an empty placeholder; the grammar lands
+   *  via a dispatch once the dynamic import resolves. Lazy-loads
+   *  the per-language grammar so each ships in its own chunk —
+   *  the three grammars together exceed 300 KB minified, so this
+   *  is load-bearing for bundle size. */
+  language?: {
+    accessor: Accessor<L | undefined>;
+    loadExtension: (lang: L) => Promise<Extension>;
+  };
   /** Called once after the view is mounted. Use it to build any
    *  imperative ref handle the caller wants to expose (e.g. focus,
    *  insertAtCursor). */
   onView?: (view: EditorView) => void;
 }
 
-export function useCodeMirror(opts: UseCodeMirrorOpts): void {
+export function useCodeMirror<L extends string = string>(opts: UseCodeMirrorOpts<L>): void {
   let view: EditorView | undefined;
   const editableCompartment = new Compartment();
+  const languageCompartment = new Compartment();
 
   onMount(() => {
     const parent = opts.parent();
     if (!parent) return;
     const state = EditorState.create({
       doc: opts.initialDoc,
-      extensions: opts.buildExtensions(editableCompartment),
+      extensions: opts.buildExtensions({ editableCompartment, languageCompartment }),
     });
     view = new EditorView({ state, parent });
     opts.onView?.(view);
@@ -97,6 +114,27 @@ export function useCodeMirror(opts: UseCodeMirrorOpts): void {
       if (!view) return;
       view.dispatch({
         effects: editableCompartment.reconfigure(EditorView.editable.of(opts.editable!())),
+      });
+    });
+  }
+
+  /* Async-load + reconfigure the language compartment. Each
+   * language grammar is dynamic-imported in `cmLanguageExtension`,
+   * so the editor mounts immediately with an empty placeholder and
+   * the grammar lands once the chunk resolves. Re-fires if the
+   * language accessor's value changes mid-life (rare in this
+   * codebase but supported). The `generation` guard discards a
+   * stale-but-late resolution if the language flipped mid-flight. */
+  if (opts.language) {
+    let generation = 0;
+    createEffect(() => {
+      const lang = opts.language!.accessor();
+      if (lang === undefined) return;
+      const gen = ++generation;
+      void opts.language!.loadExtension(lang).then((ext) => {
+        if (gen !== generation) return; /* stale — language switched mid-flight */
+        if (!view) return;
+        view.dispatch({ effects: languageCompartment.reconfigure(ext) });
       });
     });
   }

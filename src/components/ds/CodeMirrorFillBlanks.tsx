@@ -204,7 +204,7 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
     /* Read-only scaffold: no value-sync, no editable-toggle. The
      * segments are static for a given exercise instance (Reshuffle
      * remounts the component). */
-    buildExtensions: () => {
+    buildExtensions: ({ languageCompartment }) => {
       /* The decoration set is computed once on mount — same
        * reasoning. Re-derivation per state change is unnecessary. */
       const widgets = blankRanges.map((b) =>
@@ -217,7 +217,9 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
       return [
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
-        cmLanguageExtension(lang),
+        /* Grammar dynamic-loaded via useCodeMirror's `language`
+         * config; this slot starts empty so the view mounts now. */
+        languageCompartment.of([]),
         EditorView.decorations.of(decorationSet),
         EditorView.atomicRanges.of(() => decorationSet),
         EditorView.contentAttributes.of({
@@ -232,6 +234,7 @@ export function CodeMirrorFillBlanks(props: CodeMirrorFillBlanksProps): JSX.Elem
         }),
       ];
     },
+    language: { accessor: () => lang, loadExtension: cmLanguageExtension },
   });
 
   return <div ref={parent} />;

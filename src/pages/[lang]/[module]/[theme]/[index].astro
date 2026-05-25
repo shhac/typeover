@@ -16,17 +16,19 @@ import { FillBlankLineInput } from "~/components/exercise/FillBlankLineInput";
 import { Freeform } from "~/components/exercise/Freeform";
 import {
   exerciseHref,
-  findAdjacentExercises,
-  firstExerciseOfNextTheme,
   langHref,
-  lastExerciseInModule,
-  lastExerciseOfPreviousTheme,
-  loadExerciseContext,
   moduleCompleteHref,
   moduleHref,
   paramsForExercise,
   themeHref,
 } from "~/lib/curriculum";
+import {
+  findAdjacentExercises,
+  firstExerciseOfNextTheme,
+  lastExerciseInModule,
+  lastExerciseOfPreviousTheme,
+  loadExerciseContext,
+} from "~/lib/curriculum-nav";
 import { LANG_DISPLAY } from "~/lib/lang";
 import { formatBlock } from "~/lib/format-block";
 import { pickExerciseDispatch } from "~/lib/exercise-dispatch";
