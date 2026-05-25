@@ -27,7 +27,7 @@ export function matchesAcceptedAnswer(
   values: Record<string, string> | undefined,
 ): AcceptedAnswer | null {
   const target = normaliseSubmission(submission);
-  if (target === "") return null;
+  if (target === null) return null;
   for (const answer of acceptedAnswers ?? []) {
     if (normaliseSubmission(renderMatch(answer.match, values)) === target) return answer;
   }
@@ -40,7 +40,7 @@ export function matchKnownAttempt(
   values: Record<string, string> | undefined,
 ): (KnownAttempt & { runResult: RunResult }) | null {
   const target = normaliseSubmission(submission);
-  if (target === "") return null;
+  if (target === null) return null;
   for (const attempt of knownAttempts ?? []) {
     if (normaliseSubmission(renderMatch(attempt.match, values)) !== target) continue;
     return {

@@ -12,6 +12,7 @@
  * `User := …`). Loosens only the *match* axis — authored text and
  * correctness oracles are unaffected. design-docs/19 F-16.
  */
-export function normaliseSubmission(s: string): string {
-  return s.replace(/\s+/g, " ").trim().toLowerCase();
+export function normaliseSubmission(s: string): string | null {
+  const result = s.replace(/\s+/g, " ").trim().toLowerCase();
+  return result === "" ? null : result;
 }

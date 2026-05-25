@@ -22,7 +22,7 @@ export function matchWrongPattern(
 ): { explain: string } | null {
   if (!distractors || distractors.length === 0) return null;
   const target = normaliseSubmission(submission);
-  if (target === "") return null;
+  if (target === null) return null;
   for (const entry of distractors) {
     if (normaliseSubmission(distractorMatchText(entry)) !== target) continue;
     const explain = distractorExplain(entry);

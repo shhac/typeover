@@ -31,17 +31,20 @@ describe("normaliseSubmission", () => {
     expect(normaliseSubmission("USER := lookup(id)")).toBe("user := lookup(id)");
   });
 
-  it("returns empty string for whitespace-only input", () => {
-    expect(normaliseSubmission("")).toBe("");
-    expect(normaliseSubmission("   ")).toBe("");
-    expect(normaliseSubmission("\t\n\r ")).toBe("");
+  it("returns null for empty or whitespace-only input", () => {
+    expect(normaliseSubmission("")).toBeNull();
+    expect(normaliseSubmission("   ")).toBeNull();
+    expect(normaliseSubmission("\t\n\r ")).toBeNull();
   });
 
   it("is idempotent — normalising twice equals normalising once", () => {
-    const inputs = ["VAR  x  :=  1", "  spaces\t\there  ", "PLAIN", ""];
+    const inputs = ["VAR  x  :=  1", "  spaces\t\there  ", "PLAIN"];
     for (const s of inputs) {
-      expect(normaliseSubmission(normaliseSubmission(s))).toBe(normaliseSubmission(s));
+      const once = normaliseSubmission(s);
+      expect(once).not.toBeNull();
+      expect(normaliseSubmission(once!)).toBe(once);
     }
+    expect(normaliseSubmission("")).toBeNull();
   });
 
   it("preserves operators / punctuation literally", () => {

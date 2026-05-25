@@ -93,7 +93,7 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   const matchesAlternateCanonical = () => {
     if (!props.alternateCanonicals || props.alternateCanonicals.length === 0) return false;
     const target = normaliseSubmission(input());
-    if (target === "") return false;
+    if (target === null) return false;
     return props.alternateCanonicals.some((alt) => normaliseSubmission(alt) === target);
   };
   const matchesAccepted = () =>
