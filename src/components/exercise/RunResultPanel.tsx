@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { FOCUS_RING_CLASS } from "../ds/_internal";
 import { CodePane } from "../ds/CodePane";
 import { Text } from "../ds/Text";
-import type { RunResult } from "~/lib/use-runtime-run";
+import { stdoutMatches, type RunResult } from "~/lib/use-runtime-run";
 
 interface RunResultPanelProps {
   result: RunResult;
@@ -40,7 +40,7 @@ interface RunResultPanelProps {
  *     so the learner gets visible confirmation, not silence.
  */
 export function RunResultPanel(props: RunResultPanelProps) {
-  const stdoutMatches = () => props.result.stdout === props.expectStdout;
+  const matches = () => stdoutMatches(props.result, props.expectStdout);
   const noOutput = <span class="text-fg-faint italic">(no output)</span>;
 
   return (
@@ -64,7 +64,7 @@ export function RunResultPanel(props: RunResultPanelProps) {
           <Text tone="faint" size="xs" family="mono" class="mb-1">
             what you got
           </Text>
-          <CodePane tone={stdoutMatches() ? "success" : "error"}>
+          <CodePane tone={matches() ? "success" : "error"}>
             <Show when={props.result.stdout !== ""} fallback={noOutput}>
               {props.result.stdout}
             </Show>

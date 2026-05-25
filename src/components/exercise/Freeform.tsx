@@ -4,7 +4,7 @@ import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
-import { useRuntimeRun, runtimeToTarget, type AcceptedRuntime } from "~/lib/use-runtime-run";
+import { useRuntimeRun, runtimeToTarget, stdoutMatches, type AcceptedRuntime } from "~/lib/use-runtime-run";
 import {
   LANGUAGE_FREEFORM_SCAFFOLD,
   resolveSubmissionShape,
@@ -103,10 +103,7 @@ export function Freeform(props: FreeformProps) {
    * "Booting <lang> runtime…" badge. design-docs/16 F-4. */
   onMount(() => runner.preflight());
 
-  const isCorrect = () => {
-    const r = runner.runResult();
-    return r !== null && r.error === "" && r.stdout === props.expectStdout;
-  };
+  const isCorrect = () => stdoutMatches(runner.runResult(), props.expectStdout);
   const canSubmit = () => runner.runResult() !== null && !runner.running();
 
   const runPanelFocus = useRunResultFocus(runner.runResult);

@@ -50,6 +50,10 @@ export interface RunResult {
   durationMs: number;
 }
 
+export function stdoutMatches(result: RunResult | null, expectStdout: string): boolean {
+  return result !== null && result.error === "" && result.stdout === expectStdout;
+}
+
 /** Runtime boot lifecycle. `uninit` is the pre-mount default and the
  *  state reset() returns to. `booting` is in-flight WASM load. `ready`
  *  means subsequent eval() calls don't pay the cold-start cost.

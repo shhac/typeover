@@ -13,7 +13,7 @@ import {
 import { useAutoSubmittingPhase } from "~/lib/use-auto-submitting-phase";
 import { useRunResultFocus } from "~/lib/use-run-result-focus";
 import { insertAtFocused } from "~/lib/textarea-insert";
-import { useRuntimeRun, type ClientRuntime } from "~/lib/use-runtime-run";
+import { useRuntimeRun, stdoutMatches, type ClientRuntime } from "~/lib/use-runtime-run";
 import { matchWrongPattern } from "~/lib/wrong-pattern";
 import { InstructionLine } from "../ds/InstructionLine";
 import { MobileKeyBar } from "../ds/MobileKeyBar";
@@ -104,12 +104,8 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   const matchesAccepted = () =>
     matchesAcceptedAnswer(input(), props.acceptedAnswers, instance().values) !== null ||
     matchesAlternateCanonical();
-  const isCorrect = () => {
-    const r = runner.runResult();
-    if (r === null) return false;
-    if (r.error === "" && r.stdout === props.expectStdout) return true;
-    return matchesAccepted();
-  };
+  const isCorrect = () =>
+    stdoutMatches(runner.runResult(), props.expectStdout) || matchesAccepted();
   /* Inner gate used by the phase handle for grading. A fresh
    * Run result is required to commit a verdict; the OUTER
    * canSubmit (below, on ownPhase) is looser so the user can
