@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/abstractions/traits
+type: mcq
+order: 3
+prompt: |
+  A trait method only READS the implementor's state — no
+  ownership transfer, no mutation. Pick the receiver type.
+generator:
+  kind: variant
+  variants:
+    - id: trait-receiver
+      ts: 'interface Reader { read(): number; } // TS methods have implicit `this`.'
+      canonical: '&self — shared borrow; lets the trait method read fields of the type, multiple calls allowed, no ownership transfer.'
+      distractors:
+        - 'self — takes OWNERSHIP of the value; method can only be called once because it consumes the receiver.'
+        - '&mut self — exclusive mutable borrow; needed only when the method MUTATES the value. Over-permissioned for a read.'
+        - 'this — JS/TS reflex; Rust spells the receiver `self` (and `&self`/`&mut self`).'
+hints:
+  - "Same receiver shape as `impl` methods on a plain struct — `&self` is the read-only mode. Five characters."
+  - "`&` plus the lowercase Rust receiver name."
+  - '`&self`'
+runtime: none
+notes: |
+  Pins `&self` as the trait-method read receiver. Mirrors
+  the structs-and-impl theme's receiver choice — same
+  vocabulary, same intuition.

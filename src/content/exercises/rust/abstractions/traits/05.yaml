@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/abstractions/traits
+type: fill-line
+order: 5
+prompt: |
+  Open an impl block that implements the `Greeter` trait for the
+  `Robot` struct. End the line with the opening brace.
+generator:
+  kind: template
+  vars:
+    line:
+      - "impl Greeter for Robot {"
+  ts: |-
+    class Robot implements Greeter { /* ... */ }
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    ${line}
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+  distractors:
+    - match: "impl Robot for Greeter {"
+      explain: |-
+        Direction reversed. Rust spells the impl as
+        `impl <Trait> for <Type>` — trait FIRST, type SECOND.
+        Reversed reads as "implement the Robot trait for the
+        Greeter type," the opposite of the intent.
+    - match: "impl Greeter for Robot"
+      explain: |-
+        Missing the opening brace `{`. Like every other Rust
+        block declaration, an impl block opens with `{`.
+    - match: "Robot implements Greeter {"
+      explain: |-
+        Java/TS syntax; Rust uses the `impl ... for ...`
+        keyword pair, not `implements`.
+    - match: "impl for Robot Greeter {"
+      explain: |-
+        Word order swapped. The pair is `impl <Trait> for <Type>` —
+        `impl Greeter for Robot`.
+expectStdout: |
+  beep
+runtime: server
+blanks: [line]
+hints:
+  - "Three keywords + two names + the opening brace: `impl`, the trait name, `for`, the type name, `{`."
+  - "Shape: `impl <Trait> for <Type> {`."
+  - "`impl Greeter for Robot {`"
+notes: |
+  Drills the impl block opener. Distractors target the
+  TS-reversed direction, missing brace, Java syntax, and
+  word-order swap.

@@ -1,0 +1,78 @@
+target: rust
+themeId: rust/abstractions/traits
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0599]: no method named `greet`
+  found for struct `Robot``:
+
+      trait Greeter {
+          fn greet(&self) -> String;
+      }
+
+      struct Robot;
+
+      fn main() {
+          let r = Robot;
+          println!("{}", r.greet());
+      }
+
+  The trait declares `greet`, but `Robot` doesn't IMPLEMENT it
+  yet. Add an `impl Greeter for Robot { fn greet(...) ... }`
+  block returning `"beep"`. Output:
+
+      beep
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot {}
+    // missing `implements Greeter` + method
+    console.log(new Robot().greet?.() ?? "ERR");
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+expectStdout: |
+  beep
+hints:
+  - "Add an `impl Greeter for Robot { fn greet(&self) -> String { String::from(\"beep\") } }` block between the struct declaration and `fn main`. Don't touch the existing code — the impl is the missing piece."
+  - "Insert the impl block; the body returns `String::from(\"beep\")`."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "trait declared but
+  not impl-d" error. The fix is structural — add the
+  impl. Distinct from "missing `use` for trait import"
+  (a different E0599 flavour) which doesn't apply here
+  since everything is in one file.

@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/abstractions/traits
+type: mcq
+order: 2
+prompt: |
+  Implement the `Greeter` trait for a struct `Robot`, returning
+  `"beep"`. Pick the idiomatic Rust impl block.
+generator:
+  kind: variant
+  variants:
+    - id: impl-for
+      ts: 'class Robot implements Greeter { greet(): string { return "beep"; } }'
+      canonical: 'impl Greeter for Robot { fn greet(&self) -> String { String::from("beep") } }'
+      distractors:
+        - 'impl Robot for Greeter { ... } — the direction is reversed; Rust spells the impl as `impl <Trait> for <Type>`.'
+        - 'Robot implements Greeter { ... } — Java/TS syntax; Rust uses the `impl ... for ...` keyword pair.'
+        - 'class Robot extends Greeter { ... } — class inheritance; Rust has neither `class` nor `extends`.'
+hints:
+  - "Order matters: the keyword pair is `impl <Trait> for <Type>`. The TRAIT comes first, the TYPE second — opposite of TS `class A implements B`."
+  - "Shape: `impl <Trait> for <Type> { ... }`."
+  - '`impl Greeter for Robot { ... }`'
+runtime: none
+notes: |
+  Pins the `impl Trait for Type` ordering. The reversed
+  distractor surfaces a real common typo a TS-dev makes
+  on first writing a trait impl.

@@ -1,0 +1,73 @@
+target: rust
+themeId: rust/abstractions/traits
+type: freeform
+order: 7
+prompt: |
+  Reuse the `Greeter` trait + `Robot` impl. Add a function
+  `announce<T: Greeter>(g: &T)` that prints `"I say: <greet>"`
+  using `g.greet()`. `main` calls `announce(&Robot)`.
+
+  Output:
+
+      I say: beep
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot implements Greeter { greet(): string { return "beep"; } }
+    function announce<T extends Greeter>(g: T): void {
+      console.log("I say: " + g.greet());
+    }
+    announce(new Robot());
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn announce<T: Greeter>(g: &T) {
+        println!("I say: {}", g.greet());
+    }
+
+    fn main() {
+        announce(&Robot);
+    }
+expectStdout: |
+  I say: beep
+hints:
+  - "Generic function with a TRAIT BOUND: `fn announce<T: Greeter>(g: &T)`. The bound `T: Greeter` means `T` must implement `Greeter`. Inside the body, `g.greet()` resolves via the impl on whatever type T is."
+  - "Same shape as TS `<T extends Greeter>`, with `:` instead of `extends`."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn announce<T: Greeter>(g: &T) {
+        println!("I say: {}", g.greet());
+    }
+
+    fn main() {
+        announce(&Robot);
+    }
+runtime: server
+notes: |
+  Drills trait bounds on generic functions. `T: Greeter`
+  is monomorphised — the compiler generates a specialised
+  copy of `announce` for each concrete `T` at compile
+  time (zero runtime cost).

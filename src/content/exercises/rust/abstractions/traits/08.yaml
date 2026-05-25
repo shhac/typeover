@@ -1,0 +1,82 @@
+target: rust
+themeId: rust/abstractions/traits
+type: freeform
+order: 8
+prompt: |
+  Translate the TS interface + class pattern. Trait `Speaker`
+  with `say(&self) -> String`. Struct `Cat { name: String }`
+  implements it, returning `"meow from <name>"`. Function
+  `announce(s: &dyn Speaker)` (TRAIT OBJECT — dynamic
+  dispatch) prints `s.say()`. `main` calls
+  `announce(&Cat { name: String::from("milo") })`.
+
+  Output:
+
+      meow from milo
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Speaker { say(): string; }
+    class Cat implements Speaker {
+      constructor(public name: string) {}
+      say(): string { return "meow from " + this.name; }
+    }
+    function announce(s: Speaker): void { console.log(s.say()); }
+    announce(new Cat("milo"));
+  canonical: |-
+    trait Speaker {
+        fn say(&self) -> String;
+    }
+
+    struct Cat {
+        name: String,
+    }
+
+    impl Speaker for Cat {
+        fn say(&self) -> String {
+            format!("meow from {}", self.name)
+        }
+    }
+
+    fn announce(s: &dyn Speaker) {
+        println!("{}", s.say());
+    }
+
+    fn main() {
+        announce(&Cat { name: String::from("milo") });
+    }
+expectStdout: |
+  meow from milo
+hints:
+  - "Two differences from slot 07: the struct has a `name: String` field, and the function uses `&dyn Speaker` (TRAIT OBJECT) instead of `<T: Speaker>` (generic bound). `dyn Speaker` dispatches at runtime through a vtable; the trait-bound form dispatches at compile time."
+  - "Method body uses `format!` to interpolate `self.name`."
+  - |-
+    trait Speaker {
+        fn say(&self) -> String;
+    }
+
+    struct Cat {
+        name: String,
+    }
+
+    impl Speaker for Cat {
+        fn say(&self) -> String {
+            format!("meow from {}", self.name)
+        }
+    }
+
+    fn announce(s: &dyn Speaker) {
+        println!("{}", s.say());
+    }
+
+    fn main() {
+        announce(&Cat { name: String::from("milo") });
+    }
+runtime: server
+notes: |
+  Drills `&dyn Trait` for runtime polymorphism. Slot 07
+  used compile-time generic bounds; slot 08 uses runtime
+  trait objects — the same trait, two dispatch styles
+  (covered in detail by the impl-trait-and-trait-objects
+  theme).

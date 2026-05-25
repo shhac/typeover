@@ -1,0 +1,64 @@
+target: rust
+themeId: rust/abstractions/traits
+type: freeform
+order: 6
+prompt: |
+  Declare a trait `Greeter` with one method
+  `greet(&self) -> String`. Implement it for a unit-style
+  struct `Robot` returning `"beep"`. `main` builds a `Robot`
+  and prints `r.greet()`.
+
+  Output:
+
+      beep
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    interface Greeter { greet(): string; }
+    class Robot implements Greeter { greet(): string { return "beep"; } }
+    console.log(new Robot().greet());
+  canonical: |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+expectStdout: |
+  beep
+hints:
+  - "Three pieces: trait declaration with signature only (`fn greet(&self) -> String;`), unit struct `struct Robot;`, impl block `impl Greeter for Robot { fn greet(...) { ... } }`. Unit struct construction is just the name: `let r = Robot;`."
+  - "Body of the impl returns `String::from(\"beep\")` (an owned String, not a `&str` literal — the return type is `String`)."
+  - |-
+    trait Greeter {
+        fn greet(&self) -> String;
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+runtime: server
+notes: |
+  First trait freeform. The unit struct (no fields, no
+  parens) lets the focus stay on the trait+impl pair
+  without struct-field noise.

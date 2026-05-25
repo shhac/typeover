@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/abstractions/traits
+type: mcq
+order: 1
+prompt: |
+  Declare a trait `Greeter` with one method `greet(&self) -> String`
+  (signature only, no body). Pick the idiomatic Rust syntax.
+generator:
+  kind: variant
+  variants:
+    - id: trait-decl
+      ts: 'interface Greeter { greet(): string; }'
+      canonical: 'trait Greeter { fn greet(&self) -> String; } — keyword + name + brace block; signatures end with `;`.'
+      distractors:
+        - 'interface Greeter { greet(&self) -> String; } — `interface` is TS/Java; Rust uses `trait`.'
+        - 'protocol Greeter { fn greet(&self) -> String; } — `protocol` is Swift; Rust uses `trait`.'
+        - 'trait Greeter = { fn greet(&self) -> String; } — no `=` between the name and the body.'
+hints:
+  - "Five letters. Rust's equivalent of TS `interface`, Java `interface`, Swift `protocol`. Method signatures inside use `fn ... -> Type;` (with the trailing `;`)."
+  - "The keyword is `trait`."
+  - "`trait Greeter { fn greet(&self) -> String; }`"
+runtime: none
+notes: |
+  Pins the `trait` keyword and signature-only shape.
+  Distractors cover TS/Swift naming and a punctuation typo.

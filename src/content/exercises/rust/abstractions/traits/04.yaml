@@ -1,0 +1,67 @@
+target: rust
+themeId: rust/abstractions/traits
+type: fill-line
+order: 4
+prompt: |
+  Inside `trait Greeter { ... }`, write the method signature for
+  `greet(&self) -> String`. Signature ONLY — no body, end with
+  a semicolon.
+generator:
+  kind: template
+  vars:
+    line:
+      - "fn greet(&self) -> String;"
+  ts: |-
+    interface Greeter { greet(): string; }
+  canonical: |-
+    trait Greeter {
+        ${line}
+    }
+
+    struct Robot;
+
+    impl Greeter for Robot {
+        fn greet(&self) -> String {
+            String::from("beep")
+        }
+    }
+
+    fn main() {
+        let r = Robot;
+        println!("{}", r.greet());
+    }
+  distractors:
+    - match: "fn greet(&self) -> String"
+      explain: |-
+        Missing trailing semicolon. Trait method signatures
+        (without a default body) end with `;` — the impl will
+        provide the body.
+    - match: "fn greet(self) -> String;"
+      explain: |-
+        Wrong receiver: `self` takes OWNERSHIP. A read-only
+        method like `greet` should use `&self` (shared borrow)
+        so the caller keeps their value.
+    - match: "fn greet(&self) -> String { }"
+      explain: |-
+        That declares a DEFAULT method body (an empty one
+        returning nothing — and it won't compile since the
+        return type is `String`). Signature-only methods
+        end with `;`, no braces.
+    - match: "greet(&self) -> String;"
+      explain: |-
+        Missing the `fn` keyword. Method signatures inside a
+        trait look exactly like free-function signatures —
+        same `fn <name>(<args>) -> <ret>` shape.
+expectStdout: |
+  beep
+runtime: server
+blanks: [line]
+hints:
+  - "Five tokens + punctuation: `fn`, the method name, `(<receiver>)`, `-> <return>`, trailing `;`. The receiver for a read-only method is `&self`."
+  - "`fn greet(&self) -> String;`."
+  - "`fn greet(&self) -> String;`"
+notes: |
+  Drills the signature-only trait method shape.
+  Distractors target the four common typos: missing
+  semicolon, wrong receiver, accidental default-body, and
+  missing `fn`.
