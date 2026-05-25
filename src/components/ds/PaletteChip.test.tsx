@@ -12,14 +12,14 @@ import { PALETTES } from "~/lib/theme";
  *  1. Render contract — the chip is aria-hidden, sets data
  *     attributes, and paints the right colours inline.
  *  2. Drift guard — PALETTE_CHIP_COLORS duplicates `--color-bg-base`
- *     and `--color-accent-primary` from src/styles/global.css.
+ *     and `--color-accent-primary` from the palette CSS source.
  *     This test parses the CSS and asserts every value agrees, so
  *     a future tweak to a palette's colours can't silently desync
  *     the picker swatches.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
-const cssPath = join(here, "..", "..", "styles", "global.css");
+const cssPath = join(here, "..", "..", "styles", "global-parts", "palettes.css");
 const cssSource = readFileSync(cssPath, "utf8");
 
 /** Pull a single CSS declaration out of a palette block by selector
@@ -67,7 +67,7 @@ describe("<PaletteChip>", () => {
   });
 });
 
-describe("PALETTE_CHIP_COLORS — drift guard against global.css", () => {
+describe("PALETTE_CHIP_COLORS — drift guard against palettes.css", () => {
   it("includes every palette ID in PALETTES", () => {
     for (const p of PALETTES) {
       expect(PALETTE_CHIP_COLORS[p], `missing palette: ${p}`).toBeDefined();

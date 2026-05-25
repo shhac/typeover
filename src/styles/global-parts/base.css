@@ -1,0 +1,137 @@
+@layer base {
+  html {
+    background-color: var(--color-bg-base);
+    color: var(--color-fg-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    /* Body font defaults to sans; textbook style rebinds to serif
+     * via the `--font-body` token. design-docs/21. */
+    font-family: var(--font-body);
+  }
+
+  ::selection {
+    background-color: var(--color-accent-primary);
+    color: var(--color-bg-base);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  /* `.ds-prose` is applied to any container that wraps the block-
+     level HTML returned by formatBlock() (theme intros, future
+     module summaries). Tailwind preflight zeroes the default list
+     marker / paragraph spacing; this restores just enough to read
+     as prose. Scoped via a class so we don't bias every <ul>/<p>
+     on the page. */
+  .ds-prose p {
+    margin: 0 0 0.75em 0;
+  }
+  .ds-prose p:last-child {
+    margin-bottom: 0;
+  }
+  .ds-prose ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+    margin: 0 0 0.75em 0;
+  }
+  .ds-prose ul:last-child {
+    margin-bottom: 0;
+  }
+  .ds-prose li {
+    margin-bottom: 0.25em;
+  }
+  .ds-prose li:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Inline <code> spans — rendered by formatInline() into hints,
+     intros, summaries, etc. Subtle inset background + tight padding
+     reads as inline code without competing visually with CodeBlock.
+     `pre code` resets these because CodeBlock's <pre> wrapper owns
+     its own background/typography. */
+  code {
+    background-color: var(--color-bg-inset);
+    padding: 0 0.3em;
+    border-radius: var(--radius-sm);
+    font-size: 0.92em;
+    color: var(--color-fg-primary);
+  }
+  pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Visible focus on all interactives. We never strip the ring without
+     replacing it. */
+  *:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ---- Style-axis consumers (design-docs/14) ----
+   * Components add these classes and read the style tokens
+   * automatically. Terminal defaults are no-ops; non-terminal
+   * styles light up the cascade.
+   */
+  .ds-panel {
+    box-shadow: var(--shadow-panel);
+    background-image: var(--surface-pattern);
+    /* Style-driven border treatment. Default `solid` is today's
+     * behaviour; cardboard rebinds to `dashed` for the paper-seam
+     * look. design-docs/21. */
+    border-style: var(--border-style);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .ds-panel {
+      backdrop-filter: var(--panel-backdrop-filter);
+    }
+  }
+  /* Heading weight system — each style sets `--heading-weight-base`
+   * (default 600) and per-level CSS calculations derive the actual
+   * weight via the scalars (h1 ×1.0, h2 ×0.85, h3 ×0.7, h4 ×0.55).
+   * Heading.tsx targets the right rule by adding `.ds-heading-h{N}`
+   * alongside `.ds-heading-font`. design-docs/21 #3. */
+  .ds-heading-font {
+    font-family: var(--font-heading);
+    /* Fallback when no per-level class is present. */
+    font-weight: var(--heading-weight-base);
+  }
+  .ds-heading-font.ds-heading-h1 {
+    font-weight: calc(var(--heading-weight-base) * var(--heading-scale-h1));
+  }
+  .ds-heading-font.ds-heading-h2 {
+    font-weight: calc(var(--heading-weight-base) * var(--heading-scale-h2));
+  }
+  .ds-heading-font.ds-heading-h3 {
+    font-weight: calc(var(--heading-weight-base) * var(--heading-scale-h3));
+  }
+  .ds-heading-font.ds-heading-h4 {
+    font-weight: calc(var(--heading-weight-base) * var(--heading-scale-h4));
+  }
+
+  /* Respect reduced-motion. Quiz transitions must check this too. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

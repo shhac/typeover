@@ -1,0 +1,282 @@
+/* ===========================================================================
+ * Theme overrides — see design-docs/13-themes.md
+ *
+ * @theme above is the dark default; utility classes compile against those
+ * vars. Each `:root[data-theme="<id>"]` block re-binds the SAME var names
+ * to different values. The cascade does the rest: every component reads
+ * `var(--color-bg-base)`, so the swap is atomic with zero per-component
+ * code.
+ *
+ * Add a new theme = add one block here + one entry on the selector. If
+ * a component breaks under a new theme, the component is at fault for
+ * having reached around the token layer — not the theme.
+ * ========================================================================= */
+
+/* ---- Density axis (compact / normal / airy) — see design-docs/14 ----
+ * One knob scales every margin/padding/gap via Tailwind 4's
+ * `--spacing`. "normal" is the @theme default, so no override block.
+ * Touch-target floors (44×44px, e.g. `min-h-11`) are enforced at the
+ * component level — density only shrinks the AIR around interactives.
+ */
+:root[data-density="compact"] {
+  --spacing: 0.2rem; /* -20%, ~3.2px per unit */
+}
+:root[data-density="airy"] {
+  --spacing: 0.32rem; /* +28%, ~5.1px per unit */
+}
+
+/* ---- Shape axis (sharp / normal / rounded) — see design-docs/14 ----
+ * Three radii rebound together. The focus-ring radius is pinned to
+ * --radius-sm so it follows the axis naturally.
+ */
+:root[data-radius="sharp"] {
+  --radius-sm: 0px;
+  --radius-md: 1px;
+  --radius-lg: 2px;
+}
+:root[data-radius="rounded"] {
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+:root[data-radius="pill"] {
+  /* Even rounder than "rounded" — see design-docs/14. Small
+   * UI elements approach pills; large surfaces feel
+   * generously curved without exploding into 9999px
+   * half-height shapes. */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+}
+
+/* ---- Style axis (terminal / cardboard / textbook / glass / islands)
+ * design-docs/14 + design-docs/21 (radical rebind). Each block
+ * re-binds typography, border treatment, radius semantics, and
+ * surface chrome so that flipping styles produces visually
+ * distinct documents — not just shadow shifts. Components don't
+ * branch on the active style; everything flows through CSS vars.
+ */
+
+/* ----- terminal ----- */
+:root[data-style="terminal"] {
+  --font-heading: var(--font-mono);
+  --heading-weight-base: 500;
+  --measure: 68ch;
+  /* Re-asserts identity-floor: no shadow, no texture, hairline
+   * borders only. Stays the @theme default but explicit here so
+   * a learner switching FROM another style returns to a clean
+   * slate rather than carrying the previous style's overrides. */
+  --shadow-panel: none;
+  --surface-pattern: none;
+}
+
+/* Terminal radius progression: compressed `0 / 2 / 4 / 8` —
+ * the axis still moves but the style caps the curve well below
+ * the global `pill` (8px instead of 24px). design-docs/21 #1. */
+:root[data-style="terminal"][data-radius="sharp"] {
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+:root[data-style="terminal"][data-radius="normal"] {
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+}
+:root[data-style="terminal"][data-radius="rounded"] {
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+}
+:root[data-style="terminal"][data-radius="pill"] {
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+}
+
+/* ----- cardboard ----- */
+:root[data-style="cardboard"] {
+  /* Style block carries chrome only — typography, border-style,
+   * stipple grain, shadow chrome, radius progression. Colour
+   * identity (panel tilt, accent hue) lives in palette blocks
+   * (design-docs/22). The dashed border colour is derived from
+   * whatever palette is active — `color-mix` reads the live
+   * `--color-accent-primary` so every cardboard-home palette
+   * gets a self-consistent accent-tinted stitch without
+   * redeclaring it per-palette. */
+  --font-heading: var(--font-serif);
+  --heading-weight-base: 700;
+  --border-style: dashed;
+  --color-border-default: color-mix(in oklab, var(--color-accent-primary) 35%, transparent);
+  --surface-pattern: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--color-fg-faint) 35%, transparent) 1px,
+    transparent 1.5px
+  );
+  --shadow-panel: 0 2px 0 -1px color-mix(in oklab, #000 35%, transparent);
+}
+
+/* Cardboard radius progression: axis + 1 step. `1 / 4 / 8 / 14`. */
+:root[data-style="cardboard"][data-radius="sharp"] {
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+}
+:root[data-style="cardboard"][data-radius="normal"] {
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+:root[data-style="cardboard"][data-radius="rounded"] {
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+}
+:root[data-style="cardboard"][data-radius="pill"] {
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+}
+
+/* ----- textbook ----- */
+:root[data-style="textbook"] {
+  /* Chrome only. Serif everywhere (heading + body); narrow
+   * reading measure; drop-cap on first paragraph (see selector
+   * below). Originally shipped with an amber inset left-rule on
+   * every panel, but post-launch user feedback flagged that as
+   * the antique-parchment tell — modern textbook sites (Tufte,
+   * Gwern, Stripe Press, Pearson+) either drop the rule entirely
+   * or reserve it for semantic callouts. Removed here; if a
+   * callout primitive ever needs an accent-rule, it can opt in
+   * locally rather than every Panel inheriting it. */
+  --font-heading: var(--font-serif);
+  --font-body: var(--font-serif);
+  --heading-weight-base: 700;
+  --measure: 60ch;
+  --color-border-default: transparent;
+}
+
+/* Textbook radius progression: heavy compression `0 / 0 / 2 / 4`.
+ * `sharp` and `normal` identical at 0; `rounded` and `pill` peek
+ * through with a hint of curve so the axis isn't a no-op. */
+:root[data-style="textbook"][data-radius="sharp"] {
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+:root[data-style="textbook"][data-radius="normal"] {
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+:root[data-style="textbook"][data-radius="rounded"] {
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+}
+:root[data-style="textbook"][data-radius="pill"] {
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+}
+
+/* Drop-cap-lite — first letter of the first paragraph in a
+ * Panel scales 1.5×, no float so subsequent lines flow normally.
+ * Scoped to textbook only. design-docs/21 #5. */
+:root[data-style="textbook"] .ds-panel > p:first-of-type::first-letter,
+:root[data-style="textbook"] .ds-prose > p:first-of-type::first-letter {
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ----- glass ----- */
+:root[data-style="glass"] {
+  /* Chrome only. Light heading, 60% panel transparency, strong
+   * blur, transparent borders (lift via the gradient hairline
+   * + shadow chrome). The body gradient is a palette token
+   * (`--body-gradient`) since palette identity determines the
+   * bloom colours. design-docs/22. */
+  --heading-weight-base: 300;
+  --measure: 80ch;
+  --panel-bg-mix: 60%;
+  --color-border-default: transparent;
+  --panel-backdrop-filter: blur(20px) saturate(180%);
+  --shadow-panel:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 14%, transparent),
+    0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 4%, transparent),
+    0 8px 28px -10px color-mix(in oklab, #000 40%, transparent);
+}
+
+/* Body backdrop — palette sets `--body-gradient`. Glass-home
+ * palettes fill it with their characteristic bloom; non-glass
+ * palettes applied to glass style leave it as the @theme default
+ * (`none`), and the panels' translucency reads against flat
+ * page bg with reduced effect. design-docs/22. */
+body {
+  background-image: var(--body-gradient);
+  background-attachment: fixed;
+}
+
+/* Glass radius progression: amplified `2 / 6 / 14 / 24`. */
+:root[data-style="glass"][data-radius="sharp"] {
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+}
+:root[data-style="glass"][data-radius="normal"] {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+:root[data-style="glass"][data-radius="rounded"] {
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 22px;
+}
+:root[data-style="glass"][data-radius="pill"] {
+  --radius-sm: 24px;
+  --radius-md: 32px;
+  --radius-lg: 40px;
+}
+
+/* ----- islands ----- */
+:root[data-style="islands"] {
+  /* Chrome only. Bold sans, layered shadow stack, transparent
+   * borders (lift via shadow + page-vs-panel contrast). The
+   * page-vs-panel contrast lives in the palette's bg-base +
+   * bg-panel values — islands-home palettes (desk-felt,
+   * app-store, etc.) authored that delta into their token
+   * values. */
+  --heading-weight-base: 700;
+  --color-border-default: transparent;
+  --shadow-panel:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 8%, transparent),
+    0 10px 24px -12px color-mix(in oklab, #000 55%, transparent),
+    0 2px 4px -1px color-mix(in oklab, #000 30%, transparent);
+  --shadow-island:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-fg-primary) 10%, transparent),
+    0 20px 40px -18px color-mix(in oklab, #000 65%, transparent);
+}
+
+/* Islands radius progression: amplified modestly `3 / 6 / 12 / 20`. */
+:root[data-style="islands"][data-radius="sharp"] {
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 5px;
+}
+:root[data-style="islands"][data-radius="normal"] {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+}
+:root[data-style="islands"][data-radius="rounded"] {
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 18px;
+}
+:root[data-style="islands"][data-radius="pill"] {
+  --radius-sm: 20px;
+  --radius-md: 28px;
+  --radius-lg: 36px;
+}

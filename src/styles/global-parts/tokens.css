@@ -1,0 +1,142 @@
+@theme {
+  /* === Surfaces ===
+   * Near-black base, slightly elevated panels. Bloomberg's identity (dark
+   * + amber) without Bloomberg-tight density — we go airy.
+   */
+  --color-bg-base: #0a0a0b;
+  --color-bg-panel: #121214;
+  --color-bg-elevated: #1a1a1d;
+  --color-bg-inset: #08080a;
+
+  --color-border-default: #26262a;
+  --color-border-strong: #3a3a40;
+  --color-border-accent: #ffa72655;
+
+  /* === Text ===
+   * Contrast-verified against bg-base for WCAG 2.2 AA:
+   *   fg-primary    16.2:1   ✓
+   *   fg-secondary   8.4:1   ✓
+   *   fg-muted       5.7:1   ✓  (was failing at 3.2; brightened from #6b6b70)
+   *   fg-faint       3.2:1   non-text/decorative use only (UI < 14pt fails)
+   */
+  --color-fg-primary: #e8e8e8;
+  --color-fg-secondary: #a8a8ad;
+  --color-fg-muted: #8a8a8f;
+  --color-fg-faint: #6b6b70;
+
+  /* === Brand accents ===
+   * amber  — Bloomberg-terminal nostalgia, focus / active / primary CTA
+   * ts     — TypeScript blue, anywhere TS is referenced
+   * go     — Go cyan ("Aqua"), anywhere Go is referenced
+   * zig    — Zig's brand orange #f7a41d, anywhere Zig is referenced
+   * rust   — Ferris-evoking warm salmon #e07856, anywhere Rust is referenced
+   *
+   * accent-ts brightened from #3178c6 (failed 4.5:1 AA at small text)
+   * to #4a9eff (passes ~7.2:1).
+   * accent-go #00add8 already passes ~7.5:1.
+   * accent-zig #f7a41d — Zig's brand orange. Picked for brand
+   * association rather than perfect contrast; sits at ~5.5:1 against
+   * the base bg, comfortable for the badge / accent surface but we
+   * don't rely on it for body text.
+   * accent-rust #e07856 — Ferris-mascot peach/salmon, distinct enough
+   * from zig-orange and amber-primary to read as its own track. Sits
+   * at ~5:1 on the dark bg; usage rules match accent-zig.
+   */
+  --color-accent-primary: #ffa726;
+  --color-accent-primary-dim: #b87a1c;
+  --color-accent-ts: #4a9eff;
+  --color-accent-ts-dim: #2a6fbf;
+  --color-accent-go: #00add8;
+  --color-accent-go-dim: #007a99;
+  --color-accent-zig: #f7a41d;
+  --color-accent-zig-dim: #b3760e;
+  --color-accent-rust: #e07856;
+  --color-accent-rust-dim: #a8523a;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #ef4444;
+
+  /* === Type ===
+   * Mono is the *primary* feature font — code is the content. Sans for
+   * surrounding prose. Base size 16px (Tailwind default) — airy direction;
+   * we never go below 14px for body text (a11y, normal-text contrast rules).
+   */
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  /* === Micro-mono sizes ===
+   * Two named tokens replace the scattered text-[10px] / text-[11px] /
+   * text-[13px] arbitrary values across the DS (design-docs/17 F-6).
+   * `--text-micro` is for chip/badge/header strip text; `--text-code`
+   * is for the body of CodeBlock and BlankInput so code reads at the
+   * same size everywhere. Anything that grows past the readable floor
+   * climbs to Tailwind's standard `text-xs` / `text-sm`. */
+  --text-micro: 11px;
+  --text-code: 13px;
+
+  /* === Radii ===
+   * Sharp. The terminal aesthetic doesn't get rounded corners — but it
+   * doesn't get knife-edge either. 3-4px max. Rebound by the shape
+   * axis below (sharp / normal / rounded).
+   */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+
+  /* === Spacing knob ===
+   * Tailwind 4 multiplies every spacing utility by --spacing
+   * (`.p-4` compiles to `padding: calc(var(--spacing) * 4)`). So one
+   * knob scales every margin, padding, and gap in the codebase.
+   * Rebound by the density axis below (compact / normal / airy).
+   * Default is `0.25rem` = 4px per unit, matching Tailwind's stock.
+   */
+  --spacing: 0.25rem;
+
+  /* === Style axis (terminal default) ===
+   * design-docs/14 + design-docs/21. Tokens that styles re-bind;
+   * components consume them via .ds-panel / .ds-heading-font in
+   * @layer base below. "Terminal" is the @theme default — flat,
+   * hairline-only, mono.
+   */
+  --surface-pattern: none;
+  --shadow-panel: none;
+  --shadow-island: none;
+  --panel-backdrop-filter: none;
+  --font-serif: "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-sans);
+
+  /* design-docs/21 — body font defaults to sans; textbook style
+   * rebinds to serif so prose reads as a book page. */
+  --font-body: var(--font-sans);
+
+  /* Heading weight system — a style sets `--heading-weight-base`
+   * and each level reads `calc(base × scale-hN)`. The CSS
+   * `font-weight` property accepts any integer 1-1000 but
+   * variable-font fallback rounds to the nearest 100; we keep
+   * scales as floats so the math reads. design-docs/21 #3. */
+  --heading-weight-base: 600;
+  --heading-scale-h1: 1;
+  --heading-scale-h2: 0.85;
+  --heading-scale-h3: 0.7;
+  --heading-scale-h4: 0.55;
+
+  /* Container max-width per style. Default matches Tailwind v4's
+   * `--container-4xl` (56rem) so `width="default"` containers
+   * keep today's behaviour. A style that sets `--measure` (e.g.
+   * textbook `60ch`, glass `80ch`) overrides. design-docs/21 #4. */
+  --measure: 56rem;
+
+  /* Panel chrome knobs. `--border-style` defaults to `solid`
+   * (today's behaviour); cardboard switches to `dashed` for the
+   * paper-seam look. `--panel-bg-mix` defaults to `100%` (full
+   * opacity); glass drops it to a transparent mix so the body
+   * gradient reads through. design-docs/21. */
+  --border-style: solid;
+  --panel-bg-mix: 100%;
+
+  /* Body backdrop gradient. Defaults to `none` (no gradient).
+   * Glass palettes set this so the page has something to blur
+   * through; non-glass palettes leave it `none`. design-docs/22. */
+  --body-gradient: none;
+}

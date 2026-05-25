@@ -1,0 +1,65 @@
+/* ===========================================================================
+ * Legacy generic light-theme block — kept as a fallback for the
+ * (very rare) case where no palette is set. Bootstrap always sets
+ * `data-palette` pre-paint, so this should not be reached in
+ * practice. design-docs/22.
+ * ========================================================================= */
+:root[data-theme="light"] {
+  /* Surfaces — off-white base, subtle elevated tints toward warm grey. */
+  --color-bg-base: #ffffff;
+  --color-bg-panel: #f5f6f8;
+  --color-bg-elevated: #ebedf1;
+  --color-bg-inset: #f0f2f5;
+
+  --color-border-default: #e1e4ea;
+  --color-border-strong: #c4c9d2;
+  --color-border-accent: #c97a0055;
+
+  /* Text — contrast-verified against bg-base (#fff) for WCAG AA:
+   *   fg-primary   ~17:1 ✓ AAA
+   *   fg-secondary  ~8.4:1 ✓ AAA
+   *   fg-muted      ~5.7:1 ✓ AA
+   *   fg-faint      ~3.2:1 non-text/decorative only (same a11y rule
+   *                 as the dark variant). */
+  --color-fg-primary: #14171f;
+  --color-fg-secondary: #4a5060;
+  --color-fg-muted: #6b7280;
+  --color-fg-faint: #94989f;
+
+  /* Brand accents — darkened from the dark-theme values so they pass
+   * 4.5:1 AA against #ffffff at ≥14pt. Brand identity bends to a11y;
+   * amber stays the focus colour, TS-blue and Go-cyan stay
+   * recognisable but pull toward saturated mid-tones.
+   *
+   * 2026-05-20: amber further darkened from #c97a00 (≈ 4.3:1 against
+   * white — fails AA) to #a06400 (≈ 5.2:1 — passes AA). The fix is
+   * load-bearing because primary buttons render white text on amber
+   * in light theme. */
+  --color-accent-primary: #a06400;
+  --color-accent-primary-dim: #6f4400;
+  --color-accent-ts: #2057b8;
+  --color-accent-ts-dim: #143a7e;
+  --color-accent-go: #006d8e;
+  --color-accent-go-dim: #00485e;
+
+  --color-success: #0e8443;
+  --color-warning: #b25c00;
+  --color-error: #b91c1c;
+}
+
+/* design-docs/20 follow-up — Tailwind 4 `@utility` directive. The
+ * focus-visible outline was hand-pasted at 17 call sites
+ * (`focus-visible:outline-2 focus-visible:outline-accent-primary
+ * rounded-sm`); one place to widen the ring or recolour it now.
+ *
+ * Bakes in both the always-on `border-radius` (so the focus ring
+ * matches its element's corners under any shape axis) and the
+ * focus-visible outline. Keeps the original "always-rounded +
+ * outlined-on-focus" semantics as one class. */
+@utility focus-ring {
+  border-radius: var(--radius-sm);
+  &:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 0;
+  }
+}
