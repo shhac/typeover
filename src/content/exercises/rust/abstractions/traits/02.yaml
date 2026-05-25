@@ -10,7 +10,12 @@ generator:
   variants:
     - id: impl-for
       ts: 'class Robot implements Greeter { greet(): string { return "beep"; } }'
-      canonical: 'impl Greeter for Robot { fn greet(&self) -> String { String::from("beep") } }'
+      canonical: |-
+        impl Greeter for Robot {
+            fn greet(&self) -> String {
+                String::from("beep")
+            }
+        }
       distractors:
         - 'impl Robot for Greeter { ... } — the direction is reversed; Rust spells the impl as `impl <Trait> for <Type>`.'
         - 'Robot implements Greeter { ... } — Java/TS syntax; Rust uses the `impl ... for ...` keyword pair.'

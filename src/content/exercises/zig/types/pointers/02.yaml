@@ -19,9 +19,18 @@ generator:
         return p.*;
     }
   distractors:
-    - "fn read(p: *i32) i32 { return p.*; }"
-    - "fn read(p: const *i32) i32 { return p.*; }"
-    - "fn read(p: i32 const) i32 { return p; }"
+    - |-
+      fn read(p: *i32) i32 {
+          return p.*;
+      }
+    - |-
+      fn read(p: const *i32) i32 {
+          return p.*;
+      }
+    - |-
+      fn read(p: i32 const) i32 {
+          return p;
+      }
 hints:
   - "Two pieces: the read-only-pointer type is `*const T` (with `const` between the `*` and the underlying type). The deref `p.*` is unchanged."
   - "Shape: `fn name(p: *const T) ReturnType { return p.*; }`."

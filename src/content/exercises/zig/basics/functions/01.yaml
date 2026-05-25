@@ -12,18 +12,42 @@ generator:
   variants:
     - id: add
       ts: "function add(a: number, b: number): number { return a + b; }"
-      canonical: "fn add(a: i32, b: i32) i32 { return a + b; }"
+      canonical: |-
+        fn add(a: i32, b: i32) i32 {
+            return a + b;
+        }
       distractors:
-        - "fn add(a: i32, b: i32): i32 { return a + b; }"
-        - "function add(a: i32, b: i32) i32 { return a + b; }"
-        - "fn add(a: i32, b: i32) -> i32 { return a + b; }"
+        - |-
+          fn add(a: i32, b: i32): i32 {
+              return a + b;
+          }
+        - |-
+          function add(a: i32, b: i32) i32 {
+              return a + b;
+          }
+        - |-
+          fn add(a: i32, b: i32) -> i32 {
+              return a + b;
+          }
     - id: greet
       ts: "function greet(name: string): string { return name; }"
-      canonical: "fn greet(name: []const u8) []const u8 { return name; }"
+      canonical: |-
+        fn greet(name: []const u8) []const u8 {
+            return name;
+        }
       distractors:
-        - "fn greet(name: string) string { return name; }"
-        - "fn greet(name: []const u8): []const u8 { return name; }"
-        - "fn greet(name: []const u8) -> []const u8 { return name; }"
+        - |-
+          fn greet(name: string) string {
+              return name;
+          }
+        - |-
+          fn greet(name: []const u8): []const u8 {
+              return name;
+          }
+        - |-
+          fn greet(name: []const u8) -> []const u8 {
+              return name;
+          }
 hints:
   - "Three shifts from TS: `function` → `fn`, return type comes AFTER the param list (no colon between them), and the types are Zig-specific (`i32`, `[]const u8`)."
   - "Shape: `fn <name>(<params>) <ReturnType> { <body> }`."

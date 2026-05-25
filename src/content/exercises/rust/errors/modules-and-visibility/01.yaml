@@ -10,7 +10,13 @@ generator:
   variants:
     - id: mod-decl
       ts: 'namespace math { export function add(a: number, b: number) { return a + b; } }'
-      canonical: 'mod math { fn add(a: i32, b: i32) -> i32 { a + b } } — `mod <name> { ... }` introduces an inline module body in the current file.'
+      canonical: |-
+        mod math {
+            fn add(a: i32, b: i32) -> i32 {
+                a + b
+            }
+        }
+        — `mod <name> { ... }` introduces an inline module body in the current file.
       distractors:
         - 'namespace math { ... } — that''s the C++/TypeScript keyword; Rust uses `mod`.'
         - 'module math { ... } — full word; Rust spells it as the three-letter abbreviation `mod`.'
