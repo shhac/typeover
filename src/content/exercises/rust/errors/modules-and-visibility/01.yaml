@@ -9,7 +9,12 @@ generator:
   kind: variant
   variants:
     - id: mod-decl
-      ts: 'namespace math { export function add(a: number, b: number) { return a + b; } }'
+      ts: |-
+        namespace math {
+          export function add(a: number, b: number) {
+            return a + b;
+          }
+        }
       canonical: |-
         mod math {
             fn add(a: i32, b: i32) -> i32 {

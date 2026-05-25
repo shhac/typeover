@@ -9,7 +9,10 @@ generator:
   kind: variant
   variants:
     - id: push-bang
-      ts: 'function exclaim(s: string): string { return s + "!"; }'
+      ts: |-
+        function exclaim(s: string): string {
+          return s + "!";
+        }
       canonical: 'fn exclaim(s: &mut String) — exclusive mutable borrow; the function modifies in place and the caller keeps ownership.'
       distractors:
         - 'fn exclaim(s: &String) — shared borrow; the function cannot mutate.'

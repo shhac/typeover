@@ -11,7 +11,10 @@ generator:
   kind: variant
   variants:
     - id: add
-      ts: "function add(a: number, b: number): number { return a + b; }"
+      ts: |-
+        function add(a: number, b: number): number {
+          return a + b;
+        }
       canonical: |-
         fn add(a: i32, b: i32) i32 {
             return a + b;
@@ -30,7 +33,10 @@ generator:
               return a + b;
           }
     - id: greet
-      ts: "function greet(name: string): string { return name; }"
+      ts: |-
+        function greet(name: string): string {
+          return name;
+        }
       canonical: |-
         fn greet(name: []const u8) []const u8 {
             return name;

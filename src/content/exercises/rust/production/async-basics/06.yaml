@@ -9,7 +9,10 @@ generator:
   kind: variant
   variants:
     - id: doubler-body
-      ts: 'async function double(x: number): Promise<number> { return x * 2; }'
+      ts: |-
+        async function double(x: number): Promise<number> {
+          return x * 2;
+        }
       canonical: '{ x * 2 } — single expression, no trailing semicolon, returns implicitly. Idiomatic Rust style.'
       distractors:
         - '{ return x * 2; } — compiles, but `return` is redundant when the body is a single expression. Trailing-expression form is idiomatic.'

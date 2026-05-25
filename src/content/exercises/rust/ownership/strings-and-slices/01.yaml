@@ -10,7 +10,10 @@ generator:
   kind: variant
   variants:
     - id: read-helper
-      ts: 'function shout(s: string): string { return s.toUpperCase(); }'
+      ts: |-
+        function shout(s: string): string {
+          return s.toUpperCase();
+        }
       canonical: 'fn shout(s: &str) -> String — `&str` is the universal read-only string borrow; both `&String` and `"literal"` coerce to it.'
       distractors:
         - 'fn shout(s: &String) -> String — works for `&String` callers, but `"literal"` does not auto-coerce.'

@@ -9,21 +9,30 @@ generator:
   kind: variant
   variants:
     - id: double
-      ts: 'function double(x: number): number { return x * 2; }'
+      ts: |-
+        function double(x: number): number {
+          return x * 2;
+        }
       canonical: 'func double(x int) int { return x * 2 }'
       distractors:
         - 'function double(x int) int { return x * 2 }'
         - 'func double(x: int): int { return x * 2 }'
         - 'def double(x int) -> int { return x * 2 }'
     - id: greet
-      ts: 'function greet(name: string): string { return "hi " + name; }'
+      ts: |-
+        function greet(name: string): string {
+          return "hi " + name;
+        }
       canonical: 'func greet(name string) string { return "hi " + name }'
       distractors:
         - 'function greet(name string) string { return "hi " + name }'
         - 'func greet(name: string): string { return "hi " + name }'
         - 'func greet(string name) string { return "hi " + name }'
     - id: is-zero
-      ts: 'function isZero(n: number): boolean { return n === 0; }'
+      ts: |-
+        function isZero(n: number): boolean {
+          return n === 0;
+        }
       canonical: 'func isZero(n int) bool { return n == 0 }'
       distractors:
         - 'function isZero(n int) bool { return n == 0 }'

@@ -10,7 +10,10 @@ generator:
   kind: variant
   variants:
     - id: identity-generic
-      ts: 'function identity<T>(x: T): T { return x; }'
+      ts: |-
+        function identity<T>(x: T): T {
+          return x;
+        }
       canonical: 'fn identity<T>(x: T) -> T { x } — type parameter declared in `<...>` between the function name and the parameter list; return type uses `->`.'
       distractors:
         - 'fn identity<T>(x: T): T { return x; } — `:` for return type is TS syntax; Rust uses `->`. Body returns by trailing expression, no `return` keyword needed.'

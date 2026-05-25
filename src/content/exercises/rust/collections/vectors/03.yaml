@@ -10,7 +10,10 @@ generator:
   kind: variant
   variants:
     - id: get-or-index
-      ts: 'function safe(xs: number[], i: number): number | undefined { return xs[i]; }'
+      ts: |-
+        function safe(xs: number[], i: number): number | undefined {
+          return xs[i];
+        }
       canonical: 'xs.get(5) — returns `Option<&i32>`; `None` for out-of-bounds; no panic.'
       distractors:
         - 'xs[5] — direct indexing panics on out-of-bounds (`index out of bounds`); no `Option` involved.'

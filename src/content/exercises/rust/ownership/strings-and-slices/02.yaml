@@ -10,7 +10,10 @@ generator:
   kind: variant
   variants:
     - id: owned-return
-      ts: 'function tag(name: string): string { return "@" + name; }'
+      ts: |-
+        function tag(name: string): string {
+          return "@" + name;
+        }
       canonical: 'fn tag(name: &str) -> String — returns the owned String; the function allocates, the caller takes ownership.'
       distractors:
         - 'fn tag(name: &str) -> &str — the new string lives only inside the function; returning a reference to it produces a dangling borrow.'

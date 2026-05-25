@@ -9,7 +9,10 @@ generator:
   kind: variant
   variants:
     - id: async-fn
-      ts: 'async function answer(): Promise<number> { return 42; }'
+      ts: |-
+        async function answer(): Promise<number> {
+          return 42;
+        }
       canonical: 'async fn answer() -> i32 { 42 } — `async` modifier BEFORE `fn`; the function returns an opaque future of `i32`.'
       distractors:
         - 'fn async answer() -> i32 { 42 } — `async` comes BEFORE `fn`, not after.'

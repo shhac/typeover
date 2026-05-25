@@ -9,7 +9,10 @@ generator:
   kind: variant
   variants:
     - id: pub-modifier
-      ts: 'export function add(a: number, b: number): number { return a + b; }'
+      ts: |-
+        export function add(a: number, b: number): number {
+          return a + b;
+        }
       canonical: 'pub fn foo() {} — `pub` is the three-letter modifier that exposes the item to consumers outside the module.'
       distractors:
         - 'export fn foo() {} — `export` is the TS keyword; Rust uses `pub`.'

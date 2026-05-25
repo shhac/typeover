@@ -10,14 +10,20 @@ generator:
   kind: variant
   variants:
     - id: double
-      ts: "function double(n: number): number { return n * 2; }"
+      ts: |-
+        function double(n: number): number {
+          return n * 2;
+        }
       canonical: "fn double(n: i32) -> i32 { n * 2 }"
       distractors:
         - "function double(n: i32) -> i32 { n * 2 }"
         - "fn double(n: i32): i32 { return n * 2; }"
         - "fn double(n) -> i32 { n * 2 }"
     - id: greet
-      ts: "function greet(name: string): string { return `hi ${name}`; }"
+      ts: |-
+        function greet(name: string): string {
+          return `hi ${name}`;
+        }
       canonical: 'fn greet(name: &str) -> String { format!("hi {}", name) }'
       distractors:
         - 'fn greet(name: &str): String { format!("hi {}", name) }'
