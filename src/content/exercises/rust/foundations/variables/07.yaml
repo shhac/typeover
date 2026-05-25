@@ -1,0 +1,52 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-line
+order: 7
+prompt: |
+  Write the line that rebinds `text` to its trimmed length — a
+  shadow that changes the type from `&str` to `usize`.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let text: usize = text.trim().len();"
+  ts: |-
+    const text: string = "  hi  ";
+    const text: number = text.trim().length;
+    console.log(text);
+  canonical: |-
+    fn main() {
+        let text: &str = "  hi  ";
+        ${line}
+        println!("{}", text);
+    }
+  distractors:
+    - match: "text = text.trim().len();"
+      explain: |-
+        That's a reassignment, but `text` is immutable AND the
+        type can't change from `&str` to `usize` via mutation.
+        Use a fresh `let` to shadow.
+    - match: "let mut text: usize = text.trim().len();"
+      explain: |-
+        `mut` lets you reassign LATER, but the rebinding here
+        IS the change — shadowing handles it with a plain `let`,
+        no `mut` needed.
+    - match: "let text = text.trim().len();"
+      explain: |-
+        Compiles (Rust infers `usize`), but this exercise asks
+        for the explicit `: usize` annotation so you see the
+        type that `.len()` returns.
+expectStdout: |
+  2
+runtime: server
+blanks: [line]
+hints:
+  - "Shadow with a fresh `let` — same name, new type. The expression `text.trim().len()` returns a `usize` (Rust's pointer-width index type)."
+  - "Shape: `let <name>: <type> = <expr>;`. No `mut` (you're not mutating, you're rebinding)."
+  - "`let text: usize = text.trim().len();`"
+notes: |
+  Production drill for shadowing under runtime grading. Distractors
+  cover the three predictable wrong reflexes: bare reassignment
+  (type mismatch + immutable), unneeded `mut`, and dropping the
+  explicit annotation. The canonical's chained `.trim().len()`
+  also previews the method-chain idiom.

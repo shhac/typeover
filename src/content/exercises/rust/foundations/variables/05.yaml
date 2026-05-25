@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-word
+order: 5
+prompt: |
+  Fill the keyword that turns this `let` into a mutable binding so
+  the next line's reassignment compiles. Three letters.
+generator:
+  kind: template
+  vars:
+    keyword: ["mut"]
+    name: [score, count, total]
+  ts: |-
+    let ${name}: number = 0;
+    ${name} = ${name} + 1;
+  canonical: |-
+    let ${keyword} ${name}: i32 = 0;
+    ${name} = ${name} + 1;
+blanks: [keyword]
+hints:
+  - "Rust's reflex is immutable-by-default. Three letters; the same word C++ uses for mutable member-functions."
+  - "Slots between `let` and the name."
+  - "`mut`"
+runtime: none
+notes: |
+  Production drill for `let mut` after the slot-02 MCQ pinned the
+  shape. Single canonical answer (`mut`); name-variant for
+  replayability.

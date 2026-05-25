@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/foundations/variables
+type: mcq
+order: 1
+prompt: |
+  The variable is declared and used, never reassigned. Pick the
+  idiomatic Rust binding — Rust defaults to immutable; opt in to
+  mutability only when you need it.
+generator:
+  kind: variant
+  variants:
+    - id: count
+      ts: "let count: number = 5;"
+      canonical: "let count: i32 = 5;"
+      distractors:
+        - "let mut count: i32 = 5;"
+        - "var count: i32 = 5;"
+        - "const count: i32 = 5;"
+    - id: ratio
+      ts: "let ratio: number = 0.5;"
+      canonical: "let ratio: f64 = 0.5;"
+      distractors:
+        - "let mut ratio: f64 = 0.5;"
+        - "var ratio: f64 = 0.5;"
+        - "const ratio: f64 = 0.5;"
+hints:
+  - "Rust's `let` is immutable by default — that's the reverse of TS's `let`. No reassignment is happening, so don't add anything."
+  - "Shape: `let <name>: <type> = <value>;`. No `mut`."
+  - "For count: `let count: i32 = 5;`."
+runtime: none
+notes: |
+  Sets the immutable-by-default reflex. Distractors:
+   - `let mut` — unnecessary opt-in (works but signals intent that
+     isn't here).
+   - `var` — Zig/JS reflex; not a Rust keyword.
+   - `const` — Rust's `const` is for compile-time constants only;
+     misuse for a regular binding is a common TS-dev slip.

@@ -1,0 +1,43 @@
+target: rust
+themeId: rust/foundations/variables
+type: mcq
+order: 3
+prompt: |
+  Rust's numeric primitives are width-specific — there's no generic
+  `number`. Pick the right type annotation for the literal value.
+generator:
+  kind: variant
+  variants:
+    - id: small-int
+      ts: "let n: number = 7;"
+      canonical: "let n: i32 = 7;"
+      distractors:
+        - "let n: number = 7;"
+        - "let n: int = 7;"
+        - "let n: i = 7;"
+    - id: big-int
+      ts: "let n: number = 1_000_000_000_000;"
+      canonical: "let n: i64 = 1_000_000_000_000;"
+      distractors:
+        - "let n: i32 = 1_000_000_000_000;"
+        - "let n: int = 1_000_000_000_000;"
+        - "let n: u32 = 1_000_000_000_000;"
+    - id: ratio
+      ts: "let pi: number = 3.14159;"
+      canonical: "let pi: f64 = 3.14159;"
+      distractors:
+        - "let pi: number = 3.14159;"
+        - "let pi: float = 3.14159;"
+        - "let pi: f = 3.14159;"
+hints:
+  - "Rust splits `number` into width-specific types: `i32`/`i64`/`u32`/`u64` for integers, `f32`/`f64` for floats. The annotation goes after `:` between name and `=`."
+  - "Reasonable defaults: `i32` for small integers, `i64` if the value won't fit in 32 bits, `f64` for floats. The literal underscores (`1_000_000_000_000`) are visual separators — not a syntax change."
+  - "For small-int: `let n: i32 = 7;`."
+runtime: none
+notes: |
+  Recognition drill for width-specific numerics. Distractors:
+   - `number` — TS leakage; Rust has no generic number type.
+   - `int` / `float` — close-but-wrong names; Rust uses `i32`/`f64`
+     etc.
+   - `i32` for a 1-trillion literal — would warn at compile time
+     and overflow at runtime.

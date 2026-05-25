@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/foundations/variables
+type: freeform
+order: 9
+prompt: |
+  Write a Rust program that increments a counter from 0 to 5 and
+  prints the final value. The TS reference uses plain `let` and
+  reassignment; the Rust version needs the mutability opt-in so
+  the loop body's `count = count + 1` compiles. Output:
+
+      5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    let count: number = 0;
+    while (count < 5) { count = count + 1; }
+    console.log(count);
+  canonical: |-
+    fn main() {
+        let mut count: i32 = 0;
+        while count < 5 {
+            count = count + 1;
+        }
+        println!("{}", count);
+    }
+expectStdout: |
+  5
+runtime: server
+hints:
+  - "Two things to remember: `let mut` (not just `let`) because the loop reassigns `count`, and `while` in Rust doesn't take parentheses around the condition (the braces around the body are required)."
+  - "Shape: `fn main() { let mut count: i32 = 0; while count < 5 { count = count + 1; } println!(\"{}\", count); }`."
+  - |-
+    fn main() {
+        let mut count: i32 = 0;
+        while count < 5 {
+            count = count + 1;
+        }
+        println!("{}", count);
+    }
+notes: |
+  Closes the theme by combining `let mut` (slot 02 + 05) with a
+  loop that actually exercises the reassignment — the immutable
+  default would refuse the body, so the learner has to ship the
+  full reflex shift to pass. `while` (vs Go/Zig's `for`) gets
+  introduced incidentally; the conditional-loop deep-dive lives
+  in `control-flow`.

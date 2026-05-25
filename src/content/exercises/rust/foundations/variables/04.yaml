@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/foundations/variables
+type: mcq
+order: 4
+prompt: |
+  The program parses a string and wants to use the same name
+  `n` for the parsed integer. The type changes from `&str` to
+  `i32`, so mutation can't do it — pick the right Rust shape.
+generator:
+  kind: variant
+  variants:
+    - id: parse-int
+      ts: 'const n: string = "42"; const n: number = parseInt(n);'
+      canonical: 'let n: &str = "42"; let n: i32 = n.parse().unwrap();'
+      distractors:
+        - 'let mut n: &str = "42"; n = n.parse().unwrap();'
+        - 'let n: &str = "42"; n = n.parse().unwrap();'
+        - 'let n: &str = "42"; let n: i32 = parseInt(n);'
+hints:
+  - "Shadowing means a fresh `let` that happens to reuse the name — a NEW binding, not a reassignment. That's why the type can change. `mut` only allows reassignment WITH THE SAME TYPE."
+  - "Two `let` lines, same name on both. No `mut` needed — each `let` declares a fresh binding."
+  - "`let n: &str = \"42\"; let n: i32 = n.parse().unwrap();`"
+runtime: none
+notes: |
+  Shadowing vs mutation — the distinction TS devs trip on because
+  TS forbids redeclaration in the same scope. Distractors:
+   - `let mut ... ; n = n.parse()` — would still fail compile; you
+     can't change the type via reassignment.
+   - `let ...; n = n.parse()` — same failure for two reasons.
+   - `parseInt(n)` — TS function name leaked; Rust uses
+     `.parse()` with type inference from the binding.

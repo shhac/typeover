@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/foundations/variables
+type: mcq
+order: 2
+prompt: |
+  The variable is reassigned on the next line. Pick the Rust
+  declaration that allows mutation — `let` alone won't compile
+  when the next statement tries to change it.
+generator:
+  kind: variant
+  variants:
+    - id: counter
+      ts: "let counter: number = 0; counter = counter + 1;"
+      canonical: "let mut counter: i32 = 0; counter = counter + 1;"
+      distractors:
+        - "let counter: i32 = 0; counter = counter + 1;"
+        - "const mut counter: i32 = 0; counter = counter + 1;"
+        - "var counter: i32 = 0; counter = counter + 1;"
+    - id: total
+      ts: "let total: number = 0; total = total + 10;"
+      canonical: "let mut total: i32 = 0; total = total + 10;"
+      distractors:
+        - "let total: i32 = 0; total = total + 10;"
+        - "const mut total: i32 = 0; total = total + 10;"
+        - "var total: i32 = 0; total = total + 10;"
+hints:
+  - "Reassignment needs `mut`. Plain `let` rejects the next line with `cannot assign twice to immutable variable`."
+  - "Shape: `let mut <name>: <type> = <value>;`. The `mut` slots between `let` and the name."
+  - "For counter: `let mut counter: i32 = 0; counter = counter + 1;`."
+runtime: none
+notes: |
+  Sibling to slot 01 — same shape, different reflex. Distractors:
+   - `let` without `mut` — the most common TS-dev slip; compiler
+     pinpoints the assignment line.
+   - `const mut` — keyword salad. `const` and `mut` are mutually
+     exclusive in Rust.
+   - `var` — Zig/JS reflex; not a Rust keyword.

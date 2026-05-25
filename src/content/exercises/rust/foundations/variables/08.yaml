@@ -1,0 +1,41 @@
+target: rust
+themeId: rust/foundations/variables
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript into a complete Rust program. Three
+  bindings, one print. Output should be exactly:
+
+      7
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const base: number = 3;
+    const bump: number = 4;
+    const total: number = base + bump;
+    console.log(total);
+  canonical: |-
+    fn main() {
+        let base: i32 = 3;
+        let bump: i32 = 4;
+        let total: i32 = base + bump;
+        println!("{}", total);
+    }
+expectStdout: |
+  7
+runtime: server
+hints:
+  - "Three `let` bindings (all `i32`, none need `mut` — they're never reassigned). One `println!` with `{}` and `total` as the argument."
+  - "Shape: `fn main() { let base: i32 = 3; let bump: i32 = 4; let total: i32 = base + bump; println!(\"{}\", total); }`."
+  - |-
+    fn main() {
+        let base: i32 = 3;
+        let bump: i32 = 4;
+        let total: i32 = base + bump;
+        println!("{}", total);
+    }
+notes: |
+  Multi-binding freeform translating from a TS reference. None of
+  the bindings need `mut` — the slot pins immutable-by-default
+  for a runnable program. Canonical small enough for prebake.

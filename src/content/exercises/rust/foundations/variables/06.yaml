@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/foundations/variables
+type: fill-word
+order: 6
+prompt: |
+  Fill the Rust type annotation. The literal is a 32-bit signed
+  integer.
+generator:
+  kind: template
+  vars:
+    type: ["i32"]
+    name: [count, score, age]
+  ts: |-
+    let ${name}: number = 0;
+  canonical: |-
+    let ${name}: ${type} = 0;
+blanks: [type]
+hints:
+  - "Three characters: the letter for the signed-integer family + the bit width."
+  - "Width-specific: `i` for signed integer, `32` for 32 bits. Rust has no generic `int`."
+  - "`i32`"
+runtime: none
+notes: |
+  Production drill for the default integer annotation. The wider
+  vocabulary (`i64`, `u32`, `f64`) is reinforced by slot 03's MCQ.
