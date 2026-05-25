@@ -49,10 +49,8 @@ export function resolveSubmissionShape(
   const base = LANGUAGE_SUBMISSION_SHAPE[target];
   if (!override) return base;
   return {
-    mustStartWith:
-      override.mustStartWith !== undefined ? override.mustStartWith : base.mustStartWith,
-    mustEndWith:
-      override.mustEndWith !== undefined ? override.mustEndWith : base.mustEndWith,
+    mustStartWith: override.mustStartWith ?? base.mustStartWith,
+    mustEndWith: override.mustEndWith ?? base.mustEndWith,
   };
 }
 

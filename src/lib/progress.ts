@@ -98,9 +98,9 @@ function read(): Progress {
   const result = parseProgressResult(raw);
   if (result.ok) {
     const migrated = migrateLegacyIds(result.value);
+    cachedProgress = migrated;
     if (migrated !== result.value) write(migrated);
-    else cachedProgress = result.value;
-    return cachedProgress!;
+    return cachedProgress;
   }
   if (result.reason !== "empty" && raw !== null) {
     return handleCorruptProgress(raw);
