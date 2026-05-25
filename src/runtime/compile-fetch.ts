@@ -39,19 +39,13 @@ export async function fetchCompiledWasm(
 ): Promise<FetchCompiledResult> {
   const doFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
 
-  let res: Response;
-  try {
-    res = await doFetch(`/api/compile/${language}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: code }),
-    });
-  } catch (err) {
-    /* Network failure / DNS / offline. The `[transport]` prefix
-     * disambiguates from compile-failure messages (which are the
-     * rustc diagnostics themselves) in the freeform UI. */
-    return { ok: false, error: `[transport] ${errorMessage(err)}` };
-  }
+  const res = await doFetch(`/api/compile/${language}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source: code }),
+  }).catch((err: unknown) => ({ ok: false as const, error: `[transport] ${errorMessage(err)}` }));
+
+  if ("error" in res) return res;
 
   if (!res.ok) {
     /* On L1 miss, the Function (or the SW's fallthrough) returns
