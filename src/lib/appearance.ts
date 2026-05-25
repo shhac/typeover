@@ -17,12 +17,13 @@ export const DENSITIES = ["compact", "normal", "airy"] as const;
 export type DensityId = (typeof DENSITIES)[number];
 
 export const DENSITY_STORAGE_KEY = "typeover:density";
+export const DENSITY_DEFAULT: DensityId = "normal";
 
 const densityAxis = defineAppearanceAxis<DensityId>({
   values: DENSITIES,
   storageKey: DENSITY_STORAGE_KEY,
   datasetKey: "density",
-  default: "normal",
+  default: DENSITY_DEFAULT,
 });
 
 export const currentDensity = densityAxis.current;
@@ -54,12 +55,13 @@ export const RADII = ["sharp", "normal", "rounded", "pill"] as const;
 export type RadiusId = (typeof RADII)[number];
 
 export const RADIUS_STORAGE_KEY = "typeover:radius";
+export const RADIUS_DEFAULT: RadiusId = "normal";
 
 const radiusAxis = defineAppearanceAxis<RadiusId>({
   values: RADII,
   storageKey: RADIUS_STORAGE_KEY,
   datasetKey: "radius",
-  default: "normal",
+  default: RADIUS_DEFAULT,
 });
 
 export const currentRadius = radiusAxis.current;
@@ -92,12 +94,13 @@ export const STYLES = ["terminal", "cardboard", "textbook", "glass", "islands"] 
 export type StyleId = (typeof STYLES)[number];
 
 export const STYLE_STORAGE_KEY = "typeover:style";
+export const STYLE_DEFAULT: StyleId = "terminal";
 
 const styleAxis = defineAppearanceAxis<StyleId>({
   values: STYLES,
   storageKey: STYLE_STORAGE_KEY,
   datasetKey: "style",
-  default: "terminal",
+  default: STYLE_DEFAULT,
 });
 
 export const currentStyle = styleAxis.current;

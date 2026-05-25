@@ -27,18 +27,21 @@ import { defineAppearanceAxis } from "./appearance-axis";
 export {
   /* shape (radius) */
   RADII,
+  RADIUS_DEFAULT,
   RADIUS_LABELS,
   RADIUS_STORAGE_KEY,
   currentRadius,
   setRadius,
   /* density */
   DENSITIES,
+  DENSITY_DEFAULT,
   DENSITY_LABELS,
   DENSITY_STORAGE_KEY,
   currentDensity,
   setDensity,
   /* style */
   STYLES,
+  STYLE_DEFAULT,
   STYLE_LABELS,
   STYLE_STORAGE_KEY,
   currentStyle,

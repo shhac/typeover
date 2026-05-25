@@ -2,6 +2,7 @@
 import "~/styles/global.css";
 import { ResumeLink } from "~/components/header/ResumeLink";
 import { NAV_LINK_CLASS } from "~/components/ds/NavLink";
+import { APPEARANCE_BOOTSTRAP_SCRIPT } from "~/lib/appearance-bootstrap";
 
 interface Props {
   title: string;
@@ -97,77 +98,7 @@ const runtimePrefetchScript = `(function () {
      * small; any growth lives in src/lib/theme.ts. See
      * design-docs/13-themes.md + 14-stylistic-themes.md.
      */}
-    <script is:inline>
-      (() => {
-        try {
-          var pinnedTheme = localStorage.getItem("typeover:theme");
-          var theme =
-            pinnedTheme === "dark" || pinnedTheme === "light"
-              ? pinnedTheme
-              : window.matchMedia("(prefers-color-scheme: light)").matches
-                ? "light"
-                : "dark";
-          document.documentElement.dataset.theme = theme;
-
-          var pinnedDensity = localStorage.getItem("typeover:density");
-          document.documentElement.dataset.density =
-            pinnedDensity === "compact" ||
-            pinnedDensity === "normal" ||
-            pinnedDensity === "airy"
-              ? pinnedDensity
-              : "normal";
-
-          var pinnedRadius = localStorage.getItem("typeover:radius");
-          document.documentElement.dataset.radius =
-            pinnedRadius === "sharp" ||
-            pinnedRadius === "normal" ||
-            pinnedRadius === "rounded" ||
-            pinnedRadius === "pill"
-              ? pinnedRadius
-              : "normal";
-
-          var pinnedStyle = localStorage.getItem("typeover:style");
-          var style =
-            pinnedStyle === "terminal" ||
-            pinnedStyle === "cardboard" ||
-            pinnedStyle === "textbook" ||
-            pinnedStyle === "glass" ||
-            pinnedStyle === "islands"
-              ? pinnedStyle
-              : "terminal";
-          document.documentElement.dataset.style = style;
-
-          /* Palette resolution per design-docs/22 — `default` (or
-           * absent) follows the active style's default; a specific
-           * palette ID persists across style switches. The list
-           * below must stay in sync with PALETTES + STYLE_DEFAULT_PALETTE
-           * in src/lib/theme.ts — bootstrap.test asserts every
-           * literal appears. */
-          var styleDefaultPalette = {
-            terminal: "phosphor-amber",
-            cardboard: "warm-paper",
-            textbook: "parchment-ink",
-            glass: "aurora-amber",
-            islands: "desk-felt",
-          };
-          var palettes = [
-            "phosphor-amber", "phosphor-green", "ice-blue", "tape-reel",
-            "warm-paper", "kraft", "manila", "newsprint", "calfskin",
-            "parchment-ink", "pelican", "almanac", "e-reader", "slate-rule",
-            "aurora-amber", "glacier-blue", "lavender-mist", "monochrome",
-            "desk-felt", "app-store", "dark-wood", "studio-grey", "sunlit-pine",
-          ];
-          var pinnedPalette = localStorage.getItem("typeover:palette");
-          document.documentElement.dataset.palette =
-            pinnedPalette && pinnedPalette !== "default" && palettes.indexOf(pinnedPalette) >= 0
-              ? pinnedPalette
-              : styleDefaultPalette[style];
-        } catch (_) {
-          /* localStorage unavailable (incognito quota / SSR / etc.) —
-           * fall through to the CSS @theme defaults. */
-        }
-      })();
-    </script>
+    <script is:inline set:html={APPEARANCE_BOOTSTRAP_SCRIPT} />
     <link rel="canonical" href={pageUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {preloadWasm && (
