@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LANGUAGE_REGISTRY, getLanguage, normalizeRust } from "./index";
+import { LANGUAGE_REGISTRY, normalizeRust } from "./index";
 
 describe("LANGUAGE_REGISTRY", () => {
   it("every entry's id matches its registry key", () => {
@@ -15,14 +15,5 @@ describe("LANGUAGE_REGISTRY", () => {
 
   it("registers Rust with the canonical normalize function", () => {
     expect(LANGUAGE_REGISTRY.rust.normalize).toBe(normalizeRust);
-  });
-
-  it("getLanguage('rust') returns the registry entry", () => {
-    expect(getLanguage("rust")).toBe(LANGUAGE_REGISTRY.rust);
-  });
-
-  it("getLanguage returns undefined for unknown languages", () => {
-    expect(getLanguage("python")).toBeUndefined();
-    expect(getLanguage("")).toBeUndefined();
   });
 });

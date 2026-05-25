@@ -24,8 +24,4 @@ export const LANGUAGE_REGISTRY: Record<string, LanguageEntry> = {
   rust: { id: "rust", normalize: normalizeRust },
 };
 
-export function getLanguage(id: string): LanguageEntry | undefined {
-  return LANGUAGE_REGISTRY[id];
-}
-
 export { normalizeRust };
