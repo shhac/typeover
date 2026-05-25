@@ -1,0 +1,61 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: freeform
+order: 8
+prompt: |
+  Translate the TS throw/catch pattern. `parse_age(s)` returns
+  `Result<i32, String>` where the Err includes the original
+  input. `main` matches on the result and prints either the
+  parsed number or `"error: <msg>"`.
+
+  Output:
+
+      27
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number {
+      const n = Number(s);
+      if (Number.isNaN(n)) throw new Error("invalid age: " + s);
+      return n;
+    }
+    try {
+      console.log(parseAge("27"));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log("error:", msg);
+    }
+  canonical: |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| format!("invalid age: {}: {}", s, e))
+    }
+
+    fn main() {
+        match parse_age("27") {
+            Ok(n) => println!("{}", n),
+            Err(msg) => println!("error: {}", msg),
+        }
+    }
+expectStdout: |
+  27
+hints:
+  - "Three pieces: signature returns `Result<i32, String>`, body uses `.map_err(|e| format!(\"invalid age: {}: {}\", s, e))` to BUILD the failure message (TS-like), `main` consumes with a two-arm `match`. No `throw`/`catch` — explicit value-shaped errors."
+  - "Match shape: `match parse_age(\"27\") { Ok(n) => ..., Err(msg) => ... }`."
+  - |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| format!("invalid age: {}: {}", s, e))
+    }
+
+    fn main() {
+        match parse_age("27") {
+            Ok(n) => println!("{}", n),
+            Err(msg) => println!("error: {}", msg),
+        }
+    }
+runtime: server
+notes: |
+  Closes the try/catch parallel. Rust replaces
+  exception-control-flow with value-shaped errors;
+  `match` is the explicit branch the TS `catch`
+  block implies.

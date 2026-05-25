@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: freeform
+order: 9
+prompt: |
+  This program fails to compile with `error[E0277]: the `?`
+  operator can only be used in a function that returns `Result`
+  or `Option``:
+
+      fn parse_age(s: &str) -> i32 {
+          let n = s.parse::<i32>().map_err(|e| e.to_string())?;
+          n
+      }
+
+      fn main() {
+          println!("{:?}", parse_age("27"));
+      }
+
+  Fix it by changing the return type to `Result<i32, String>`
+  and wrapping the final `n` in `Ok(...)`. `main` then prints
+  with `{:?}`.
+
+  Output:
+
+      Ok(27)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number {
+      return Number(s);  // TS lets ? short-circuit only in specific places
+    }
+    console.log(parseAge("27"));
+  canonical: |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        let n = s.parse::<i32>().map_err(|e| e.to_string())?;
+        Ok(n)
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+expectStdout: |
+  Ok(27)
+hints:
+  - "Two coordinated edits: return type goes from `i32` to `Result<i32, String>`, and the final expression goes from bare `n` to `Ok(n)` (the success variant of the new return type). `?` requires the enclosing function to ALSO return `Result` (or `Option`)."
+  - "`-> Result<i32, String>` on the signature, `Ok(n)` on the tail."
+  - |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        let n = s.parse::<i32>().map_err(|e| e.to_string())?;
+        Ok(n)
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+runtime: server
+notes: |
+  Closes the theme on the `?`-needs-Result-return trap.
+  The fix surfaces the symmetry: `?` propagates UP, so the
+  caller's signature must be ready to receive the same
+  failure type.

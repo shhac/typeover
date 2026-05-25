@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: mcq
+order: 1
+prompt: |
+  A function MIGHT succeed with an `i32` or fail with a String
+  reason. Pick the Rust return type that models both outcomes.
+generator:
+  kind: variant
+  variants:
+    - id: result-shape
+      ts: 'function parseAge(s: string): number { /* throws on fail */ }'
+      canonical: 'Result<i32, String> — generic enum with `Ok(i32)` for success and `Err(String)` for failure.'
+      distractors:
+        - 'i32 | String — TS-union syntax; Rust has no union types.'
+        - 'Either<i32, String> — Haskell / Scala / fp-ts naming; Rust calls this `Result`.'
+        - 'Option<i32> — encodes ABSENCE only; no slot for a failure reason.'
+hints:
+  - "Six letters, generic over BOTH outcomes — first the success type, then the failure type. Lives in the prelude (no import needed)."
+  - "Same word a database query returns."
+  - '`Result<i32, String>`'
+runtime: none
+notes: |
+  Pins `Result<T, E>` as the recoverable-error type.
+  Distractors cover the TS-union, Haskell-Either, and
+  Option-when-Result-is-wanted reflexes.

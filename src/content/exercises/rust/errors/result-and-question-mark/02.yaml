@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: mcq
+order: 2
+prompt: |
+  Pick the pair of variant names that ship with `Result<T, E>`.
+generator:
+  kind: variant
+  variants:
+    - id: ok-err
+      ts: '// TS uses thrown values for errors — no built-in variant pair.'
+      canonical: 'Ok(value) and Err(reason) — the two variants of `Result<T, E>`, prelude-imported.'
+      distractors:
+        - 'Some(value) and None — those are `Option<T>`''s variants, not `Result`''s.'
+        - 'Success(value) and Failure(reason) — Java/Scala naming; Rust uses Ok/Err.'
+        - 'Right(value) and Left(reason) — that''s Haskell `Either`; convention inverted from Rust.'
+hints:
+  - "Two-letter variant for success, three-letter variant for failure — both PascalCase, both prelude-imported so they're referenced without `Result::` qualifier."
+  - "`Ok` and `Err`."
+  - '`Ok(value)` and `Err(reason)`'
+runtime: none
+notes: |
+  Pins `Ok`/`Err` as the variants. Distractors cover the
+  Option-confusion, Java-Success/Failure, and Haskell-
+  Right/Left reflexes.

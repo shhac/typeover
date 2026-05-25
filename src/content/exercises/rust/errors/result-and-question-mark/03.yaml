@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: mcq-explain
+order: 3
+prompt: |
+  Pick the strongest reason to use the `?` operator instead of
+  nested `match` for error propagation.
+generator:
+  kind: variant
+  variants:
+    - id: question-mark
+      ts: |-
+        // TS handles propagation with `throw` — invisible in the
+        // signature. Rust makes the path explicit: `?` extracts
+        // the success or returns the error from the function.
+      canonical: '`?` extracts `Ok(v)` to `v` OR returns the `Err` early from the enclosing function — replacing a multi-line nested `match` with one character, without losing exhaustiveness.'
+      distractors:
+        - '`?` short-circuits at runtime via a PANIC if the value is `Err` — faster than `match` in release builds.'
+        - '`?` is REQUIRED when calling functions that return `Result`; nested `match` does not compile against `Result` types.'
+        - '`?` works on any type; nested `match` only works with `Result` and `Option`.'
+hints:
+  - "The `?` operator is sugar for `match v { Ok(x) => x, Err(e) => return Err(e.into()) }`. Same semantics, one character. Compile-time check stays in place."
+  - "Names the operation: e-x-t-r-a-c-t-or-return."
+  - 'Extract Ok or early-return Err — replaces nested match boilerplate.'
+runtime: none
+notes: |
+  Names the real role of `?`: syntactic sugar for the
+  extract-or-propagate pattern. Distractors cover the
+  panic-myth, the "required" myth, and the polymorphism
+  myth.

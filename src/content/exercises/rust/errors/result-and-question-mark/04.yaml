@@ -1,0 +1,24 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: fill-word
+order: 4
+prompt: |
+  Fill the variant name that constructs a successful `Result`
+  carrying the value `42`.
+generator:
+  kind: template
+  vars:
+    variant: ["Ok"]
+  ts: |-
+    function success(): { value: number } { return { value: 42 }; }
+  canonical: |-
+    let r: Result<i32, String> = ${variant}(42);
+blanks: [variant]
+hints:
+  - "Two letters, PascalCase. Prelude-imported so no `Result::` qualifier is needed. Same letters as the English approval word."
+  - "Capital O, lowercase k."
+  - "`Ok`"
+runtime: none
+notes: |
+  Drills the `Ok(value)` construction. Like `Some`, the
+  variant is in the prelude — no qualifier required.

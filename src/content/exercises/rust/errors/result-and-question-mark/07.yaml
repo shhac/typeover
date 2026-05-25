@@ -1,0 +1,53 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: freeform
+order: 7
+prompt: |
+  Write `combine(a: &str, b: &str) -> Result<i32, String>` that
+  parses BOTH `a` and `b` as `i32` and returns their sum. Use
+  the `?` operator TWICE — once per parse — and wrap the final
+  sum in `Ok(...)`. `main` calls `combine("3", "4")` and prints
+  with `{:?}`.
+
+  Output:
+
+      Ok(7)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function combine(a: string, b: string): number {
+      return Number(a) + Number(b);
+    }
+    console.log(combine("3", "4"));
+  canonical: |-
+    fn combine(a: &str, b: &str) -> Result<i32, String> {
+        let x = a.parse::<i32>().map_err(|e| e.to_string())?;
+        let y = b.parse::<i32>().map_err(|e| e.to_string())?;
+        Ok(x + y)
+    }
+
+    fn main() {
+        println!("{:?}", combine("3", "4"));
+    }
+expectStdout: |
+  Ok(7)
+hints:
+  - "Each parse line: `let <name> = <input>.parse::<i32>().map_err(|e| e.to_string())?;`. The `?` extracts the `Ok` value into the binding OR early-returns the `Err`. After both parses succeed, the final line is `Ok(x + y)` — must be wrapped because the function returns a Result."
+  - "Two `let ... = ...?;` lines, then `Ok(x + y)` as the trailing expression."
+  - |-
+    fn combine(a: &str, b: &str) -> Result<i32, String> {
+        let x = a.parse::<i32>().map_err(|e| e.to_string())?;
+        let y = b.parse::<i32>().map_err(|e| e.to_string())?;
+        Ok(x + y)
+    }
+
+    fn main() {
+        println!("{:?}", combine("3", "4"));
+    }
+runtime: server
+notes: |
+  Drills `?` for early-return error propagation. Two
+  consecutive `?` operators eliminate a nested match
+  ladder — the canonical "early-out on first error" shape
+  in idiomatic Rust.

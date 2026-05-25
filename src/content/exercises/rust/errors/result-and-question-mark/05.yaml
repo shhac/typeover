@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: fill-word
+order: 5
+prompt: |
+  Fill the return type. The function might succeed with `i32` or
+  fail with a `String` reason.
+generator:
+  kind: template
+  vars:
+    ret: ["Result<i32, String>"]
+  ts: |-
+    function parseAge(s: string): number { /* throws on fail */ }
+  canonical: |-
+    fn parse_age(s: &str) -> ${ret} {
+        s.parse::<i32>().map_err(|e| e.to_string())
+    }
+blanks: [ret]
+hints:
+  - "Generic over two types — first the SUCCESS type, then the FAILURE type. The two arguments are separated by a comma."
+  - "Shape: `Result<<success>, <failure>>`."
+  - "`Result<i32, String>`"
+runtime: none
+notes: |
+  Drills the full Result return-type form. The body uses
+  `.map_err` to widen the parse error into a String — a
+  common shape when normalising error types.

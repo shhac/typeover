@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/errors/result-and-question-mark
+type: freeform
+order: 6
+prompt: |
+  Write `parse_age(s: &str) -> Result<i32, String>` that parses
+  `s` as an `i32` via `.parse::<i32>()` and converts the parse
+  error to a `String` via `.map_err(|e| e.to_string())`. `main`
+  calls `parse_age("27")` and prints with `{:?}` debug.
+
+  Output:
+
+      Ok(27)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number {
+      const n = Number(s);
+      if (Number.isNaN(n)) throw new Error(s);
+      return n;
+    }
+    console.log(parseAge("27"));
+  canonical: |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| e.to_string())
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+expectStdout: |
+  Ok(27)
+hints:
+  - "Two pieces: signature `fn parse_age(s: &str) -> Result<i32, String>`, body is one expression chaining `.parse::<i32>()` (turbofish pins the target type) with `.map_err(|e| e.to_string())` to widen the parse error to a `String`."
+  - "Body: `s.parse::<i32>().map_err(|e| e.to_string())`."
+  - |-
+    fn parse_age(s: &str) -> Result<i32, String> {
+        s.parse::<i32>().map_err(|e| e.to_string())
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("27"));
+    }
+runtime: server
+notes: |
+  First Result-returning function. `.map_err` is the
+  iterator-style adapter for transforming the Err
+  side; pairs with `.map` (which transforms Ok).
