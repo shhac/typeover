@@ -1,6 +1,10 @@
 import type { CollectionEntry } from "astro:content";
 import { byOrder } from "./curriculum";
 
+function exercisesForTheme(themeId: string, allExercises: readonly Exercise[]): Exercise[] {
+  return allExercises.filter((ex) => ex.data.themeId === themeId).sort(byOrder);
+}
+
 type Module = CollectionEntry<"modules">;
 type Theme = CollectionEntry<"themes">;
 type Exercise = CollectionEntry<"exercises">;
@@ -146,9 +150,7 @@ export function lastExerciseInModule(
   if (!ctx) return null;
   const isLastTheme = ctx.moduleThemes[ctx.moduleThemes.length - 1]?.id === ctx.ownTheme.id;
   if (!isLastTheme) return null;
-  const themeExercises = allExercises
-    .filter((ex) => ex.data.themeId === ctx.ownTheme.id)
-    .sort(byOrder);
+  const themeExercises = exercisesForTheme(ctx.ownTheme.id, allExercises);
   const isLastExercise = themeExercises[themeExercises.length - 1]?.id === exercise.id;
   return isLastExercise ? { moduleId: ctx.ownTheme.data.moduleId } : null;
 }
@@ -171,10 +173,7 @@ export function firstExerciseOfNextTheme(
   if (!ctx) return null;
   const nextTheme = ctx.moduleThemes[ctx.index + 1];
   if (!nextTheme) return null;
-  const nextThemeExercises = allExercises
-    .filter((ex) => ex.data.themeId === nextTheme.id)
-    .sort(byOrder);
-  return nextThemeExercises[0] ?? null;
+  return exercisesForTheme(nextTheme.id, allExercises)[0] ?? null;
 }
 
 /**
@@ -197,8 +196,6 @@ export function lastExerciseOfPreviousTheme(
   if (!ctx) return null;
   const prevTheme = ctx.moduleThemes[ctx.index - 1];
   if (!prevTheme) return null;
-  const prevThemeExercises = allExercises
-    .filter((ex) => ex.data.themeId === prevTheme.id)
-    .sort(byOrder);
-  return prevThemeExercises[prevThemeExercises.length - 1] ?? null;
+  const exs = exercisesForTheme(prevTheme.id, allExercises);
+  return exs[exs.length - 1] ?? null;
 }
