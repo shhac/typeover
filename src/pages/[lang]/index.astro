@@ -45,17 +45,17 @@ const moduleCountWord = ["zero", "one", "two", "three", "four", "five", "six", "
   moduleCount
 ] ?? `${moduleCount}`;
 
-/* Per-language wedge example — same "TS shape, target language
+/* Per-language translation example — same "TS shape, target language
  * shape" rhythm as before, code swapped for the language we're
  * showing. Keep it short — the comparison earns its real estate by
  * being instantly readable. */
-const wedgeTs = `let count: number = 5;
+const translationTs = `let count: number = 5;
 const PI = 3.14;
 
 function double(n: number): number {
   return n * 2;
 }`;
-const wedgeTargetByLang: Record<string, { filename: string; code: string }> = {
+const translationTargetByLang: Record<string, { filename: string; code: string }> = {
   go: {
     filename: "variables.go",
     code: `count := 5
@@ -75,7 +75,7 @@ fn double(n: i32) i32 {
 }`,
   },
 };
-const wedgeTarget = wedgeTargetByLang[lang] ?? wedgeTargetByLang.go!;
+const translationTarget = translationTargetByLang[lang] ?? translationTargetByLang.go!;
 ---
 
 <BaseLayout
@@ -130,12 +130,12 @@ const wedgeTarget = wedgeTargetByLang[lang] ?? wedgeTargetByLang.go!;
         </Stack>
 
         <Stack gap="md">
-          <Heading level={2} size="xl">The translation wedge</Heading>
+          <Heading level={2} size="xl">Translation from TypeScript</Heading>
           <Compare
             caption="Same intent, two syntaxes. typeover's whole shape is teaching the second one by leaning on what you already know about the first."
           >
-            <CodeBlock lang="ts" filename="variables.ts">{wedgeTs}</CodeBlock>
-            <CodeBlock lang={lang} filename={wedgeTarget.filename}>{wedgeTarget.code}</CodeBlock>
+            <CodeBlock lang="ts" filename="variables.ts">{translationTs}</CodeBlock>
+            <CodeBlock lang={lang} filename={translationTarget.filename}>{translationTarget.code}</CodeBlock>
           </Compare>
         </Stack>
 

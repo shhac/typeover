@@ -1,5 +1,5 @@
 import { createSignal, For } from "solid-js";
-import { Button, ButtonLink, CodeBlock, Stack, Text } from "~/components/ds";
+import { Button, ButtonLink, CodeBlock, Heading, Stack, Text } from "~/components/ds";
 
 type TargetId = "go" | "zig" | "rust";
 
@@ -50,14 +50,14 @@ export function HomepageDrill() {
   const current = () => choices[selected()];
 
   return (
-    <section class="border border-border-default rounded-sm overflow-hidden bg-bg-panel">
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <div class="p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-border-default">
+    <section>
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-6 lg:gap-10 items-start">
+        <div>
           <Stack gap="md">
             <Stack gap="xs">
-              <Text tone="muted" size="xs" family="mono">
-                Try the translation move
-              </Text>
+              <Heading level={2} size="2xl">
+                One TypeScript idea, three correct translations
+              </Heading>
               <Text tone="secondary" size="md">
                 Same TypeScript intent. Different target-language reflexes. Pick any answer; all
                 three are valid in their own language.
@@ -85,7 +85,7 @@ console.log(count);`}</CodeBlock>
             </div>
           </Stack>
         </div>
-        <div class="p-4 sm:p-6 bg-bg-base/30">
+        <div>
           <Stack gap="md">
             <CodeBlock lang={selected()} filename={current().filename}>
               {current().code}

@@ -5,7 +5,6 @@ import {
   Button,
   Container,
   Heading,
-  LangCrumbs,
   Stack,
   Text,
 } from "~/components/ds";
@@ -19,7 +18,7 @@ import { HomepageDrill } from "~/components/home/HomepageDrill";
  * as another <TrackCard> below this one with no homepage
  * restructure.
  *
- * Rhythm: hero → TS↔Go wedge example → "what's on offer" Go
+ * Rhythm: hero → language-neutral translation drill → track cards
  * TrackCard → future-language slot → footer. The DS inventory
  * has moved off this page — see /design-system.
  */
@@ -59,20 +58,21 @@ const rustThemeCount = rustThemes.length;
     <Container width="wide">
       <Stack gap="xl">
         {/* Hero */}
-        <Stack gap="md">
-          <LangCrumbs>
-            <Text tone="muted" size="xs" family="mono">v0.0.0 — hello world</Text>
-          </LangCrumbs>
+        <Stack gap="lg">
           <Heading level={1}>
             <span class="text-accent-ts">type</span><span class="text-accent-primary">over</span>
           </Heading>
-          <Text tone="secondary" size="lg">
-            A bilingual learning site that bridges the languages you
-            already know to the ones you want next. Side-by-side
-            translation, multiple choice, fill-in-the-tile, and
-            code-runner exercises — scaffolded so you build real
-            intuition, not just syntax recognition.
-          </Text>
+          <Stack gap="md" class="max-w-3xl">
+            <Text tone="secondary" size="lg">
+              Learn Go, Zig, and Rust by translating from TypeScript you
+              already understand. Short drills, real syntax, runnable code,
+              and hints only when you ask for them.
+            </Text>
+            <Text tone="muted" size="sm">
+              Built for developers who don't need another programming intro;
+              they need their TypeScript reflexes reshaped for the next language.
+            </Text>
+          </Stack>
         </Stack>
 
         <HomepageDrill client:visible />

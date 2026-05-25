@@ -31,7 +31,8 @@ export function Compare(props: ParentProps<CompareProps>) {
   const resolved = children(() => local.children);
   const items = () => {
     const value = resolved();
-    return Array.isArray(value) ? value : [value];
+    const list = Array.isArray(value) ? value : [value];
+    return list.filter((item) => typeof item !== "string" || item.trim() !== "");
   };
   const first = () => items()[0];
   const second = () => items()[1];
