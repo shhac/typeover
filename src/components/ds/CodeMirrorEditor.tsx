@@ -287,10 +287,7 @@ export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   useCodeMirror({
     parent: () => parent,
     initialDoc: props.value,
-    /* Sync external `value` changes only when the editor is
-     * editable. Read-only display mode is one-shot — the caller
-     * doesn't expect to mutate via the value prop after mount. */
-    value: readOnly ? undefined : () => props.value,
+    value: () => props.value,
     /* Toggle editability when `disabled` flips. Only relevant in
      * editor mode (readOnly mode never adds the compartment). */
     editable: readOnly ? undefined : () => !props.disabled,
