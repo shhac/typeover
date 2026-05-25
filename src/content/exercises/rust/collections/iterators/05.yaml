@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/collections/iterators
+type: fill-word
+order: 5
+prompt: |
+  Fill the part of the chain that tells `.sum()` what numeric
+  type to produce. Rust calls this syntax the "turbofish."
+generator:
+  kind: template
+  vars:
+    call: ["sum::<i32>"]
+  ts: |-
+    const total = [1, 2, 3].reduce((a, b) => a + b, 0);
+  canonical: |-
+    let total = vec![1, 2, 3].iter().${call}();
+blanks: [call]
+hints:
+  - "The TURBOFISH is `::<Type>` after the method name. Three pieces — the method name, the turbofish, and parens. Here the method is the one that adds; the type pins the result to a specific integer width."
+  - "Three letters + four characters of turbofish: `sum` + `::<i32>`."
+  - "`sum::<i32>`"
+runtime: none
+notes: |
+  Drills the turbofish syntax on `.sum()`. The annotation
+  `let total: i32 = ...` would also work — turbofish puts
+  the hint on the method call instead of the binding.

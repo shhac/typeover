@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/iterators
+type: fill-word
+order: 4
+prompt: |
+  Fill the iterator adapter that keeps only elements satisfying
+  a predicate.
+generator:
+  kind: template
+  vars:
+    method: ["filter"]
+  ts: |-
+    const positives = xs.filter((x) => x > 0);
+  canonical: |-
+    let xs = vec![-1, 2, -3, 4];
+    let positives: Vec<i32> = xs.into_iter().${method}(|x| x > 0).collect();
+blanks: [method]
+hints:
+  - "Same name as the JS Array method. Takes a closure returning `bool`; keeps only elements where the closure returns `true`."
+  - "Six letters; lowercase."
+  - "`filter`"
+runtime: none
+notes: |
+  Drills `.filter`. Uses `.into_iter()` to get owned `i32`s
+  so the predicate compares `x > 0` without deref noise —
+  the contrast with slot 02 is intentional (consumes `xs`,
+  which we don't need afterward).

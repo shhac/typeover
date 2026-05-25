@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/iterators
+type: mcq
+order: 3
+prompt: |
+  Convert `vec![1, 2, 3]` into a new `Vec<i32>` with each element
+  doubled. Pick the idiomatic iterator chain.
+generator:
+  kind: variant
+  variants:
+    - id: map-collect
+      ts: 'const doubled = xs.map((x) => x * 2);'
+      canonical: 'xs.iter().map(|x| x * 2).collect::<Vec<i32>>() — `.iter()` for shared borrow, `.map(closure)` for transformation, `.collect()` with a target-type hint to materialise the new vector.'
+      distractors:
+        - 'xs.map(|x| x * 2) — `.map` is a method on iterators, not on `Vec`. Call `.iter()` (or `.into_iter()`) first to get an iterator.'
+        - 'xs.iter().map(|x| x * 2) — returns an Iterator, NOT a `Vec`. Iterators are lazy in Rust — `.collect()` (or a similar terminal) is required to materialise.'
+        - 'xs.iter().filter(|x| x * 2).collect() — `.filter` takes a PREDICATE returning bool, not a transformation. Wrong adapter.'
+hints:
+  - "Three steps: get an iterator (`.iter()`), transform (`.map(closure)`), terminate (`.collect()`). Iterators are lazy — without a terminal operation, nothing runs."
+  - "Each transformation = `.map(|x| <expr>)`. Terminal = `.collect::<Vec<i32>>()` (or annotate the binding type)."
+  - '`xs.iter().map(|x| x * 2).collect::<Vec<i32>>()`'
+runtime: none
+notes: |
+  Pins the iter-map-collect triple. The third distractor
+  surfaces the lazy-iterator trap: without `.collect()` you
+  have an Iterator, not a Vec. The fourth surfaces filter-vs-
+  map confusion.

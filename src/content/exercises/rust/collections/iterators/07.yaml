@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/collections/iterators
+type: freeform
+order: 7
+prompt: |
+  Write `sum_of_positives(xs: &[i32]) -> i32` that sums only the
+  POSITIVE elements. Use a chain that BORROWS (no
+  `.into_iter()`). `main` calls it with `vec![1, -2, 3, -4, 5]`
+  and prints.
+
+  Output:
+
+      9
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function sumOfPositives(xs: number[]): number {
+      return xs.filter((x) => x > 0).reduce((a, b) => a + b, 0);
+    }
+    console.log(sumOfPositives([1, -2, 3, -4, 5]));
+  canonical: |-
+    fn sum_of_positives(xs: &[i32]) -> i32 {
+        xs.iter().copied().filter(|&x| x > 0).sum()
+    }
+
+    fn main() {
+        let xs = vec![1, -2, 3, -4, 5];
+        println!("{}", sum_of_positives(&xs));
+    }
+expectStdout: |
+  9
+hints:
+  - "Four pieces: `.iter()` to borrow, `.copied()` to turn `Iterator<&i32>` into `Iterator<i32>` (so the filter closure compares cleanly), `.filter(|&x| x > 0)` keeps positives, `.sum()` terminates. Return type pins `.sum()`'s output."
+  - "Body: `xs.iter().copied().filter(|&x| x > 0).sum()`."
+  - |-
+    fn sum_of_positives(xs: &[i32]) -> i32 {
+        xs.iter().copied().filter(|&x| x > 0).sum()
+    }
+
+    fn main() {
+        let xs = vec![1, -2, 3, -4, 5];
+        println!("{}", sum_of_positives(&xs));
+    }
+runtime: server
+notes: |
+  Drills the read-only chain shape. `.copied()` is the
+  TS-leaning fix for "I have references but want values" —
+  cheaper than `.cloned()` for `Copy` types like `i32`.

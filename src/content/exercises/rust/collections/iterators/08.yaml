@@ -1,0 +1,41 @@
+target: rust
+themeId: rust/collections/iterators
+type: freeform
+order: 8
+prompt: |
+  Translate the TS array chain. Keep only positive elements,
+  double them, collect into a new vec, print all three
+  space-separated.
+
+  Output:
+
+      2 6 10
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, -2, 3, -4, 5];
+    const result = xs.filter((x) => x > 0).map((x) => x * 2);
+    console.log(result.join(" "));
+  canonical: |-
+    fn main() {
+        let xs = vec![1, -2, 3, -4, 5];
+        let result: Vec<i32> = xs.iter().copied().filter(|&x| x > 0).map(|x| x * 2).collect();
+        println!("{} {} {}", result[0], result[1], result[2]);
+    }
+expectStdout: |
+  2 6 10
+hints:
+  - "Chain order matches TS: `.iter().copied().filter(...).map(...).collect()`. `.copied()` flips `&i32` → `i32` so both closures see owned ints; the binding's `Vec<i32>` type tells `.collect()` what to build."
+  - "Body: `let result: Vec<i32> = xs.iter().copied().filter(|&x| x > 0).map(|x| x * 2).collect();`."
+  - |-
+    fn main() {
+        let xs = vec![1, -2, 3, -4, 5];
+        let result: Vec<i32> = xs.iter().copied().filter(|&x| x > 0).map(|x| x * 2).collect();
+        println!("{} {} {}", result[0], result[1], result[2]);
+    }
+runtime: server
+notes: |
+  Closes the `.filter` + `.map` parallel with TS arrays.
+  The chain reads left-to-right matching the TS form;
+  `.collect()` at the end is the Rust-specific terminal.

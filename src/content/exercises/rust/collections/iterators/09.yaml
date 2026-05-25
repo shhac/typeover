@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/collections/iterators
+type: freeform
+order: 9
+prompt: |
+  This program tries to build `doubled` AND read `sum`, but
+  fails with `error[E0382]: borrow of moved value: `xs``:
+
+      fn main() {
+          let xs = vec![1, 2, 3];
+          let doubled: Vec<i32> = xs.into_iter().map(|x| x * 2).collect();
+          let sum: i32 = xs.iter().sum();
+          println!("doubled: {:?}, sum: {}", doubled, sum);
+      }
+
+  The first chain CONSUMED `xs`. Fix it by switching to a
+  borrowing chain (`.iter()` + `.copied()`) so `xs` survives.
+
+  Output:
+
+      doubled: [2, 4, 6], sum: 6
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3];
+    const doubled = xs.map((x) => x * 2);
+    const sum = xs.reduce((a, b) => a + b, 0);
+    console.log("doubled: " + JSON.stringify(doubled) + ", sum: " + sum);
+  canonical: |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let doubled: Vec<i32> = xs.iter().copied().map(|x| x * 2).collect();
+        let sum: i32 = xs.iter().sum();
+        println!("doubled: {:?}, sum: {}", doubled, sum);
+    }
+expectStdout: |
+  doubled: [2, 4, 6], sum: 6
+hints:
+  - "One coordinated edit on the first chain: `xs.into_iter()` → `xs.iter().copied()`. The `.copied()` adapter turns the `&i32` items into owned `i32`s for `.map`, while leaving `xs` intact for the second chain."
+  - "The pattern is: BORROW with `.iter()`, COPY with `.copied()` when you want owned values without consuming the source."
+  - |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let doubled: Vec<i32> = xs.iter().copied().map(|x| x * 2).collect();
+        let sum: i32 = xs.iter().sum();
+        println!("doubled: {:?}, sum: {}", doubled, sum);
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "into_iter consumed
+  too early" trap. The `.iter().copied()` pair is the
+  panic-free / non-consuming alternative; pedagogically
+  cheaper than `.clone()` for `Copy` types.

@@ -1,0 +1,37 @@
+target: rust
+themeId: rust/collections/iterators
+type: mcq-explain
+order: 2
+prompt: |
+  rustc rejects this program with `error[E0382]: borrow of moved
+  value: `xs``. Pick the explanation that names the real cause.
+generator:
+  kind: variant
+  variants:
+    - id: into-iter-moves
+      ts: |-
+        const xs = [1, 2, 3];
+        for (const n of xs) console.log(n);
+        console.log("len:", xs.length);
+        // TS arrays survive iteration; nothing moves.
+      source: |-
+        let xs = vec![1, 2, 3];
+        for n in xs.into_iter() {
+            println!("{}", n);
+        }
+        println!("len: {}", xs.len());
+      canonical: '`.into_iter()` CONSUMES the vector by value — `xs` is moved into the iterator and dropped at the end of the loop. The subsequent `xs.len()` reads a moved-out binding, which the borrow checker forbids.'
+      distractors:
+        - 'The closure inside the for loop borrows `xs` for its lifetime, blocking subsequent reads.'
+        - '`xs.len()` requires `&mut self`, but `xs` was declared without `mut`.'
+        - '`.into_iter()` returns owned values, so `n` must be written as `&n` to satisfy the println.'
+hints:
+  - "There's no closure here — `into_iter` itself moves the receiver. The fix would be `.iter()` (or `&xs`) to BORROW instead of CONSUME."
+  - "The error names the operation that moved the value: into-something."
+  - '`.into_iter()` moves `xs`; the second usage is a use-after-move.'
+runtime: none
+notes: |
+  Names the ownership cost of `.into_iter()`. Distractors
+  surface plausible-but-wrong hypotheses (closure-borrow,
+  receiver mutability, deref pattern) that all miss the
+  move event.

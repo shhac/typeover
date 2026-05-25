@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/iterators
+type: mcq
+order: 1
+prompt: |
+  A function reads each element of a `Vec<i32>` to compute a sum,
+  WITHOUT mutating or consuming the vector. Pick the iterator
+  method that yields SHARED references.
+generator:
+  kind: variant
+  variants:
+    - id: iter-borrow
+      ts: 'const total = xs.reduce((a, b) => a + b, 0);'
+      canonical: 'xs.iter() — yields `&i32`; the vector is borrowed, not moved.'
+      distractors:
+        - 'xs.into_iter() — CONSUMES the vector; yields owned `i32`; the caller cannot use `xs` after.'
+        - 'xs.iter_mut() — yields `&mut i32`; needs `let mut xs` AND grants exclusive access — over-permissioned for a read.'
+        - 'iter(xs) — Rust has no free-standing `iter` function; iterator constructors are methods called via `.`.'
+hints:
+  - "Four letters, lowercase. The method on a vec (or slice) that produces an iterator yielding SHARED references — leaves the owner intact."
+  - "Same word as the noun for one cycle of a loop."
+  - '`xs.iter()`'
+runtime: none
+notes: |
+  Pins `.iter()` as the read-only iterator. The three slips
+  cover the wrong ownership flavours: move (into_iter),
+  mutable (iter_mut), and TS-style free function.

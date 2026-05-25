@@ -1,0 +1,41 @@
+target: rust
+themeId: rust/collections/iterators
+type: freeform
+order: 6
+prompt: |
+  Build a new `Vec<i32>` from `vec![1, 2, 3]` by SQUARING each
+  element. Use `.iter().map(...).collect()`. `main` prints the
+  three squared values space-separated.
+
+  Output:
+
+      1 4 9
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3];
+    const squared = xs.map((x) => x * x);
+    console.log(squared.join(" "));
+  canonical: |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let squared: Vec<i32> = xs.iter().map(|x| x * x).collect();
+        println!("{} {} {}", squared[0], squared[1], squared[2]);
+    }
+expectStdout: |
+  1 4 9
+hints:
+  - "Three pieces: `.iter()` to borrow, `.map(|x| x * x)` to transform (the closure parameter `x` is `&i32`; `*` works through auto-deref), `.collect()` to materialise. The type annotation on `squared` tells `.collect()` which container to build."
+  - "Body: `let squared: Vec<i32> = xs.iter().map(|x| x * x).collect();`."
+  - |-
+    fn main() {
+        let xs = vec![1, 2, 3];
+        let squared: Vec<i32> = xs.iter().map(|x| x * x).collect();
+        println!("{} {} {}", squared[0], squared[1], squared[2]);
+    }
+runtime: server
+notes: |
+  Drills iter→map→collect with a non-trivial closure body.
+  The type annotation on the binding pins the target
+  collection (equivalent to a turbofish on `.collect()`).
