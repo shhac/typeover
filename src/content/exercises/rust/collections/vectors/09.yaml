@@ -1,0 +1,65 @@
+target: rust
+themeId: rust/collections/vectors
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0382]: borrow of moved value:
+  `nums``. The `for n in nums` loop CONSUMES the vector, so
+  the next line that reads `nums.len()` fails.
+
+  Broken source:
+
+      fn main() {
+          let nums = vec![1, 2, 3];
+          for n in nums {
+              println!("{}", n);
+          }
+          println!("len: {}", nums.len());
+      }
+
+  Fix it by iterating by REFERENCE (`for n in &nums`) so the
+  vector survives the loop.
+
+  Output:
+
+      1
+      2
+      3
+      len: 3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const nums = [1, 2, 3];
+    for (const n of nums) console.log(n);
+    console.log("len: " + nums.length);
+  canonical: |-
+    fn main() {
+        let nums = vec![1, 2, 3];
+        for n in &nums {
+            println!("{}", n);
+        }
+        println!("len: {}", nums.len());
+    }
+expectStdout: |
+  1
+  2
+  3
+  len: 3
+hints:
+  - "One coordinated edit: change `for n in nums` to `for n in &nums`. The `&` borrows the vector for the loop instead of moving it — `n` becomes `&i32` (auto-deref in `println!`)."
+  - "Single character change: `nums` → `&nums` in the for header."
+  - |-
+    fn main() {
+        let nums = vec![1, 2, 3];
+        for n in &nums {
+            println!("{}", n);
+        }
+        println!("len: {}", nums.len());
+    }
+runtime: server
+notes: |
+  Closes the theme with the move-by-iteration trap.
+  `for n in vec` consumes the vector by IntoIterator;
+  `for n in &vec` borrows it via IntoIterator on `&Vec`.
+  TS arrays don't have this distinction.

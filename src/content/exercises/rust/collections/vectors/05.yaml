@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/collections/vectors
+type: fill-word
+order: 5
+prompt: |
+  Fill the parameter type. The function reads from a sequence of
+  `i32`s without owning them — works for both `Vec<i32>` and
+  fixed arrays via shared borrow.
+generator:
+  kind: template
+  vars:
+    param: ["&[i32]"]
+  ts: |-
+    function sum(xs: number[]): number {
+      return xs.reduce((a, b) => a + b, 0);
+    }
+  canonical: |-
+    fn sum(xs: ${param}) -> i32 {
+        xs.iter().sum()
+    }
+blanks: [param]
+hints:
+  - "Slice syntax — same shape as the strings-and-slices theme: `&` + brackets around the element type. Works for `Vec<T>` callers (via `&xs`) and array callers (via `&arr`) alike."
+  - "Six characters: `&` + `[` + `i32` + `]`."
+  - "`&[i32]`"
+runtime: none
+notes: |
+  Drills `&[T]` as the universal "I read a sequence" parameter.
+  Same shape as `strings-and-slices/05`, here in vector
+  context; the union with arrays is the point.

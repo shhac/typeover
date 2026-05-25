@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/vectors
+type: mcq
+order: 1
+prompt: |
+  TypeScript's `number[]` describes a resizable owned array of
+  numbers. Pick the Rust type that matches — owned, growable,
+  parameterised on the element type.
+generator:
+  kind: variant
+  variants:
+    - id: vec-int
+      ts: 'const xs: number[] = [];'
+      canonical: 'Vec<i32> — owned growable vector parameterised on the element type.'
+      distractors:
+        - 'i32[] — Rust has no `[]` suffix at the type level; that''s a TS reflex.'
+        - 'Array<i32> — Rust has no `Array` type alias; the standard owned vector is `Vec<T>`.'
+        - '&[i32] — that''s a BORROWED slice (a view into a vec or array), not an owned collection.'
+hints:
+  - "Three letters. Generic, capital V, takes one type parameter in angle brackets. Owned and growable — `push`, `pop`, all the operations work in place."
+  - "Same prefix as the macro that builds one."
+  - '`Vec<i32>`'
+runtime: none
+notes: |
+  Establishes `Vec<T>` as the owned-growable counterpart of
+  TS's `T[]`. The `&[T]` distractor surfaces the
+  borrowed-vs-owned axis from `strings-and-slices`.

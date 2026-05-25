@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/collections/vectors
+type: mcq
+order: 3
+prompt: |
+  A function reads `xs.something(5)` on a `Vec<i32>` that might
+  be SHORTER than 5 elements. Pick the access form that returns
+  `Option<&i32>` instead of panicking.
+generator:
+  kind: variant
+  variants:
+    - id: get-or-index
+      ts: 'function safe(xs: number[], i: number): number | undefined { return xs[i]; }'
+      canonical: 'xs.get(5) — returns `Option<&i32>`; `None` for out-of-bounds; no panic.'
+      distractors:
+        - 'xs[5] — direct indexing panics on out-of-bounds (`index out of bounds`); no `Option` involved.'
+        - 'xs.unwrap(5) — `.unwrap` is a method on `Option`/`Result`, not on `Vec`. Wrong type.'
+        - 'xs.at(5) — `.at` is not a method on `Vec`. JavaScript reflex.'
+hints:
+  - "Three letters. Returns `Option<&T>` — the same wrapper from the previous theme. `None` if the index is out of bounds; the caller decides what to do."
+  - "Same word as the verb meaning 'fetch'."
+  - '`xs.get(5)`'
+runtime: none
+notes: |
+  Pins `.get()` as the panic-free indexing alternative.
+  Connects to the Option theme — `Vec<T>::get` returns the
+  Option-wrapped reference, forcing absence-handling at the
+  type level.

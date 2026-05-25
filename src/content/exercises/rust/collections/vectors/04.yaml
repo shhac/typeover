@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/collections/vectors
+type: fill-word
+order: 4
+prompt: |
+  Fill the method that appends `42` to the end of `xs` in place.
+generator:
+  kind: template
+  vars:
+    method: ["push"]
+  ts: |-
+    const xs: number[] = [];
+    xs.push(42);
+  canonical: |-
+    let mut xs: Vec<i32> = Vec::new();
+    xs.${method}(42);
+blanks: [method]
+hints:
+  - "Same English word as the verb meaning 'shove'. Same name as the JS Array method."
+  - "Four letters; lowercase."
+  - "`push`"
+runtime: none
+notes: |
+  Drills the `push` method. The binding must be `let mut`
+  (mutation through `&mut self`) — that's the parallel to
+  the `mutable-borrows` theme.

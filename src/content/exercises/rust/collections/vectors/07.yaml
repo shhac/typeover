@@ -1,0 +1,50 @@
+target: rust
+themeId: rust/collections/vectors
+type: freeform
+order: 7
+prompt: |
+  Write `product(xs: &[i32]) -> i32` that returns the product of
+  every element (1 for empty). Use the iterator method that
+  matches the operation. `main` calls it with `vec![1, 2, 3, 4]`
+  and prints.
+
+  Output:
+
+      24
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function product(xs: number[]): number {
+      return xs.reduce((a, b) => a * b, 1);
+    }
+    console.log(product([1, 2, 3, 4]));
+  canonical: |-
+    fn product(xs: &[i32]) -> i32 {
+        xs.iter().product()
+    }
+
+    fn main() {
+        let xs = vec![1, 2, 3, 4];
+        println!("{}", product(&xs));
+    }
+expectStdout: |
+  24
+hints:
+  - "The method named after the operation — same shape as `.sum()` from the slices theme. Body is one expression: `xs.iter().<op>()`."
+  - "Seven letters, lowercase."
+  - |-
+    fn product(xs: &[i32]) -> i32 {
+        xs.iter().product()
+    }
+
+    fn main() {
+        let xs = vec![1, 2, 3, 4];
+        println!("{}", product(&xs));
+    }
+runtime: server
+notes: |
+  Reinforces `&[T]` parameter + `.iter().product()` chain.
+  Sibling of `strings-and-slices/07` (which did sum); the
+  identical shape with a different operation pins the
+  pattern.

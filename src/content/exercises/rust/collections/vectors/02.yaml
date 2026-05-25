@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/vectors
+type: mcq
+order: 2
+prompt: |
+  Build a vector containing `[1, 2, 3]`. Pick the idiomatic
+  Rust literal.
+generator:
+  kind: variant
+  variants:
+    - id: vec-literal
+      ts: 'const xs = [1, 2, 3];'
+      canonical: 'vec![1, 2, 3] — the `vec!` macro builds a `Vec<i32>` containing the listed elements.'
+      distractors:
+        - 'Vec(1, 2, 3) — `Vec` is not constructed with parens; you call the macro or build via `Vec::new()` + `.push`.'
+        - 'Vec::new(1, 2, 3) — `Vec::new` takes NO arguments; it returns an empty vector.'
+        - '[1, 2, 3] — that''s a fixed-size ARRAY (`[i32; 3]`), not a `Vec<i32>`. Different type, different ownership story.'
+hints:
+  - "Macro call — note the `!` after `vec`. Brackets, not parens. Inside the brackets, the elements separated by commas."
+  - "Shape: `vec![<elem>, <elem>, ...]`."
+  - '`vec![1, 2, 3]`'
+runtime: none
+notes: |
+  The `vec!` macro is the canonical literal builder. The
+  fourth distractor (`[1, 2, 3]`) is a real Rust value but a
+  different type — `[i32; 3]` is a fixed-size array, not a
+  growable vector.

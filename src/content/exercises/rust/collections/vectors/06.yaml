@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/collections/vectors
+type: freeform
+order: 6
+prompt: |
+  Write `build_vec() -> Vec<i32>` that creates an empty vector
+  with `Vec::new()`, pushes `1`, `2`, `3` in order, and returns
+  it. `main` calls the builder and prints the three elements
+  space-separated.
+
+  Output:
+
+      1 2 3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function buildVec(): number[] {
+      const xs: number[] = [];
+      xs.push(1);
+      xs.push(2);
+      xs.push(3);
+      return xs;
+    }
+    const xs = buildVec();
+    console.log(xs[0] + " " + xs[1] + " " + xs[2]);
+  canonical: |-
+    fn build_vec() -> Vec<i32> {
+        let mut xs = Vec::new();
+        xs.push(1);
+        xs.push(2);
+        xs.push(3);
+        xs
+    }
+
+    fn main() {
+        let xs = build_vec();
+        println!("{} {} {}", xs[0], xs[1], xs[2]);
+    }
+expectStdout: |
+  1 2 3
+hints:
+  - "Three pieces: `Vec::new()` builds an empty owned vector, three `.push()` calls fill it, return `xs` (no semicolon) to transfer ownership. Binding must be `let mut` to allow the `&mut self` push."
+  - "Body: `let mut xs = Vec::new(); xs.push(1); xs.push(2); xs.push(3); xs`."
+  - |-
+    fn build_vec() -> Vec<i32> {
+        let mut xs = Vec::new();
+        xs.push(1);
+        xs.push(2);
+        xs.push(3);
+        xs
+    }
+
+    fn main() {
+        let xs = build_vec();
+        println!("{} {} {}", xs[0], xs[1], xs[2]);
+    }
+runtime: server
+notes: |
+  Drills the build-mutate-return pattern for owned
+  collections. The element type is inferred from the first
+  `.push` — `Vec::new()` alone wouldn't know.

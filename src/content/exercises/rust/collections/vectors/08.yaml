@@ -1,0 +1,44 @@
+target: rust
+themeId: rust/collections/vectors
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript array code. Start with `vec![1, 2, 3]`,
+  push `4`, then sum and print.
+
+  Output:
+
+      10
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const nums = [1, 2, 3];
+    nums.push(4);
+    const sum = nums.reduce((a, b) => a + b, 0);
+    console.log(sum);
+  canonical: |-
+    fn main() {
+        let mut nums = vec![1, 2, 3];
+        nums.push(4);
+        let sum: i32 = nums.iter().sum();
+        println!("{}", sum);
+    }
+expectStdout: |
+  10
+hints:
+  - "Three reflex-shifts from TS: `let mut` instead of `const` (mutation needed for `.push`), `vec![...]` macro instead of array literal, and the type annotation `let sum: i32` tells `.sum()` which numeric type to produce."
+  - "Body: `let mut nums = vec![1, 2, 3]; nums.push(4); let sum: i32 = nums.iter().sum(); println!(\"{}\", sum);`."
+  - |-
+    fn main() {
+        let mut nums = vec![1, 2, 3];
+        nums.push(4);
+        let sum: i32 = nums.iter().sum();
+        println!("{}", sum);
+    }
+runtime: server
+notes: |
+  Closes the basic-loop on `Vec<T>`: build, mutate, fold.
+  The type annotation on `sum` is required — `.sum()` is
+  polymorphic over numeric types and needs a target type
+  to pick.
