@@ -294,3 +294,186 @@ describe("exerciseSchema — freeform requirements (#17)", () => {
     if (!r.success) expect(paths(r.error.issues)).toContain("expectStdout");
   });
 });
+
+describe("exerciseSchema — fill-line runtime mode", () => {
+  /* validateFillLineMode requires fill-line to declare expectStdout
+   * and a non-none runtime (one of yaegi/zig/server). Without these
+   * the exercise can't be graded; the schema is the earliest place
+   * to fail loudly so the author sees the issue at content-lint
+   * time, not at exercise-dispatch time. */
+
+  const baseFillLine = (overrides: Record<string, unknown> = {}) =>
+    baseEx({
+      type: "fill-line",
+      blanks: ["x"],
+      generator: tplGen({ distractors: ["${x}+1"] }),
+      ...overrides,
+    });
+
+  it("rejects fill-line without expectStdout", () => {
+    const r = exerciseSchema.safeParse(baseFillLine({ runtime: "yaegi" }));
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("expectStdout");
+  });
+
+  it("rejects fill-line with runtime=none", () => {
+    const r = exerciseSchema.safeParse(
+      baseFillLine({ runtime: "none", expectStdout: "x\n" }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("runtime");
+  });
+
+  it("accepts fill-line with yaegi runtime and expectStdout", () => {
+    const r = exerciseSchema.safeParse(
+      baseFillLine({ runtime: "yaegi", expectStdout: "x\n" }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts fill-line with zig runtime", () => {
+    const r = exerciseSchema.safeParse(
+      baseFillLine({ target: "zig", runtime: "zig", expectStdout: "z\n" }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts fill-line with server runtime (Rust)", () => {
+    /* The (target=rust, runtime=server) reshape happens later in
+     * exercise-dispatch; the schema admits server at this layer. */
+    const r = exerciseSchema.safeParse(
+      baseFillLine({ target: "rust", runtime: "server", expectStdout: "r\n" }),
+    );
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("exerciseSchema — alternateCanonicals scope", () => {
+  /* alternateCanonicals only applies to fill-line, which grades a
+   * single typed line against a set of acceptable canonicals. The
+   * field on any other type is a silent no-op; the schema rejects
+   * it to surface the authoring mistake. */
+
+  it("rejects alternateCanonicals on an MCQ", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        generator: tplGen({ distractors: ["${x}+1"] }),
+        alternateCanonicals: ["alt"],
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("alternateCanonicals");
+  });
+
+  it("rejects alternateCanonicals on a freeform", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "freeform",
+        runtime: "yaegi",
+        expectStdout: "x\n",
+        alternateCanonicals: ["alt"],
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("alternateCanonicals");
+  });
+
+  it("rejects alternateCanonicals on a fill-word", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "fill-word",
+        blanks: ["x"],
+        alternateCanonicals: ["alt"],
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("alternateCanonicals");
+  });
+
+  it("accepts alternateCanonicals on a fill-line", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "fill-line",
+        blanks: ["x"],
+        runtime: "yaegi",
+        expectStdout: "ok\n",
+        alternateCanonicals: ["alt"],
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts an empty alternateCanonicals array on any type", () => {
+    /* The refinement early-returns on `length === 0`, so an empty
+     * array is a no-op regardless of type — this is the explicit
+     * "I considered it and there are no alternates" shape. */
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        generator: tplGen({ distractors: ["${x}+1"] }),
+        alternateCanonicals: [],
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("exerciseSchema — submissionShape scope", () => {
+  /* submissionShape constrains the bookend of a learner-typed
+   * freeform program (must-start-with / must-end-with). It has
+   * no meaning on MCQ (no source), fill-word (single tokens), or
+   * fill-line (single graded line). */
+
+  const shape = { mustStartWith: "fn main", mustEndWith: "}" };
+
+  it("rejects submissionShape on an MCQ", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "mcq",
+        generator: tplGen({ distractors: ["${x}+1"] }),
+        submissionShape: shape,
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("submissionShape");
+  });
+
+  it("rejects submissionShape on a fill-line", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "fill-line",
+        blanks: ["x"],
+        runtime: "yaegi",
+        expectStdout: "x\n",
+        submissionShape: shape,
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("submissionShape");
+  });
+
+  it("rejects submissionShape on a fill-word", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "fill-word",
+        blanks: ["x"],
+        submissionShape: shape,
+      }),
+    );
+    expect(r.success).toBe(false);
+    if (!r.success) expect(paths(r.error.issues)).toContain("submissionShape");
+  });
+
+  it("accepts submissionShape on a freeform", () => {
+    const r = exerciseSchema.safeParse(
+      baseEx({
+        type: "freeform",
+        runtime: "yaegi",
+        expectStdout: "x\n",
+        submissionShape: shape,
+      }),
+    );
+    expect(r.success).toBe(true);
+  });
+});

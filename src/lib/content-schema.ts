@@ -153,7 +153,12 @@ function validateFillLineMode(ex: Exercise, ctx: Ctx): void {
     });
     return;
   }
-  if (!FILL_LINE_RUNTIMES.includes(ex.runtime as (typeof FILL_LINE_RUNTIMES)[number])) {
+  /* Array.includes on a `readonly` tuple narrows its arg to the
+   * tuple's literal-union type, which forces an `as` cast on user
+   * input. Widen to `readonly string[]` instead — the cast lands
+   * on a known-good literal array rather than learner-supplied
+   * runtime data. */
+  if (!(FILL_LINE_RUNTIMES as readonly string[]).includes(ex.runtime)) {
     ctx.addIssue({
       code: "custom",
       message: `fill-line exercises require a client-side runtime (one of: ${FILL_LINE_RUNTIMES.map((r) => `"${r}"`).join(", ")}).`,
