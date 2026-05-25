@@ -1,6 +1,7 @@
 import type { JSX, ParentProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { splitProps } from "solid-js";
+import { ACCENT_TEXT_CLASS, type Accent } from "~/lib/lang";
 import { cn } from "./_internal";
 
 type Level = 1 | 2 | 3 | 4;
@@ -20,7 +21,7 @@ interface HeadingProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
    *  the DS-bypass pattern. */
   size?: Size;
   as?: keyof JSX.HTMLElementTags;
-  accent?: "primary" | "ts" | "go";
+  accent?: Accent;
 }
 
 /* Size = font-size + tracking only. Weight comes from the heading-
@@ -46,12 +47,6 @@ const defaultSize: Record<Level, Size> = {
   4: "base",
 };
 
-const accentClass = {
-  primary: "text-accent-primary",
-  ts: "text-accent-ts",
-  go: "text-accent-go",
-} as const;
-
 export function Heading(props: ParentProps<HeadingProps>) {
   const [local, rest] = splitProps(props, ["level", "size", "as", "accent", "class", "children"]);
   const level = local.level ?? 1;
@@ -65,7 +60,7 @@ export function Heading(props: ParentProps<HeadingProps>) {
         "ds-heading-font",
         `ds-heading-h${level}`,
         sizeClass[size],
-        local.accent ? accentClass[local.accent] : "text-fg-primary",
+        local.accent ? ACCENT_TEXT_CLASS[local.accent] : "text-fg-primary",
         local.class,
       )}
     >

@@ -1,5 +1,6 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps } from "solid-js";
+import { ACCENT_TEXT_CLASS, type Accent } from "~/lib/lang";
 import { cn } from "./_internal";
 
 /*
@@ -24,19 +25,25 @@ import { cn } from "./_internal";
  * follows, Badge tags what's already there.
  */
 
-type Tone = "default" | "muted" | "primary" | "ts" | "go";
+type Tone = "default" | "muted" | Accent;
 
 interface EyebrowProps extends JSX.HTMLAttributes<HTMLSpanElement> {
   tone?: Tone;
 }
 
-const toneClass: Record<Tone, string> = {
+/* Non-accent tones live here; accent tones come from the shared
+ * ACCENT_TEXT_CLASS table so adding a fourth track language is one
+ * edit in ~/lib/lang.ts rather than one per DS component. */
+const TONE_NEUTRAL_CLASS = {
   default: "text-fg-secondary",
   muted: "text-fg-muted",
-  primary: "text-accent-primary",
-  ts: "text-accent-ts",
-  go: "text-accent-go",
-};
+} as const satisfies Record<"default" | "muted", string>;
+
+function toneClass(tone: Tone): string {
+  return tone === "default" || tone === "muted"
+    ? TONE_NEUTRAL_CLASS[tone]
+    : ACCENT_TEXT_CLASS[tone];
+}
 
 export function Eyebrow(props: ParentProps<EyebrowProps>) {
   const [local, rest] = splitProps(props, ["tone", "class", "children"]);
@@ -45,7 +52,7 @@ export function Eyebrow(props: ParentProps<EyebrowProps>) {
       {...rest}
       class={cn(
         "inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest",
-        toneClass[local.tone ?? "default"],
+        toneClass(local.tone ?? "default"),
         local.class,
       )}
     >

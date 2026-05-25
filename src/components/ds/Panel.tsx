@@ -1,9 +1,10 @@
 import type { JSX, ParentProps } from "solid-js";
 import { splitProps, Show } from "solid-js";
+import type { Accent } from "~/lib/lang";
 import { cn } from "./_internal";
 
 type Tone = "default" | "inset" | "elevated";
-type LangAccent = "primary" | "ts" | "go" | "none";
+type LangAccent = Accent | "none";
 type Padding = "tight" | "default" | "airy";
 
 interface PanelProps extends JSX.HTMLAttributes<HTMLElement> {
@@ -33,10 +34,16 @@ const toneBgVar: Record<Tone, string> = {
   elevated: "var(--color-bg-elevated)",
 };
 
+/* Compound border+text per language. Diverges from the shared
+ * ACCENT_TEXT_CLASS in ~/lib/lang because Panel's label strip
+ * needs the border too. Set must stay aligned with the lang.ts
+ * Accent union — typecheck enforces. */
 const accentClass: Record<LangAccent, string> = {
   primary: "border-accent-primary/60 text-accent-primary",
   ts: "border-accent-ts/60 text-accent-ts",
   go: "border-accent-go/60 text-accent-go",
+  zig: "border-accent-zig/60 text-accent-zig",
+  rust: "border-accent-rust/60 text-accent-rust",
   none: "border-border-default text-fg-secondary",
 };
 
