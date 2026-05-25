@@ -191,6 +191,51 @@ describe("<FillBlankLineInput> — happy path", () => {
   });
 });
 
+describe("<FillBlankLineInput> — stdout-equality grading invariants", () => {
+  /* Mirror of the Freeform pin: stderr is informational and does
+   * NOT gate correctness; equality against expectStdout is strict
+   * (no whitespace normalization). */
+
+  it("matching stdout with non-empty stderr still auto-passes", async () => {
+    evalMock.mockResolvedValueOnce({
+      stdout: EXPECTED_STDOUT,
+      stderr: "deprecation warning: foo\n",
+      error: "",
+    });
+    const { container, getAllByText } = renderFBL();
+    const input = lineInput(container);
+    setVal(input, "doubled := count * 2");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect(slot()?.instancesPassed).toBe(1);
+      expect(input.disabled).toBe(true);
+    });
+    expect(slot()?.instancesFailed).toBe(0);
+  });
+
+  it("stdout that differs only by a trailing newline grades wrong", async () => {
+    /* Strict equality — `"10\n"` (expected) vs `"10\n\n"` (a stray
+     * extra println). Pin so a future trim/normalize change can't
+     * silently relax grading. */
+    evalMock.mockResolvedValueOnce({
+      stdout: EXPECTED_STDOUT + "\n",
+      stderr: "",
+      error: "",
+    });
+    const { container, getAllByText, getByText } = renderFBL();
+    setVal(lineInput(container), "doubled := count * 2");
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    expect(slot()?.instancesPassed).toBe(0);
+    fireEvent.click(getByText("Submit"));
+    expect(getByText("Try again")).toBeTruthy();
+    expect(slot()?.instancesPassed).toBe(0);
+    expect(slot()?.instancesFailed).toBe(0);
+  });
+});
+
 describe("<FillBlankLineInput> — wrong path", () => {
   it("stdout mismatch → stays in picking after Run; explicit Submit commits to wrong-phase", async () => {
     /* Wrong-stdout Runs deliberately DO NOT auto-Submit — the

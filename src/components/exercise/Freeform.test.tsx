@@ -134,6 +134,62 @@ describe("<Freeform> — happy path", () => {
   });
 });
 
+describe("<Freeform> — stdout-equality grading invariants", () => {
+  /* Pin the grading contract:
+   *   - stdout === expectStdout → pass, regardless of stderr.
+   *   - stdout differs even by one trailing newline → wrong.
+   *
+   * Without these, a future "be lenient on trailing whitespace"
+   * change would silently relax exact-match correctness, and a
+   * "drop runs with stderr noise" change would silently fail
+   * runs that legitimately printed diagnostics + the right answer.
+   * Both regressions are invisible until learners report them. */
+
+  it("matching stdout with non-empty stderr still records a pass", async () => {
+    /* The freeform grader treats `error: ""` as a clean run and
+     * grades on `stdout === expectStdout`. Stderr is informational
+     * — a panicked goroutine that recovered, a `log.Println` —
+     * and must not gate correctness. */
+    evalMock.mockResolvedValueOnce({
+      stdout: EXPECTED_STDOUT,
+      stderr: "warning: recovered from panic\n",
+      error: "",
+    });
+    const { container, getAllByText, getByText } = renderFF();
+    setVal(textarea(container), 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello") }');
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(slot()?.instancesPassed).toBe(1);
+    expect(slot()?.instancesFailed).toBe(0);
+  });
+
+  it("stdout that differs only by a trailing newline grades wrong", async () => {
+    /* Equality is strict — `"hello\n"` (the expected) vs
+     * `"hello\n\n"` (an extra empty println). The grader does NOT
+     * normalize whitespace; pin that so a future "trim trailing
+     * newlines" tweak surfaces as a test failure rather than as
+     * silently looser grading. */
+    evalMock.mockResolvedValueOnce({
+      stdout: EXPECTED_STDOUT + "\n",
+      stderr: "",
+      error: "",
+    });
+    const { container, getAllByText, getByText } = renderFF();
+    setVal(textarea(container), 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello"); fmt.Println() }');
+    fireEvent.click(getAllByText("Run")[0]!);
+    await vi.waitFor(() => {
+      expect((getByText("Submit") as HTMLButtonElement).disabled).toBe(false);
+    });
+    fireEvent.click(getByText("Submit"));
+    expect(getByText("Try again")).toBeTruthy();
+    expect(slot()?.instancesPassed).toBe(0);
+    expect(slot()?.instancesFailed).toBe(0);
+  });
+});
+
 describe("<Freeform> — wrong path", () => {
   it("stdout mismatch → wrong-phase actions surface, no pass or fail recorded", async () => {
     evalMock.mockResolvedValueOnce({ stdout: "wrong\n", stderr: "", error: "" });
