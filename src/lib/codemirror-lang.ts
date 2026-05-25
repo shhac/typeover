@@ -52,14 +52,10 @@ export async function cmLanguageExtension(lang: CmLanguage): Promise<Extension> 
       const { zigLanguage } = await import("@ndim/codemirror-lang-zig");
       return zigLanguage;
     }
-    case "rust":
-      /* No Rust Lezer parser bundled today — code renders in mono
-       * with no syntax tinting. Adding a parser is a focused
-       * upgrade (`@codemirror/lang-rust` exists upstream); leaving
-       * the fallback empty keeps the bundle lean until the Rust
-       * track justifies the dependency. Async wrapper for API
-       * uniformity even though no work is done here. */
-      return [];
+    case "rust": {
+      const { rust } = await import("@codemirror/lang-rust");
+      return rust();
+    }
     default:
       /* Widening CmLanguage without a matching case here is a
        * compile-time failure rather than a silent fall-through
