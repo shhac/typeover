@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: fill-line
+order: 6
+prompt: |
+  rustc complains: `cannot assign twice to immutable variable
+  `count``, with `help: consider making this binding mutable:
+  `mut count``. Apply the hint to the `let` line — write the
+  fixed declaration. The program prints the incremented total.
+generator:
+  kind: template
+  vars:
+    line:
+      - "let mut count: i32 = 0;"
+  ts: |-
+    let count: number = 0;
+    count = count + 1;
+    console.log(count);
+  canonical: |-
+    fn main() {
+        ${line}
+        count = count + 1;
+        println!("{}", count);
+    }
+  distractors:
+    - match: "let count: i32 = 0;"
+      explain: |-
+        That's the original line that produced the error. The
+        compiler said `help: consider making this binding mutable`
+        — apply it: add `mut`.
+    - match: "let mut count = 0;"
+      explain: |-
+        Compiles (Rust infers `i32`), but the exercise wants the
+        explicit type. Keep `: i32` between the name and the `=`.
+    - match: "const mut count: i32 = 0;"
+      explain: |-
+        `const` and `mut` are mutually exclusive in Rust — `const`
+        is a compile-time constant. The fix is `let mut`, not
+        `const mut`.
+    - match: "let count: mut i32 = 0;"
+      explain: |-
+        `mut` slots between `let` and the NAME, not between `:`
+        and the type. Shape is `let mut <name>: <type> = ...`.
+expectStdout: |
+  1
+runtime: server
+blanks: [line]
+hints:
+  - "Apply rustc's literal hint: `consider making this binding mutable: `mut count``. The fix is adding `mut` between `let` and `count`."
+  - "Shape: `let mut <name>: <type> = <value>;`."
+  - "`let mut count: i32 = 0;`"
+notes: |
+  Production drill for applying a `help:` suggestion literally.
+  Distractors cover the original line, the missing-annotation
+  shortcut, `const mut` keyword salad, and the wrong slot for
+  `mut`.

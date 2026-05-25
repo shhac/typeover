@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: mcq
+order: 7
+prompt: |
+  rustc emits `warning: unused variable `extra`` but the program
+  STILL compiles and runs. Pick the statement that correctly
+  describes the warning-vs-error distinction.
+generator:
+  kind: variant
+  variants:
+    - id: warn-vs-err
+      ts: "TS surfaces unused-variable lints; whether they BLOCK build depends on tsconfig — Rust's default is the same."
+      canonical: "Warnings produce output but don't stop compilation; the binary still builds and runs."
+      distractors:
+        - "Warnings stop the build until the underlying issue is fixed."
+        - "Warnings are turned into errors by default; you must rename the variable to `_extra`."
+        - "Warnings only appear in release builds; debug builds are silent."
+hints:
+  - "rustc separates errors (build-blocking) from warnings (advisory). The unused-variable lint is a warning by default — the build still produces a binary."
+  - "Renaming to `_extra` (underscore prefix) silences the warning by convention, but isn't required for the build to succeed."
+  - 'Warnings produce output but don''t stop compilation.'
+runtime: none
+notes: |
+  Disambiguates rustc warning-vs-error semantics. Distractors:
+   - "Warnings stop the build" — wrong; conflates with `-D warnings`.
+   - "Warnings are errors by default" — only with `#![deny(warnings)]`.
+   - "Release vs debug" — invented; the lint behaviour is the same
+     in both profiles.

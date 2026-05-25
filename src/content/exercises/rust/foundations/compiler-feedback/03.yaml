@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: mcq
+order: 3
+prompt: |
+  The compiler says: `expected i64, found i32`. The buggy line is
+  `let total: i64 = count + 5;` where `count: i32`. Pick the
+  smallest fix.
+generator:
+  kind: variant
+  variants:
+    - id: widen
+      ts: "TS would auto-widen number arithmetic; Rust never does across integer widths."
+      canonical: "let total: i64 = count as i64 + 5;"
+      distractors:
+        - "let total: i32 = count + 5;"
+        - "let total: i64 = count + 5 as i64;"
+        - "let total: i64 = count + 5i64;"
+hints:
+  - "Rust never auto-widens between integer types. The smallest fix is to cast the narrower operand — `count as i64` — so both sides of `+` are `i64`."
+  - "`as` binds tighter than `+`, so `count as i64 + 5` parses as `(count as i64) + 5`."
+  - "`let total: i64 = count as i64 + 5;`."
+runtime: none
+notes: |
+  Diagnostic-to-fix mapping. Distractors:
+   - Widening `total` to match `count` — silently truncates intent.
+   - Casting the literal `5` — wrong operand; `count` is still i32.
+   - `5i64` suffix — the literal type isn't the issue; `count` is.

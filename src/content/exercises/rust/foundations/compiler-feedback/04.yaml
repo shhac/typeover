@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: fill-word
+order: 4
+prompt: |
+  rustc says: `cannot find value `cont` in this scope`, with
+  `help: a local variable with a similar name exists: `count``.
+  Fill the corrected variable name.
+generator:
+  kind: template
+  vars:
+    name: ["count"]
+  ts: |-
+    let count: number = 5;
+    console.log(cont);
+  canonical: |-
+    let count: i32 = 5;
+    println!("{}", ${name});
+blanks: [name]
+hints:
+  - "rustc's `help:` line says it out loud — the local variable that exists in scope is the one the print should reference."
+  - "Five letters."
+  - "`count`"
+runtime: none
+notes: |
+  Production drill for acting on rustc's similar-name suggestion.
+  The mistake (`cont` vs `count`) is exactly the typo rustc would
+  surface.

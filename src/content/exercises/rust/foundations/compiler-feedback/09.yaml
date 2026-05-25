@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: freeform
+order: 9
+prompt: |
+  The following function fails with:
+
+      error[E0308]: mismatched types
+       --> src/main.rs:2:5
+        |
+      1 | fn double(n: i32) -> i32 {
+        |                      --- expected `i32` because of return type
+      2 |     n * 2;
+        |     ^^^^^- help: remove this semicolon
+
+  Broken source:
+
+      fn double(n: i32) -> i32 {
+          n * 2;
+      }
+
+      fn main() {
+          println!("{}", double(7));
+      }
+
+  Apply the `help:` and write the FIXED program. Output:
+
+      14
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function double(n: number): number { return n * 2; }
+    console.log(double(7));
+  canonical: |-
+    fn double(n: i32) -> i32 {
+        n * 2
+    }
+
+    fn main() {
+        println!("{}", double(7));
+    }
+expectStdout: |
+  14
+runtime: server
+hints:
+  - "rustc literally tells you what to do: `help: remove this semicolon`. The trailing `;` turns the expression into a statement, which produces `()` instead of `i32`."
+  - "Strip the `;` from the body's tail. Everything else stays."
+  - |-
+    fn double(n: i32) -> i32 {
+        n * 2
+    }
+
+    fn main() {
+        println!("{}", double(7));
+    }
+notes: |
+  Closes the theme with the expression-vs-statement gotcha
+  from functions-and-expressions, now framed as a diagnostic
+  the learner READS RUSTC say. Pinning the "obey the help line
+  literally" reflex is the whole point of compiler-feedback —
+  this is the most-rewarding instance of it.

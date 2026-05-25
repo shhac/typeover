@@ -1,0 +1,57 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: freeform
+order: 8
+prompt: |
+  The following Rust program FAILS to compile with:
+
+      error[E0308]: mismatched types
+       --> src/main.rs:3:23
+        |
+      3 |     println!("{}", n + half);
+        |                       ^^^^ expected `i32`, found `f64`
+        |
+      help: cast the value with `as i32`
+
+  Original broken source:
+
+      fn main() {
+          let n: i32 = 10;
+          let half: f64 = 0.5;
+          println!("{}", n + half);
+      }
+
+  Apply the `help:` cast and write the FIXED program. Output
+  should be exactly:
+
+      10
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const n: number = 10;
+    const half: number = 0.5;
+    console.log(n + half);
+  canonical: |-
+    fn main() {
+        let n: i32 = 10;
+        let half: f64 = 0.5;
+        println!("{}", n + half as i32);
+    }
+expectStdout: |
+  10
+runtime: server
+hints:
+  - "rustc's `help:` line says `cast the value with `as i32``. The value being added is `half: f64` — apply the cast on the right operand of `+`."
+  - "`as` binds tighter than `+`, so `n + half as i32` parses as `n + (half as i32)`. The cast `0.5 as i32` truncates to `0`, so the sum is `10`."
+  - |-
+    fn main() {
+        let n: i32 = 10;
+        let half: f64 = 0.5;
+        println!("{}", n + half as i32);
+    }
+notes: |
+  Diagnostic-driven repair. The learner reads the help line and
+  copies the suggested `as i32` into the right operand. The
+  truncating-cast surprise (0.5 → 0) is documented in hint 2 so
+  the deterministic stdout `10` doesn't confuse.

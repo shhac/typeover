@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: mcq
+order: 1
+prompt: |
+  Rust's compiler emits diagnostics that look like this. Identify
+  the PRIMARY error line — the one that names the error code and
+  the short summary. The other lines are spans, notes, and help
+  suggestions.
+generator:
+  kind: variant
+  variants:
+    - id: e0277
+      ts: 'A TS error has one location and message: `error TS2322: Type "string" is not assignable to type "number".`'
+      canonical: 'error[E0277]: cannot multiply `i32` by `&str`'
+      distractors:
+        - '  --> src/main.rs:4:9'
+        - '  = note: the trait `Mul<&str>` is not implemented for `i32`'
+        - 'help: consider converting the value with `.parse::<i32>()`'
+hints:
+  - "The primary line starts with `error[EXXXX]:` — bracketed numeric error code, colon, summary."
+  - "Not the `-->` (file:line:col span), not the `= note:` (related fact), not the `help:` (suggested fix)."
+  - "`error[E0277]: cannot multiply ...`"
+runtime: none
+notes: |
+  Establishes rustc's diagnostic anatomy. Distractors are the
+  three sibling lines a learner has to scan past: the span,
+  the note, and the help suggestion.

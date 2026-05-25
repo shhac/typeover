@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: fill-word
+order: 5
+prompt: |
+  rustc says: `expected `f64`, found integer`. The bug is the
+  annotation on the LEFT of `=`. Fill the corrected type so the
+  literal `0.5` lines up with the annotation.
+generator:
+  kind: template
+  vars:
+    type: ["f64"]
+  ts: |-
+    let ratio: number = 0.5;
+  canonical: |-
+    let ratio: ${type} = 0.5;
+blanks: [type]
+hints:
+  - "rustc said `expected f64, found integer` — the RIGHT side is a float, so the LEFT side's annotation needs to match the float family."
+  - "Three characters: family letter `f` + bit width."
+  - "`f64`"
+runtime: none
+notes: |
+  Drills "the diagnostic tells you what to write." The compiler's
+  `expected X, found Y` shape gives the learner literal substitution
+  material.

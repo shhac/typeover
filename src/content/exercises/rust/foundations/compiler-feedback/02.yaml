@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/foundations/compiler-feedback
+type: mcq
+order: 2
+prompt: |
+  Inside a rustc diagnostic, which line is the actionable
+  suggestion you can copy verbatim into your code?
+generator:
+  kind: variant
+  variants:
+    - id: parse-suggest
+      ts: 'TS surfaces a hint via `Did you mean ...?` in the message.'
+      canonical: 'help: consider converting the value with `.parse::<i32>()`'
+      distractors:
+        - 'error[E0277]: cannot multiply `i32` by `&str`'
+        - '  = note: the trait `Mul<&str>` is not implemented for `i32`'
+        - '  --> src/main.rs:4:9'
+hints:
+  - "Lines that start with `help:` are rustc's suggested fixes — sometimes literal source the learner can paste in."
+  - "The other three lines are the error header, the file/line span, and a related-trait note."
+  - "`help: consider converting ...`"
+runtime: none
+notes: |
+  Reinforces the `help:` line as the action surface. Common
+  beginner failure: reading only the error header and missing
+  the help directly below.
