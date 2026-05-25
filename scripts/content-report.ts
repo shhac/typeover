@@ -16,14 +16,7 @@
  * its pre-launch-stub footnote.
  */
 
-import { glob, readFile } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
-import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
-
-const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = join(here, "..");
-const contentRoot = join(repoRoot, "src", "content");
+import { loadCollection } from "./content-collection.ts";
 
 /** Soft slot target per design-docs/02 ("9 exercises per theme")
  *  + design-docs/23's actual landings (10-11 per theme). Used to
@@ -49,46 +42,18 @@ interface ExerciseData {
   order: number;
 }
 
-interface RawEntry<T> {
-  data: T;
-  path: string;
-}
-
-/** Load + parse every YAML under a content sub-tree. */
-async function loadCollection<T>(subdir: string): Promise<RawEntry<T>[]> {
-  const out: RawEntry<T>[] = [];
-  for await (const path of glob(join(contentRoot, subdir, "**/*.yaml"))) {
-    const data = parse(await readFile(path, "utf8")) as T;
-    out.push({ data, path });
-  }
-  return out;
-}
-
 const [modulesRaw, themesRaw, exercisesRaw] = await Promise.all([
   loadCollection<ModuleData>("modules"),
   loadCollection<ThemeData>("themes"),
   loadCollection<ExerciseData>("exercises"),
 ]);
 
-/* Module / theme IDs match Astro's collection IDs:
- *   modules/<lang>/<module>.yaml      → `<lang>/<module>`
- *   themes/<lang>/<module>/<theme>.yaml → `<lang>/<module>/<theme>`
- * Mirrors how astro:content + the lint identify entries. */
-function moduleId(path: string): string {
-  const r = relative(join(contentRoot, "modules"), path);
-  return r.slice(0, -".yaml".length).split(sep).join("/");
-}
-function themeId(path: string): string {
-  const r = relative(join(contentRoot, "themes"), path);
-  return r.slice(0, -".yaml".length).split(sep).join("/");
-}
-
 const modules = modulesRaw
-  .map(({ data, path }) => ({ id: moduleId(path), data }))
+  .map(({ id, data }) => ({ id, data }))
   .sort((a, b) => a.data.order - b.data.order);
 
 const themes = themesRaw
-  .map(({ data, path }) => ({ id: themeId(path), data }))
+  .map(({ id, data }) => ({ id, data }))
   .sort((a, b) => a.data.order - b.data.order);
 
 /** Group exercises by theme ID. */

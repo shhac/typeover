@@ -19,22 +19,19 @@
  *                                          OIDC token)
  */
 
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
+import { join } from "node:path";
 
+import { contentRoot, loadCollection, repoRoot } from "./content-collection.ts";
 import { normalizeRust } from "../src/lib/compile-service/normalize/rust.ts";
 import { sha256Hex } from "../src/lib/compile-service/hash.ts";
 import { DockerTransport } from "../src/lib/compile-service/transports/docker.ts";
 import { SandboxTransport } from "../src/lib/compile-service/transports/sandbox.ts";
 import type { CompileTransport } from "../src/lib/compile-service/transports/types.ts";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const root = join(here, "..");
-const exercisesRoot = join(root, "src/content/exercises/rust");
-const cacheRoot = join(root, "public/compile-cache/rust");
+const exercisesRoot = join(contentRoot, "exercises/rust");
+const cacheRoot = join(repoRoot, "public/compile-cache/rust");
 
 export type ExerciseYaml = {
   target: string;
@@ -83,34 +80,23 @@ async function collectCanonicals(): Promise<CanonicalEntry[]> {
   if (!existsSync(exercisesRoot)) return [];
   const entries: CanonicalEntry[] = [];
 
-  async function walk(dir: string): Promise<void> {
-    const items = await readdir(dir, { withFileTypes: true });
-    for (const item of items) {
-      const full = join(dir, item.name);
-      if (item.isDirectory()) {
-        await walk(full);
-      } else if (item.name.endsWith(".yaml")) {
-        const raw = await readFile(full, "utf8");
-        const data = parse(raw) as ExerciseYaml;
-        const sources = extractCanonicals(data);
-        if (sources.length === 0) continue;
-        const idPath = relative(exercisesRoot, full).replace(/\.yaml$/, "");
-        sources.forEach((source, idx) => {
-          /* When an exercise has multiple variants, append a suffix
-           * so the log distinguishes which one's being baked. The
-           * hash key is the only thing the SW actually looks up,
-           * so the suffix is purely cosmetic. */
-          const suffix = sources.length > 1 ? `#${idx}` : "";
-          entries.push({
-            exerciseId: `rust/${idPath}${suffix}`,
-            source,
-          });
-        });
-      }
-    }
+  for (const { id, data } of await loadCollection<ExerciseYaml>("exercises")) {
+    if (!id.startsWith("rust/")) continue;
+    const sources = extractCanonicals(data);
+    if (sources.length === 0) continue;
+    sources.forEach((source, idx) => {
+      /* When an exercise has multiple variants, append a suffix
+       * so the log distinguishes which one's being baked. The
+       * hash key is the only thing the SW actually looks up,
+       * so the suffix is purely cosmetic. */
+      const suffix = sources.length > 1 ? `#${idx}` : "";
+      entries.push({
+        exerciseId: `${id}${suffix}`,
+        source,
+      });
+    });
   }
 
-  await walk(exercisesRoot);
   return entries;
 }
 
@@ -129,16 +115,12 @@ function pickTransport(): CompileTransport {
 async function main(): Promise<void> {
   const canonicals = await collectCanonicals();
   if (canonicals.length === 0) {
-    console.log(
-      "[prebake] no freeform rust exercises with runtime=server — nothing to do",
-    );
+    console.log("[prebake] no freeform rust exercises with runtime=server — nothing to do");
     return;
   }
 
   const transport = pickTransport();
-  console.log(
-    `[prebake] ${canonicals.length} canonical(s) · transport=${transport.name}`,
-  );
+  console.log(`[prebake] ${canonicals.length} canonical(s) · transport=${transport.name}`);
   await mkdir(cacheRoot, { recursive: true });
 
   let okCount = 0;
@@ -163,7 +145,10 @@ async function main(): Promise<void> {
     if (!result.ok) {
       console.error(
         `  ✗ ${entry.exerciseId} · ${result.elapsedSeconds.toFixed(1)}s\n` +
-          result.message.split("\n").map((l) => `      ${l}`).join("\n"),
+          result.message
+            .split("\n")
+            .map((l) => `      ${l}`)
+            .join("\n"),
       );
       failCount++;
       continue;
@@ -177,9 +162,7 @@ async function main(): Promise<void> {
     okCount++;
   }
 
-  console.log(
-    `[prebake] done · built ${okCount} · cached ${skipCount} · failed ${failCount}`,
-  );
+  console.log(`[prebake] done · built ${okCount} · cached ${skipCount} · failed ${failCount}`);
   if (failCount > 0) process.exit(1);
 }
 

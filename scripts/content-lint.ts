@@ -26,14 +26,9 @@
  * adding a new rule is one append. The driver collects + reports.
  */
 
-import { glob, readFile } from "node:fs/promises";
-import { basename, dirname, join, relative, sep } from "node:path";
-import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
+import { basename } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = join(here, "..");
-const contentRoot = join(repoRoot, "src", "content");
+import { exerciseThemeId, loadCollection, relativeToRepo } from "./content-collection.ts";
 
 /* ───────────────────────────── types ──────────────────────────── */
 
@@ -91,10 +86,6 @@ const warn = (path: string, msg: string): Issue => ({ severity: "warning", path,
 
 /* ───────────────────────────── ingest ────────────────────────── */
 
-async function readYaml<T>(path: string): Promise<T> {
-  return parse(await readFile(path, "utf8")) as T;
-}
-
 /* Multi-language tracks: file paths are
  *   src/content/modules/<lang>/<module>.yaml
  *   src/content/themes/<lang>/<module>/<theme>.yaml
@@ -107,23 +98,16 @@ async function ingest(): Promise<Graph> {
   const themes = new Map<string, ThemeEntry>();
   const exercisesByTheme = new Map<string, ExerciseEntry[]>();
 
-  for await (const path of glob(join(contentRoot, "modules", "**/*.yaml"))) {
-    const segments = relative(join(contentRoot, "modules"), path).split(sep);
-    const slug = `${segments[0]}/${basename(segments[segments.length - 1]!, ".yaml")}`;
-    modules.set(slug, { data: await readYaml<ModuleData>(path), path });
+  for (const { id, data, path } of await loadCollection<ModuleData>("modules")) {
+    modules.set(id, { data, path });
   }
 
-  for await (const path of glob(join(contentRoot, "themes", "**/*.yaml"))) {
-    const segments = relative(join(contentRoot, "themes"), path).split(sep);
-    const slug = `${segments[0]}/${segments[1]}/${basename(segments[segments.length - 1]!, ".yaml")}`;
-    themes.set(slug, { data: await readYaml<ThemeData>(path), path });
+  for (const { id, data, path } of await loadCollection<ThemeData>("themes")) {
+    themes.set(id, { data, path });
   }
 
-  for await (const path of glob(join(contentRoot, "exercises", "**/*.yaml"))) {
-    const segments = relative(join(contentRoot, "exercises"), path).split(sep);
-    const themeFromPath = `${segments[0]}/${segments[1]}/${segments[2]}`;
-    const exerciseSlug = `${themeFromPath}/${basename(segments[segments.length - 1]!, ".yaml")}`;
-    const data = await readYaml<ExerciseData>(path);
+  for (const { id: exerciseSlug, data, path } of await loadCollection<ExerciseData>("exercises")) {
+    const themeFromPath = exerciseThemeId(exerciseSlug);
     if (!exercisesByTheme.has(themeFromPath)) exercisesByTheme.set(themeFromPath, []);
     exercisesByTheme.get(themeFromPath)!.push({ data, path, slug: exerciseSlug, themeFromPath });
   }
@@ -316,9 +300,10 @@ const CHECKS: ReadonlyArray<(g: Graph) => Issue[]> = [
 
 /* ───────────────────────────── report ────────────────────────── */
 
-const rel = (p: string) => relative(repoRoot, p);
 const fmtIssue = (i: Issue): string =>
-  i.severity === "error" ? `  ✗  ${rel(i.path)} — ${i.msg}` : `  !  ${rel(i.path)} — ${i.msg}`;
+  i.severity === "error"
+    ? `  ✗  ${relativeToRepo(i.path)} — ${i.msg}`
+    : `  !  ${relativeToRepo(i.path)} — ${i.msg}`;
 
 const graph = await ingest();
 const issues = CHECKS.flatMap((check) => check(graph));

@@ -33,13 +33,10 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout, argv, exit } from "node:process";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = join(here, "..");
-const contentRoot = join(repoRoot, "src", "content");
+import { contentRoot, relativeToRepo } from "./content-collection.ts";
 
 function fail(msg: string): never {
   console.error(`✗ ${msg}`);
@@ -229,19 +226,17 @@ async function stampFiles(slug: Slug, fields: ThemeFields | null): Promise<void>
 
 /* ───────── report ───────── */
 
-const rel = (p: string) => p.replace(repoRoot + "/", "");
-
 function report(slug: Slug, themeStamped: boolean): void {
   console.log(`✓ stamped ${slug.themeSlug}`);
   if (themeStamped) {
-    console.log(`  theme:     ${rel(slug.themeYamlPath)}`);
+    console.log(`  theme:     ${relativeToRepo(slug.themeYamlPath)}`);
   }
-  console.log(`  exercises: ${rel(slug.exercisesDir)}/{01..09}.yaml`);
+  console.log(`  exercises: ${relativeToRepo(slug.exercisesDir)}/{01..09}.yaml`);
   console.log(`\nNext:`);
   console.log(`  pnpm content:lint       # confirms graph integrity`);
   console.log(`  pnpm runtime:verify     # confirms canonicals run`);
   console.log(`  pnpm build              # confirms schema passes`);
-  console.log(`  grep -r 'TODO' ${rel(slug.exercisesDir)}  # find what to write`);
+  console.log(`  grep -r 'TODO' ${relativeToRepo(slug.exercisesDir)}  # find what to write`);
 }
 
 /* ───────── entry point ───────── */
