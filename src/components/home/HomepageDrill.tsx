@@ -1,5 +1,5 @@
-import { createSignal, For } from "solid-js";
-import { Button, ButtonLink, CodeBlock, Heading, Stack, Text } from "~/components/ds";
+import { createSignal } from "solid-js";
+import { ButtonLink, CodeBlock, Heading, Stack, Text } from "~/components/ds";
 
 type TargetId = "go" | "zig" | "rust";
 
@@ -8,6 +8,7 @@ const choices: Record<
   {
     label: string;
     filename: string;
+    lang: "go" | "zig" | "rust";
     code: string;
     note: string;
     startHref: string;
@@ -17,6 +18,7 @@ const choices: Record<
   go: {
     label: "Go",
     filename: "count.go",
+    lang: "go",
     code: `count := len(users)
 fmt.Println(count)`,
     note: "Correct in Go: length is a builtin function, and printing goes through fmt.",
@@ -26,6 +28,7 @@ fmt.Println(count)`,
   zig: {
     label: "Zig",
     filename: "count.zig",
+    lang: "zig",
     code: `const count = users.len;
 std.debug.print("{d}\\n", .{count});`,
     note: "Correct in Zig: arrays and slices expose len, and formatted output takes an argument tuple.",
@@ -35,6 +38,7 @@ std.debug.print("{d}\\n", .{count});`,
   rust: {
     label: "Rust",
     filename: "count.rs",
+    lang: "rust",
     code: `let count = users.len();
 println!("{}", count);`,
     note: "Correct in Rust: length is a method call, and println! is a macro.",
@@ -65,29 +69,21 @@ export function HomepageDrill() {
             </Stack>
             <CodeBlock lang="ts" filename="count.ts">{`const count = users.length;
 console.log(count);`}</CodeBlock>
-            <div
-              class="flex flex-row flex-wrap gap-2"
-              role="group"
-              aria-label="Choose a target language"
-            >
-              <For each={order}>
-                {(id) => (
-                  <Button
-                    variant={selected() === id ? "primary" : "secondary"}
-                    size="sm"
-                    onClick={() => setSelected(id)}
-                    aria-pressed={selected() === id}
-                  >
-                    {choices[id].label}
-                  </Button>
-                )}
-              </For>
-            </div>
           </Stack>
         </div>
         <div>
           <Stack gap="md">
-            <CodeBlock lang={selected()} filename={current().filename}>
+            <CodeBlock
+              lang={current().lang}
+              filename={current().filename}
+              tabs={order.map((id) => ({
+                id,
+                label: choices[id].filename,
+                lang: choices[id].lang,
+                selected: selected() === id,
+                onSelect: () => setSelected(id),
+              }))}
+            >
               {current().code}
             </CodeBlock>
             <Text tone="secondary" size="sm">

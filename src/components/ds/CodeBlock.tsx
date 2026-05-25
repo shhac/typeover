@@ -1,8 +1,21 @@
 import type { JSX, ParentProps } from "solid-js";
-import { splitProps, Show } from "solid-js";
+import { For, splitProps, Show } from "solid-js";
+import { IconFileGeneric } from "~/components/icons/icon-file-generic";
+import { IconFileGo } from "~/components/icons/icon-file-go";
+import { IconFileRs } from "~/components/icons/icon-file-rs";
+import { IconFileTs } from "~/components/icons/icon-file-ts";
+import { IconFileZig } from "~/components/icons/icon-file-zig";
 import { cn } from "./_internal";
 
 type Lang = "ts" | "go" | "zig" | "rust" | "shell" | "plain";
+
+interface CodeBlockTab {
+  id: string;
+  label: string;
+  lang?: Lang;
+  selected?: boolean;
+  onSelect?: () => void;
+}
 
 interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
   lang?: Lang;
@@ -20,6 +33,8 @@ interface CodeBlockProps extends JSX.HTMLAttributes<HTMLPreElement> {
   label?: string;
   /** Show the file icon in the tab. */
   showLang?: boolean;
+  /** Optional interactive file tabs. Used when one code pane can show multiple target files. */
+  tabs?: readonly CodeBlockTab[];
 }
 
 const langIconClass: Record<Lang, string> = {
@@ -32,28 +47,23 @@ const langIconClass: Record<Lang, string> = {
 };
 
 function FileIcon(props: { lang: Lang }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      class={cn("size-4 shrink-0", langIconClass[props.lang])}
-    >
-      <path
-        d="M3.5 1.75h5.2l3.8 3.8v8.7H3.5z"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.25"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M8.7 1.75v3.8h3.8"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.25"
-        stroke-linejoin="round"
-      />
-      <path d="M5.5 11.25h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
-    </svg>
+  const className = cn("size-4 shrink-0", langIconClass[props.lang]);
+  if (props.lang === "ts") return <IconFileTs class={className} />;
+  if (props.lang === "go") return <IconFileGo class={className} />;
+  if (props.lang === "zig") return <IconFileZig class={className} />;
+  if (props.lang === "rust") return <IconFileRs class={className} />;
+  return <IconFileGeneric class={className} />;
+}
+
+const staticTabClass =
+  "inline-flex items-center gap-2 max-w-full px-3 py-1.5 -mb-px bg-bg-inset border border-border-default border-b-bg-inset rounded-t-sm";
+
+function interactiveTabClass(selected: boolean): string {
+  return cn(
+    "inline-flex items-center gap-2 max-w-full px-3 py-1.5 -mb-px border rounded-t-sm font-sans text-sm transition-colors focus-ring",
+    selected
+      ? "bg-bg-inset border-border-default border-b-bg-inset text-fg-primary"
+      : "bg-bg-panel border-transparent text-fg-muted hover:bg-bg-elevated hover:text-fg-secondary",
   );
 }
 
@@ -63,11 +73,13 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
     "filename",
     "label",
     "showLang",
+    "tabs",
     "class",
     "children",
   ]);
   const lang = local.lang ?? "plain";
   const showLang = local.showLang ?? true;
+  const hasTabs = () => (local.tabs?.length ?? 0) > 0;
   /* Prefer filename; fall back to label. Both render in the same
    * mono-muted slot but stay typed as separate props so consumers
    * don't conflate filenames (real file paths) with prose
@@ -77,14 +89,43 @@ export function CodeBlock(props: ParentProps<CodeBlockProps>) {
     <div
       class={cn("border border-border-default rounded-sm overflow-hidden bg-bg-inset", local.class)}
     >
-      <Show when={headerText() !== undefined || showLang}>
+      <Show when={headerText() !== undefined || showLang || hasTabs()}>
         <div class="flex items-end px-2 pt-2 bg-bg-panel border-b border-border-default">
-          <div class="inline-flex items-center gap-2 max-w-full px-3 py-1.5 -mb-px bg-bg-inset border border-border-default border-b-bg-inset rounded-t-sm">
-            <Show when={showLang}>
-              <FileIcon lang={lang} />
-            </Show>
-            <span class="font-mono text-micro text-fg-muted truncate">{headerText()}</span>
-          </div>
+          <Show
+            when={hasTabs()}
+            fallback={
+              <div class={staticTabClass}>
+                <Show when={showLang}>
+                  <FileIcon lang={lang} />
+                </Show>
+                <span class="font-mono text-micro text-fg-muted truncate">{headerText()}</span>
+              </div>
+            }
+          >
+            <div
+              class="flex flex-row gap-1 overflow-x-auto"
+              role="tablist"
+              aria-label="Code file tabs"
+            >
+              <For each={local.tabs}>
+                {(tab) => {
+                  const tabLang = () => tab.lang ?? "plain";
+                  return (
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={tab.selected ? "true" : "false"}
+                      class={interactiveTabClass(tab.selected ?? false)}
+                      onClick={() => tab.onSelect?.()}
+                    >
+                      <FileIcon lang={tabLang()} />
+                      <span class="truncate">{tab.label}</span>
+                    </button>
+                  );
+                }}
+              </For>
+            </div>
+          </Show>
         </div>
       </Show>
       <pre
