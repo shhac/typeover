@@ -55,12 +55,9 @@ export async function handleCompileRequest(
   const entry = deps.registry[lang];
   if (!entry) return deps.fetch(request);
 
-  let source: string | undefined;
-  try {
-    source = extractSource(await request.clone().text());
-  } catch {
-    return deps.fetch(request);
-  }
+  const body = await request.clone().text().catch(() => null);
+  if (body === null) return deps.fetch(request);
+  const source = extractSource(body);
   if (typeof source !== "string") return deps.fetch(request);
 
   const hash = await sha256Hex(entry.normalize(source));
