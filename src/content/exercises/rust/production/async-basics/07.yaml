@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 7
+prompt: |
+  Inside `async fn run() -> i32`, compose TWO awaited calls
+  to `inner(x: i32) -> impl Future<Output = i32>` and return
+  their sum. Pick the most idiomatic body.
+generator:
+  kind: variant
+  variants:
+    - id: compose-awaits
+      ts: 'return (await inner(1)) + (await inner(2));'
+      canonical: 'inner(1).await + inner(2).await — postfix `.await` on each future, the addition runs after both resolve. Single expression, no trailing `;` because the body returns it.'
+      distractors:
+        - 'await inner(1) + await inner(2) — TS prefix syntax; Rust uses POSTFIX `.await`.'
+        - 'inner(1).await + inner(2).await; — trailing semicolon turns the expression into a statement; the fn would return `()` instead of `i32`.'
+        - 'inner(1) + inner(2) — missing `.await` on both. Adding `impl Future` to `impl Future` doesn''t compile.'
+hints:
+  - "Two `.await`s in one expression — postfix syntax chains cleanly: `inner(1).await + inner(2).await`. No leading return, no trailing semicolon."
+  - "`inner(1).await + inner(2).await`."
+  - '`inner(1).await + inner(2).await`'
+runtime: none
+notes: |
+  Reinforces postfix `.await` in expression position. The
+  trailing-semicolon distractor is the classic
+  "function returns () instead of i32" trap.

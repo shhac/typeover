@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 9
+prompt: |
+  This line fails to compile because `compute` is async:
+
+      let n = compute(21);  // n is `impl Future<Output = i32>`, not `i32`
+      println!("{}", n + 1);  // ERROR: Future + i32 doesn't compile
+
+  Pick the fix.
+generator:
+  kind: variant
+  variants:
+    - id: fix-missing-await
+      ts: 'const n = await compute(21);'
+      canonical: 'let n = compute(21).await; — append postfix `.await` to drive the future to its `i32` result.'
+      distractors:
+        - 'let n = await compute(21); — TS prefix syntax; Rust uses POSTFIX `.await`.'
+        - 'let n: i32 = compute(21); — the type annotation makes the mismatch SHARPER (the compiler complains that `impl Future<...>` is not `i32`), but doesn''t add the await.'
+        - 'let n = compute(21).get(); — `.get` is not a method on Future; the resolution mechanism is `.await`.'
+hints:
+  - "One coordinated edit: add `.await` between `compute(21)` and the trailing semicolon."
+  - "`compute(21).await`."
+  - '`let n = compute(21).await;`'
+runtime: none
+notes: |
+  Closes the theme on the canonical "future never
+  awaited" bug. The fix is one suffix. The annotation
+  distractor surfaces a real partial-fix pattern that
+  doesn't actually resolve the future.

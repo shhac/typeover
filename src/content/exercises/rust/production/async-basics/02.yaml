@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 2
+prompt: |
+  Inside an async fn, call another async fn `inner()` and bind
+  its resolved value to `n`. Pick the syntax.
+generator:
+  kind: variant
+  variants:
+    - id: dot-await
+      ts: 'const n = await inner();'
+      canonical: 'let n = inner().await; — `.await` is a POSTFIX operator (no parens, no leading keyword); chains naturally with method calls.'
+      distractors:
+        - 'let n = await inner(); — TS/JS prefix syntax. Rust uses postfix `.await` so chaining reads left-to-right.'
+        - 'let n = inner(); — without `.await`, `n` is the Future itself (a `impl Future<Output = ...>`), NOT the resolved value.'
+        - 'let n = await(inner()); — JS-style "await as function call." Not Rust syntax.'
+hints:
+  - "Rust chose POSTFIX `.await` so chains read naturally — `x.foo().await.bar()` instead of `(await x.foo()).bar()`. Same `.` syntax as method calls."
+  - "`.await` — dot, then the five-letter word."
+  - '`let n = inner().await;`'
+runtime: none
+notes: |
+  Pins the postfix `.await` form. Postfix was a contentious
+  design choice — chosen explicitly to make chaining ergonomic
+  in long futures pipelines.

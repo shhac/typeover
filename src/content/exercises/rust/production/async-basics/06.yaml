@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 6
+prompt: |
+  Pick the BODY for `async fn double(x: i32) -> i32` that
+  returns `x` doubled (i.e. `42` when called with `21`).
+generator:
+  kind: variant
+  variants:
+    - id: doubler-body
+      ts: 'async function double(x: number): Promise<number> { return x * 2; }'
+      canonical: '{ x * 2 } — single expression, no trailing semicolon, returns implicitly. Idiomatic Rust style.'
+      distractors:
+        - '{ return x * 2; } — compiles, but `return` is redundant when the body is a single expression. Trailing-expression form is idiomatic.'
+        - '{ x * 2; } — trailing SEMICOLON turns the body into a STATEMENT; the fn returns `()` not `i32`. Compile error.'
+        - '{ x.await * 2 } — `.await` is for FUTURES; `x` is `i32`, not a future. Compile error.'
+hints:
+  - "Three tokens between the braces: `x * 2`. NO trailing semicolon — that's how Rust returns the value implicitly."
+  - "`x * 2` — no `;`, no `return`."
+  - '`{ x * 2 }`'
+runtime: none
+notes: |
+  Pins the trailing-expression body shape. The
+  semicolon distractor is the most common source of E0308
+  in async fns ("expected `i32`, found `()`").

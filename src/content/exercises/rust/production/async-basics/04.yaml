@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/async-basics
+type: fill-word
+order: 4
+prompt: |
+  Fill the modifier that turns a synchronous `fn` declaration
+  into an async one (returning an opaque Future).
+generator:
+  kind: template
+  vars:
+    kw: ["async"]
+  ts: |-
+    async function answer(): Promise<number> { return 42; }
+  canonical: |-
+    ${kw} fn answer() -> i32 {
+        42
+    }
+blanks: [kw]
+hints:
+  - "Five letters, lowercase. Same keyword as in TS, JavaScript, C#, etc."
+  - "`async`."
+  - "`async`"
+runtime: none
+notes: |
+  Drills the `async` keyword in front of `fn`. The fn body
+  doesn't change; only the call-site interpretation does
+  (now returns a Future).

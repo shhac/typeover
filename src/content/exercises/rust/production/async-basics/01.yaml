@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 1
+prompt: |
+  Declare an async function returning `i32` with value `42`.
+  Pick the idiomatic Rust syntax.
+generator:
+  kind: variant
+  variants:
+    - id: async-fn
+      ts: 'async function answer(): Promise<number> { return 42; }'
+      canonical: 'async fn answer() -> i32 { 42 } — `async` modifier BEFORE `fn`; the function returns an opaque future of `i32`.'
+      distractors:
+        - 'fn async answer() -> i32 { 42 } — `async` comes BEFORE `fn`, not after.'
+        - 'async function answer(): Promise<i32> { return 42; } — TS syntax; Rust uses `fn` and `->`.'
+        - 'fn answer() -> async i32 { 42 } — `async` is a modifier on the FUNCTION, not the return TYPE.'
+hints:
+  - "Two tokens: the `async` keyword, then the regular `fn` signature. The return type is the inner type — `async fn ... -> T` returns an opaque `Future<Output = T>`."
+  - "Shape: `async fn <name>(<args>) -> <ret> { ... }`."
+  - '`async fn answer() -> i32 { 42 }`'
+runtime: none
+notes: |
+  Pins the `async fn` shape. Distractors target three TS/JS
+  leakage points: word order, `function` keyword, and
+  `async` on the return type.

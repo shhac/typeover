@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 8
+prompt: |
+  Translate `console.log(await shout("hi"))` to Rust where
+  `shout` is an `async fn shout(s: String) -> String`. Pick
+  the println line.
+generator:
+  kind: variant
+  variants:
+    - id: ts-promise
+      ts: 'console.log(await shout("hi"));'
+      canonical: 'println!("{}", shout(String::from("hi")).await); — postfix `.await` on the future expression, inside `println!`''s second arg. String literal becomes an owned `String` via `String::from`.'
+      distractors:
+        - 'println!("{}", await shout(String::from("hi"))); — TS prefix `await`; Rust uses POSTFIX `.await`.'
+        - 'println!("{}", shout(String::from("hi"))); — missing `.await`. The argument is a Future, not a String; `{}` would need `Display` on Future (none exists).'
+        - 'await println!("{}", shout(String::from("hi"))); — `println!` is NOT an async fn; awaiting it makes no sense.'
+hints:
+  - "Two reflex-shifts: postfix `.await` (not prefix), and `String::from(\"hi\")` to construct an owned String for the parameter."
+  - "`println!(\"{}\", shout(String::from(\"hi\")).await);`."
+  - '`println!("{}", shout(String::from("hi")).await);`'
+runtime: none
+notes: |
+  Closes the TS-`await` translation parallel. Postfix
+  `.await` inside any expression position — including
+  `println!` macro args.

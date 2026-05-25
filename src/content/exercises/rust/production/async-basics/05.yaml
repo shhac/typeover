@@ -1,0 +1,30 @@
+target: rust
+themeId: rust/production/async-basics
+type: fill-word
+order: 5
+prompt: |
+  Fill the POSTFIX suffix that turns a Future expression into
+  its resolved value (inside an async context).
+generator:
+  kind: template
+  vars:
+    suffix: [".await"]
+  ts: |-
+    const n = await double(21);
+  canonical: |-
+    async fn double(x: i32) -> i32 { x * 2 }
+
+    async fn run() {
+        let n = double(21)${suffix};
+        println!("{}", n);
+    }
+blanks: [suffix]
+hints:
+  - "Six characters: leading dot + five letters. Postfix — comes AFTER the future expression."
+  - "`.await`."
+  - "`.await`"
+runtime: none
+notes: |
+  Drills postfix `.await` directly after the Future
+  expression — same chain-friendly placement as method
+  calls.

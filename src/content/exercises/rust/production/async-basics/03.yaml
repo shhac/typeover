@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/production/async-basics
+type: mcq
+order: 3
+prompt: |
+  A fallible async function either succeeds with an `i32` or
+  fails with a `String` reason. Pick the return type
+  declaration.
+generator:
+  kind: variant
+  variants:
+    - id: async-result
+      ts: 'async function fetch(): Promise<number> { ... } // TS wraps in Promise'
+      canonical: 'async fn fetch() -> Result<i32, String> — `Result<T, E>` goes in the SAME position as in a synchronous fn; the `async` modifier wraps the whole return in a Future.'
+      distractors:
+        - 'async fn fetch() -> Result<async i32, String> — `async` is a modifier on the FUNCTION, not nested into the return type.'
+        - 'fn fetch() -> Promise<Result<i32, String>> — TS-style `Promise<T>`; Rust has no `Promise` type, and the `async` modifier handles it.'
+        - 'async Result<i32, String> fn fetch() — wrong word order; `async` always comes immediately before `fn`.'
+hints:
+  - "Same `-> Result<T, E>` shape as a normal Result-returning function. The `async` modifier on the fn turns the whole thing into a `Future<Output = Result<T, E>>` for the caller — but you don't have to spell that out."
+  - "Shape: `async fn <name>(<args>) -> Result<<T>, <E>>`."
+  - '`async fn fetch() -> Result<i32, String>`'
+runtime: none
+notes: |
+  Pins the Result-in-async-signature shape. The `async`
+  modifier transparently wraps the result in a Future;
+  TS-style `Promise<Result<...>>` is a common authoring
+  reflex but not Rust syntax.
