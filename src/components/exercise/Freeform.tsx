@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { MobileKeyBar, Text } from "~/components/ds";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
@@ -88,6 +88,7 @@ export function Freeform(props: FreeformProps) {
   const runner = useRuntimeRun({
     runtime: props.runtime,
     buildProgram: () => code(),
+    autoboot: true,
     precheck: () => {
       const shape = resolveSubmissionShape(
         runner.runtimeTarget,
@@ -96,12 +97,6 @@ export function Freeform(props: FreeformProps) {
       return validateSubmissionShape(code(), shape);
     },
   });
-
-  /* Preflight the worker on mount. `preflight()` is a no-op when
-   * canRun is false, so no per-runtime gate needed at the call
-   * site. Hides the brotli'd WASM cold-start behind a visible
-   * "Booting <lang> runtime…" badge. design-docs/16 F-4. */
-  onMount(() => runner.preflight());
 
   const isCorrect = () => stdoutMatches(runner.runResult(), props.expectStdout);
   const canSubmit = () => runner.runResult() !== null && !runner.running();

@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import type { Target } from "./content-schema";
 import {
   CLIENT_RUNTIME_DESCRIPTORS,
@@ -126,6 +126,11 @@ interface UseRuntimeRunArgs {
    *  wrong result. Returning a RunResult preserves the Run panel UX
    *  while skipping the runtime call. */
   syntheticRun?: () => RunResult | null;
+  /** When true, the hook registers an onMount that calls preflight()
+   *  automatically — hides the WASM cold-start behind a visible
+   *  "Booting…" badge. Saves callers from each having to remember
+   *  `onMount(() => runner.preflight())`. */
+  autoboot?: boolean;
 }
 
 /** How long the runtime can sit in "booting" before we surface a
@@ -233,6 +238,8 @@ export function useRuntimeRun(args: UseRuntimeRunArgs): RuntimeRunHandle {
     armStallTimer(bootGen);
     attachBootHandlers(bootGen, descriptor.get().ready());
   }
+
+  if (args.autoboot) onMount(preflight);
 
   async function run(): Promise<void> {
     /* Server runtime → no-op. Consumers gate the Run button on

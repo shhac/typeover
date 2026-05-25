@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { type GeneratorSpec } from "~/lib/generator-schema";
 import { useExerciseInstance } from "~/lib/exercise-instance";
 import { useExercisePhase } from "~/lib/exercise-phase";
@@ -81,15 +81,10 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   const runner = useRuntimeRun({
     runtime: props.runtime,
     buildProgram: () => substituteAtBlank(instance(), input()),
+    autoboot: true,
     syntheticRun: () =>
       matchKnownAttempt(input(), props.knownAttempts, instance().values)?.runResult ?? null,
   });
-
-  /* Preflight WASM on mount — fill-line always uses a client-side
-   * runtime per schema, so there's no runtime gate here. Surfaces
-   * the cold-start as a "Booting <lang> runtime…" badge instead of
-   * a frozen Run button. design-docs/16 F-4. */
-  onMount(() => runner.preflight());
 
   /* Submission matches one of the authored alternate canonicals
    * (whitespace-normalised). Used to grade a "perfect" modern answer
