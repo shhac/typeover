@@ -1,16 +1,15 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { Container, Heading, Stack, Text } from "~/components/ds";
-import { YaegiSmoke } from "~/components/runtime/YaegiSmoke";
+import { SmokeProbe } from "~/components/exercise/SmokeProbe";
 
 /*
  * Dev-only smoke page for the Yaegi WASM runtime. Hydrates the
- * YaegiSmoke island which spawns the worker + Comlink-wraps it and
+ * SmokeProbe island which spawns the worker + Comlink-wraps it and
  * runs whatever Go you type. Not linked from any user-facing nav.
  *
  * Loaded at /runtime-smoke — visit during development to verify the
- * runtime end-to-end. Will be deleted once the Freeform exercise
- * component (#17) lands and exercises this same chain in production.
+ * runtime end-to-end.
  */
 ---
 
@@ -30,7 +29,7 @@ import { YaegiSmoke } from "~/components/runtime/YaegiSmoke";
             same worker.
           </Text>
         </Stack>
-        <YaegiSmoke client:only="solid-js" />
+        <SmokeProbe client:only="solid-js" />
       </Stack>
     </Container>
   </main>

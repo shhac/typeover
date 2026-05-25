@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 import { useRuntimeRun } from "~/lib/use-runtime-run";
-import { RunResetToolbar } from "../exercise/RunResetToolbar";
-import { RunResultPanel } from "../exercise/RunResultPanel";
+import { RunResetToolbar } from "./RunResetToolbar";
+import { RunResultPanel } from "./RunResultPanel";
 
 /*
  * Browser-side smoke island for the Yaegi worker. Exists purely to
@@ -9,9 +9,11 @@ import { RunResultPanel } from "../exercise/RunResultPanel";
  * exercise components consume it. Mounted at /runtime-smoke for dev
  * inspection; not linked from any user-facing nav.
  *
- * Shares useRuntimeRun + RunResetToolbar + RunResultPanel with the
- * production exercise surfaces — same lifecycle, same visual
- * vocabulary.
+ * Co-located with the exercise components it shares (RunResetToolbar
+ * + RunResultPanel) — previously lived under `src/components/runtime/`
+ * which created a `components/runtime → components/exercise` peer
+ * dependency flagged by the seam audit. The probe IS exercise-shaped:
+ * same lifecycle, same toolbar, same result panel.
  */
 
 const DEFAULT_CODE = `package main
@@ -36,7 +38,7 @@ const DEFAULT_EXPECT = `hello from yaegi (browser)
   i = 3
 `;
 
-export function YaegiSmoke() {
+export function SmokeProbe() {
   const [code, setCode] = createSignal(DEFAULT_CODE);
   const yaegi = useRuntimeRun({ runtime: "yaegi", buildProgram: () => code() });
 
