@@ -51,8 +51,8 @@ const rustThemeCount = rustThemes.length;
 ---
 
 <BaseLayout
-  title="typeover — learn Go and Zig from TypeScript"
-  description="A bilingual learning site that teaches Go and Zig to TypeScript developers."
+  title="typeover — learn Go, Zig, and Rust from TypeScript"
+  description="A learning site that teaches Go, Zig, and Rust to TypeScript developers."
 >
   <main class="py-16">
     <Container width="wide">
@@ -154,19 +154,34 @@ const rustThemeCount = rustThemes.length;
               <span class="text-accent-rust">Rust</span> for TypeScript devs
             </Heading>
             <Fragment slot="dek">
-              Foundations preview — {rustExerciseCount} exercises across
-              {rustThemeCount}
-              {rustThemeCount === 1 ? "theme" : "themes"} covering printing,
-              variables, and the immutable-by-default shift. Runnable
-              exercises arrive once the server-compile path lands (see
-              design-docs/32); recognition + fill-in already work.
+              Foundations ships {rustExerciseCount} runnable exercises today,
+              graded by a server-compile pipeline (Vercel Sandbox → wasm
+              → in-browser run) with a service-worker L1 cache so canonical
+              answers never burn Vercel CPU. Modules 2–7 ship their theme
+              spines today — {rustThemeCount} themes across all modules — with
+              exercises arriving next.
             </Fragment>
             <Stack gap="xs" slot="modules">
               <Text tone="muted" size="sm" family="mono">
-                <span class="text-accent-rust">1.</span> Foundations · preview
+                <span class="text-accent-rust">1.</span> Foundations · partial
               </Text>
               <Text tone="faint" size="sm" family="mono">
-                <span>2+.</span> Ownership, error handling, more · soon
+                <span>2.</span> Ownership &amp; borrowing · spine
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>3.</span> Data modeling · spine
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>4.</span> Collections &amp; iteration · spine
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>5.</span> Errors, crates &amp; tests · spine
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>6.</span> Traits &amp; generics · spine
+              </Text>
+              <Text tone="faint" size="sm" family="mono">
+                <span>7.</span> Production Rust · spine
               </Text>
             </Stack>
             <a href="/rust/foundations/hello-and-printing/01" class="inline-flex">
@@ -183,7 +198,7 @@ const rustThemeCount = rustThemes.length;
             typeover · 2026 · built with astro + solid + tailwind
           </Text>
           <Text tone="faint" size="xs" family="mono">
-            yaegi + zig runtimes · in browser · rust preview
+            yaegi + zig in browser · rust server-compiled + SW-cached
           </Text>
         </Stack>
       </Stack>
