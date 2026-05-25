@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: fill-word
+order: 5
+prompt: |
+  Fill the IDIOMATIC associated-function form that bumps the
+  reference count and produces another `Rc` pointing to the
+  same inner value. (Use the `Rc::xxx(&a)` form, not
+  `a.clone()`.)
+generator:
+  kind: template
+  vars:
+    call: ["Rc::clone"]
+  ts: |-
+    const ref2 = ref1; // sharing an object reference in TS.
+  canonical: |-
+    use std::rc::Rc;
+
+    let a: Rc<String> = Rc::new(String::from("hi"));
+    let b = ${call}(&a);
+blanks: [call]
+hints:
+  - "Two letters of type name + `::` + five letters of function name. The associated-function form makes the cheap-clone semantics explicit at the call site (vs `a.clone()` which could be confused with deep clone)."
+  - "Shape: `<RcType>::clone`."
+  - "`Rc::clone`"
+runtime: none
+notes: |
+  Drills `Rc::clone(&a)` as the explicit-shared-ownership
+  idiom. `a.clone()` is equivalent but reads as if it
+  deep-copies the inner value; the `Rc::clone(&a)` form
+  is preferred in production code for clarity.

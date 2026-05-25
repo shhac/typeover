@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: mcq
+order: 3
+prompt: |
+  A value needs to be SHARED by ownership ACROSS THREADS. Pick
+  the smart pointer.
+generator:
+  kind: variant
+  variants:
+    - id: arc-threads
+      ts: 'const shared = { ... }; // JS shares freely across the event loop.'
+      canonical: 'Arc<T> — Atomically Reference Counted; thread-safe (implements `Send`/`Sync` where T allows).'
+      distractors:
+        - 'Rc<T> — NOT thread-safe (`!Send`, `!Sync`); the compiler refuses to move it across threads.'
+        - 'Box<T> — single-owner; can''t share at all, let alone across threads.'
+        - 'Mutex<T> — provides MUTABLE access via locking, but doesn''t share ownership by itself; usually paired as `Arc<Mutex<T>>`.'
+hints:
+  - "Three letters: starts with `A` for atomic. Same shape as `Rc`, just thread-safe."
+  - "`Arc`."
+  - '`Arc<T>`'
+runtime: none
+notes: |
+  Pins `Arc<T>` as the cross-thread shared pointer. The
+  Mutex distractor surfaces the canonical pairing — `Arc`
+  shares ownership, `Mutex` synchronises access; together
+  `Arc<Mutex<T>>` is the standard mutable-shared shape.

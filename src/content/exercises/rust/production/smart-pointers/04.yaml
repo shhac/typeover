@@ -1,0 +1,25 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: fill-word
+order: 4
+prompt: |
+  Fill the associated function that allocates a value on the
+  heap and returns a `Box<T>` pointing to it.
+generator:
+  kind: template
+  vars:
+    call: ["Box::new"]
+  ts: |-
+    const b = { value: 42 }; // TS objects are already heap-allocated.
+  canonical: |-
+    let b: Box<i32> = ${call}(42);
+blanks: [call]
+hints:
+  - "Three letters of type name + `::` + three letters of associated-function name. Same `new` convention as other constructors."
+  - "Shape: `<Type>::new`."
+  - "`Box::new`"
+runtime: none
+notes: |
+  Drills `Box::new(value)`. The associated-function form
+  (vs method) is the standard Rust constructor pattern;
+  works for `Rc::new`, `Arc::new`, `String::new`, etc.

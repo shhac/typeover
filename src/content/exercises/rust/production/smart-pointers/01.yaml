@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: mcq
+order: 1
+prompt: |
+  A recursive enum (each node may carry a child of the SAME
+  type) won't compile without indirection — the compiler can't
+  compute a finite size. Pick the smart pointer for SINGLE-
+  owner recursion.
+generator:
+  kind: variant
+  variants:
+    - id: box-recursive
+      ts: 'type List = { head: number; tail: List | null };'
+      canonical: 'Box<T> — owned heap pointer; one level of indirection makes the type''s size finite (pointer-sized), single owner.'
+      distractors:
+        - 'Rc<T> — reference-counted SHARED ownership; correct for "many owners," overkill for "one owner with recursion."'
+        - 'Arc<T> — atomically reference-counted shared ownership across threads; even more overkill for single-thread recursion.'
+        - '&T — a BORROW, not an owner; can''t be returned from a constructor without lifetime gymnastics.'
+hints:
+  - "Three letters, PascalCase. Stack-sized pointer to a heap-allocated value; the simplest smart pointer; same name as a small container."
+  - "`Box`."
+  - '`Box<T>`'
+runtime: none
+notes: |
+  Pins `Box<T>` as the single-owner heap pointer.
+  Distractors cover the shared-ownership cousins (Rc/Arc,
+  both correct shape but heavier than needed) and the
+  borrow trap.

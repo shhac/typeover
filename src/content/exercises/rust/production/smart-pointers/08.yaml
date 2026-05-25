@@ -1,0 +1,58 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: freeform
+order: 8
+prompt: |
+  Translate the TS pattern that shares one object reference
+  across two variables. In Rust, model with `Rc<Data>` where
+  `struct Data { name: String }`. Print both refs' `name`
+  fields space-separated.
+
+  Output:
+
+      paul paul
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const data = { name: "paul" };
+    const ref1 = data;
+    const ref2 = data;
+    console.log(ref1.name, ref2.name);
+  canonical: |-
+    use std::rc::Rc;
+
+    struct Data {
+        name: String,
+    }
+
+    fn main() {
+        let data = Rc::new(Data { name: String::from("paul") });
+        let ref1 = Rc::clone(&data);
+        let ref2 = Rc::clone(&data);
+        println!("{} {}", ref1.name, ref2.name);
+    }
+expectStdout: |
+  paul paul
+hints:
+  - "Wrap the `Data` in `Rc::new(...)` once, then `Rc::clone(&data)` for each additional binding. `.name` field access works transparently through the Rc (it derefs to `&Data`)."
+  - "Two `Rc::clone(&data)` lines."
+  - |-
+    use std::rc::Rc;
+
+    struct Data {
+        name: String,
+    }
+
+    fn main() {
+        let data = Rc::new(Data { name: String::from("paul") });
+        let ref1 = Rc::clone(&data);
+        let ref2 = Rc::clone(&data);
+        println!("{} {}", ref1.name, ref2.name);
+    }
+runtime: server
+notes: |
+  Surfaces the TS-to-Rust shared-reference translation.
+  TS shares freely (object references); Rust requires
+  explicit `Rc` + `Rc::clone` to opt into shared
+  ownership.

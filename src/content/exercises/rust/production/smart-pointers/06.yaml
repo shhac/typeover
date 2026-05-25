@@ -1,0 +1,88 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: freeform
+order: 6
+prompt: |
+  Define a recursive enum `List` with two variants:
+  `Cons(i32, Box<List>)` (value + boxed tail) and `Nil`. Build
+  the list `1 -> 2 -> 3 -> Nil` and print each value on its
+  own line via a recursive `print_list(&List)`.
+
+  Output:
+
+      1
+      2
+      3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type List = { head: number; tail: List | null };
+    function print(l: List | null): void {
+      if (l) { console.log(l.head); print(l.tail); }
+    }
+    print({ head: 1, tail: { head: 2, tail: { head: 3, tail: null } } });
+  canonical: |-
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    fn print_list(list: &List) {
+        match list {
+            List::Cons(v, next) => {
+                println!("{}", v);
+                print_list(next);
+            }
+            List::Nil => {}
+        }
+    }
+
+    fn main() {
+        let list = List::Cons(
+            1,
+            Box::new(List::Cons(
+                2,
+                Box::new(List::Cons(3, Box::new(List::Nil))),
+            )),
+        );
+        print_list(&list);
+    }
+expectStdout: |
+  1
+  2
+  3
+hints:
+  - "Three pieces: recursive enum where the recursive position is wrapped in `Box`, a recursive function pattern-matching on the variant, and `main` building the list inside-out via nested `Box::new(List::Cons(...))`."
+  - "Inner-most first: `Box::new(List::Nil)`, wrap with the previous Cons, repeat."
+  - |-
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    fn print_list(list: &List) {
+        match list {
+            List::Cons(v, next) => {
+                println!("{}", v);
+                print_list(next);
+            }
+            List::Nil => {}
+        }
+    }
+
+    fn main() {
+        let list = List::Cons(
+            1,
+            Box::new(List::Cons(
+                2,
+                Box::new(List::Cons(3, Box::new(List::Nil))),
+            )),
+        );
+        print_list(&list);
+    }
+runtime: server
+notes: |
+  Drills the canonical recursive-enum + Box pattern.
+  Without the Box wrapping, the enum has no upper bound
+  on size; Box gives each "tail" a pointer-sized slot.

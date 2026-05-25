@@ -1,0 +1,60 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: freeform
+order: 9
+prompt: |
+  This program fails with `error[E0072]: recursive type `List`
+  has infinite size`:
+
+      enum List {
+          Cons(i32, List),
+          Nil,
+      }
+
+      fn main() {
+          let _x = List::Nil;
+          println!("ok");
+      }
+
+  Fix it by wrapping the recursive position in `Box<List>`.
+  `main` just prints `"ok"` to confirm the program compiles.
+
+  Output:
+
+      ok
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    type List = { head: number; tail: List | null };
+    console.log("ok");
+  canonical: |-
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    fn main() {
+        let _x = List::Nil;
+        println!("ok");
+    }
+expectStdout: |
+  ok
+hints:
+  - "One coordinated edit: change `Cons(i32, List)` to `Cons(i32, Box<List>)`. The `Box` gives the recursive position a known size (pointer-sized) — same shape as TS `tail: List | null` (a JS reference is pointer-sized too)."
+  - "Wrap `List` in `Box<...>` inside the `Cons` variant."
+  - |-
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    fn main() {
+        let _x = List::Nil;
+        println!("ok");
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical recursive-without-Box
+  trap. `Box` is the cheapest indirection — one heap
+  allocation per recursive node, no ref-counting cost.

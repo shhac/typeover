@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: mcq
+order: 2
+prompt: |
+  Two structures in a SINGLE-THREADED program both need to OWN
+  the same value. Pick the smart pointer.
+generator:
+  kind: variant
+  variants:
+    - id: rc-shared
+      ts: 'const a = data; const b = data; // both own a reference'
+      canonical: 'Rc<T> — single-threaded reference counter; cheap clone (`Rc::clone`), deallocates when the last `Rc` drops.'
+      distractors:
+        - 'Box<T> — SINGLE owner. Cloning a `Box` duplicates the value, doesn''t share ownership.'
+        - '&T — a BORROW, not ownership. There is still exactly one owner; the borrow doesn''t change that.'
+        - 'Arc<T> — works, but pays for ATOMIC ref-count operations we don''t need in single-threaded code.'
+hints:
+  - "Two letters: ref-count. Single-threaded variant (no atomics)."
+  - "`Rc`."
+  - '`Rc<T>`'
+runtime: none
+notes: |
+  Pins `Rc<T>` as the single-thread shared-ownership tool.
+  The `Arc` distractor is functionally correct but wasteful
+  — a common over-cautious choice.

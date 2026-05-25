@@ -1,0 +1,47 @@
+target: rust
+themeId: rust/production/smart-pointers
+type: freeform
+order: 7
+prompt: |
+  Use `Rc` to SHARE a `String` between two bindings without
+  cloning the underlying String. Build `let a = Rc::new(
+  String::from("paul"));`, share via `let b = Rc::clone(&a);`,
+  print both bindings and the strong count.
+
+  Output:
+
+      paul paul count=2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const a = { name: "paul" };
+    const b = a; // share the same object
+    console.log(a.name, b.name);
+  canonical: |-
+    use std::rc::Rc;
+
+    fn main() {
+        let a = Rc::new(String::from("paul"));
+        let b = Rc::clone(&a);
+        println!("{} {} count={}", a, b, Rc::strong_count(&a));
+    }
+expectStdout: |
+  paul paul count=2
+hints:
+  - "Three calls: `Rc::new(...)` to construct the shared pointer, `Rc::clone(&a)` to bump the count and produce a second pointer to the SAME String, `Rc::strong_count(&a)` to read the count (returns `usize`)."
+  - "Format: `\"{} {} count={}\"` with three args: `a`, `b`, `Rc::strong_count(&a)`."
+  - |-
+    use std::rc::Rc;
+
+    fn main() {
+        let a = Rc::new(String::from("paul"));
+        let b = Rc::clone(&a);
+        println!("{} {} count={}", a, b, Rc::strong_count(&a));
+    }
+runtime: server
+notes: |
+  Drills `Rc::new` + `Rc::clone` + `Rc::strong_count`.
+  Both `a` and `b` see the same heap-allocated String;
+  no string-level allocation happened on the clone.
+  Count is 2 — drops to 0 when both go out of scope.
