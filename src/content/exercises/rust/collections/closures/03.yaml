@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/collections/closures
+type: mcq-explain
+order: 3
+prompt: |
+  When should you write `move ||` in front of a Rust closure?
+generator:
+  kind: variant
+  variants:
+    - id: when-move
+      ts: |-
+        // TS closures always close over references — there's no
+        // `move` keyword. Rust requires explicit `move` to take
+        // ownership of captures.
+      canonical: 'Add `move` when the closure must OUTLIVE the local borrows it would otherwise take — typically when handing the closure to another thread or storing it in a struct. `move` forces capture by VALUE; without it the compiler picks the lightest mode (borrow, then mut-borrow, then move).'
+      distractors:
+        - 'Always — `move` makes closures safer by avoiding hidden references.'
+        - 'Only when the closure mutates captured state; without `move`, mutation is forbidden.'
+        - 'When the closure returns a value larger than 8 bytes, to avoid copying on return.'
+hints:
+  - "The compiler picks the lightest capture mode by default. `move` is the explicit override — used when the closure needs to keep its captures ALIVE past the surrounding scope (threads, stored callbacks)."
+  - "Same word as the verb meaning 'transfer'."
+  - 'When the closure must outlive the local borrows (threads, stored callbacks).'
+runtime: none
+notes: |
+  Pins the right intuition for `move`: lifetime, not
+  mutability. Distractors cover always-on (over-cautious),
+  mutation-implies-move (false; mutation works through
+  `&mut` capture), and a made-up perf reason.

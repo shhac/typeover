@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/collections/closures
+type: mcq
+order: 1
+prompt: |
+  Pick the idiomatic Rust closure that doubles its input.
+generator:
+  kind: variant
+  variants:
+    - id: doubler
+      ts: 'const double = (x) => x * 2;'
+      canonical: '|x| x * 2 — pipes around params, expression body. No `fn`, no return keyword.'
+      distractors:
+        - '(x) => x * 2 — TS/JS arrow syntax; not Rust.'
+        - 'fn(x) { x * 2 } — `fn` declares a NAMED function (or a function-pointer TYPE); closures use `|...|` instead.'
+        - '[x| x * 2] — square brackets are for array literals; closure params go between pipes.'
+hints:
+  - "Two pipes around the parameter list (like Smalltalk / Ruby blocks). Body is an expression — no return, no semicolon at the tail."
+  - "Shape: `|<params>| <expression>`."
+  - "`|x| x * 2`"
+runtime: none
+notes: |
+  Establishes the `|x| expr` closure shape. Distractors cover
+  the three main wrong syntaxes a TS-dev brings: arrow form,
+  `fn` confusion (closure vs named function), and bracket
+  typo.

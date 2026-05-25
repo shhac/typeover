@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/collections/closures
+type: mcq-explain
+order: 2
+prompt: |
+  The closure `|x| x * 2` declares no type for `x`. Pick the
+  explanation that names why it compiles.
+generator:
+  kind: variant
+  variants:
+    - id: inference
+      ts: |-
+        // TS arrow functions are similar — `(x) => x * 2` infers x
+        // from contextual typing at the call site.
+      canonical: 'The compiler INFERS the parameter type from the closure''s first concrete use. Once inferred, the closure is monomorphic — calling it later with a different type is a compile error.'
+      distractors:
+        - 'Closures default to `i32`; the parameter is implicitly typed `i32` unless annotated otherwise.'
+        - 'Rust closures are dynamically typed; `x` accepts any type at runtime — there is no static check.'
+        - 'The compiler defaults closure parameters to `&i32`; an explicit type is needed only for non-numeric inputs.'
+hints:
+  - "Same mechanism as `let x = ...` for bindings — Rust looks at the FIRST concrete use to pin the type. Once pinned, the closure is one specific function type."
+  - "The word that names this mechanism."
+  - 'Type inference from the first concrete use.'
+runtime: none
+notes: |
+  Pins type inference as the mechanism. Distractors target
+  three common TS/JS reflexes: numeric default, runtime-
+  dynamic, and reference-default.

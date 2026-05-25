@@ -1,0 +1,24 @@
+target: rust
+themeId: rust/collections/closures
+type: fill-word
+order: 5
+prompt: |
+  Fill the closure body that doubles its input.
+generator:
+  kind: template
+  vars:
+    body: ["x * 2"]
+  ts: |-
+    const doubled = xs.map((x) => x * 2);
+  canonical: |-
+    let xs: Vec<i32> = vec![1, 2, 3];
+    let doubled: Vec<i32> = xs.into_iter().map(|x| ${body}).collect();
+blanks: [body]
+hints:
+  - "Three tokens with one space: the parameter, the multiplication operator, the literal."
+  - "Multiply `x` by `2`."
+  - "`x * 2`"
+runtime: none
+notes: |
+  Drills a mapping closure body. Companion to slot 04
+  (predicate); this one transforms instead of filtering.

@@ -1,0 +1,59 @@
+target: rust
+themeId: rust/collections/closures
+type: freeform
+order: 9
+prompt: |
+  This program fails — the closure captures `xs` by `&mut`, but
+  then `xs.push(5)` runs while the closure's borrow is still
+  alive:
+
+      fn main() {
+          let mut xs = vec![1, 2, 3];
+          let mut inc = || xs.push(4);
+          xs.push(5);
+          inc();
+          println!("{:?}", xs);
+      }
+
+  Fix it by CALLING `inc()` BEFORE the other mutation, so the
+  closure's `&mut` borrow ends (last-use NLL) before
+  `xs.push(5)` starts.
+
+  Output:
+
+      [1, 2, 3, 4, 5]
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3];
+    const inc = () => xs.push(4);
+    xs.push(5);
+    inc();
+    console.log(xs);
+  canonical: |-
+    fn main() {
+        let mut xs = vec![1, 2, 3];
+        let mut inc = || xs.push(4);
+        inc();
+        xs.push(5);
+        println!("{:?}", xs);
+    }
+expectStdout: |
+  [1, 2, 3, 4, 5]
+hints:
+  - "One reorder: move `inc();` UP, so it runs before `xs.push(5);`. Under non-lexical lifetimes the closure's `&mut xs` capture ends at the closure's last use; once `inc()` runs, `xs` is free for further mutation."
+  - "The closure holds an `&mut xs`; that borrow must end before any other `&mut xs` (like `.push`) starts."
+  - |-
+    fn main() {
+        let mut xs = vec![1, 2, 3];
+        let mut inc = || xs.push(4);
+        inc();
+        xs.push(5);
+        println!("{:?}", xs);
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical closure-vs-borrow
+  conflict. The fix is structural (re-order, not annotate)
+  — same pattern as the lifetime-intuition fixes.

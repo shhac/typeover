@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/collections/closures
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript array chain to Rust. Keep only even
+  elements, square them, collect into a new vec, print the first
+  two squared values space-separated.
+
+  Output:
+
+      4 16
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [1, 2, 3, 4, 5];
+    const result = xs.filter((x) => x % 2 === 0).map((x) => x * x);
+    console.log(result[0] + " " + result[1]);
+  canonical: |-
+    fn main() {
+        let xs: Vec<i32> = vec![1, 2, 3, 4, 5];
+        let result: Vec<i32> = xs
+            .into_iter()
+            .filter(|x| x % 2 == 0)
+            .map(|x| x * x)
+            .collect();
+        println!("{} {}", result[0], result[1]);
+    }
+expectStdout: |
+  4 16
+hints:
+  - "Chain shape mirrors the TS: `xs.into_iter().filter(|x| <pred>).map(|x| <expr>).collect()`. Use `==` (not `===`) for equality, `%` for modulo. The binding type `Vec<i32>` tells `.collect()` what to build."
+  - "Body: `xs.into_iter().filter(|x| x % 2 == 0).map(|x| x * x).collect();`."
+  - |-
+    fn main() {
+        let xs: Vec<i32> = vec![1, 2, 3, 4, 5];
+        let result: Vec<i32> = xs
+            .into_iter()
+            .filter(|x| x % 2 == 0)
+            .map(|x| x * x)
+            .collect();
+        println!("{} {}", result[0], result[1]);
+    }
+runtime: server
+notes: |
+  Closes the TS-arrow parallel with two inline closures
+  in one chain. `into_iter` keeps the closures simple
+  (`x: i32` instead of `&i32`).

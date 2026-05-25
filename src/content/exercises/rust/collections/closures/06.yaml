@@ -1,0 +1,42 @@
+target: rust
+themeId: rust/collections/closures
+type: freeform
+order: 6
+prompt: |
+  Sort `vec![3, -1, 4, -5, 2]` by ABSOLUTE VALUE ascending using
+  `sort_by_key`. The closure should return `x.abs()` for each
+  element. Print all five elements space-separated AFTER the
+  sort.
+
+  Output:
+
+      -1 2 3 4 -5
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const xs = [3, -1, 4, -5, 2];
+    xs.sort((a, b) => Math.abs(a) - Math.abs(b));
+    console.log(xs.join(" "));
+  canonical: |-
+    fn main() {
+        let mut xs: Vec<i32> = vec![3, -1, 4, -5, 2];
+        xs.sort_by_key(|x| x.abs());
+        println!("{} {} {} {} {}", xs[0], xs[1], xs[2], xs[3], xs[4]);
+    }
+expectStdout: |
+  -1 2 3 4 -5
+hints:
+  - "Two pieces: `xs.sort_by_key(<closure>)` sorts in place — needs `let mut xs: Vec<i32>` (the type annotation pins the element type so `.abs()` resolves). The closure takes one parameter and returns the KEY to sort by; here `|x| x.abs()` (auto-deref on `&i32` makes `.abs()` work)."
+  - "`xs.sort_by_key(|x| x.abs());`."
+  - |-
+    fn main() {
+        let mut xs: Vec<i32> = vec![3, -1, 4, -5, 2];
+        xs.sort_by_key(|x| x.abs());
+        println!("{} {} {} {} {}", xs[0], xs[1], xs[2], xs[3], xs[4]);
+    }
+runtime: server
+notes: |
+  Drills a closure used as a key extractor. Stable sort
+  by `.abs()` preserves the original order of equal-key
+  elements; the canonical input has no ties.

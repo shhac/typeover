@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/collections/closures
+type: fill-word
+order: 4
+prompt: |
+  Fill the closure body. Should evaluate to `true` for positive
+  values (greater than zero).
+generator:
+  kind: template
+  vars:
+    body: ["x > 0"]
+  ts: |-
+    const positives = xs.filter((x) => x > 0);
+  canonical: |-
+    let xs: Vec<i32> = vec![-1, 2, -3, 4];
+    let positives: Vec<i32> = xs.into_iter().filter(|x| ${body}).collect();
+blanks: [body]
+hints:
+  - "Three tokens with one space: the parameter name, the comparison operator, and zero."
+  - "Use the same parameter name (`x`) as the closure declares; compare it against `0`."
+  - "`x > 0`"
+runtime: none
+notes: |
+  Drills a minimal predicate closure body. The into_iter
+  shape means `x` is owned `i32`, so the comparison works
+  without deref noise.

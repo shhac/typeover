@@ -1,0 +1,50 @@
+target: rust
+themeId: rust/collections/closures
+type: freeform
+order: 7
+prompt: |
+  Declare `let threshold = 3;`, then a closure
+  `above_threshold` that takes `&i32` and returns `true` when
+  the value is greater than `threshold` (the closure CAPTURES
+  `threshold`). Use it to filter `vec![1, 2, 3, 4, 5, 6]` and
+  print the count of elements that pass.
+
+  Output:
+
+      3
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const threshold = 3;
+    const aboveThreshold = (x: number) => x > threshold;
+    const xs = [1, 2, 3, 4, 5, 6];
+    console.log(xs.filter(aboveThreshold).length);
+  canonical: |-
+    fn main() {
+        let threshold = 3;
+        let above_threshold = |x: &i32| *x > threshold;
+        let xs: Vec<i32> = vec![1, 2, 3, 4, 5, 6];
+        let count = xs.into_iter().filter(above_threshold).count();
+        println!("{}", count);
+    }
+expectStdout: |
+  3
+hints:
+  - "Three pieces: bind `threshold` first, declare the closure capturing it by borrow (`|x: &i32| *x > threshold`), pass the closure by NAME to `.filter`. `.into_iter()` makes `.filter` accept a `Fn(&i32) -> bool` directly."
+  - "Closure body: `*x > threshold` — deref `x` to compare an `i32` against the captured `i32`."
+  - |-
+    fn main() {
+        let threshold = 3;
+        let above_threshold = |x: &i32| *x > threshold;
+        let xs: Vec<i32> = vec![1, 2, 3, 4, 5, 6];
+        let count = xs.into_iter().filter(above_threshold).count();
+        println!("{}", count);
+    }
+runtime: server
+notes: |
+  Drills named closures with captured state. `threshold`
+  is captured by SHARED borrow — the compiler picks the
+  lightest mode since the closure only reads. Passing the
+  closure by name to `.filter` works because
+  `into_iter().filter` wants `Fn(&i32) -> bool`.
