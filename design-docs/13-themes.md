@@ -137,7 +137,6 @@ before shipping):
 
   --color-border-default: #e1e4ea;
   --color-border-strong:  #c4c9d2;
-  --color-border-accent:  #c97a0055;
 
   --color-fg-primary:   #14171f;  /* ~17:1 against #fff */
   --color-fg-secondary: #4a5060;  /* ~8.4:1 */

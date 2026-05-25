@@ -13,7 +13,6 @@
 
   --color-border-default: #e1e4ea;
   --color-border-strong: #c4c9d2;
-  --color-border-accent: #c97a0055;
 
   /* Text — contrast-verified against bg-base (#fff) for WCAG AA:
    *   fg-primary   ~17:1 ✓ AAA
