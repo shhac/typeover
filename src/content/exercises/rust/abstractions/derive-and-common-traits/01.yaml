@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: mcq
+order: 1
+prompt: |
+  A struct `Point` should be printable via the `{:?}` debug
+  format without writing the `Debug` impl by hand. Pick the
+  attribute that asks the compiler to generate it.
+generator:
+  kind: variant
+  variants:
+    - id: derive-debug
+      ts: '// TS: console.log shows objects automatically — no opt-in needed.'
+      canonical: '#[derive(Debug)] — placed on the line above the struct declaration; the compiler generates the boilerplate `Debug` impl.'
+      distractors:
+        - '#[Debug] — missing the `derive(...)` wrapper. Bare `#[Debug]` is not a recognised attribute.'
+        - '@derive(Debug) — Java/TS-style annotation prefix; Rust attributes start with `#`.'
+        - '#[implements(Debug)] — Java/TS reflex. The attribute name is `derive`.'
+hints:
+  - "Two pieces: the attribute name (`derive`) and the trait list in parens. The whole thing in `#[ ... ]` brackets."
+  - "Shape: `#[derive(<TraitNames>)]`."
+  - '`#[derive(Debug)]`'
+runtime: none
+notes: |
+  Pins `#[derive(...)]` syntax. Distractors target attribute-
+  syntax typos and the Java/TS annotation reflex.

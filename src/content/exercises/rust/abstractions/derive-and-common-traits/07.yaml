@@ -1,0 +1,49 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: freeform
+order: 7
+prompt: |
+  Define `struct Counter { count: i32 }` deriving `Default`
+  and `Debug`. `main` builds a `Counter::default()` (the
+  derive provides the zero-initialised value) and prints
+  with `{:?}`.
+
+  Output:
+
+      Counter { count: 0 }
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class Counter { count: number = 0; }
+    console.log(new Counter());
+  canonical: |-
+    #[derive(Default, Debug)]
+    struct Counter {
+        count: i32,
+    }
+
+    fn main() {
+        let c = Counter::default();
+        println!("{:?}", c);
+    }
+expectStdout: |
+  Counter { count: 0 }
+hints:
+  - "Two derives: `Default` provides the `default()` associated function that returns a fresh instance with each field at its type's default (0 for numerics, empty for collections); `Debug` enables the `{:?}` formatter."
+  - "Construction: `Counter::default()` — `Default::default()` would also work via UFCS."
+  - |-
+    #[derive(Default, Debug)]
+    struct Counter {
+        count: i32,
+    }
+
+    fn main() {
+        let c = Counter::default();
+        println!("{:?}", c);
+    }
+runtime: server
+notes: |
+  Drills `Default` for zero-init. The default value for
+  each field comes from the field's type — `i32::default()`
+  is `0`, `String::default()` is `""`, etc.

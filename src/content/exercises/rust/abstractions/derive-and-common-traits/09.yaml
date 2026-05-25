@@ -1,0 +1,71 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: freeform
+order: 9
+prompt: |
+  This program fails because `Key` cannot be used as a
+  `HashMap` key without `Hash`, `Eq`, and `PartialEq` impls:
+
+      error[E0277]: the trait bound `Key: Eq` is not satisfied
+
+      use std::collections::HashMap;
+
+      struct Key { id: i32 }
+
+      fn main() {
+          let mut m: HashMap<Key, String> = HashMap::new();
+          m.insert(Key { id: 1 }, String::from("alice"));
+          println!("{:?}", m.get(&Key { id: 1 }));
+      }
+
+  Fix it by deriving `Hash`, `Eq`, and `PartialEq` on `Key`.
+
+  Output:
+
+      Some("alice")
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const m = new Map<{ id: number }, string>();
+    m.set({ id: 1 }, "alice");
+    console.log(m.get({ id: 1 })); // undefined — different object
+  canonical: |-
+    use std::collections::HashMap;
+
+    #[derive(Hash, Eq, PartialEq)]
+    struct Key {
+        id: i32,
+    }
+
+    fn main() {
+        let mut m: HashMap<Key, String> = HashMap::new();
+        m.insert(Key { id: 1 }, String::from("alice"));
+        println!("{:?}", m.get(&Key { id: 1 }));
+    }
+expectStdout: |
+  Some("alice")
+hints:
+  - "Add `#[derive(Hash, Eq, PartialEq)]` to `Key`. `HashMap` needs all three: `Hash` to slot the key into a bucket, `Eq` (which requires `PartialEq`) to confirm key identity on collision."
+  - "One derive line, three traits, comma-separated."
+  - |-
+    use std::collections::HashMap;
+
+    #[derive(Hash, Eq, PartialEq)]
+    struct Key {
+        id: i32,
+    }
+
+    fn main() {
+        let mut m: HashMap<Key, String> = HashMap::new();
+        m.insert(Key { id: 1 }, String::from("alice"));
+        println!("{:?}", m.get(&Key { id: 1 }));
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "key without Hash/Eq"
+  fix. The TS contrast is striking: JS `Map` uses
+  reference identity, so two object literals with the
+  same shape never resolve to the same key — Rust's
+  derived structural equality makes the round-trip work
+  naturally.

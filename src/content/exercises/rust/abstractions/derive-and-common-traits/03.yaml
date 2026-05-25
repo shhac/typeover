@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: mcq-explain
+order: 3
+prompt: |
+  When should a struct derive both `Clone` AND `Copy` (and not
+  just `Clone`)?
+generator:
+  kind: variant
+  variants:
+    - id: clone-vs-copy
+      ts: |-
+        // TS: primitives copy, objects share. Rust splits this into
+        // `Copy` (implicit, bit-copy semantics) and `Clone` (explicit
+        // `.clone()`), with `Copy` opt-in via derive.
+      canonical: 'Derive `Copy` (in addition to the required `Clone`) only for SMALL plain-old-data types — primitives, or simple structs of primitives. `Copy` makes assignment and parameter-passing implicitly COPY instead of MOVE; for heap-owning types this would create double-frees, which is why `Copy` is opt-in and restricted.'
+      distractors:
+        - 'Always derive both — `Clone` is just slower than `Copy`, so deriving both gives the compiler flexibility.'
+        - 'Derive only `Copy`; `Clone` is automatic for any `Copy` type.'
+        - 'Derive only `Clone`; `Copy` is for smart-pointer types like `Box<T>` and `Rc<T>`.'
+hints:
+  - "`Copy` requires `Clone` (it's a sub-trait), and bit-copy must be sound — that excludes anything that owns heap memory (`String`, `Vec`, `Box`)."
+  - "Three letters describe what kinds of types qualify: plain-old-data."
+  - 'Small POD types only — primitives and structs of primitives.'
+runtime: none
+notes: |
+  Names the safe Copy boundary. Distractors target three
+  common myths: always-both, Clone-implies-Copy, and the
+  reverse "Box<T> is Copy" (heap-owning types aren't).

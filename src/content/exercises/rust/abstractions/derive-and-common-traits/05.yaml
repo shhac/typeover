@@ -1,0 +1,53 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: fill-line
+order: 5
+prompt: |
+  Fill the line that prints the `Point` value `p` using DEBUG
+  format. End with a semicolon.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'println!("{:?}", p);'
+  ts: |-
+    console.log(p); // TS prints the object structure automatically.
+  canonical: |-
+    #[derive(Debug)]
+    struct Point { x: i32, y: i32 }
+
+    fn main() {
+        let p = Point { x: 3, y: 4 };
+        ${line}
+    }
+  distractors:
+    - match: 'println!("{}", p);'
+      explain: |-
+        `{}` calls `Display`, which is NOT derived. Use `{:?}`
+        for the derived `Debug` formatter.
+    - match: 'println!("{?}", p);'
+      explain: |-
+        Wrong format specifier. The debug placeholder is `{:?}`
+        — colon before the question mark, both inside the
+        braces.
+    - match: 'println!(":?", p);'
+      explain: |-
+        Missing the braces around the format specifier. Each
+        argument slot is wrapped in `{...}`.
+    - match: 'print!("{:?}", p);'
+      explain: |-
+        `print!` (no trailing `!n`) doesn't add a newline,
+        so the expected output mismatches. Use `println!`.
+expectStdout: |
+  Point { x: 3, y: 4 }
+runtime: server
+blanks: [line]
+hints:
+  - "Macro name, format string in double quotes, argument, semicolon. The format string uses `{:?}` — colon, question mark, both inside braces — for the derived `Debug` formatter."
+  - "Shape: `println!(\"{:?}\", <value>);`."
+  - '`println!("{:?}", p);`'
+notes: |
+  Drills `{:?}` debug printing. The four distractors cover
+  the common typos: Display-instead-of-Debug, wrong
+  format-spec syntax, missing-braces, and
+  print-without-newline.

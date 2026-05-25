@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: mcq
+order: 2
+prompt: |
+  A struct should compare with `==` (structural equality). Pick
+  the derive that provides `==` and `!=`.
+generator:
+  kind: variant
+  variants:
+    - id: partialeq
+      ts: '// TS: `===` is REFERENCE equality on objects; Rust derives STRUCTURAL.'
+      canonical: '#[derive(PartialEq)] — provides `==` and `!=`. For total equality (rarely matters), pair with `Eq`.'
+      distractors:
+        - '#[derive(Equal)] — there is no `Equal` trait; the closest names are `PartialEq` and `Eq`.'
+        - '#[derive(Eq)] — `Eq` is a MARKER trait that depends on `PartialEq`; the actual `==` operator is `PartialEq::eq`. Deriving `Eq` alone fails because the prerequisite isn''t derived.'
+        - '#[derive(Compare)] — there is no `Compare` trait. For ordering use `PartialOrd`/`Ord`.'
+hints:
+  - "Two halves: the trait that provides the OPERATOR is named PARTIAL + EQ. `Eq` alone is a marker trait that builds on it."
+  - "Eight letters, PascalCase."
+  - '`#[derive(PartialEq)]`'
+runtime: none
+notes: |
+  Pins `PartialEq` as the `==` provider. The second
+  distractor surfaces the Eq/PartialEq distinction —
+  Eq is a marker that REQUIRES PartialEq; deriving Eq
+  alone doesn't compile.

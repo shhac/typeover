@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: fill-word
+order: 4
+prompt: |
+  Fill the trait list inside the derive attribute so the struct
+  gets both `Debug` and `Clone` impls.
+generator:
+  kind: template
+  vars:
+    list: ["Debug, Clone"]
+  ts: |-
+    interface Point { x: number; y: number; } // TS has no derive.
+  canonical: |-
+    #[derive(${list})]
+    struct Point { x: i32, y: i32 }
+blanks: [list]
+hints:
+  - "Two trait names separated by `, ` (comma + space) — same order, exact spelling."
+  - "Each name is PascalCase; the trait names are five and five letters."
+  - "`Debug, Clone`"
+runtime: none
+notes: |
+  Drills the comma-separated derive list. Multiple traits
+  in one `derive(...)` is the canonical Rust idiom — saves
+  stacking multiple `#[derive(...)]` attributes.

@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: freeform
+order: 6
+prompt: |
+  Define `struct Point { x: i32, y: i32 }` with derives for
+  `Debug`, `Clone`, `PartialEq`, `Eq`. `main` builds two
+  Points with the same fields, asserts they're equal via
+  `assert_eq!`, then prints `"ok"`.
+
+  Output:
+
+      ok
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const a = { x: 1, y: 2 };
+    const b = { x: 1, y: 2 };
+    if (a.x === b.x && a.y === b.y) console.log("ok");
+  canonical: |-
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    fn main() {
+        let a = Point { x: 1, y: 2 };
+        let b = Point { x: 1, y: 2 };
+        assert_eq!(a, b);
+        println!("ok");
+    }
+expectStdout: |
+  ok
+hints:
+  - "One derive line with four traits, comma-separated: `Debug` (for `{:?}` and `assert_eq!`'s failure message), `Clone` (the prerequisite for many other impls), `PartialEq` (the `==` operator), `Eq` (marker that strengthens to total equality)."
+  - "`#[derive(Debug, Clone, PartialEq, Eq)]`."
+  - |-
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    fn main() {
+        let a = Point { x: 1, y: 2 };
+        let b = Point { x: 1, y: 2 };
+        assert_eq!(a, b);
+        println!("ok");
+    }
+runtime: server
+notes: |
+  Drills the canonical "comparable value type" derive
+  set. `assert_eq!` requires both PartialEq (for `==`)
+  and Debug (for the failure message on mismatch).

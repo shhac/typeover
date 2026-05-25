@@ -1,0 +1,54 @@
+target: rust
+themeId: rust/abstractions/derive-and-common-traits
+type: freeform
+order: 8
+prompt: |
+  Translate the TS equality check. Two `Point` values with
+  the same fields. JS `===` would say `false` (reference
+  identity); Rust's derived `==` says `true` (structural).
+  `main` prints `"{}", a == b` after deriving `PartialEq`.
+
+  Output:
+
+      true
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const a = { x: 1, y: 2 };
+    const b = { x: 1, y: 2 };
+    console.log(a === b); // false — different objects
+  canonical: |-
+    #[derive(PartialEq)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    fn main() {
+        let a = Point { x: 1, y: 2 };
+        let b = Point { x: 1, y: 2 };
+        println!("{}", a == b);
+    }
+expectStdout: |
+  true
+hints:
+  - "One derive (`PartialEq`) is enough — gives you `==` and `!=`. The struct doesn't need to be `Eq` here; the simpler partial-equivalence is what `==` resolves through."
+  - "`#[derive(PartialEq)]` on the struct, `a == b` in the println."
+  - |-
+    #[derive(PartialEq)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    fn main() {
+        let a = Point { x: 1, y: 2 };
+        let b = Point { x: 1, y: 2 };
+        println!("{}", a == b);
+    }
+runtime: server
+notes: |
+  Surfaces the structural-vs-reference equality split.
+  Rust derives structural by default — what `===` would
+  give in TS if JS had structural equality on objects.
