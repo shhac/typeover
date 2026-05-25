@@ -1,0 +1,76 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: freeform
+order: 6
+prompt: |
+  Define `enum AppError { ParseFailed(String), DivideByZero }`
+  and implement `Display` so each variant prints a human-readable
+  message — `"parse failed: <input>"` or `"divide by zero"`.
+  `main` constructs `AppError::ParseFailed(String::from("abc"))`
+  and prints with `{}` (Display).
+
+  Output:
+
+      parse failed: abc
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class AppError extends Error {
+      constructor(public kind: "parse" | "div", public input?: string) {
+        super(kind === "parse" ? "parse failed: " + input : "divide by zero");
+      }
+    }
+    console.log(new AppError("parse", "abc").message);
+  canonical: |-
+    use std::fmt;
+
+    enum AppError {
+        ParseFailed(String),
+        DivideByZero,
+    }
+
+    impl fmt::Display for AppError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                AppError::ParseFailed(s) => write!(f, "parse failed: {}", s),
+                AppError::DivideByZero => write!(f, "divide by zero"),
+            }
+        }
+    }
+
+    fn main() {
+        let e = AppError::ParseFailed(String::from("abc"));
+        println!("{}", e);
+    }
+expectStdout: |
+  parse failed: abc
+hints:
+  - "Three pieces: enum declaration with two variants (one tuple-style with `String` payload, one unit), `impl fmt::Display for AppError` with a two-arm `match self`, and `main` constructing one variant and printing via `{}`. The impl uses `use std::fmt;` for the `fmt::Display` / `fmt::Formatter` / `fmt::Result` namespace."
+  - "Each arm uses `write!(f, <fmt>, <args>)` against the passed formatter — analogous to `println!` but it writes to `f` instead of stdout."
+  - |-
+    use std::fmt;
+
+    enum AppError {
+        ParseFailed(String),
+        DivideByZero,
+    }
+
+    impl fmt::Display for AppError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                AppError::ParseFailed(s) => write!(f, "parse failed: {}", s),
+                AppError::DivideByZero => write!(f, "divide by zero"),
+            }
+        }
+    }
+
+    fn main() {
+        let e = AppError::ParseFailed(String::from("abc"));
+        println!("{}", e);
+    }
+runtime: server
+notes: |
+  Drills the full enum + Display impl combo. The `Display`
+  trait is what `{}` formatting calls; without it, the
+  println would only work with `{:?}` debug.

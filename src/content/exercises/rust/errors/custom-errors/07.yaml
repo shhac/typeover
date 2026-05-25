@@ -1,0 +1,82 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: freeform
+order: 7
+prompt: |
+  Reuse the `AppError` enum from slot 06. Add
+  `impl From<std::num::ParseIntError> for AppError` that wraps
+  the parse error as `AppError::ParseFailed(e.to_string())`.
+  Then write `parse_and_double(s: &str) -> Result<i32, AppError>`
+  that uses `?` to propagate the conversion. `main` calls
+  `parse_and_double("21")` and prints via `{:?}` debug.
+
+  Output:
+
+      Ok(42)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAndDouble(s: string): number {
+      const n = Number(s);
+      if (Number.isNaN(n)) throw new Error("parse failed: " + s);
+      return n * 2;
+    }
+    console.log(parseAndDouble("21"));
+  canonical: |-
+    use std::num::ParseIntError;
+
+    #[derive(Debug)]
+    enum AppError {
+        ParseFailed(String),
+        DivideByZero,
+    }
+
+    impl From<ParseIntError> for AppError {
+        fn from(e: ParseIntError) -> Self {
+            AppError::ParseFailed(e.to_string())
+        }
+    }
+
+    fn parse_and_double(s: &str) -> Result<i32, AppError> {
+        let n: i32 = s.parse()?;
+        Ok(n * 2)
+    }
+
+    fn main() {
+        println!("{:?}", parse_and_double("21"));
+    }
+expectStdout: |
+  Ok(42)
+hints:
+  - "Three pieces: derive `Debug` on the enum so `{:?}` works, write `impl From<ParseIntError> for AppError` whose body builds `ParseFailed(e.to_string())`, then in `parse_and_double` the bare `?` invokes `.into()` (via the From impl) to convert the parse error to AppError automatically."
+  - "The `?` looks the same as before — the difference is that the From impl makes the cross-type conversion compile."
+  - |-
+    use std::num::ParseIntError;
+
+    #[derive(Debug)]
+    enum AppError {
+        ParseFailed(String),
+        DivideByZero,
+    }
+
+    impl From<ParseIntError> for AppError {
+        fn from(e: ParseIntError) -> Self {
+            AppError::ParseFailed(e.to_string())
+        }
+    }
+
+    fn parse_and_double(s: &str) -> Result<i32, AppError> {
+        let n: i32 = s.parse()?;
+        Ok(n * 2)
+    }
+
+    fn main() {
+        println!("{:?}", parse_and_double("21"));
+    }
+runtime: server
+notes: |
+  Drills the `From` impl that makes `?` cross-type
+  conversions free. The `#[derive(Debug)]` is the
+  one-line opt-in for `{:?}` formatting; required for the
+  println since we don't implement Display here.

@@ -1,0 +1,91 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: freeform
+order: 9
+prompt: |
+  This program fails to compile because `?` cannot convert
+  `ParseIntError` to `AppError` automatically:
+
+      error[E0277]: `?` couldn't convert the error to `AppError`
+
+      #[derive(Debug)]
+      enum AppError { ParseFailed(String) }
+
+      fn parse_age(s: &str) -> Result<i32, AppError> {
+          let n: i32 = s.parse()?;
+          Ok(n)
+      }
+
+  Fix it by adding an `impl From<ParseIntError> for AppError`
+  that builds `AppError::ParseFailed(e.to_string())`. `main`
+  calls `parse_age("abc")` and prints with `{:?}`.
+
+  Output:
+
+      Err(ParseFailed("invalid digit found in string"))
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function parseAge(s: string): number {
+      const n = Number(s);
+      if (Number.isNaN(n)) throw new Error("invalid: " + s);
+      return n;
+    }
+    try { console.log(parseAge("abc")); }
+    catch (e) { console.log("err:", e instanceof Error ? e.message : e); }
+  canonical: |-
+    use std::num::ParseIntError;
+
+    #[derive(Debug)]
+    enum AppError {
+        ParseFailed(String),
+    }
+
+    impl From<ParseIntError> for AppError {
+        fn from(e: ParseIntError) -> Self {
+            AppError::ParseFailed(e.to_string())
+        }
+    }
+
+    fn parse_age(s: &str) -> Result<i32, AppError> {
+        let n: i32 = s.parse()?;
+        Ok(n)
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("abc"));
+    }
+expectStdout: |
+  Err(ParseFailed("invalid digit found in string"))
+hints:
+  - "One block to add: `impl From<ParseIntError> for AppError { fn from(e: ParseIntError) -> Self { AppError::ParseFailed(e.to_string()) } }`. Don't touch `parse_age`'s body — the existing `?` will start working as soon as the From impl is in scope."
+  - "`?` calls `.into()` on the error, which uses the `From` impl. Wire that impl up and `?` does the rest."
+  - |-
+    use std::num::ParseIntError;
+
+    #[derive(Debug)]
+    enum AppError {
+        ParseFailed(String),
+    }
+
+    impl From<ParseIntError> for AppError {
+        fn from(e: ParseIntError) -> Self {
+            AppError::ParseFailed(e.to_string())
+        }
+    }
+
+    fn parse_age(s: &str) -> Result<i32, AppError> {
+        let n: i32 = s.parse()?;
+        Ok(n)
+    }
+
+    fn main() {
+        println!("{:?}", parse_age("abc"));
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "?-can't-convert" fix.
+  Adding one `From` impl unblocks every `?` site that
+  needed to widen this error type — single source of
+  truth for the conversion.

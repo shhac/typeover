@@ -1,0 +1,72 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: fill-line
+order: 5
+prompt: |
+  Fill the `Display` match arm for the `DivideByZero` variant.
+  It should write `"divide by zero"` to the formatter. End the
+  line with a comma.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'AppError::DivideByZero => write!(f, "divide by zero"),'
+  ts: |-
+    class AppError {
+      kind: "parse" | "div";
+      toString() { return this.kind === "div" ? "divide by zero" : "parse failed"; }
+    }
+  canonical: |-
+    use std::fmt;
+
+    enum AppError {
+        ParseFailed(String),
+        DivideByZero,
+    }
+
+    impl fmt::Display for AppError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                AppError::ParseFailed(s) => write!(f, "parse failed: {}", s),
+                ${line}
+            }
+        }
+    }
+
+    fn main() {
+        println!("{}", AppError::DivideByZero);
+    }
+  distractors:
+    - match: 'AppError::DivideByZero => write!(f, "divide by zero")'
+      explain: |-
+        Missing trailing comma. Match arms are comma-separated
+        unless the body is a `{ }` block; one-expression arms
+        need the comma so the parser closes them.
+    - match: 'DivideByZero => write!(f, "divide by zero"),'
+      explain: |-
+        Missing the `AppError::` qualifier. Inside `impl Display
+        for AppError`, the match-arm pattern still needs the full
+        path to the variant (or a `use AppError::*` at the top
+        of the impl).
+    - match: 'AppError::DivideByZero => println!("divide by zero"),'
+      explain: |-
+        `println!` prints to STDOUT — but `Display::fmt` writes
+        to the FORMATTER passed in via `f`. Use `write!(f, ...)`.
+    - match: 'AppError::DivideByZero => "divide by zero",'
+      explain: |-
+        The arm body must produce `fmt::Result` (what the
+        function returns). A bare string is a `&str`, not
+        a `Result`. Use `write!(f, ...)`.
+expectStdout: |
+  divide by zero
+runtime: server
+blanks: [line]
+hints:
+  - "Shape: `<Type>::<Variant> => write!(f, <format_string>),`. Four parts: qualified variant, fat arrow, `write!` macro call against the passed formatter, trailing comma."
+  - 'Macro: `write!(f, "divide by zero")`.'
+  - '`AppError::DivideByZero => write!(f, "divide by zero"),`'
+notes: |
+  Drills the Display-arm pattern. Distractors target four
+  real wrong reflexes: missing comma, missing qualifier,
+  `println!`-instead-of-`write!`, and bare-string-instead-
+  of-Result.

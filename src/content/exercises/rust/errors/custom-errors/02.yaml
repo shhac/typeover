@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: mcq
+order: 2
+prompt: |
+  A parse failure should keep the offending input so the error
+  message can quote it. Pick the variant shape.
+generator:
+  kind: variant
+  variants:
+    - id: payload-shape
+      ts: 'class ParseFailed extends Error { constructor(public input: string) { super(); } }'
+      canonical: 'ParseFailed(String) — tuple-like variant; the input is stored as a positional payload.'
+      distractors:
+        - 'ParseFailed (with a separate top-level `input` field on the enum) — Rust enums don''t have shared fields across variants; payload lives ON the variant.'
+        - 'ParseFailed: String — `:` is not the variant-payload syntax; tuple-like uses parens, struct-like uses braces.'
+        - 'ParseFailed<String> — angle brackets introduce GENERIC PARAMETERS for the enum; the input would be a type parameter, not a payload value.'
+hints:
+  - "Same shape as `data/enums` slot 02's tuple-style variant — parens around the payload type. The variant declaration looks like a function signature, except the args are types."
+  - "Shape: `<Variant>(<PayloadType>)`."
+  - '`ParseFailed(String)`'
+runtime: none
+notes: |
+  Pins tuple-style variants for error context. The third
+  distractor surfaces the real-but-different generic-enum
+  syntax; the second surfaces the Java/TS "shared field on
+  the parent class" reflex that doesn't exist in Rust
+  enums.

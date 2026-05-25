@@ -1,0 +1,76 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: freeform
+order: 8
+prompt: |
+  Translate the TS custom-error class to Rust. `check(x)`
+  returns `Ok(())` when `x >= 0` and
+  `Err(AppError::Validation(field))` otherwise (where
+  `field` is the offending input). `main` calls `check(-1)`
+  and prints either `"ok"` or `"err: <field>"` from a
+  two-arm match.
+
+  Output:
+
+      err: x
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    class ValidationError extends Error {
+      constructor(public field: string) { super("invalid: " + field); }
+    }
+    function check(x: number): void {
+      if (x < 0) throw new ValidationError("x");
+    }
+    try { check(-1); }
+    catch (e) {
+      if (e instanceof ValidationError) console.log("err: " + e.field);
+    }
+  canonical: |-
+    enum AppError {
+        Validation(String),
+    }
+
+    fn check(x: i32) -> Result<(), AppError> {
+        if x < 0 {
+            return Err(AppError::Validation(String::from("x")));
+        }
+        Ok(())
+    }
+
+    fn main() {
+        match check(-1) {
+            Ok(()) => println!("ok"),
+            Err(AppError::Validation(field)) => println!("err: {}", field),
+        }
+    }
+expectStdout: |
+  err: x
+hints:
+  - "Three pieces: enum with one tuple-style variant carrying the field name, function returns `Result<(), AppError>` (unit success type), `main` matches both arms — destructure the payload with `Err(AppError::Validation(field))`."
+  - "Match shape: `match check(-1) { Ok(()) => ..., Err(AppError::Validation(field)) => ... }`."
+  - |-
+    enum AppError {
+        Validation(String),
+    }
+
+    fn check(x: i32) -> Result<(), AppError> {
+        if x < 0 {
+            return Err(AppError::Validation(String::from("x")));
+        }
+        Ok(())
+    }
+
+    fn main() {
+        match check(-1) {
+            Ok(()) => println!("ok"),
+            Err(AppError::Validation(field)) => println!("err: {}", field),
+        }
+    }
+runtime: server
+notes: |
+  Drills the value-returning custom-error pattern. The
+  unit success type `()` is the Rust idiom for "no payload
+  on success" — TS would use `void`. The caller's two-arm
+  `match` replaces the try/catch + instanceof check.

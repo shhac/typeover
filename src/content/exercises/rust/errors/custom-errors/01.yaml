@@ -1,0 +1,29 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: mcq
+order: 1
+prompt: |
+  A small CLI parses numbers and divides them. Pick the idiomatic
+  Rust DOMAIN error type that names each failure mode explicitly.
+generator:
+  kind: variant
+  variants:
+    - id: error-enum
+      ts: |-
+        class AppError extends Error {}
+        // or: type AppError = "parse-failed" | "divide-by-zero";
+      canonical: 'enum AppError { ParseFailed, DivideByZero } — one variant per failure mode; the type system exhausts the cases at every `match`.'
+      distractors:
+        - 'class AppError extends Error { ... } — Rust has no `class`; domain errors are usually `enum`s, not subtype hierarchies.'
+        - 'type AppError = "parse-failed" | "divide-by-zero"; — TS string-union; Rust enums are stronger (variants can carry payload, match is exhaustive).'
+        - 'struct AppError(String); — a struct WORKS but loses the named-variant structure; one bag of strings hides the cases.'
+hints:
+  - "Same shape as the `Door` state machine in `data/pattern-matching` or the `Outcome` from `data/enums`. Named variants, comma-separated."
+  - "Four letters: `enum`."
+  - '`enum AppError { ParseFailed, DivideByZero }`'
+runtime: none
+notes: |
+  Pins the enum-per-error-shape convention. The struct
+  distractor is a real Rust alternative, but loses the
+  named-cases structure that makes exhaustive `match`
+  useful.

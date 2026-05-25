@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: fill-word
+order: 4
+prompt: |
+  Fill the variant name. Returns an `Err` carrying the
+  `DivideByZero` variant of `AppError`.
+generator:
+  kind: template
+  vars:
+    variant: ["DivideByZero"]
+  ts: |-
+    throw new Error("divide by zero");
+  canonical: |-
+    enum AppError { ParseFailed(String), DivideByZero }
+    let r: Result<i32, AppError> = Err(AppError::${variant});
+blanks: [variant]
+hints:
+  - "PascalCase, twelve characters. Three words concatenated, each capitalised — `<verb><preposition><noun>`."
+  - "The variant name spells the failure: divide-by-zero."
+  - "`DivideByZero`"
+runtime: none
+notes: |
+  Drills the `Err(Type::Variant)` shape. PascalCase
+  matches the variant declaration; the `Err` wrapper is
+  the Result success/failure layer.

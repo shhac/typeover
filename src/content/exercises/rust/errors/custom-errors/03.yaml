@@ -1,0 +1,31 @@
+target: rust
+themeId: rust/errors/custom-errors
+type: mcq
+order: 3
+prompt: |
+  Inside a function returning `Result<i32, AppError>`, calling
+  `s.parse::<i32>()` produces a `Result<i32, ParseIntError>`. You
+  want `?` to convert the `ParseIntError` into an `AppError`
+  automatically. Pick the mechanism.
+generator:
+  kind: variant
+  variants:
+    - id: from-impl
+      ts: |-
+        // TS: thrown values are not converted automatically;
+        // you wrap manually in `catch`.
+      canonical: 'impl From<ParseIntError> for AppError — `?` calls `.into()` on the error, which uses the `From` impl to perform the conversion automatically.'
+      distractors:
+        - 'Call `.unwrap()` and rewrap manually — `?` does not need conversion; it accepts any error type.'
+        - 'Use `try_into()` instead of `?` — `?` is restricted to types implementing a specific conversion API.'
+        - 'No conversion needed — `?` is generic and accepts any error type at the call site.'
+hints:
+  - "Implement the standard conversion trait FROM the lower-level error TO your domain error. Once the impl exists, `?` invokes `.into()` automatically — same single character, free conversion."
+  - "Four letters, PascalCase."
+  - '`impl From<ParseIntError> for AppError`'
+runtime: none
+notes: |
+  Pins `From` as the mechanism. The distractors target the
+  three common misreadings of `?`: "it accepts anything,"
+  "use try_into instead," "wrap manually." None are right;
+  `From` is the standard answer.
