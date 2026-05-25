@@ -1,0 +1,40 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: freeform
+order: 9
+prompt: |
+  Write a complete Rust program that declares a `name: &str` with
+  value `"Rust"`, then uses inline named capture to print:
+
+      hello, Rust
+
+  Use `println!` with the modern `{name}` inline-capture syntax
+  (the variable name directly inside the braces, no separate
+  argument list).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const name: string = "Rust";
+    console.log("hello, " + name);
+  canonical: |-
+    fn main() {
+        let name: &str = "Rust";
+        println!("hello, {name}");
+    }
+expectStdout: |
+  hello, Rust
+runtime: server
+hints:
+  - "Two lines inside `main`: the `let name: &str = \"Rust\";` binding, and the `println!` with `{name}` inline-captured. No trailing argument list after the format string."
+  - "Skeleton: `fn main() { let name: &str = \"Rust\"; println!(\"hello, {name}\"); }`. The inline capture replaces `\"hello, {}\", name`."
+  - "Canonical program:\n\n```rust\nfn main() {\n    let name: &str = \"Rust\";\n    println!(\"hello, {name}\");\n}\n```"
+notes: |
+  Caps the theme by combining the print macro + format string +
+  inline named capture + first &str literal binding. The TS
+  counterpart deliberately uses backtick template-literal syntax
+  so the contrast (`${name}` vs `{name}`) lands visually.
+
+  The alternative shape `println!("hello, {}", name);` would also
+  pass the grader (same stdout). But the prompt explicitly asks
+  for inline capture, so the canonical models the target reflex.

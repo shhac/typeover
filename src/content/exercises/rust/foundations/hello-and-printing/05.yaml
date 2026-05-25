@@ -1,0 +1,38 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: fill-word
+order: 5
+prompt: |
+  Rust's print macros all end in a one-character marker that
+  distinguishes them from ordinary function calls. Fill it in to
+  make this line compile.
+generator:
+  kind: template
+  vars:
+    bang:
+      - "!"
+  ts: |-
+    console.log("hello");
+  canonical: |-
+    println${bang}("hello");
+  distractors:
+    - "?"
+    - "."
+    - "()"
+blanks: [bang]
+hints:
+  - "Macros in Rust always end in one specific character — the same character used for ordinary 'not' / negation. It tells the compiler 'expand this at compile time' rather than 'call this function at runtime'."
+  - "One character. Same one TS uses for the logical-not operator."
+  - "`!`."
+notes: |
+  Reinforces the macro-marker reflex from slot 01. Distractors:
+   - `?` — Rust's question-mark operator, used for error
+     propagation. Has nothing to do with macros.
+   - `.` — would parse as `println.(...)` which is a syntax error.
+   - `()` — would make `println` look like a no-arg function call,
+     then immediately call its result. `println` is not callable
+     without the `!`.
+
+  Sets up the freeform exercises in this theme by giving the
+  learner a forced one-character fill — they cannot succeed without
+  internalising "macros need `!`."

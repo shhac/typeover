@@ -1,0 +1,44 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: freeform
+order: 8
+prompt: |
+  Write a complete Rust program that prints, on three separate
+  lines:
+
+      ready
+      set
+      go
+
+  Use three `println!` calls (or one call with embedded `\n` — your
+  choice; the grader checks stdout, not code shape).
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("ready");
+    console.log("set");
+    console.log("go");
+  canonical: |-
+    fn main() {
+        println!("ready");
+        println!("set");
+        println!("go");
+    }
+expectStdout: |
+  ready
+  set
+  go
+runtime: server
+hints:
+  - "Two structural choices: (a) three separate `println!(\"...\")` calls — each adds its own newline — or (b) one `println!(\"ready\\nset\\ngo\")` with embedded `\\n`. Either matches expected stdout."
+  - "Skeleton (three-call version): `fn main() { println!(\"ready\"); println!(\"set\"); println!(\"go\"); }`. Each call ends with `;`."
+  - "Three-call program:\n\n```rust\nfn main() {\n    println!(\"ready\");\n    println!(\"set\");\n    println!(\"go\");\n}\n```"
+notes: |
+  Mirrors zig's hello-and-output/09 — same prompt, different
+  target. Tests the simplest "multi-line output, your choice of
+  shape" pattern: the grader is stdout-equality, so both the
+  three-call and the embedded-newline approaches pass.
+
+  Canonical uses three calls because that's the clearer model for
+  someone fresh to `println!` — one statement per line of output.
