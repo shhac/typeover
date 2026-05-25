@@ -1,10 +1,12 @@
-import type { JSX, ParentProps } from "solid-js";
+import type { Component, JSX, ParentProps } from "solid-js";
 import { For, splitProps, Show } from "solid-js";
-import { IconFileGeneric } from "~/components/icons/icon-file-generic";
-import { IconFileGo } from "~/components/icons/icon-file-go";
-import { IconFileRs } from "~/components/icons/icon-file-rs";
-import { IconFileTs } from "~/components/icons/icon-file-ts";
-import { IconFileZig } from "~/components/icons/icon-file-zig";
+import {
+  IconFileGeneric,
+  IconFileGo,
+  IconFileRs,
+  IconFileTs,
+  IconFileZig,
+} from "~/components/icons/file-icons";
 import { CodeHighlight } from "./CodeHighlight";
 import { cn } from "./_internal";
 
@@ -52,13 +54,24 @@ const langIconClass: Record<Lang, string> = {
   plain: "text-fg-muted",
 };
 
+/* Per-language icon dispatch. The `Record<Lang, …>` enforces a row
+ * per Lang at typecheck time — adding a new Lang member to the
+ * union forces a matching entry here, removing the silent-fallback
+ * footgun the previous if-chain had (any non-listed Lang would
+ * have rendered the generic file icon). shell + plain intentionally
+ * use the generic glyph since they have no per-language identity. */
+const LANG_ICON: Record<Lang, Component<{ class?: string }>> = {
+  ts: IconFileTs,
+  go: IconFileGo,
+  zig: IconFileZig,
+  rust: IconFileRs,
+  shell: IconFileGeneric,
+  plain: IconFileGeneric,
+};
+
 function FileIcon(props: { lang: Lang }) {
-  const className = cn("size-4 shrink-0", langIconClass[props.lang]);
-  if (props.lang === "ts") return <IconFileTs class={className} />;
-  if (props.lang === "go") return <IconFileGo class={className} />;
-  if (props.lang === "zig") return <IconFileZig class={className} />;
-  if (props.lang === "rust") return <IconFileRs class={className} />;
-  return <IconFileGeneric class={className} />;
+  const Icon = LANG_ICON[props.lang];
+  return <Icon class={cn("size-4 shrink-0", langIconClass[props.lang])} />;
 }
 
 const staticTabClass =
