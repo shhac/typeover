@@ -16,7 +16,7 @@ import { ExerciseShell } from "./ExerciseShell";
 import { BlankInput } from "./BlankInput";
 import { CodeMirrorFillBlanks } from "../ds/CodeMirrorFillBlanks";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
-import { RunResetToolbar } from "./RunResetToolbar";
+import { RunToolbar } from "./RunToolbar";
 import { RunResultPanel } from "./RunResultPanel";
 
 interface FillBlankLineInputProps {
@@ -147,27 +147,21 @@ export function FillBlankLineInput(props: FillBlankLineInputProps) {
   const runPanelFocus = useRunResultFocus(runner.runResult);
 
   const toolbar = (
-    <div class="flex flex-row gap-3 items-center flex-wrap">
-      <RunResetToolbar
-        running={runner.running()}
-        canRun={input().trim() !== ""}
-        onRun={runner.run}
-        onReset={runner.reset}
-        runtimeStatus={runner.runtimeStatus()}
-        runtimeLabel={runner.runtimeLabel}
-        bootError={runner.bootError()}
-        bootStalled={runner.bootStalled()}
-      />
-      {/* Run nudge surfaced only when the learner has typed but
-       * hasn't run yet. Submit auto-Runs (design-docs/26 UX ask),
-       * but the explicit Run button is still the right path when
-       * they want to inspect output before committing. */}
-      <Show when={runner.runResult() === null && input().trim() !== "" && !runner.running()}>
-        <Text tone="muted" size="xs" family="mono">
-          ↳ Run to inspect output, or Submit to grade
-        </Text>
-      </Show>
-    </div>
+    <RunToolbar
+      runner={runner}
+      canRun={input().trim() !== ""}
+      nudge={
+        /* Run nudge surfaced only when the learner has typed but
+         * hasn't run yet. Submit auto-Runs (design-docs/26 UX ask),
+         * but the explicit Run button is still the right path when
+         * they want to inspect output before committing. */
+        <Show when={runner.runResult() === null && input().trim() !== "" && !runner.running()}>
+          <Text tone="muted" size="xs" family="mono">
+            ↳ Run to inspect output, or Submit to grade
+          </Text>
+        </Show>
+      }
+    />
   );
 
   return (

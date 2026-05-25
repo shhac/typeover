@@ -14,7 +14,7 @@ import {
 import { CodeMirrorEditor, type CodeMirrorEditorHandle } from "../ds/CodeMirrorEditor";
 import { ExerciseShell } from "./ExerciseShell";
 import { InlineCanonicalReveal } from "./InlineCanonicalReveal";
-import { RunResetToolbar } from "./RunResetToolbar";
+import { RunToolbar } from "./RunToolbar";
 import { RunResultPanel } from "./RunResultPanel";
 
 interface FreeformProps {
@@ -124,27 +124,20 @@ export function Freeform(props: FreeformProps) {
   });
 
   const toolbar = (
-    <div class="flex flex-row gap-3 items-center flex-wrap">
-      <RunResetToolbar
-        running={runner.running()}
-        canRun={runner.canRun}
-        onRun={runner.run}
-        onReset={runner.reset}
-        runtimeStatus={runner.runtimeStatus()}
-        runtimeLabel={runner.runtimeLabel}
-        bootError={runner.bootError()}
-        bootStalled={runner.bootStalled()}
-      />
-      {/* Disabled-Submit explainer per design-docs/16 F-18.
-       * Submit is gated on a prior Run; without this hint a
-       * learner who types a correct answer and clicks Submit
-       * sees nothing and assumes the button is broken. */}
-      <Show when={runner.runResult() === null && code().trim() !== ""}>
-        <Text tone="muted" size="xs" family="mono">
-          ↳ Run your code first to enable Submit
-        </Text>
-      </Show>
-    </div>
+    <RunToolbar
+      runner={runner}
+      nudge={
+        /* Disabled-Submit explainer per design-docs/16 F-18.
+         * Submit is gated on a prior Run; without this hint a
+         * learner who types a correct answer and clicks Submit
+         * sees nothing and assumes the button is broken. */
+        <Show when={runner.runResult() === null && code().trim() !== ""}>
+          <Text tone="muted" size="xs" family="mono">
+            ↳ Run your code first to enable Submit
+          </Text>
+        </Show>
+      }
+    />
   );
 
   return (
