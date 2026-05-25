@@ -82,8 +82,8 @@ expectStdout: |
   2
   3
 runtime: yaegi
-alternateCanonicals:
-  - "fns = append(fns, func() int { return x })"
+acceptedAnswers:
+  - match: "fns = append(fns, func() int { return x })"
 successNote: |
   Heads-up: Yaegi runs pre-Go-1.22 loop-variable semantics, so the
   modern `fns = append(fns, func() int { return x })` (without the
@@ -107,7 +107,7 @@ notes: |
 
   The Yaegi build typeover ships still has the pre-1.22 semantics,
   so the slot's correctness-by-Yaegi path forces the historical
-  workaround. The modern form is accepted via alternateCanonicals
+  workaround. The modern form is accepted via acceptedAnswers
   (same shape, no `x := x`) so a learner who DOES know 1.22+ isn't
   punished. design-docs/23 + the successNote ramp.
 

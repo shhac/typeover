@@ -1,0 +1,35 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: mcq
+order: 3
+prompt: |
+  Rust format strings use `{}` placeholders. Pick the Rust translation
+  of this TypeScript template literal.
+generator:
+  kind: template
+  vars:
+    name: [name, user, city]
+    value: [Ada, Lin, Oslo]
+  ts: |-
+    const ${name} = "${value}";
+    console.log(`Hello, \${${name}}!`);
+  canonical: |-
+    let ${name} = "${value}";
+    println!("Hello, {}!", ${name});
+  distractors:
+    - |-
+      let ${name} = "${value}";
+      println!("Hello, ${name}!");
+    - |-
+      let ${name} = "${value}";
+      println!(`Hello, ${name}!`);
+    - |-
+      let ${name} = "${value}";
+      console.log("Hello, {}!", ${name});
+hints:
+  - "Rust does not use JS template literals. Put `{}` in the string, then pass the value after the string."
+  - "Shape: `println!(\"Hello, {}!\", name);`"
+  - "`println!(\"Hello, {}!\", ${name});`"
+runtime: none
+notes: |
+  First format-placeholder recognition before fill-word production.

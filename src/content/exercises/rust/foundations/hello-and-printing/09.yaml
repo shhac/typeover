@@ -1,0 +1,32 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: freeform
+order: 9
+prompt: |
+  Write a Rust program that prints two lines: `first` and then
+  `second`.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("first");
+    console.log("second");
+  canonical: |-
+    fn main() {
+        println!("first");
+        println!("second");
+    }
+expectStdout: |
+  first
+  second
+runtime: server
+hints:
+  - "You still need exactly one `fn main()` wrapper."
+  - "Use two `println!` calls, one per output line."
+  - |-
+    fn main() {
+        println!("first");
+        println!("second");
+    }
+notes: |
+  Reinforces that `println!` includes the newline; no `\n` needed.

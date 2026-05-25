@@ -1,0 +1,36 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: mcq
+order: 1
+prompt: |
+  TypeScript can run top-level statements in a script. Rust binaries
+  start in a function named `main`. Pick the Rust entry point shape.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("Hello");
+  canonical: |-
+    fn main() {
+        println!("Hello");
+    }
+  distractors:
+    - |-
+      function main() {
+          console.log("Hello");
+      }
+    - |-
+      pub main() {
+          println!("Hello");
+      }
+    - |-
+      main := fn() {
+          println!("Hello");
+      }
+hints:
+  - "Rust's binary entry point is a function named `main`, introduced with `fn`."
+  - "The body is a block: `fn main() { ... }`."
+  - "`fn main() { println!(\"Hello\"); }`"
+runtime: none
+notes: |
+  Introduces `fn main` before teaching macros in slot 2.

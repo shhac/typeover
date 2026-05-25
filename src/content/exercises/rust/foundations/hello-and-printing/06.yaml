@@ -1,0 +1,50 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: fill-line
+order: 6
+prompt: |
+  Type the Rust line that prints `Hi` followed by a newline.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'println!("Hi");'
+  ts: |-
+    console.log("Hi");
+  canonical: |-
+    fn main() {
+        ${line}
+    }
+  distractors:
+    - match: 'print!("Hi");'
+      explain: "`print!` does not add a newline. This exercise expects `Hi` plus a trailing newline."
+    - match: 'println("Hi");'
+      explain: "Rust's stdout helper is a macro here, so it needs `!`: `println!(...)`."
+acceptedAnswers:
+  - match: 'println!("{}", "Hi");'
+    prebake: true
+knownAttempts:
+  - match: 'print!("Hi");'
+    outcome: wrong-output
+    stdout: Hi
+    stderr: ""
+    error: ""
+    explain: "That would run, but it prints no trailing newline. `println!` is the newline form."
+  - match: 'console.log("Hi");'
+    outcome: does-not-compile
+    stdout: ""
+    stderr: |
+      error[E0433]: failed to resolve: use of undeclared type `console`
+    error: "Rust has no `console.log`; use `println!`."
+    explain: "That is the TypeScript API. Rust code calls the `println!` macro instead."
+expectStdout: |
+  Hi
+runtime: server
+blanks: [line]
+hints:
+  - "Use the macro from the previous exercises."
+  - "Remember the bang: `println!`, not `println`."
+  - '`println!("Hi");`'
+notes: |
+  First Rust runtime fill-line. Known attempts avoid a sandbox compile
+  while still rendering the Run result panel.

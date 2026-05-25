@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: mcq
+order: 2
+prompt: |
+  TypeScript calls `console.log`. Rust's common stdout helper is a
+  macro, so the call has a `!`. Pick the idiomatic Rust line.
+generator:
+  kind: template
+  vars:
+    text: [Hello, Ready, Done]
+  ts: |-
+    console.log("${text}");
+  canonical: |-
+    println!("${text}");
+  distractors:
+    - "println(\"${text}\");"
+    - "console.log(\"${text}\");"
+    - "print_line!(\"${text}\");"
+hints:
+  - "The name is `println`, and the `!` matters because this is a macro call."
+  - "Keep the Rust semicolon: `println!(...) ;` without the space."
+  - "`println!(\"${text}\");`"
+runtime: none
+notes: |
+  Establishes macro-call recognition: `name!()`.

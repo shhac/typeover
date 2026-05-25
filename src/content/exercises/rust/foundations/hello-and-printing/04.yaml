@@ -1,0 +1,23 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: fill-word
+order: 4
+prompt: |
+  Fill the macro name that prints one line to stdout.
+generator:
+  kind: template
+  vars:
+    macro: [println]
+    text: [Hello, Ready, Done]
+  ts: |-
+    console.log("${text}");
+  canonical: |-
+    ${macro}!("${text}");
+blanks: [macro]
+hints:
+  - "The `!` is already shown; type the macro name before it."
+  - "It is `print` plus `ln` for newline."
+  - "`println`"
+runtime: none
+notes: |
+  Production drill for the macro name only.

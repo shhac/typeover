@@ -65,8 +65,8 @@ expectStdout: |
   [1 1 3 4 7]
   4
 runtime: yaegi
-alternateCanonicals:
-  - "slices.Sort(xs); i := slices.Index(xs, 7)"
+acceptedAnswers:
+  - match: "slices.Sort(xs); i := slices.Index(xs, 7)"
 successNote: |
   Heads-up: the modern Go 1.21+ canonical is `slices.Sort(xs); i :=
   slices.Index(xs, 7)` — same shape, one package, no `sort` import

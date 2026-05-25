@@ -1,0 +1,24 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: fill-word
+order: 5
+prompt: |
+  Fill the Rust format placeholder that receives the value after the
+  string literal.
+generator:
+  kind: template
+  vars:
+    placeholder: ["{}"]
+    name: [name, user, city]
+  ts: |-
+    console.log(`Hello, \${${name}}!`);
+  canonical: |-
+    println!("Hello, ${placeholder}!", ${name});
+blanks: [placeholder]
+hints:
+  - "Rust's general display placeholder is two braces with nothing between them."
+  - "The value comes after the string: `..., name`."
+  - "`{}`"
+runtime: none
+notes: |
+  Production drill for the basic display placeholder.

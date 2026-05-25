@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript into a complete Rust program.
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    console.log("TypeScript -> Rust");
+  canonical: |-
+    fn main() {
+        println!("TypeScript -> Rust");
+    }
+expectStdout: |
+  TypeScript -> Rust
+runtime: server
+hints:
+  - "Start with `fn main() { ... }`."
+  - "Inside the block, use `println!` with a string literal."
+  - |-
+    fn main() {
+        println!("TypeScript -> Rust");
+    }
+notes: |
+  First Rust freeform exercise; keeps the full program tiny.

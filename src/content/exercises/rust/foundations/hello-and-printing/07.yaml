@@ -1,0 +1,53 @@
+target: rust
+themeId: rust/foundations/hello-and-printing
+type: fill-line
+order: 7
+prompt: |
+  The scaffold already binds `name`. Type the Rust line that prints
+  `Hello, Ada!`.
+generator:
+  kind: template
+  vars:
+    line:
+      - 'println!("Hello, {name}!");'
+  ts: |-
+    const name = "Ada";
+    console.log(`Hello, \${name}!`);
+  canonical: |-
+    fn main() {
+        let name = "Ada";
+        ${line}
+    }
+  distractors:
+    - match: 'println!("Hello, {}!");'
+      explain: "A `{}` placeholder needs a matching value after the format string."
+    - match: 'println!("Hello, name!");'
+      explain: "That prints the literal word `name`, not the variable's value."
+acceptedAnswers:
+  - match: 'println!("Hello, {}!", name);'
+    prebake: true
+knownAttempts:
+  - match: 'println!("Hello, {}!");'
+    outcome: does-not-compile
+    stdout: ""
+    stderr: |
+      error: 1 positional argument in format string, but no arguments were given
+    error: "The `{}` placeholder needs `name` after the string."
+    explain: "Rust checks format strings at compile time. Add `, name` after the string."
+  - match: 'println!("Hello, name!");'
+    outcome: wrong-output
+    stdout: |
+      Hello, name!
+    stderr: ""
+    error: ""
+    explain: "That prints the literal word `name`. Use `{name}` or pass `name` to `{}`."
+expectStdout: |
+  Hello, Ada!
+runtime: server
+blanks: [line]
+hints:
+  - "Rust can capture a local variable by name inside the format string: `{name}`."
+  - "The older equivalent is `println!(\"Hello, {}!\", name);`; both are accepted."
+  - '`println!("Hello, {name}!");`'
+notes: |
+  Drills captured format args and accepts the explicit-argument form.
