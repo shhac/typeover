@@ -93,7 +93,7 @@ describe("<FillBlankWord> — wrong path", () => {
     expect(getByText("Reshuffle this exercise")).toBeTruthy();
     expect(getByText("Reveal answer (counts as fail)")).toBeTruthy();
     /* Clear shows in both picking and wrong phases when there's
-     * any input — the extraWrongActions slot mounts it here. */
+     * any input — the extraActions slot mounts it here. */
     expect(getByText("Clear")).toBeTruthy();
     expect(slot()?.instancesFailed).toBe(0);
   });

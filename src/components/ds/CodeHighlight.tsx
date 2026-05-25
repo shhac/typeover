@@ -16,10 +16,14 @@ import { assertUnreachable } from "~/lib/assert-unreachable";
  * their target uses.
  *
  * Loading shape:
- *   - On mount the parser for `props.lang` is requested via
- *     `createResource`. First paint renders the raw `props.code` as
- *     a single unhighlighted `<span>` — the "plain" fallback path.
- *   - When the parser resolves, the resource updates and the
+ *   - The parser for `props.lang` is requested inside `onMount`,
+ *     not `createResource` — Solid SSR tries to serialize a
+ *     resource's resolved value via seroval, which throws on the
+ *     Lezer Parser's deep internal state (Uint16Array tables,
+ *     dialect maps). `createSignal` + `onMount` keeps the load
+ *     client-only; SSR renders the unhighlighted fallback.
+ *   - First paint (SSR or pre-load) is `<span>{props.code}</span>`.
+ *   - When the parser resolves the signal updates and the
  *     component re-renders tokenised output.
  *   - `parserCache` memoises the resolved parser per Lang so each
  *     grammar's chunk is fetched at most once per session
