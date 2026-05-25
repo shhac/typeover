@@ -1,0 +1,50 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: freeform
+order: 8
+prompt: |
+  Translate the TypeScript record-as-inventory pattern to Rust.
+  Insert two entries, read them by key, print the sum.
+
+  Output:
+
+      10
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const inventory: Record<string, number> = {};
+    inventory["apples"] = 3;
+    inventory["bananas"] = 7;
+    console.log(inventory["apples"] + inventory["bananas"]);
+  canonical: |-
+    use std::collections::HashMap;
+
+    fn main() {
+        let mut inventory: HashMap<String, i32> = HashMap::new();
+        inventory.insert(String::from("apples"), 3);
+        inventory.insert(String::from("bananas"), 7);
+        let total = inventory["apples"] + inventory["bananas"];
+        println!("{}", total);
+    }
+expectStdout: |
+  10
+hints:
+  - "Three reflex-shifts: `let mut` (HashMap needs mutability for inserts), `.insert(String::from(...), v)` (no `m[k] = v` for writes), and `inventory[\"apples\"]` for READS (this DOES work — HashMap implements `Index`, which panics on absent keys but copies through for `Copy` value types)."
+  - "Two inserts then a single addition: `inventory[\"apples\"] + inventory[\"bananas\"]`."
+  - |-
+    use std::collections::HashMap;
+
+    fn main() {
+        let mut inventory: HashMap<String, i32> = HashMap::new();
+        inventory.insert(String::from("apples"), 3);
+        inventory.insert(String::from("bananas"), 7);
+        let total = inventory["apples"] + inventory["bananas"];
+        println!("{}", total);
+    }
+runtime: server
+notes: |
+  Pins the asymmetric write-via-insert / read-via-index
+  shape. `inventory["apples"]` works for reads because of
+  `Index<&str>` for `HashMap<String, _>` via `Borrow<str>`,
+  and panics if the key is absent.

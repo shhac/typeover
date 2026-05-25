@@ -1,0 +1,27 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: mcq
+order: 3
+prompt: |
+  Given `m: HashMap<String, i32>`, what does `m.get("alice")`
+  return? The key might or might not be present.
+generator:
+  kind: variant
+  variants:
+    - id: get-option-ref
+      ts: 'const v: number | undefined = counts["alice"];'
+      canonical: 'Option<&i32> — `None` if the key is absent; `Some(&v)` borrowing the stored value otherwise.'
+      distractors:
+        - '&i32 — would have to panic on absent keys; Rust forces absence into the type instead.'
+        - 'i32 — would have to move `v` out of the map (impossible through a shared borrow) OR copy without permission; the type is borrowed.'
+        - 'Result<&i32, MissingError> — `Result` is for failures with REASONS; absence is "no reason needed" — that''s what `Option` is for.'
+hints:
+  - "Two design choices in the return: ABSENCE is in the type (so the caller must handle it), and the value comes back as a BORROW (so the map keeps ownership)."
+  - "Wrap the borrow-of-value in the absence-or-presence enum."
+  - '`Option<&i32>`'
+runtime: none
+notes: |
+  Pins the Option-of-reference return of `.get`. The two
+  design decisions encoded here — absence in the type,
+  value as a borrow — are the shape that lets `.get` be
+  panic-free and zero-copy.

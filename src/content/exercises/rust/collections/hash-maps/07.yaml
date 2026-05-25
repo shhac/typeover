@@ -1,0 +1,62 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: freeform
+order: 7
+prompt: |
+  Write `get_or_default(m: &HashMap<String, i32>, key: &str) -> i32`
+  that returns the value for `key` if present, or `0` otherwise.
+  `main` inserts `("alice", 7)` and prints both `get_or_default(&m,
+  "alice")` and `get_or_default(&m, "bob")`.
+
+  Output:
+
+      7
+      0
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function getOrDefault(m: Record<string, number>, key: string): number {
+      return m[key] ?? 0;
+    }
+    const m: Record<string, number> = { alice: 7 };
+    console.log(getOrDefault(m, "alice"));
+    console.log(getOrDefault(m, "bob"));
+  canonical: |-
+    use std::collections::HashMap;
+
+    fn get_or_default(m: &HashMap<String, i32>, key: &str) -> i32 {
+        *m.get(key).unwrap_or(&0)
+    }
+
+    fn main() {
+        let mut m: HashMap<String, i32> = HashMap::new();
+        m.insert(String::from("alice"), 7);
+        println!("{}", get_or_default(&m, "alice"));
+        println!("{}", get_or_default(&m, "bob"));
+    }
+expectStdout: |
+  7
+  0
+hints:
+  - "Two pieces: signature with `&HashMap<String, i32>` and `&str` key, body uses `.get(key).unwrap_or(&0)` to fall back without panic, then dereferences with `*` to copy out `i32`."
+  - "Body: `*m.get(key).unwrap_or(&0)`."
+  - |-
+    use std::collections::HashMap;
+
+    fn get_or_default(m: &HashMap<String, i32>, key: &str) -> i32 {
+        *m.get(key).unwrap_or(&0)
+    }
+
+    fn main() {
+        let mut m: HashMap<String, i32> = HashMap::new();
+        m.insert(String::from("alice"), 7);
+        println!("{}", get_or_default(&m, "alice"));
+        println!("{}", get_or_default(&m, "bob"));
+    }
+runtime: server
+notes: |
+  Drills the safe-lookup-with-default pattern: `.get()`
+  returns `Option<&V>`; `.unwrap_or(&default)` falls back
+  to a borrowed default; outer `*` derefs the `&i32` to
+  copy out the value.

@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: mcq
+order: 1
+prompt: |
+  TypeScript writes a string-keyed integer map as
+  `Record<string, number>`. Pick the Rust type that matches.
+generator:
+  kind: variant
+  variants:
+    - id: hashmap-string-int
+      ts: 'const counts: Record<string, number> = {};'
+      canonical: 'HashMap<String, i32> — generic over both key and value types; from `std::collections`.'
+      distractors:
+        - 'Map<String, i32> — `Map` is the JS/TS type; Rust''s prelude has no top-level `Map`.'
+        - '{ [k: String]: i32 } — TS index-signature syntax; not valid Rust.'
+        - 'Dict<String, i32> — Python''s name for the same idea; Rust calls it `HashMap`.'
+hints:
+  - "Seven letters, PascalCase, generic over both key and value. Lives in `std::collections`."
+  - "Same prefix as the data structure's underlying algorithm: hash-something."
+  - '`HashMap<String, i32>`'
+runtime: none
+notes: |
+  Pins `HashMap<K, V>` as the owned key-value map type.
+  Distractors cover the JS/TS, Python, and TS-index-signature
+  reflexes.

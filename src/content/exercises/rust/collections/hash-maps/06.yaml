@@ -1,0 +1,56 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: freeform
+order: 6
+prompt: |
+  Write a word-frequency counter. Given
+  `let words = vec!["apple", "banana", "apple"];`, build a
+  `HashMap<&str, i32>` of counts using `.entry(...).or_insert(0)`,
+  then print the count of `"apple"` (use `.get(...).unwrap()`
+  to read).
+
+  Output:
+
+      2
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    const words = ["apple", "banana", "apple"];
+    const counts: Record<string, number> = {};
+    for (const w of words) counts[w] = (counts[w] ?? 0) + 1;
+    console.log(counts["apple"]);
+  canonical: |-
+    use std::collections::HashMap;
+
+    fn main() {
+        let words = vec!["apple", "banana", "apple"];
+        let mut counts: HashMap<&str, i32> = HashMap::new();
+        for w in &words {
+            *counts.entry(*w).or_insert(0) += 1;
+        }
+        println!("{}", counts.get("apple").unwrap());
+    }
+expectStdout: |
+  2
+hints:
+  - "Three pieces: import `HashMap` from `std::collections`, build a `let mut counts` map of `&str` to `i32`, and for each word `*counts.entry(*w).or_insert(0) += 1;`. Read with `.get(\"apple\").unwrap()`."
+  - "The increment chain dereferences the `&mut i32` returned by `.or_insert(0)` and adds 1: `*counts.entry(*w).or_insert(0) += 1;`."
+  - |-
+    use std::collections::HashMap;
+
+    fn main() {
+        let words = vec!["apple", "banana", "apple"];
+        let mut counts: HashMap<&str, i32> = HashMap::new();
+        for w in &words {
+            *counts.entry(*w).or_insert(0) += 1;
+        }
+        println!("{}", counts.get("apple").unwrap());
+    }
+runtime: server
+notes: |
+  Canonical entry-and-increment pattern. `for w in &words`
+  borrows the vec; `*w` derefs to `&str`; the `*` on the
+  outer expression derefs the `&mut i32` slot returned
+  by `.or_insert`. Reads `apple` via `.get().unwrap()`
+  because we know it's present.

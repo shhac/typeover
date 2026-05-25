@@ -1,0 +1,33 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: fill-word
+order: 5
+prompt: |
+  Fill the method that returns the map's `Entry` API — used for
+  "get or insert default" in one shot.
+generator:
+  kind: template
+  vars:
+    method: ["entry"]
+  ts: |-
+    counts[key] = (counts[key] ?? 0) + 1;
+  canonical: |-
+    use std::collections::HashMap;
+
+    fn main() {
+        let mut counts: HashMap<String, i32> = HashMap::new();
+        let key = String::from("alice");
+        let slot = counts.${method}(key).or_insert(0);
+        *slot += 1;
+    }
+blanks: [method]
+hints:
+  - "Five letters, lowercase. Same word as the noun for one row in a database or dictionary. Returns a value that supports chaining `.or_insert(default)`."
+  - "Same word as the verb meaning 'come in'."
+  - "`entry`"
+runtime: none
+notes: |
+  Drills `.entry(k).or_insert(default)` — the canonical "if
+  missing, insert; in either case, return a mutable
+  reference to the slot" pattern. Saves a separate
+  `contains_key` + `insert` round trip.

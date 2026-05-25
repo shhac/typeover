@@ -1,0 +1,26 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: mcq
+order: 2
+prompt: |
+  Add the key `String::from("alice")` with value `5` to a
+  `HashMap<String, i32>` named `m`. Pick the idiomatic call.
+generator:
+  kind: variant
+  variants:
+    - id: insert
+      ts: 'counts["alice"] = 5;'
+      canonical: 'm.insert(String::from("alice"), 5); — `.insert` takes key and value; returns the previous value (if any) wrapped in `Option`.'
+      distractors:
+        - 'm["alice"] = 5; — Rust HashMap supports `Index` for READING (panics on absent) but not `IndexMut` for writing. Use `.insert`.'
+        - 'm.set("alice", 5); — `.set` is the JS Map method name; Rust uses `.insert`.'
+        - 'm.push((String::from("alice"), 5)); — `.push` is for `Vec`, not `HashMap`. Different shape.'
+hints:
+  - "Six letters; same word databases use for writing a new row. Takes two arguments — the key and the value, in that order."
+  - "Same name as the method on Vec for inserting at an index — except here there's no index, just two positional args."
+  - '`m.insert(String::from("alice"), 5);`'
+runtime: none
+notes: |
+  Drills `.insert(k, v)` as the assignment API. The first
+  distractor pins the read-vs-write asymmetry of HashMap's
+  `Index` impl — assigning via `m["key"] = v` doesn't compile.

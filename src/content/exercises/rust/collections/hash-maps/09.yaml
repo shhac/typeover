@@ -1,0 +1,74 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: freeform
+order: 9
+prompt: |
+  This program over-clones — `lookup` takes `key: String`,
+  forcing the caller to `.clone()` an owned String just to look
+  it up:
+
+      fn lookup(m: &HashMap<String, i32>, key: String) -> Option<i32> {
+          m.get(&key).copied()
+      }
+
+      fn main() {
+          let mut m: HashMap<String, i32> = HashMap::new();
+          m.insert(String::from("alice"), 5);
+          let name = String::from("alice");
+          println!("{:?}", lookup(&m, name.clone()));
+      }
+
+  Fix it so `lookup` accepts a borrowed `&str` and `main` passes
+  `&name` (no clone). `HashMap<String, _>` looks up cleanly by
+  `&str` via the `Borrow` impl.
+
+  Output:
+
+      Some(5)
+generator:
+  kind: template
+  vars: {}
+  ts: |-
+    function lookup(m: Record<string, number>, key: string): number | undefined {
+      return m[key];
+    }
+    const m: Record<string, number> = { alice: 5 };
+    const name = "alice";
+    console.log(lookup(m, name));
+  canonical: |-
+    use std::collections::HashMap;
+
+    fn lookup(m: &HashMap<String, i32>, key: &str) -> Option<i32> {
+        m.get(key).copied()
+    }
+
+    fn main() {
+        let mut m: HashMap<String, i32> = HashMap::new();
+        m.insert(String::from("alice"), 5);
+        let name = String::from("alice");
+        println!("{:?}", lookup(&m, &name));
+    }
+expectStdout: |
+  Some(5)
+hints:
+  - "Two coordinated edits: signature `key: String` → `key: &str`, and call site `name.clone()` → `&name`. Inside `lookup`, drop the `&` from `m.get(&key)` because `key` is already a `&str`."
+  - "The library handles the cross-type lookup: `HashMap<String, V>::get` accepts any `&Q` where `String: Borrow<Q>` — `&str` qualifies."
+  - |-
+    use std::collections::HashMap;
+
+    fn lookup(m: &HashMap<String, i32>, key: &str) -> Option<i32> {
+        m.get(key).copied()
+    }
+
+    fn main() {
+        let mut m: HashMap<String, i32> = HashMap::new();
+        m.insert(String::from("alice"), 5);
+        let name = String::from("alice");
+        println!("{:?}", lookup(&m, &name));
+    }
+runtime: server
+notes: |
+  Closes the theme on the canonical "over-clone" trap.
+  `HashMap`'s `Borrow`-based lookup means callers don't
+  need to clone an owned key to look it up — `&str`
+  works against `String` keys.

@@ -1,0 +1,28 @@
+target: rust
+themeId: rust/collections/hash-maps
+type: fill-word
+order: 4
+prompt: |
+  Fill the type name in the import that brings the standard
+  hash-map into scope.
+generator:
+  kind: template
+  vars:
+    type_: ["HashMap"]
+  ts: |-
+    // TS has no equivalent — `Record<K, V>` is built in.
+  canonical: |-
+    use std::collections::${type_};
+
+    fn main() {
+        let _m: ${type_}<String, i32> = ${type_}::new();
+    }
+blanks: [type_]
+hints:
+  - "Seven letters, PascalCase. Same word that names the structure — the type imported FROM `std::collections::*`."
+  - "Two segments concatenated: the hashing primitive + the kind of structure."
+  - "`HashMap`"
+runtime: none
+notes: |
+  Drills the import. `HashMap` is NOT in the prelude (unlike
+  `Vec` and `String`); the `use` statement is required.
