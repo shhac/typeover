@@ -3,7 +3,6 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Container,
-  Divider,
   Heading,
   Panel,
   Stack,
@@ -195,8 +194,6 @@ const dispatch = pickExerciseDispatch(ex);
             />
           )}
         </Panel>
-
-        <Divider />
 
         <Stack gap="sm">
           <Heading level={4}>About this theme</Heading>

@@ -5,8 +5,6 @@ import {
   CodeBlock,
   Compare,
   Container,
-  Divider,
-  Eyebrow,
   Heading,
   LangCrumbs,
   Stack,
@@ -131,8 +129,8 @@ const wedgeTarget = wedgeTargetByLang[lang] ?? wedgeTargetByLang.go!;
           </div>
         </Stack>
 
-        <Stack gap="sm">
-          <Eyebrow>the wedge</Eyebrow>
+        <Stack gap="md">
+          <Heading level={2} size="xl">The translation wedge</Heading>
           <Compare
             caption="Same intent, two syntaxes. typeover's whole shape is teaching the second one by leaning on what you already know about the first."
           >
@@ -140,8 +138,6 @@ const wedgeTarget = wedgeTargetByLang[lang] ?? wedgeTargetByLang.go!;
             <CodeBlock lang={lang} filename={wedgeTarget.filename}>{wedgeTarget.code}</CodeBlock>
           </Compare>
         </Stack>
-
-        <Divider />
 
         <Stack gap="lg">
           {tree.map(({ module, themes }) => {
@@ -203,8 +199,6 @@ const wedgeTarget = wedgeTargetByLang[lang] ?? wedgeTargetByLang.go!;
             );
           })}
         </Stack>
-
-        <Divider />
 
         <Stack direction="row" justify="between" align="center" wrap>
           <Text tone="muted" size="xs" family="mono">

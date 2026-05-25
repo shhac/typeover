@@ -3,8 +3,6 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   Container,
-  Divider,
-  Eyebrow,
   Heading,
   Stack,
   Text,
@@ -47,10 +45,6 @@ export async function getStaticPaths() {
   });
 }
 
-interface Props {
-  entry: Module;
-}
-
 const { entry } = Astro.props;
 const moduleData = entry.data;
 const lang = moduleData.target;
@@ -88,18 +82,18 @@ const nextModule = sorted[idx + 1]?.module;
 
         {/* Module hero */}
         <Stack gap="sm">
-          <Eyebrow tone="muted">module {moduleData.order} of {sorted.length}</Eyebrow>
+          <Text tone="muted" size="xs" family="mono">
+            module {moduleData.order} of {sorted.length}
+          </Text>
           <Heading level={1}>{moduleData.title}</Heading>
           <Text tone="secondary" size="lg" as="div" class="ds-prose">
             <Fragment set:html={formatBlock(moduleData.summary)} />
           </Text>
         </Stack>
 
-        <Divider />
-
         {/* Themes */}
-        <Stack gap="md">
-          <Eyebrow>themes</Eyebrow>
+        <Stack gap="md" class="pt-4">
+          <Heading level={2} size="xl">Themes</Heading>
           {node.themes.length === 0 ? (
             <Text tone="muted" size="sm" family="mono">
               No themes drafted for this module yet.
@@ -118,8 +112,6 @@ const nextModule = sorted[idx + 1]?.module;
             </div>
           )}
         </Stack>
-
-        <Divider />
 
         {/* Module nav */}
         <Stack direction="row" justify="between" align="center" wrap>

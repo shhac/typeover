@@ -2,10 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
-  Badge,
   Container,
-  Divider,
-  Eyebrow,
   Heading,
   Panel,
   Stack,
@@ -89,8 +86,8 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
 
         <Stack gap="md">
           <Stack direction="row" gap="sm" align="baseline" wrap>
-            <Eyebrow>exercises</Eyebrow>
-            <Text tone="faint" size="sm" family="mono">
+            <Heading level={2} size="xl">Exercises</Heading>
+            <Text tone="muted" size="sm" family="mono">
               {themeExercises.length} ready
             </Text>
             {themeExercises.length > 0 && (
@@ -123,9 +120,9 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
                         <Text tone="faint" size="xs" family="mono">
                           {ex.data.order.toString().padStart(2, "0")}
                         </Text>
-                        <Badge variant="default" outline>
+                        <Text tone="muted" size="xs" family="mono">
                           {EXERCISE_TYPE_LABELS[ex.data.type]}
-                        </Badge>
+                        </Text>
                         <ExerciseProgressChip client:only="solid-js" exerciseId={ex.id} />
                       </Stack>
                       <Text tone="primary" size="sm">
@@ -138,8 +135,6 @@ const { module: moduleEntry, exercises: themeExercises } = ctx;
             </div>
           )}
         </Stack>
-
-        <Divider />
 
         <Stack direction="row" justify="between" align="center" wrap>
           <a href={langHref(lang)} class="text-fg-muted hover:text-fg-primary font-mono text-sm">

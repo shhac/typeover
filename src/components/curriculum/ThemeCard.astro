@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { Badge, Heading, Panel, Stack, Text } from "~/components/ds";
+import { Heading, Panel, Stack, Text } from "~/components/ds";
 import { ThemeProgressChip } from "~/components/progress/ThemeProgressChip";
 import { themeHref, truncateIntro } from "~/lib/curriculum";
 import { formatInline } from "~/lib/format-inline";
@@ -68,9 +68,9 @@ const hasExercises = firstExercise !== undefined;
       <Fragment set:html={formatInline(truncateIntro(theme.data.intro))} />
     </Text>
     <Stack direction="row" gap="sm" align="center" wrap>
-      <Badge variant={exerciseCount > 0 ? "go" : "default"} outline>
+      <Text tone={exerciseCount > 0 ? "secondary" : "faint"} size="xs" family="mono">
         {exerciseCount > 0 ? `${exerciseCount} ready` : "coming"}
-      </Badge>
+      </Text>
       {exerciseIds.length > 0 && (
         <ThemeProgressChip client:only="solid-js" exerciseIds={exerciseIds} />
       )}
